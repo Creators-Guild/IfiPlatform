@@ -1,3 +1,4 @@
+"""Models for study app: Deck and Card for flashcard system."""
 from django.db import models
 from django.conf import settings
 from typing import TYPE_CHECKING
@@ -5,6 +6,7 @@ from typing import TYPE_CHECKING
 
 # Create your models here.
 class Deck(models.Model):
+    """Flashcard deck representing a collection of study cards owned by a user."""
     # one-to-many with one user
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -33,10 +35,12 @@ class Deck(models.Model):
         cards: RelatedManager["Card"]
 
     def __str__(self):
+        """Return deck name."""
         return self.name
 
 
 class Card(models.Model):
+    """Individual flashcard with question/answer pairs for studying."""
     deck = models.ForeignKey(
         Deck, on_delete=models.SET_NULL, null=True, related_name="cards"
     )
@@ -49,4 +53,5 @@ class Card(models.Model):
     times_incorrect = models.PositiveIntegerField(default=0)
 
     def __str__(self):
+        """Return first 50 characters of front side (question)."""
         return self.front[:50]

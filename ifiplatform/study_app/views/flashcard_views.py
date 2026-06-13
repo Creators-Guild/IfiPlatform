@@ -1,3 +1,4 @@
+"""Views for flashcard study feature."""
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from study_app.models import Deck, Card
@@ -8,6 +9,7 @@ from typing import cast  # removes errorlines
 
 @login_required
 def flashcard_menu(request):
+    """Display list of flashcard decks for the logged-in user."""
     decks = Deck.objects.filter(owner=request.user)
     return render(
         request=request,
@@ -18,6 +20,7 @@ def flashcard_menu(request):
 
 @login_required
 def deck_detail(request, deck_pk):
+    """Display all cards in a specific flashcard deck."""
     deck = get_object_or_404(Deck, pk=deck_pk, owner=request.user)
     cards = deck.cards.all()
     return render(
@@ -32,6 +35,7 @@ def deck_detail(request, deck_pk):
 
 @login_required
 def review(request, deck_pk: int, index: int):
+    """Display a single card for review at the given index in the deck."""
     deck = get_object_or_404(Deck, pk=deck_pk, owner=request.user)
     cards = deck.cards.all()  # later you can randomize this order
     total = cards.count()
@@ -55,6 +59,7 @@ def review(request, deck_pk: int, index: int):
 
 @login_required
 def deck_create(request):
+    """Create a new flashcard deck for the logged-in user."""
     if request.method == "POST":
         form = DeckForm(request.POST)
         if form.is_valid():
@@ -73,6 +78,7 @@ def deck_create(request):
 
 @login_required
 def deck_delete(request, deck_pk):
+    """Delete a flashcard deck and return to flashcard menu."""
     deck = cast(Deck, get_object_or_404(Deck, pk=deck_pk, owner=request.user))
     decks = Deck.objects.filter(owner=request.user)
 
@@ -88,6 +94,7 @@ def deck_delete(request, deck_pk):
 
 @login_required
 def card_create(request, deck_pk):
+    """Create a new card in a specific flashcard deck."""
     deck = get_object_or_404(Deck, pk=deck_pk, owner=request.user)
 
     if request.method == "POST":
@@ -112,6 +119,7 @@ def card_create(request, deck_pk):
 
 @login_required
 def card_delete(request, deck_pk):
+    """Delete a card from a flashcard deck."""
     card = get_object_or_404(Card, pk=deck_pk, deck__owner=request.user)
     deck = cast(Deck, card.deck)  # cast to remove errorline
     if request.method == "POST":

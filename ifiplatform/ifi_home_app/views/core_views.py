@@ -1,3 +1,4 @@
+"""Views for IFI home page."""
 from django.shortcuts import render
 from ..models.home_models import *
 from ..models.news_models import NewsItem
@@ -5,6 +6,7 @@ from ..dummydata import *
 
 
 def main_view(request):
+    """Display the main IFI home page with news, unions and tools."""
     # (development) if no news in database, use dummydata
     if not NewsItem.objects.exists():
         dummy_news_objects.create(fresh_on_page_load=True)

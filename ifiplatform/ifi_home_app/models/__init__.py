@@ -1,3 +1,4 @@
+"""Models module for IFI home app."""
 __all__ = [
     "wiki_models",
     "home_models",
