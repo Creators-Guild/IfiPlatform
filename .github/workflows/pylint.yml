@@ -26,7 +26,7 @@ jobs:
         # Ignore auto-generated migration files
         # Fails only if code is below 7/10 score
         pylint --load-plugins pylint_django \
-        --django-settings-module=ifiplatform_project.settings \
-        --ignore=migrations \
-        --fail-under=7 \
-        $(git ls-files '*.py')
+               --django-settings-module=ifiplatform_project.settings \
+               --ignore-paths=ifiplatform/.*/migrations \
+               --fail-under=7 \
+               $(git ls-files '*.py')
