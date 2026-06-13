@@ -1,0 +1,45 @@
+{% extends "ifi_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Ifi Wiki{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'styles/neon_style/ifi_home.css' %}">
+{% endblock extra_head %}
+
+{% block content %}
+
+    {% include "core\partials\home_navbar.html" %}
+
+    <a class="back-to" href="{% url 'ifi_wiki' %}">{% trans "<- Back to Ifi Wiki Mainpage" %}</a>
+
+    <div class="main-content">
+        <h1>{{ article.title }}</h2>
+
+        {% if article.image_name %}
+            <img src="{% static 'images/news/' %}{{ meta.article.image_name }}" 
+                alt="{{ meta.article.title }}">
+        {% else %}
+            <!-- simple placeholder if no image -->
+            <img src="{% static 'images/news/IfiBygg.jpg' %}" 
+                alt="{{ meta.article.title }}">
+        {% endif %}
+
+        <p>{{ article.intro_text }}</p>
+        <div>
+        {{ article.body|linebreaks }}
+        </div>
+
+        {% if meta %}
+            <p>Views: {{ meta.views }}</p>
+            <p>Created: {{ meta.created_at }}</p>
+            <p>Last edited: {{ meta.last_edited }}</p>
+        {% endif %}
+
+    </div>
+
+{% endblock %}
+
+{% block bottom_content %}
+{% endblock %}

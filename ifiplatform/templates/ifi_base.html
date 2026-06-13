@@ -1,0 +1,30 @@
+{% load i18n %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %} Ifi Platform {% endblock %}
+    </title>
+    <link rel="stylesheet" href="{% static 'styles/neon_style/common/base.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/neon_style/common/header_bar.css' %}">
+    {% block extra_head %}<!-- addtional css here -->{% endblock extra_head %}
+</head>
+<body>
+    {% include "partials/select_language.html" %}
+    {% include "partials/top_header.html" %}
+
+    <main class="page-content">
+        {% block content %}
+        <!-- default content, can be empty -->
+        {% endblock %}
+        {% block bottom_content %}
+        <!-- bottom content, can be empty -->
+        {% endblock %}
+    </main>
+
+    {% include "partials/bottom_header.html" %}
+</body>
+</html>

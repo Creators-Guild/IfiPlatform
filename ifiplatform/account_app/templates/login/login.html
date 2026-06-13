@@ -1,0 +1,32 @@
+{% extends 'ifi_base.html' %}
+
+{% block title %} User Login {% endblock %}
+
+{% block content %}
+    <h1>User Login</h1>
+    <form class="form-with-validation" action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+
+        {% if request.GET.next %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+        {% endif %}
+
+        {{ form.username.label_tag }}
+        {{ form.username }}
+
+        <div>
+            {{ form.password.label_tag }}
+            {{ form.password }}
+
+            {% for error in form.non_field_errors %}
+                <p class="error">{{ error }}</p>
+            {% endfor %}
+
+            {% for error in form.password.errors %}
+                <p class="error">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <button type="submit">Log in</button>
+    </form>
+    <a href="{% url 'signin' %}">New user? Sign in here</a>
+{% endblock %}

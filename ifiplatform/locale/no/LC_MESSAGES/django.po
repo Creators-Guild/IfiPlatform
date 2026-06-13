@@ -1,0 +1,104 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-07 15:32+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .\account_app\templates\core\account.html:9
+msgid "Welcome to the Account Page"
+msgstr "Velkommen til Konto Hovedside"
+
+#: .\account_app\templates\core\account.html:10
+msgid "This is the placeholder for Account."
+msgstr "Dette er en midlertidig side for konto"
+
+#: .\ifi_home_app\templates\core\ifihome.html:11
+msgid "Welcome to the Ifi Home Page"
+msgstr "Velkommen til Ifi Hjemmesiden"
+
+#: .\ifi_home_app\templates\core\ifihome.html:12
+msgid "This is the main content for the Ifi home page."
+msgstr "Dette er hovedinnholdet for Ifi hjemmeside"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:6
+msgid "News"
+msgstr "Nyheter"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:10
+msgid "Newsletter"
+msgstr "Nyhetbrev"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:13
+msgid "Blog"
+msgstr "Blogg"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:16
+msgid "Guest Lectures"
+msgstr "Gjesteforeleserer"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:22
+msgid "Student Organizations"
+msgstr "Student Foreninger"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:41
+#, fuzzy
+#| msgid "Starer Kit"
+msgid "Starter Kit"
+msgstr "Starterpakke"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:44
+msgid "Student Life"
+msgstr "Studentlivet"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:47
+msgid "Tips n Tricks"
+msgstr "Tips og Triks"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:50
+msgid "Apps n Links"
+msgstr "Apper og linker"
+
+#: .\study_app\templates\home\study_home.html:7
+msgid "Study Home"
+msgstr "Studie Hjem"
+
+#: .\study_app\templates\home\study_home.html:8
+msgid "Here is content for the study section."
+msgstr "Dette er en midletidig side for studieside"
+
+#: .\templates\ifi_base.html:16
+msgid "Ifi Platform"
+msgstr "Ifi Plattform"
+
+#: .\templates\ifi_base.html:19
+msgid "Ifi Homepage"
+msgstr "Ifi Hjemmesiden"
+
+#: .\templates\ifi_base.html:23
+msgid "Ifi Study"
+msgstr "Ifi Studie"
+
+#: .\templates\ifi_base.html:27
+msgid "Your Page"
+msgstr "Din Side"
+
+#: .\yourpage_app\templates\core\yourpage_main.html:9
+msgid "Welcome to the Your Page"
+msgstr "Velkommen til din side"
+
+#: .\yourpage_app\templates\core\yourpage_main.html:10
+msgid "This is the placeholder for Your Page."
+msgstr "Dette er en midlertidig side for din side"

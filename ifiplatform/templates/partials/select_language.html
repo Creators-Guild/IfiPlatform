@@ -1,0 +1,17 @@
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+<form class="select-language" action="{% url 'set_language' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.path }}">
+
+    <button type="submit" name="language" value="en"
+            class="lang-btn {% if LANGUAGE_CODE == 'en' %}active{% endif %}">
+        English
+    </button>
+
+    <button type="submit" name="language" value="no"
+            class="lang-btn {% if LANGUAGE_CODE == 'no' %}active{% endif %}">
+        Norsk
+    </button>
+</form>

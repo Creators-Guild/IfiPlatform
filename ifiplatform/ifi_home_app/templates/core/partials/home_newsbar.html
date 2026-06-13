@@ -1,0 +1,18 @@
+{% load i18n %}
+{% load static %}
+<div class="gridbar bottom-content">
+    {% for item in news_items %}
+        <div class="grid-item">
+            {% if item.image_name %}
+                <img src="{% static 'images/news/' %}{{ item.image_name }}" alt="{{ item.title }}">
+            {% else %}
+                <!-- simple placeholder if no image -->
+                <img src="{% static 'images\news\IfiBygg.jpg' %}" alt="{{ item.title }}">
+            {% endif %}
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description|truncatechars:100 }}</p>
+        </div>
+    {% empty %}
+        <p>No news yet or something is broken ;_;</p>
+    {% endfor %}
+</div>

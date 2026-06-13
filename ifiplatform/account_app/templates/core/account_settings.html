@@ -1,0 +1,18 @@
+{% extends "ifi_base.html" %}
+{% load i18n %}
+
+{% block title %}Account{% endblock %}
+
+{% block content %}
+
+    <div class="main-content">
+            <h2>{% trans "Welcome to the Account Settings Page" %}</h2>
+        <p>{% trans "This is the placeholder for Account Settings." %}</p>
+        <p>User: {{user}} </p>
+        <a href="{% url 'logout' %}">Log out</a>
+    </div>
+
+{% endblock %}
+
+{% block bottom_content %}
+{% endblock %}

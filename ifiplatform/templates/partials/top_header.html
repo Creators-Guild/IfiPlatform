@@ -1,0 +1,25 @@
+{% load i18n %}
+{% load static %}
+<div class="header-bar">
+    <h1 class ='ifiplatform-logo-box'>
+        <a class="ifiplatform-logo" href="{% url 'ifi_home' %}">
+            {% trans "Ifi Platform" %}
+        </a>
+    </h1>
+    <a href="{% url 'ifi_home' %}" 
+        class="nav_link {% if request.resolver_match.url_name == 'ifi_home' %}active{% endif %}">
+        {% trans "Ifi Homepage" %}
+    </a>
+    <a href="{% url 'study_home' %}" 
+        class="nav_link {% if '/study/' in request.path %}active{% endif %}">
+        {% trans "Ifi Study" %}
+    </a>
+    <a href="{% url 'yourpage_main' %}" 
+        class="nav_link {% if request.resolver_match.url_name == 'yourpage_main' %}active{% endif %}">
+        {% trans "Your Page" %}
+    </a>
+    <a href="{% url 'account_settings' %}" 
+        class="nav_link {% if request.resolver_match.url_name == 'account_settings' %}active{% endif %}">
+        {% trans "Account" %}
+    </a>
+</div>

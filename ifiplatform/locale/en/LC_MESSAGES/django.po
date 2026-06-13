@@ -1,0 +1,110 @@
+# Ifi Platform English translations.
+# Copyright (C) 2026 YOUR NAME
+# This file is distributed under the same license as the Ifi Platform package.
+# YOUR NAME <you@example.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: IfiPlatform 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-07 15:32+0200\n"
+"PO-Revision-Date: 2026-02-26 13:30+0100\n"
+"Last-Translator: YOUR NAME <you@example.com>\n"
+"Language-Team: English <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\account_app\templates\core\account.html:9
+#, fuzzy
+#| msgid "Welcome to the Ifi Home Page"
+msgid "Welcome to the Account Page"
+msgstr "Welcome to the Ifi Home Page"
+
+#: .\account_app\templates\core\account.html:10
+msgid "This is the placeholder for Account."
+msgstr ""
+
+#: .\ifi_home_app\templates\core\ifihome.html:11
+msgid "Welcome to the Ifi Home Page"
+msgstr "Welcome to the Ifi Home Page"
+
+#: .\ifi_home_app\templates\core\ifihome.html:12
+msgid "This is the main content for the Ifi home page."
+msgstr "This is the main content for the Ifi home page."
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:6
+msgid "News"
+msgstr "News"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:10
+msgid "Newsletter"
+msgstr "Newsletter"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:13
+msgid "Blog"
+msgstr "Blog"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:16
+msgid "Guest Lectures"
+msgstr "Guest Lectures"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:22
+msgid "Student Organizations"
+msgstr "Student Organizations"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:41
+#, fuzzy
+#| msgid "Starer Kit"
+msgid "Starter Kit"
+msgstr "Starer Kit"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:44
+msgid "Student Life"
+msgstr "Student Life"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:47
+msgid "Tips n Tricks"
+msgstr "Tips n Tricks"
+
+#: .\ifi_home_app\templates\partials\ifi_home_nav_bar.html:50
+msgid "Apps n Links"
+msgstr "Apps n Links"
+
+#: .\study_app\templates\home\study_home.html:7
+msgid "Study Home"
+msgstr ""
+
+#: .\study_app\templates\home\study_home.html:8
+msgid "Here is content for the study section."
+msgstr ""
+
+#: .\templates\ifi_base.html:16
+msgid "Ifi Platform"
+msgstr "Ifi Platform"
+
+#: .\templates\ifi_base.html:19
+msgid "Ifi Homepage"
+msgstr "Ifi Homepage"
+
+#: .\templates\ifi_base.html:23
+msgid "Ifi Study"
+msgstr "Ifi Study"
+
+#: .\templates\ifi_base.html:27
+msgid "Your Page"
+msgstr "Your Page"
+
+#: .\yourpage_app\templates\core\yourpage_main.html:9
+#, fuzzy
+#| msgid "Welcome to the Ifi Home Page"
+msgid "Welcome to the Your Page"
+msgstr "Welcome to the Ifi Home Page"
+
+#: .\yourpage_app\templates\core\yourpage_main.html:10
+#, fuzzy
+#| msgid "This is the main content for the Ifi home page."
+msgid "This is the placeholder for Your Page."
+msgstr "This is the main content for the Ifi home page."
