@@ -3,7 +3,7 @@ Student platform for Ifi Uio
 
 
 ## Setup
-###Windows (PowerShell)
+### Windows (PowerShell)
 
 1. Create and activate a virtual environment:
     python -m venv venv
