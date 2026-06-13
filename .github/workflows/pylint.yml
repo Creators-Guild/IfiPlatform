@@ -23,5 +23,10 @@ jobs:
         pip install -r requirements.txt
     - name: Analysing the code with pylint
       run: |
-        # Fails only if code below 7/10 score
-        pylint --load-plugins pylint_django --fail-under=7 $(git ls-files '*.py')
+        # Ignore auto-generated migration files
+        # Fails only if code is below 7/10 score
+        pylint --load-plugins pylint_django \
+               --django-settings-module=ifiplatform_project.settings \
+               --ignore-paths=ifiplatform/.*/migrations \
+               --fail-under=7 \
+               $(git ls-files '*.py')
