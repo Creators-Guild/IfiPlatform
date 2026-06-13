@@ -1,7 +1,9 @@
+"""Dummy data for populating StudentUnion objects during development."""
 from ifi_home_app.models.home_models import StudentUnion
 
 
 def create(fresh_on_page_load: bool = False):
+    """Create dummy StudentUnion entries, optionally clearing existing ones first."""
     if fresh_on_page_load:
         StudentUnion.objects.all().delete()
 

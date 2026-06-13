@@ -1,8 +1,10 @@
+"""Dummy data for populating Wiki objects during development."""
 from ..models.wiki_models import *
 from . import dummy_users_objects
 
 
 def create(fresh_on_page_load: bool = False):
+    """Create dummy Wiki entries, optionally clearing existing ones first."""
     if fresh_on_page_load:
         WikiAuthor.objects.all().delete()
         WikiArticle_Meta.objects.all().delete()

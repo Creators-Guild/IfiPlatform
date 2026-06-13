@@ -1,7 +1,9 @@
+"""Dummy data for populating NewsItem objects during development."""
 from ..models.news_models import NewsItem
 
 
 def create(fresh_on_page_load: bool = False):
+    """Create dummy NewsItem entries, optionally clearing existing ones first."""
     if fresh_on_page_load:
         NewsItem.objects.all().delete()
 

@@ -1,7 +1,9 @@
+"""Dummy data for populating IfiTool objects during development."""
 from ifi_home_app.models.home_models import IfiTool
 
 
 def create(fresh_on_page_load: bool = False):
+    """Create dummy IfiTool entries, optionally clearing existing ones first."""
     if fresh_on_page_load:
         IfiTool.objects.all().delete()
 

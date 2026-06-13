@@ -1,3 +1,4 @@
+"""URL configuration for the ifi_home app."""
 from django.urls import path
 from .views import home_views
 from .views import news_views
