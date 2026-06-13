@@ -6,19 +6,32 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0001_initial'),
+        ("ifi_home_app", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='StudentUnion',
+            name="StudentUnion",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField(blank=True)),
-                ('image_name', models.CharField(blank=True, max_length=100)),
-                ('programme_union', models.BooleanField(default=False, verbose_name='Is_programme_union')),
-                ('homepage', models.URLField(verbose_name='union_homepage')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField(blank=True)),
+                ("image_name", models.CharField(blank=True, max_length=100)),
+                (
+                    "programme_union",
+                    models.BooleanField(
+                        default=False, verbose_name="Is_programme_union"
+                    ),
+                ),
+                ("homepage", models.URLField(verbose_name="union_homepage")),
             ],
         ),
     ]

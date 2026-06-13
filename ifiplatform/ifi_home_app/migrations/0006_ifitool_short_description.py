@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0005_ifitool'),
+        ("ifi_home_app", "0005_ifitool"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ifitool',
-            name='short_description',
+            model_name="ifitool",
+            name="short_description",
             field=models.CharField(blank=True, max_length=200),
         ),
     ]

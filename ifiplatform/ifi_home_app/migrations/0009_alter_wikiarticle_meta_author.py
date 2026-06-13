@@ -7,13 +7,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0008_wikitag_remove_wikiarticle_meta_author_name_and_more'),
+        ("ifi_home_app", "0008_wikitag_remove_wikiarticle_meta_author_name_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='wikiarticle_meta',
-            name='author',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='author', to='ifi_home_app.wikiauthor'),
+            model_name="wikiarticle_meta",
+            name="author",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="author",
+                to="ifi_home_app.wikiauthor",
+            ),
         ),
     ]
