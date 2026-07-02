@@ -1,0 +1,6 @@
+html, body {
+  background: var(--color-bg-light);
+  margin: 0;
+  font-family: 'Inconsolata', monospace;
+  height: 100%;
+}
