@@ -1,6 +1,5 @@
 .sidemenu {
     width: 60px;
-    box-sizing: border-box;
     height: 100%;
     padding: 1rem;
     background-color: var(--color-turq-hover);

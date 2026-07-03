@@ -1,0 +1,23 @@
+.study-layout {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+}
+
+.study-layout .sidemenu {
+    flex: 0;
+}
+
+.study-layout .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.study-layout .main-content .top{
+    flex: 1;
+}
+
+.study-layout .main-content .bot{
+    flex: 1;
+}
