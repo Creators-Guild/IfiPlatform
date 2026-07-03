@@ -27,77 +27,9 @@ html, body {
   box-sizing: border-box;
 }
 
-/* Primary buttons */
-.btn {
-    cursor: pointer;
-    border-radius: 6px;
-    border: 2px solid #b3007d;
-    background-color: var(--color-pink);
-    color: #ffffff;
-    padding: 0.4rem 0.9rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    transition:
-        background-color 0.15s ease,
-        border-color 0.15s ease,
-        transform 0.05s ease;
-    margin: 2px;
-    text-decoration: none;
-}
-
-.btn:hover {
-  background-color: #f625b7;
-  transform: translateY(-1px);
-}
-
-.btn:active {
-    transform: translateY(0);
-}
-
-.btn-delete {
-  background-color: rgb(255, 0, 0);
-  border: 2px solid #000000;
-  padding: 0.2rem 0.5rem;
-}
-
-
-/* back to a links */
-.back-to {
-  display: inline-block;
-  font-weight: bold;
-  padding: 3px;
-
-  color: #001f5e;
-
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.05s ease;
-
-}
-
-.back-to:hover {
-  transform: translateY(-1px);
-  color: #197dc4;
-}
-
-.back-to:active {
-  transform: translateY(0);
-}
-
 
 /* Diffrent containers */
-.gridbar {
-  display: grid;
-  grid-auto-flow: column;      /* put items in columns (one row) */
-  grid-auto-columns: minmax(15rem, 1fr);
 
-  gap: 1rem;
-  margin: 0%;
-  padding: 0.5em 1em;
-  box-sizing: border-box;
-  overflow-x: auto;
-}
 
 .sidegridbar {
   display: grid;

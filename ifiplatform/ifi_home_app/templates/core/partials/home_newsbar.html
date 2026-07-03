@@ -1,8 +1,14 @@
 {% load i18n %}
 {% load static %}
-<div class="gridbar bottom-content">
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css\styles\neon_style\01_objects\newsbar_layout.css' %}">
+  <link rel="stylesheet" href="{% static 'css\styles\neon_style\02_components\newsbar_item.css' %}">
+{% endblock %}
+
+<div class="newsbar-layout bottom-content">
     {% for item in news_items %}
-        <div class="grid-item">
+        <div class="newsbar-item">
             {% if item.image_name %}
                 <img src="{% static 'images/news/' %}{{ item.image_name }}" alt="{{ item.title }}">
             {% else %}

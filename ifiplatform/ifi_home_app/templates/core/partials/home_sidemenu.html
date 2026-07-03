@@ -1,5 +1,11 @@
 {% load static %}
 {% load i18n %}
+
+<!-- to avoid mutiple loads of the same css if partial is used mutiple times -->
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css\styles\neon_style\05_components\sidemenu.css' %}">
+{% endblock %}
+
 <div class= "sidemenu">
     <div class="sidemenu-header">
         <img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="menu">
