@@ -53,18 +53,3 @@
   text-decoration: underline;
   transform: translateY(-1px);
 }
-
-.bot-bar {
-  padding: 1em;
-  justify-content: flex-end;
-}
-
-.bot-bar p {
-  color: var(--color-bg-light);
-}
-
-.bot-bar img {
-  padding-right: 2rem;
-  max-width: 50px;
-  max-height: 50px;
-}
