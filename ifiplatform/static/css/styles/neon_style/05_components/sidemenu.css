@@ -97,10 +97,6 @@
     padding: 0.25rem 0.75rem;
 }
 
-.sidemenu-item:hover {
-  transform: translateY(-1px);
-}
-
 /* when hovering a menu item, expand its dropdown */
 .sidemenu-item:hover .drop-content {
     max-height: 500px;               /* big enough to fit children */

@@ -1,29 +1,26 @@
 .home-layout {
     display: flex;
-    flex-direction: column;
     height: 100%;
 }
 
-.home-layout .main-content {
-    flex: 3;
-    display: flex;
+/* dont grow, shrink, 
+but width is the actual width of object.
+Sidemenu hover mdoifer will still enlarge menu */
+.home-layout .sidemenu_container {
+    flex: 0 0 auto;
 }
 
-.home-layout .main-content .side {
-    flex: 0;
-}
-
-.home-layout .main-content .main {
+.home-layout .maincontent {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 1rem;
+    padding: 1rem 2rem;
 }
 
-.home-layout .main-content .main .top {
+.home-layout .maincontent .top {
     flex: 1;
 }
 
-.home-layout .main-content .main .bottom {
+.home-layout .maincontent .newsbar_container {
     flex: 1;
 }

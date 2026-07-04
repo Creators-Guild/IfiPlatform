@@ -8,36 +8,36 @@
 {% endblock extra_head %}
 
 {% block content %}
-    <div class="study-layout">
-      <div class="sidemenu">
+    <div class="study_layout">
+      <div class="sidemenu_container">
         {% include "core\partials\study_sidemenu.html" %}
       </div>
-      <div class="main-content">
+      <div class="maincontent">
         <div class="top">
           <h1>{% trans 'Study Home' %}</h2>
           <p>{% trans 'Here is content for the study section.' %}</p>
         </div>
-        <div class = 'box studytools bot'>
+        <div class = 'bot'>
           <h1>{% trans "Studytools" %}</h1>
-            <a class = 'btn studytools-btn' href="{% url 'flashcard_menu' %}">
-              {% trans "Flashcards" %}
-            </a>
+          <a class = 'btn studytools-btn' href="{% url 'flashcard_menu' %}">
+            {% trans "Flashcards" %}
+          </a>
 
-            <a class = 'btn studytools-btn' href="{% url "multiplechoice_menu" %}">
-              {% trans "Multiple Choice" %}
-            </a>
+          <a class = 'btn studytools-btn' href="{% url "multiplechoice_menu" %}">
+            {% trans "Multiple Choice" %}
+          </a>
 
-            <a class = 'btn studytools-btn' href="{% url "mix_studyset_menu" %}">
-              {% trans "Mix Studyset" %}
-            </a>
+          <a class = 'btn studytools-btn' href="{% url "mix_studyset_menu" %}">
+            {% trans "Mix Studyset" %}
+          </a>
 
-            <a class = 'btn studytools-btn' href="{% url "studygames_menu" %}">
-              {% trans "Study Games" %}
-            </a>
+          <a class = 'btn studytools-btn' href="{% url "studygames_menu" %}">
+            {% trans "Study Games" %}
+          </a>
 
-            <a class = 'btn studytools-btn' href="">
-              {% trans "Ifi Studycompanion AI" %}
-            </a>
+          <a class = 'btn studytools-btn' href="">
+            {% trans "Ifi Studycompanion AI" %}
+          </a>
         </div>
       </div>
     </div>
