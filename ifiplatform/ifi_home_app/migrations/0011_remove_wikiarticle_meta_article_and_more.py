@@ -6,47 +6,47 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0010_rename_contributors_wikiarticle_meta_authors_and_more'),
+        ("ifi_home_app", "0010_rename_contributors_wikiarticle_meta_authors_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='wikiarticle_meta',
-            name='article',
+            model_name="wikiarticle_meta",
+            name="article",
         ),
         migrations.RemoveField(
-            model_name='wikiarticle_meta',
-            name='authors',
+            model_name="wikiarticle_meta",
+            name="authors",
         ),
         migrations.RemoveField(
-            model_name='wikiarticle_meta',
-            name='categories',
+            model_name="wikiarticle_meta",
+            name="categories",
         ),
         migrations.RemoveField(
-            model_name='wikiarticle_meta',
-            name='tags',
+            model_name="wikiarticle_meta",
+            name="tags",
         ),
         migrations.RemoveField(
-            model_name='wikiauthor',
-            name='user',
+            model_name="wikiauthor",
+            name="user",
         ),
         migrations.RemoveField(
-            model_name='wikicategory',
-            name='parent',
+            model_name="wikicategory",
+            name="parent",
         ),
         migrations.DeleteModel(
-            name='WikiArticle',
+            name="WikiArticle",
         ),
         migrations.DeleteModel(
-            name='WikiArticle_Meta',
+            name="WikiArticle_Meta",
         ),
         migrations.DeleteModel(
-            name='WikiTag',
+            name="WikiTag",
         ),
         migrations.DeleteModel(
-            name='WikiAuthor',
+            name="WikiAuthor",
         ),
         migrations.DeleteModel(
-            name='WikiCategory',
+            name="WikiCategory",
         ),
     ]

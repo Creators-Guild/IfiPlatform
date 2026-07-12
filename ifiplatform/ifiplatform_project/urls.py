@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib.auth import views as auth_views
+from wagtail.admin import urls as wagtailadmin_urls
 
 # language selection
 urlpatterns = [
@@ -26,10 +27,10 @@ urlpatterns = [
 ]
 
 urlpatterns += i18n_patterns(
-    path("i18n/", include("django.conf.urls.i18n")),  # for switching languages
     path("admin/", admin.site.urls),
-    path("", include("ifi_home_app.urls")),
+    path("wagtail-admin/", include(wagtailadmin_urls)), # admin ctrl to articles using wagtail dependancy
     path("study/", include("study_app.urls")),
     path("account/", include("account_app.urls")),
     path("yourpage/", include("yourpage_app.urls")),
+    path("", include("ifi_home_app.urls")),
 )

@@ -1,4 +1,5 @@
 """URL configuration for study app."""
+
 from django.urls import path
 from .views import flashcard_views
 from .views import multiplechoice_views

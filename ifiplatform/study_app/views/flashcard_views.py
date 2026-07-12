@@ -1,4 +1,5 @@
 """Views for flashcard study feature."""
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from study_app.models import Deck, Card

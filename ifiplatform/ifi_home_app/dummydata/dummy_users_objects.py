@@ -1,9 +1,11 @@
-""" Dummy data for dummyuser objects during development."""
+"""Dummy data for dummyuser objects during development."""
+
 from django.contrib.auth import get_user_model
 
 # TODO: Consider if this file is to be removed.
 
 User = get_user_model()
+
 
 def get_dummy_user():
     """Create dummy StudentUnion entries, optionally clearing existing ones first."""

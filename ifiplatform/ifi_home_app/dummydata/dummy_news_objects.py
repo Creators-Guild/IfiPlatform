@@ -1,4 +1,5 @@
 """Dummy data for populating NewsItem objects during development."""
+
 from ..models.home_models import NewsItem
 
 

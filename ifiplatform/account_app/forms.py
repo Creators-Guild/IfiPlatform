@@ -1,10 +1,12 @@
 """Custom user registration form with password confirmation validation."""
+
 from django import forms
 from django.contrib.auth import get_user_model
 
 
 class RegisterForm(forms.ModelForm):
     """Form for registering a new user account with matching password fields."""
+
     password = forms.CharField(widget=forms.PasswordInput)
     password_confirm = forms.CharField(
         widget=forms.PasswordInput, label="Confirm Password"
@@ -12,6 +14,7 @@ class RegisterForm(forms.ModelForm):
 
     class Meta:
         """Meta options for RegisterForm."""
+
         model = User = get_user_model()
         fields = ["username", "password", "password_confirm"]
 

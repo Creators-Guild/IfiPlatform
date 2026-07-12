@@ -1,4 +1,5 @@
 """Views for the study app main menu."""
+
 from django.shortcuts import render
 
 

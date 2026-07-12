@@ -1,4 +1,5 @@
 """Views for account settings and user profile management."""
+
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
