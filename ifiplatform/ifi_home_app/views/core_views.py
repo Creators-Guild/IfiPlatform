@@ -1,7 +1,6 @@
 """Views for IFI home page."""
 from django.shortcuts import render
 from ..models.home_models import *
-from ..models.news_models import NewsItem
 from ..dummydata import *
 
 
