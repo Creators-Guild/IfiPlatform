@@ -25,7 +25,22 @@
     </div>
 
     <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="{% url "ifi_news" %}">{% trans "Ifi News" %}</a>
+        <a class="sidemenu-option" href="">Info Articles</a>
+        <div class="drop-content">
+            <a href="">
+                {% trans "Academics" %}
+            </a>
+            <a href="">
+                {% trans "Practical" %}
+            </a>
+            <a href="">
+                {% trans "Student Life" %}
+            </a>
+        </div>
+    </div>
+
+    <div class= "sidemenu-item">
+        <a class="sidemenu-option" href="">News</a>
         <div class="drop-content">
             <a href="">
                 {% trans "Newsletter" %}
@@ -40,16 +55,16 @@
     </div>
 
     <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="{% url "ifi_wiki" %}">{% trans "Ifi Wiki" %}</a>
+        <a class="sidemenu-option" href="">Events</a>
         <div class="drop-content">
             <a href="">
-                {% trans "Newsletter" %}
+                {% trans "All" %}
             </a>
             <a href="">
-                {% trans "Blog" %}
+                {% trans "This Month" %}
             </a>
             <a href="">
-                {% trans "Guest Lectures" %}
+                {% trans "Always at Ifi" %}
             </a>
         </div>
     </div>
