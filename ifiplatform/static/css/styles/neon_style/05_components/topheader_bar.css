@@ -1,0 +1,55 @@
+/* Topbar Navigation Bar */
+.header-bar  {
+  background: var(--color-bg-dark);
+  padding: 2px;
+  display: flex; /* place all in row */
+  align-items: center; /* center vertically */
+  gap: 16px; /* gaap between each item */
+  width: 100%;
+}
+
+.ifiplatform-logo-box {
+  margin-right: auto;
+  margin-left: 20px;
+  font-size: 40px;
+  transition:
+    background-color 0.15s ease,
+    transform 0.05s ease;
+  
+}
+
+.ifiplatform-logo-box:hover {
+  transform: translateY(-1px);
+}
+
+.ifiplatform-logo {
+  text-decoration: none;
+  color: var(--color-turq);
+}
+
+.ifiplatform-logo:hover {
+  color: var(--color-turq-hover);
+}
+
+.nav_link {
+  color: var(--color-purple);
+  text-decoration: none;
+  margin-right: 100px;
+  font-size: 21px;
+  transition:
+    background-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+/* To communicate current active page */
+.nav_link.active {
+  font-size: 27px;
+  font-weight: bold;
+  color: var(--color-pink);
+}
+
+.nav_link:hover {
+  font-weight: bold;
+  text-decoration: underline;
+  transform: translateY(-1px);
+}

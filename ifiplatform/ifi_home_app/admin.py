@@ -1,6 +1,5 @@
+"""Admin registration for ifi_home_app models."""
 from django.contrib import admin
-from .models import *
+from .models import StudentUnion
 
-# Register your models here.
-admin.site.register(NewsItem)
 admin.site.register(StudentUnion)

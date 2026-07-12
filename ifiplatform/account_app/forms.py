@@ -1,23 +1,28 @@
+"""Custom user registration form with password confirmation validation."""
 from django import forms
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
-# costume registerForm
+
 class RegisterForm(forms.ModelForm):
-    # fields in the form
+    """Form for registering a new user account with matching password fields."""
     password = forms.CharField(widget=forms.PasswordInput)
-    password_confirm = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
-    
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput, label="Confirm Password"
+    )
+
     class Meta:
-        model = User
+        """Meta options for RegisterForm."""
+        model = User = get_user_model()
         fields = ["username", "password", "password_confirm"]
-        
+
     def clean(self):
+        """Validate that the two password fields match."""
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
         password_confirm = cleaned_data.get("password_confirm")
-        
+
         # check if password match
         if password and password_confirm and password != password_confirm:
             raise forms.ValidationError("Passwords do not match")
-        
+
         return cleaned_data

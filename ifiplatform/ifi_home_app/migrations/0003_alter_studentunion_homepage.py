@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0002_studentunion'),
+        ("ifi_home_app", "0002_studentunion"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='studentunion',
-            name='homepage',
-            field=models.URLField(blank=True, verbose_name='union_homepage'),
+            model_name="studentunion",
+            name="homepage",
+            field=models.URLField(blank=True, verbose_name="union_homepage"),
         ),
     ]

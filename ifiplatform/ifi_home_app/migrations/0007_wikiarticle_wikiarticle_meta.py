@@ -8,34 +8,72 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0006_ifitool_short_description'),
+        ("ifi_home_app", "0006_ifitool_short_description"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WikiArticle',
+            name="WikiArticle",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('intro_text', models.TextField()),
-                ('body', models.TextField()),
-                ('image_name', models.CharField(blank=True, max_length=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("intro_text", models.TextField()),
+                ("body", models.TextField()),
+                ("image_name", models.CharField(blank=True, max_length=100)),
             ],
         ),
         migrations.CreateModel(
-            name='WikiArticle_Meta',
+            name="WikiArticle_Meta",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('description', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('last_edited', models.DateTimeField(auto_now=True)),
-                ('views', models.PositiveIntegerField(default=0)),
-                ('last_viewed', models.DateTimeField(blank=True, null=True)),
-                ('author_name', models.CharField(blank=True, max_length=200)),
-                ('article', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='meta_data', to='ifi_home_app.wikiarticle')),
-                ('author', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='author', to=settings.AUTH_USER_MODEL)),
-                ('contributors', models.ManyToManyField(null=True, related_name='contributors', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("description", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("last_edited", models.DateTimeField(auto_now=True)),
+                ("views", models.PositiveIntegerField(default=0)),
+                ("last_viewed", models.DateTimeField(blank=True, null=True)),
+                ("author_name", models.CharField(blank=True, max_length=200)),
+                (
+                    "article",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="meta_data",
+                        to="ifi_home_app.wikiarticle",
+                    ),
+                ),
+                (
+                    "author",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="author",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "contributors",
+                    models.ManyToManyField(
+                        null=True,
+                        related_name="contributors",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

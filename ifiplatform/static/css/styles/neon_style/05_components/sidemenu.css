@@ -1,0 +1,106 @@
+.sidemenu {
+    width: 60px;
+    height: 100%;
+    padding: 1rem;
+    background-color: var(--color-turq-hover);
+    transition: 
+        width 0.2s ease,
+        opacity 0.3s ease;
+
+    display: grid;
+    grid-auto-rows: min-content;
+    overflow: hidden;
+}
+
+
+.sidemenu-item {
+    margin: 1rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+}
+
+.sidemenu .sidemenu-option {
+    border-bottom: 1px solid black;
+    width: 100%;
+}
+
+.sidemenu-item a {
+    color: var(--color-black);
+    text-decoration: none;
+    font-size: large;
+}
+
+.sidemenu-header {
+    display: block
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
+  transition: opacity 0.1s ease;
+}
+
+/* text (hidden when collapsed) */
+.icon-text {
+    font-size: larger;
+    font-weight: bold;
+    text-align: left;
+    text-decoration: underline;
+
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 0.1s ease;
+}
+
+.sidemenu:hover {
+    width: 250px;
+    padding: 1rem;
+    border-right: 1px solid #ddd;
+}
+
+.sidemenu:hover .sidemenu-item {
+    opacity: 1;
+}
+
+.sidemenu:hover .icon {
+    opacity: 0;
+}
+
+.sidemenu:hover .icon-text {
+    opacity: 1;
+}
+
+.sidemenu-item .drop-content {
+    display: grid;
+    grid-auto-rows: min-content;
+    gap: 0.5em;
+    padding-left: 1rem;
+
+    max-height: 0;             /* collapsed */
+    opacity: 0;
+    overflow: hidden;
+    transition:
+        max-height 0.25s ease,
+        opacity 0.25s ease,
+        transform 0.05s ease;
+}
+
+.sidemenu-item .drop-content a:first-child {
+    margin-top: 0.5em;
+}
+
+/* dropdown links inside */
+.sidemenu-item .drop-content .drop-option {
+    padding: 0.25rem 0.75rem;
+}
+
+/* when hovering a menu item, expand its dropdown */
+.sidemenu-item:hover .drop-content {
+    max-height: 500px;               /* big enough to fit children */
+    opacity: 1;
+    
+}
+

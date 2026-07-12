@@ -8,23 +8,23 @@
     <title>
         {% block title %} Ifi Platform {% endblock %}
     </title>
-    <link rel="stylesheet" href="{% static 'styles/neon_style/common/base.css' %}">
-    <link rel="stylesheet" href="{% static 'styles/neon_style/common/header_bar.css' %}">
+    <link rel="stylesheet" href="{% static 'css\styles\neon_style\base.css' %}">
     {% block extra_head %}<!-- addtional css here -->{% endblock extra_head %}
 </head>
 <body>
-    {% include "partials/select_language.html" %}
-    {% include "partials/top_header.html" %}
-
-    <main class="page-content">
-        {% block content %}
-        <!-- default content, can be empty -->
-        {% endblock %}
-        {% block bottom_content %}
-        <!-- bottom content, can be empty -->
-        {% endblock %}
-    </main>
-
-    {% include "partials/bottom_header.html" %}
+    <div class="page-layout">
+        <div class= "topheader-content">
+            {% include "partials/select_language.html" %}
+            {% include "partials/top_header.html" %}
+        </div>
+        <main class="page-content">
+            {% block content %}
+            <!-- default content, can be empty -->
+            {% endblock %}
+        </main>
+        <div class="bottombar-content">
+            {% include "partials/bottom_header.html" %}
+        </div>
+    </div>
 </body>
 </html>

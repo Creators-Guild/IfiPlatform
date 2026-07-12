@@ -6,17 +6,17 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0009_alter_wikiarticle_meta_author'),
+        ("ifi_home_app", "0009_alter_wikiarticle_meta_author"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='wikiarticle_meta',
-            old_name='contributors',
-            new_name='authors',
+            model_name="wikiarticle_meta",
+            old_name="contributors",
+            new_name="authors",
         ),
         migrations.RemoveField(
-            model_name='wikiarticle_meta',
-            name='author',
+            model_name="wikiarticle_meta",
+            name="author",
         ),
     ]

@@ -7,13 +7,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('study_app', '0001_initial'),
+        ("study_app", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='deck',
-            constraint=models.UniqueConstraint(fields=('owner', 'name'), name='unique_deck_name_per_owner'),
+            model_name="deck",
+            constraint=models.UniqueConstraint(
+                fields=("owner", "name"), name="unique_deck_name_per_owner"
+            ),
         ),
     ]

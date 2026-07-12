@@ -1,24 +1,41 @@
+"""URL configuration for study app."""
 from django.urls import path
 from .views import flashcard_views
 from .views import multiplechoice_views
 from .views import mix_studyset_views
 from .views import core_views
 
-
 study_urlpatterns = [
-    path("", core_views.main_view, name = "study_home"),
+    path("", core_views.main_view, name="study_home"),
 ]
 
 flashcard_urlpatterns = [
     path("flashcard/", flashcard_views.flashcard_menu, name="flashcard_menu"),
-    
     # <int:pk> is a parameter for the decks ID in database
-    path("flashcard/deck/<int:deck_pk>/", flashcard_views.deck_detail, name="deck_detail"),
-    path("flashcard/deck/<int:deck_pk>/review/<int:index>", flashcard_views.review, name="review"),
+    path(
+        "flashcard/deck/<int:deck_pk>/", flashcard_views.deck_detail, name="deck_detail"
+    ),
+    path(
+        "flashcard/deck/<int:deck_pk>/review/<int:index>",
+        flashcard_views.review,
+        name="review",
+    ),
     path("flashcard/deck/new/", flashcard_views.deck_create, name="deck_create"),
-    path("flashcard/deck/delete/<int:deck_pk>", flashcard_views.deck_delete, name="deck_delete"),
-    path("flashcard/deck/<int:deck_pk>/card/new/", flashcard_views.card_create, name="card_create"),
-    path("flashcard/deck/<int:deck_pk>/card/delete/", flashcard_views.card_delete, name="card_delete"),
+    path(
+        "flashcard/deck/delete/<int:deck_pk>",
+        flashcard_views.deck_delete,
+        name="deck_delete",
+    ),
+    path(
+        "flashcard/deck/<int:deck_pk>/card/new/",
+        flashcard_views.card_create,
+        name="card_create",
+    ),
+    path(
+        "flashcard/deck/<int:deck_pk>/card/delete/",
+        flashcard_views.card_delete,
+        name="card_delete",
+    ),
 ]
 
 multiplechoice_urlpatterns = [
@@ -33,4 +50,10 @@ studygames_urlpatterns = [
     path("studygames/", mix_studyset_views.menu_view, name="studygames_menu")
 ]
 
-urlpatterns = study_urlpatterns + flashcard_urlpatterns + multiplechoice_urlpatterns + mix_studyset_urlpatterns + studygames_urlpatterns
+urlpatterns = (
+    study_urlpatterns
+    + flashcard_urlpatterns
+    + multiplechoice_urlpatterns
+    + mix_studyset_urlpatterns
+    + studygames_urlpatterns
+)
