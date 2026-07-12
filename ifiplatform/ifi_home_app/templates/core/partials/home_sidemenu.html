@@ -1,5 +1,6 @@
 {% load static %}
 {% load i18n %}
+{% load blog_tags %}
 
 <!-- to avoid mutiple loads of the same css if partial is used mutiple times -->
 {% block extra_css %}
@@ -25,7 +26,7 @@
     </div>
 
     <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="{{ article_index_page.url }}">Info Articles</a>
+        <a class="sidemenu-option" href="">Info Articles</a>
         <div class="drop-content">
             <a href="">
                 {% trans "Academics" %}
