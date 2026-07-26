@@ -11,7 +11,11 @@ Goals:
 ## Tools and Languages
 1. Framework: Django
 2. Languages: Python, HTML and CSS
-3. Requirements: Python 3.x (specify version here), SQLite (default, via Django)
+3. Requirements:
+    - Python
+      - Minimum 3.12
+      - Supported and tested on 3.12, 3.13, 3.14
+    - SQLite (default, via Django)
 
 ## Setup
 ### Set up Virtual Environment
