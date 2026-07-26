@@ -1,10 +1,10 @@
 name: Pylint
-
 on: [push]
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DJANGO_SECRET_KEY: dummy-secret-key-for-ci
     strategy:
       matrix:
         # Django 6.0 supports Python 3.12, 3.13, and 3.14
