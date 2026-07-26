@@ -62,11 +62,12 @@ Check out...
 Check out [TUTORIALS.md](TUTORIALS.md) for more about Django Framework and other dependencies used in this project.
 
 ## Contributing
-We welcome contributions from IFI students! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+We welcome contributions from IFI students(with certain exceptions)! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - How to open issues (bug/feature/task reports, with examples)
 - How to submit pull requests
 - Code style expectations (Black/Pylint)
 - The different contributor roles in this project
+- Precisly who can contribute
 
 ## License (coming)
 This project is licensed under the...
