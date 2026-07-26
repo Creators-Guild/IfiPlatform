@@ -4,13 +4,6 @@ Thanks for wanting to contribute! This project is built by IFI-Creators' Guild �
  
 If you've never contributed to an open source project before, don't worry — this guide walks through everything you need.
 
-## Main Roles in this Repository
-1. **Committer** - Trusted developer (and part of core team) with the rights to commit and merge code directly to the main repository
-2. **Collaborator** - Developer with write access to the repo itself (e.g. teammates who aren't yet trusted to merge unreviewed, but can push branches and manage issues directly)
-3. **Contributor (You)** - The open, public-facing role — anyone can be this without any special access. You fork the repo, open issues, and submit pull requests for review.
-
-**These roles aren't fixed** — As long as you are a member of IFI-Creators' Guild, contributors who show consistent, quality work may be invited to become Collaborators, and Collaborators who build up trust over time may be invited to become Committers.
-
 ## Getting Started
  
 1. **Fork the repository** to your own GitHub account.
@@ -25,6 +18,24 @@ cd IfiPlatform
 git checkout -b <issue-type>/<short-description>
 ```
    e.g. `feature/mobile-nav`, `bug/login-redirect`, `task/setup-instructions`
+
+## Main Roles in this Repository
+1. **Committer** - Trusted developer (and part of core team) with the rights to commit and merge code directly to the main repository
+2. **Collaborator** - Developer with write access to the repo itself (e.g. teammates who aren't yet trusted to merge unreviewed, but can push branches and manage issues directly)
+3. **Contributor (You)** - The open, public-facing role — anyone can be this without any special access. You fork the repo, open issues, and submit pull requests for review.
+
+**These roles aren't fixed** — As long as you are a member of IFI-Creators' Guild, contributors who show consistent, quality work may be invited to become Collaborators, and Collaborators who build up trust over time may be invited to become Committers.
+
+## Who Can Contribute
+ 
+As described in **Main Roles** above, anyone can be a **Contributor** — no special access needed. Open an issue, fork the repo, and submit a pull request whenever you like; we welcome outside eyes on bugs or ideas from anyone, IFI student or not.
+ 
+However, to keep **merged code and write access** within our intended community, PRs are only merged from contributors who are either:
+- A current student at the Department of Informatics, University of Oslo, or
+- Approved by IFI-Creators' Guild
+If you're eligible and want write access (to push branches directly, manage issues, etc.) rather than working from a fork, reach out to a **Committer** to apply to get set up as a Collaborator.
+ 
+If you're not currently eligible, you're still welcome to open issues and submit PRs from a fork as a Contributor — a Committer will review and merge on your behalf if the contribution is a good fit. However, note that you are not likely to be prioritized unless the contribution is how high value to the project.
  
 ## Reporting Issues
  
