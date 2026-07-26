@@ -28,7 +28,9 @@ urlpatterns = [
 
 urlpatterns += i18n_patterns(
     path("admin/", admin.site.urls),
-    path("wagtail-admin/", include(wagtailadmin_urls)), # admin ctrl to articles using wagtail dependancy
+    path(
+        "wagtail-admin/", include(wagtailadmin_urls)
+    ),  # admin ctrl to articles using wagtail dependancy
     path("study/", include("study_app.urls")),
     path("account/", include("account_app.urls")),
     path("yourpage/", include("yourpage_app.urls")),

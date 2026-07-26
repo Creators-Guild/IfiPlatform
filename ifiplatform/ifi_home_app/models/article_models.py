@@ -8,8 +8,9 @@ from wagtail import blocks
 
 # !Wagtail has no views and don't need any!
 
+
 class ArticlePage(Page):
-    template = "info_articles/article_page.html" # custom path
+    template = "info_articles/article_page.html"  # custom path
 
     intro = models.CharField(max_length=250, blank=True)
     # featured image
@@ -77,7 +78,7 @@ class ArticlePage(Page):
 
 # parent page to list articles
 class ArticleIndexPage(Page):
-    template = "info_articles/article_index_page.html" # custom path
+    template = "info_articles/article_index_page.html"  # custom path
 
     intro = RichTextField(blank=True)
 
