@@ -1,15 +1,25 @@
 {% extends "ifi_base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}Account{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css\styles\neon_style\account_base.css' %}">
+{% endblock extra_head %}
+
 {% block content %}
 
-    <div class="main-content">
+    <div class="account_layout">
+        <div class="account-card">
             <h2>{% trans "Welcome to the Account Settings Page" %}</h2>
-        <p>{% trans "This is the placeholder for Account Settings." %}</p>
-        <p>User: {{user}} </p>
-        <a href="{% url 'logout' %}">Log out</a>
+            <p>{% trans "This is the placeholder for Account Settings." %}</p>
+            <div class="account-info">
+                <p>{% trans "User" %}: <span>{{ user }}</span></p>
+            </div>
+            <div class="account-actions">
+                <a class="btn" href="{% url 'logout' %}">{% trans "Log out" %}</a>
+            </div>
+        </div>
     </div>
 
 {% endblock %}

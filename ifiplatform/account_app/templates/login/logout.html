@@ -1,9 +1,21 @@
 {% extends 'ifi_base.html' %}
+{% load i18n static %}
 
-{% block title %} User Login {% endblock %}
+{% block title %}{% trans "User Login" %}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css\styles\neon_style\account_base.css' %}">
+{% endblock extra_head %}
 
 {% block content %}
-    <h1>User Login</h1>
-    <p>You are now logged out!</p>
-    <a href="{% url 'ifi_home' %}">Return to main page</a>
+    <div class="account_layout">
+        <div class="auth-card">
+            <h1>{% trans "User Login" %}</h1>
+            <p>{% trans "You are now logged out!" %}</p>
+            <p class="auth-links">
+                <a class="back-to" href="{% url 'login' %}">{% trans "Log in again" %}</a>
+                <a class="back-to" href="{% url 'ifi_home' %}">{% trans "Return to main page" %}</a>
+            </p>
+        </div>
+    </div>
 {% endblock %}
