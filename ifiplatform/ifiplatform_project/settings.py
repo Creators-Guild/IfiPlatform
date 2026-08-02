@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['158.37.66.236']
 
 
 # Application definition
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "study_app.apps.StudyAppConfig",
     "account_app.apps.AccountAppConfig",
     "yourpage_app.apps.YourPageAppConfig",
+    'django.contrib.postgres',
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.embeds",
@@ -165,6 +166,7 @@ LOCALE_PATHS = [
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 # Media files (user uploads, e.g. Wagtail images)

@@ -1,0 +1,35 @@
+/* Select Languages */
+.select-language {
+  width: 100%;
+  text-align: right;
+  background-color: var(--color-bg-dark);
+}
+
+.select-language {
+  display: block;
+  width: 100%;
+  text-align: right;
+}
+
+.lang-btn {
+  background: transparent;
+  color: #0be9ae;
+  border: 1px solid #0be9ae;
+  padding: 3px 8px;
+  margin-left: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* hover effect */
+.lang-btn:hover {
+  background: #0be9ae;
+  color: #1f1f1f;
+}
+
+/* current language */
+.lang-btn.active {
+  background: #0be9ae;
+  color: #1f1f1f;
+  font-weight: bold;
+}
