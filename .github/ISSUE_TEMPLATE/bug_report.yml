@@ -43,7 +43,7 @@ body:
     id: steps
     attributes:
       label: Steps to reproduce
-      description: How can we see the bug ourselves?
+      description: How can we see the bug ourselves? Do you best to describe, but we understand some bugs are hard to reproduce
       placeholder: |
         1. Go to...
         2. Click on...
