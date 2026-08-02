@@ -1,5 +1,4 @@
-{% load i18n %}
-{% load static %}
+{% load i18n static wagtailcore_tags article_tags%}
 <div class="home-navbar">
     <div class="dropdown-menu">
         <button class="link">
@@ -19,15 +18,15 @@
     </div>
     <div class="dropdown-menu">
         <button class="link">
-            <a class="drop-option" href="">{% trans "Ifi Wiki" %}</a>
+            {% get_article_index as article_index_page %} <!-- store tag in varible -->
+            <a class="drop-option" href="{% pageurl article_index_page %}">{% trans "Info Articles" %}</a>
         </button>
         <div class="drop-content">
-            <a class="drop-option" href="">
-                {% trans "Subjects" %}
-            </a>
-            <a class="drop-option" href="">
-                {% trans "History" %}
-            </a>
+            {% for category in categories %}
+                <a class="drop-option" href="{% pageurl category %}">
+                    {{ category.title }} <!-- dont use normal translate with wagtail, check out wagtails tranlation instead -->
+                </a>
+            {% endfor %}
         </div>
     </div>
     <div class="dropdown-menu">

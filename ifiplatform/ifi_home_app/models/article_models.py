@@ -8,9 +8,11 @@ from wagtail import blocks
 
 # !Wagtail has no views and don't need any!
 
+# Current tree: ArticleIndexPage -> ArticleCategory -> ArticlePage
 
+# Model for Articles
 class ArticlePage(Page):
-    template = "info_articles/article_page.html"  # custom path
+    template = "info_articles/pages/article_page.html"  # custom path
 
     intro = models.CharField(max_length=250, blank=True)
     # featured image
@@ -71,14 +73,14 @@ class ArticlePage(Page):
     ]
 
     parent_page_types = [
-        "ifi_home_app.ArticleIndexPage"
-    ]  # only allow creation under an index page
+        "ifi_home_app.CategoryPage"
+    ]  # only allow creation under an category
     subpage_types = []  # articles have no children
 
 
-# parent page to list articles
-class ArticleIndexPage(Page):
-    template = "info_articles/article_index_page.html"  # custom path
+# Model for article category to list articles within category
+class CategoryPage(Page):
+    template = "info_articles/pages/article_category_page.html"
 
     intro = RichTextField(blank=True)
 
@@ -86,12 +88,32 @@ class ArticleIndexPage(Page):
         FieldPanel("intro"),
     ]
 
+    parent_page_types = ["ifi_home_app.ArticleIndexPage"]
     subpage_types = ["ifi_home_app.ArticlePage"]
 
-    # overriding for extra data
     def get_context(self, request):
         context = super().get_context(request)
         context["articles"] = (
             ArticlePage.objects.child_of(self).live().order_by("-published_date")
         )
+        return context
+
+
+# parent page to list articles categories
+class ArticleIndexPage(Page):
+    template = "info_articles/pages/article_index_page.html"  # custom path
+
+    intro = RichTextField(blank=True)
+
+    content_panels = Page.content_panels + [
+        FieldPanel("intro"),
+    ]
+
+    subpage_types = ["ifi_home_app.CategoryPage"]
+
+    # overriding for extra data
+
+    def get_context(self, request):
+        context = super().get_context(request)
+        context["categories"] = CategoryPage.objects.child_of(self).live()
         return context

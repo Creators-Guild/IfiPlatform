@@ -3,6 +3,7 @@
 from django.shortcuts import render
 from ..models.home_models import *
 from ..dummydata import *
+from ifi_home_app.models.article_models import CategoryPage
 
 
 def main_view(request):
@@ -24,10 +25,11 @@ def main_view(request):
         "news_items": news_items,
         "unions": unions,
         "tools": tools,
+        "categories": CategoryPage.objects.live(),
     }
 
     return render(
         request=request,
-        template_name="core/home_main.html",
+        template_name="core/home_index.html",
         context=context,
     )

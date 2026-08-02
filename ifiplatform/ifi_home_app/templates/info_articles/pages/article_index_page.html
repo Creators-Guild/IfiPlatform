@@ -1,0 +1,25 @@
+{% extends "home_base.html" %}
+{% load i18n static wagtailcore_tags wagtailimages_tags %}
+
+{% block title %}Information Articles{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css\styles\neon_style\home_base.css' %}">
+{% endblock extra_head %}
+<link rel="stylesheet" href="{% static 'css\styles\neon_style\home_base.css' %}">
+<div class = "home-layout">
+    {% block sidemenu %}
+        {% include "info_articles\partials\article_sidemenu.html" %}
+    {% endblock sidemenu %}
+    {% block maincontent %}
+        <a class="back-to" href="{% url 'ifi_home' %}"><span aria-hidden="true">←</span> {% trans "Back to Homepage" %}</a>
+        <h1>{{ page.title }}</h1>
+        <div class="intro">{{ page.intro|richtext }}</div>
+
+        <nav class="category-menu">
+            {% for category in categories %}
+                <a href="{% pageurl category %}">{{ category.title }}</a>
+            {% endfor %}
+        </nav>
+    {% endblock maincontent %}
+</div>

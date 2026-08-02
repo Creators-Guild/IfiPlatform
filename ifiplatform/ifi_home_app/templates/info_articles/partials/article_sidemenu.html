@@ -1,4 +1,6 @@
-{% load static i18n article_tags %}
+{% load static i18n article_tags wagtailcore_tags %}
+{% get_categories as categories %}
+{% get_article_index as article_index_page %}
 
 <!-- to avoid mutiple loads of the same css if partial is used mutiple times -->
 {% block extra_css %}
@@ -12,7 +14,22 @@
     </div>
 
     <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="">{% trans "Academics" %}</a>
+        <a class="sidemenu-option" href="{% pageurl article_index_page %}">{% trans "Categories" %}</a>
+        <div class="drop-content">
+            <a href="{% pageurl article_index_page %}">
+                {% trans "All" %}
+            </a>
+            <!-- Get category context n store in varible -->
+            {% for category in categories %}
+                <a href="{% pageurl category %}">
+                    {{category.title}}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class= "sidemenu-item">
+        <a class="sidemenu-option" href="">{% trans "Buddyweek 2026" %}</a>
         <div class="drop-content">
             <a href="">
                 {% trans "Academics" %}
@@ -27,22 +44,7 @@
     </div>
 
     <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="">{% trans "Practical" %}</a>
-        <div class="drop-content">
-            <a href="">
-                {% trans "Academics" %}
-            </a>
-            <a href="">
-                {% trans "Practical" %}
-            </a>
-            <a href="">
-                {% trans "Student Life" %}
-            </a>
-        </div>
-    </div>
-
-    <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="">{% trans "Student Life" %}</a>
+        <a class="sidemenu-option" href="">{% trans "Often Asked Questions" %}</a>
         <div class="drop-content">
             <a href="">
                 {% trans "Student Unions" %}
