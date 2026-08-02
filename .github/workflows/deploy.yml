@@ -1,9 +1,7 @@
 name: Deploy to Server
-
 on:
   push:
     branches: [main]
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -14,13 +12,14 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
           script: |
             cd /home/ubuntu/IfiPlatform
             git fetch origin main
             git reset --hard origin/main
             source venv/bin/activate
-            cd ifiplatform
             pip install -r requirements.txt
+            cd ifiplatform
             python manage.py migrate
             python manage.py collectstatic --noinput
             sudo systemctl restart gunicorn
