@@ -1,0 +1,30 @@
+.account-card {
+  background-color: var(--color-bg-light);
+  border: 2px solid var(--color-purple);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--color-boxshadow);
+  padding: 1.5rem 2rem;
+  width: 100%;
+  max-width: 30rem;
+  margin-top: 1rem;
+}
+
+.account-card h2 {
+  color: var(--color-purple);
+  margin-top: 0;
+}
+
+.account-card .account-info {
+  margin: 1.5rem 0;
+}
+
+.account-card .account-info span {
+  font-weight: bold;
+  color: var(--color-black);
+}
+
+.account-card .account-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}

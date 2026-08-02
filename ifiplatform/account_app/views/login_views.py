@@ -11,6 +11,7 @@ def signin_view(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            login(request=request, user=user)
             return redirect("signin_success")
     else:  # if GET
         form = UserCreationForm()

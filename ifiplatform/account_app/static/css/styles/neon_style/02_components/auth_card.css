@@ -1,0 +1,60 @@
+.auth-card {
+  background-color: var(--color-bg-light);
+  border: 2px solid var(--color-black);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--color-boxshadow);
+  padding: 1.5rem 2rem;
+  width: 100%;
+  max-width: 26rem;
+  margin-top: 1rem;
+}
+
+.auth-card h1 {
+  color: var(--color-black);
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.auth-card label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.auth-card input[type="text"],
+.auth-card input[type="password"],
+.auth-card input[type="email"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  border: 1px solid var(--color-black);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.auth-card input:focus {
+  outline: 2px solid var(--color-turq);
+  border-color: var(--color-turq);
+}
+
+.auth-card .error {
+  color: var(--color-pink);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.auth-card button[type="submit"] {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
+
+.auth-card .auth-links {
+  margin-top: 1.25rem;
+}
