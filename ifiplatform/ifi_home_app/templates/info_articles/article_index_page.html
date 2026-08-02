@@ -6,23 +6,28 @@
 {% block title %}Ifi Articles{% endblock %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css\styles\neon_style\home_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css\styles\neon_style\article_base.css' %}">
 {% endblock extra_head %}
 
 {% block content %}
-    <h1>{{ page.title }}</h1>
-    <div class="intro">{{ page.intro|richtext }}</div>
+    <div class="article_layout">
+        <div class="sidemenu_container">{% include "info_articles\article_sidemenu.html" %}</div>
+        <div class="maincontent">
+            <h1>{{ page.title }}</h1>
+            <div class="intro">{{ page.intro|richtext }}</div>
 
-    <div class="article-list">
-        {% for article in articles %}
-        <article class="article-card">
-            {% if article.hero_image %}
-            {% image article.hero_image width-400 as img %}
-            <img src="{{ img.url }}" alt="">
-            {% endif %}
-            <h2><a href="{{ article.url }}">{{ article.title }}</a></h2>
-            <p>{{ article.intro }}</p>
-        </article>
-        {% endfor %}
+            <div class="article-list">
+                {% for article in articles %}
+                <article class="article-card">
+                    {% if article.hero_image %}
+                    {% image article.hero_image width-400 as img %}
+                    <img src="{{ img.url }}" alt="">
+                    {% endif %}
+                    <h2><a href="{{ article.url }}">{{ article.title }}</a></h2>
+                    <p>{{ article.intro }}</p>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 {% endblock %}

@@ -1,6 +1,4 @@
-{% load static %}
-{% load i18n %}
-{% load blog_tags %}
+{% load static i18n wagtailcore_tags article_tags %}
 
 <!-- to avoid mutiple loads of the same css if partial is used mutiple times -->
 {% block extra_css %}
@@ -26,7 +24,10 @@
     </div>
 
     <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="">Info Articles</a>
+        <!-- pageurl has to use varible and not nested templatetags-function -->
+        {% get_article_index as article_index_page %} <!-- store tag in varible -->
+        <a class="sidemenu-option" href="{% pageurl article_index_page %}">{% trans "Info Articles" %}</a>
+        
         <div class="drop-content">
             <a href="">
                 {% trans "Academics" %}
