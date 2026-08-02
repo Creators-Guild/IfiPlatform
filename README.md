@@ -11,7 +11,11 @@ Goals:
 ## Tools and Languages
 1. Framework: Django
 2. Languages: Python, HTML and CSS
-3. Requirements: Python 3.x (specify version here), SQLite (default, via Django)
+3. Requirements:
+    - Python
+      - Minimum 3.12
+      - Supported and tested on 3.12, 3.13, 3.14
+    - SQLite (default, via Django)
 
 ## Setup
 ### Set up Virtual Environment
@@ -34,6 +38,17 @@ Python: Create Environment
 ```bash
 pip install -r <path to requirements.txt>
 ```
+
+### Create .env for Secrets
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+Generate local Secret key and copy generated key and replace 'your-secret-key-here' inside .env with said key:
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
 ### Run website on localhost
 ```bash
 py <path to manage.py> runserver
