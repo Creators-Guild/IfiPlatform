@@ -5,15 +5,46 @@
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css\styles\neon_style\home_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css\styles\neon_style\02_components\category_card.css' %}">
+    <link rel="stylesheet" href="{% static 'css\styles\neon_style\02_components\article_body.css' %}">
 {% endblock extra_head %}
-<link rel="stylesheet" href="{% static 'css\styles\neon_style\home_base.css' %}">
-<div class = "home-layout">
-    {% block sidemenu %}
-        {% include "info_articles\partials\article_sidemenu.html" %}
-    {% endblock sidemenu %}
-    {% block maincontent %}
-        {% include "info_articles\partials\article_breadcrumbs.html" %}
+
+{% block sidemenu %}
+    {% include "info_articles\partials\article_sidemenu.html" %}
+{% endblock sidemenu %}
+
+{% block maincontent %}
+    {% include "info_articles\partials\article_breadcrumbs.html" %}
+    <div class="article-page" style="--accent-color: var(--color-{{ page.category.color }})">
         <h1>{{ page.title }}</h1>
+
+        {% if page.author or page.published_date or page.last_published_at %}
+            <div class="article-meta">
+                {% if page.author %}
+                    <span class="article-meta-item">{% trans "By" %} {{ page.author.get_full_name|default:page.author.username }}</span>
+                {% endif %}
+                {% if page.published_date %}
+                    <span class="article-meta-item">{% trans "Published" %} {{ page.published_date }}</span>
+                {% endif %}
+                {% if page.last_published_at %}
+                    <span class="article-meta-item">{% trans "Last edited" %} {{ page.last_published_at|date }}</span>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if page.hero_image %}
+            {% image page.hero_image width-1200 as hero %}
+            <figure class="hero-image-figure hero-image--{{ page.hero_image_position }} hero-image--size-{{ page.hero_image_size }}{% if page.hero_image_boxed %} image-figure--boxed box-color--{{ page.hero_image_box_color }}{% endif %}"
+                {% if page.hero_image_boxed %}style="--box-bg: {% if page.hero_image_box_color == 'custom' %}{{ page.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.hero_image_box_color }}){% endif %}"{% endif %}>
+                <img class="hero-image" src="{{ hero.url }}" alt="{{ page.hero_image_alt|default:page.hero_image.title }}">
+                {% if page.hero_image_alt or page.hero_image_caption %}
+                    <figcaption>
+                        {% if page.hero_image_alt %}<span class="image-title">{{ page.hero_image_alt }}</span>{% endif %}
+                        {% if page.hero_image_caption %}<span class="image-caption">{{ page.hero_image_caption }}</span>{% endif %}
+                    </figcaption>
+                {% endif %}
+            </figure>
+        {% endif %}
 
         <nav class="table_of_content">
         <ul>
@@ -32,18 +63,27 @@
             {% elif block.block_type == "paragraph" %}
                 <div class="prose">{{ block.value }}</div>
 
-            {% elif block.block_type == "two_column" %}
-                <div class="two-col-grid">
-                <div>{{ block.value.left }}</div>
-                <div>{{ block.value.right }}</div>
+            {% elif block.block_type == "multi_column" %}
+                <div class="multi-col-grid">
+                    {% for column in block.value.columns %}
+                        <div class="multi-col-item" style="flex: {{ column.width }} 1 0;">
+                            {% if column.title %}<h3 class="column-title">{{ column.title }}</h3>{% endif %}
+                            {% for sub in column.content %}
+                                {% if sub.block_type == "text" %}
+                                    <div class="prose">{{ sub.value }}</div>
+                                {% elif sub.block_type == "image" %}
+                                    {% include "info_articles/partials/article_image_block.html" with image_value=sub.value %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
                 </div>
 
             {% elif block.block_type == "image" %}
-                {% image block.value width-800 as img %}
-                <img src="{{ img.url }}" alt="">
+                {% include "info_articles/partials/article_image_block.html" with image_value=block.value %}
             {% endif %}
-            
+
             {% endfor %}
         </article>
+    </div>
 {% endblock maincontent %}
-</div>

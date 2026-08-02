@@ -12,4 +12,4 @@ def get_article_index():
 # to be able to send categorycontext, mainly to sidemenu
 @register.simple_tag
 def get_categories():
-    return CategoryPage.objects.live()
+    return [c for c in CategoryPage.objects.live() if c.is_visible]

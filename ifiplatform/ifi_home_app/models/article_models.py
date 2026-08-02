@@ -1,5 +1,7 @@
+from django.core.validators import RegexValidator
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from wagtail.models import Page
 from wagtail.fields import StreamField, RichTextField
 from wagtail.admin.panels import FieldPanel
@@ -7,6 +9,85 @@ from wagtail.images.blocks import ImageChooserBlock
 from wagtail import blocks
 
 # !Wagtail has no views and don't need any!
+
+HEX_COLOR_VALIDATOR = RegexValidator(
+    r"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+    "Enter a valid hex color code, e.g. #ff8800 or #f80.",
+)
+
+
+def article_image_block():
+    """A single image with layout/caption/box options, shared by the top-level
+    'image' block and the image option inside multi-column text."""
+    return blocks.StructBlock(
+        [
+            ("image", ImageChooserBlock()),
+            (
+                "alignment",
+                blocks.ChoiceBlock(
+                    choices=[
+                        ("left", "Left"),
+                        ("center", "Center"),
+                        ("right", "Right"),
+                    ],
+                    default="center",
+                ),
+            ),
+            (
+                "size",
+                blocks.ChoiceBlock(
+                    choices=[
+                        ("small", "Small"),
+                        ("medium", "Medium"),
+                        ("large", "Large"),
+                    ],
+                    default="medium",
+                ),
+            ),
+            (
+                "alt_text",
+                blocks.CharBlock(
+                    required=False,
+                    help_text="Accessible description. Leave blank to use the image's own title.",
+                ),
+            ),
+            ("caption", blocks.CharBlock(required=False)),
+            (
+                "boxed",
+                blocks.BooleanBlock(
+                    required=False,
+                    default=False,
+                    help_text="Draw a border/box around the image, title and description.",
+                ),
+            ),
+            (
+                "box_color",
+                blocks.ChoiceBlock(
+                    choices=[
+                        ("bg-light", "Light"),
+                        ("turq", "Turquoise"),
+                        ("pink", "Pink"),
+                        ("purple", "Purple"),
+                        ("black", "Black"),
+                        ("custom", "Custom (hex code)"),
+                    ],
+                    default="bg-light",
+                    required=False,
+                    help_text="Box background color (only applies when 'boxed' is enabled).",
+                ),
+            ),
+            (
+                "box_custom_color",
+                blocks.CharBlock(
+                    required=False,
+                    validators=[HEX_COLOR_VALIDATOR],
+                    help_text="Hex code, e.g. #ff8800. Only used when color is set to 'Custom'.",
+                ),
+            ),
+        ],
+        icon="image",
+    )
+
 
 # Current tree: ArticleIndexPage -> ArticleCategory -> ArticlePage
 
@@ -22,6 +103,64 @@ class ArticlePage(Page):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="+",
+    )
+
+    HERO_POSITION_CHOICES = [
+        ("left", "Left"),
+        ("center", "Center"),
+        ("right", "Right"),
+    ]
+
+    hero_image_position = models.CharField(
+        max_length=20,
+        choices=HERO_POSITION_CHOICES,
+        default="right",
+    )
+
+    HERO_SIZE_CHOICES = [
+        ("small", "Small"),
+        ("medium", "Medium"),
+        ("large", "Large"),
+        ("full", "Full width"),
+    ]
+
+    hero_image_size = models.CharField(
+        max_length=20,
+        choices=HERO_SIZE_CHOICES,
+        default="medium",
+    )
+
+    hero_image_alt = models.CharField(
+        max_length=250,
+        blank=True,
+        help_text="Accessible description of the image. Leave blank to use the image's own title.",
+    )
+    hero_image_caption = models.CharField(max_length=250, blank=True)
+    hero_image_boxed = models.BooleanField(
+        default=False,
+        help_text="Draw a border/box around the image, title and description.",
+    )
+
+    BOX_COLOR_CHOICES = [
+        ("bg-light", "Light"),
+        ("turq", "Turquoise"),
+        ("pink", "Pink"),
+        ("purple", "Purple"),
+        ("black", "Black"),
+        ("custom", "Custom (hex code)"),
+    ]
+
+    hero_image_box_color = models.CharField(
+        max_length=20,
+        choices=BOX_COLOR_CHOICES,
+        default="bg-light",
+        help_text="Box background color (only applies when 'boxed' is enabled).",
+    )
+    hero_image_box_custom_color = models.CharField(
+        max_length=7,
+        blank=True,
+        validators=[HEX_COLOR_VALIDATOR],
+        help_text="Hex code, e.g. #ff8800. Only used when color is set to 'Custom'.",
     )
     # metadata
     author = models.ForeignKey(
@@ -49,17 +188,47 @@ class ArticlePage(Page):
             ),
             ("paragraph", blocks.RichTextBlock(icon="pilcrow")),
             (
-                "two_column",
+                "multi_column",
                 blocks.StructBlock(
                     [
-                        ("left", blocks.RichTextBlock()),
-                        ("right", blocks.RichTextBlock()),
+                        (
+                            "columns",
+                            blocks.ListBlock(
+                                blocks.StructBlock(
+                                    [
+                                        ("title", blocks.CharBlock(required=False)),
+                                        (
+                                            "content",
+                                            blocks.StreamBlock(
+                                                [
+                                                    ("text", blocks.RichTextBlock()),
+                                                    ("image", article_image_block()),
+                                                ],
+                                                required=False,
+                                            ),
+                                        ),
+                                        (
+                                            "width",
+                                            blocks.IntegerBlock(
+                                                min_value=1,
+                                                max_value=10,
+                                                default=1,
+                                                help_text="Relative width compared to the other columns (e.g. 2 is twice as wide as 1).",
+                                            ),
+                                        ),
+                                    ]
+                                ),
+                                min_num=1,
+                                max_num=4,
+                                label="Column",
+                            ),
+                        ),
                     ],
                     icon="placeholder",
-                    label="Two Column Text",
+                    label="Multi-column Text",
                 ),
             ),
-            ("image", ImageChooserBlock(icon="image")),
+            ("image", article_image_block()),
         ],
         use_json_field=True,
     )
@@ -67,6 +236,13 @@ class ArticlePage(Page):
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
         FieldPanel("hero_image"),
+        FieldPanel("hero_image_position"),
+        FieldPanel("hero_image_size"),
+        FieldPanel("hero_image_alt"),
+        FieldPanel("hero_image_caption"),
+        FieldPanel("hero_image_boxed"),
+        FieldPanel("hero_image_box_color"),
+        FieldPanel("hero_image_box_custom_color"),
         FieldPanel("author"),
         FieldPanel("published_date"),
         FieldPanel("body"),
@@ -77,6 +253,11 @@ class ArticlePage(Page):
     ]  # only allow creation under an category
     subpage_types = []  # articles have no children
 
+    @property
+    def category(self):
+        """The CategoryPage this article lives under."""
+        return self.get_parent().specific
+
 
 # Model for article category to list articles within category
 class CategoryPage(Page):
@@ -84,12 +265,56 @@ class CategoryPage(Page):
 
     intro = RichTextField(blank=True)
 
+    COLOR_CHOICES = [
+        ("turq", "Turquoise"),
+        ("pink", "Pink"),
+        ("purple", "Purple"),
+    ]
+
+    color = models.CharField(
+        max_length=20,
+        choices=COLOR_CHOICES,
+        default="turq",
+        help_text="Accent color used for this category and its articles.",
+    )
+
+    # if left blank, category is always shown (a "main" category).
+    # if set, category is only shown while today falls within the range.
+    active_from = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Leave blank for a category that should always be visible.",
+    )
+    active_until = models.DateField(null=True, blank=True)
+
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
+        FieldPanel("color"),
+        FieldPanel("active_from"),
+        FieldPanel("active_until"),
     ]
 
     parent_page_types = ["ifi_home_app.ArticleIndexPage"]
     subpage_types = ["ifi_home_app.ArticlePage"]
+
+    @property
+    def is_seasonal(self):
+        """True for categories only relevant during a specific time period."""
+        return bool(self.active_from or self.active_until)
+
+    @property
+    def is_currently_active(self):
+        """True if a seasonal category's date range covers today."""
+        today = timezone.now().date()
+        if self.active_from and today < self.active_from:
+            return False
+        if self.active_until and today > self.active_until:
+            return False
+        return True
+
+    @property
+    def is_visible(self):
+        return not self.is_seasonal or self.is_currently_active
 
     def get_context(self, request):
         context = super().get_context(request)
@@ -115,5 +340,14 @@ class ArticleIndexPage(Page):
 
     def get_context(self, request):
         context = super().get_context(request)
-        context["categories"] = CategoryPage.objects.child_of(self).live()
+        categories = CategoryPage.objects.child_of(self).live()
+        context["main_categories"] = [c for c in categories if not c.is_seasonal]
+        context["seasonal_categories"] = [
+            c for c in categories if c.is_seasonal and c.is_currently_active
+        ]
+        context["suggested_articles"] = (
+            ArticlePage.objects.descendant_of(self)
+            .live()
+            .order_by("-published_date")[:4]
+        )
         return context

@@ -5,18 +5,21 @@
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css\styles\neon_style\home_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css\styles\neon_style\02_components\category_card.css' %}">
 {% endblock extra_head %}
-<link rel="stylesheet" href="{% static 'css\styles\neon_style\home_base.css' %}">
-<div class = "home-layout">
-    {% block sidemenu %}
-        {% include "info_articles\partials\article_sidemenu.html" %}
-    {% endblock sidemenu %}
-    {% block maincontent %}
-        {% include "info_articles\partials\article_breadcrumbs.html" %}
-        <!-- rest of page -->
+
+{% block sidemenu %}
+    {% include "info_articles\partials\article_sidemenu.html" %}
+{% endblock sidemenu %}
+
+{% block maincontent %}
+    {% include "info_articles\partials\article_breadcrumbs.html" %}
+    <div class="category-page" style="--accent-color: var(--color-{{ page.color }})">
         <h1>{{ page.title }}</h1>
-        {% for article in articles %}
-        <a href="{% pageurl article %}">{{ article.title }}</a>
-        {% endfor %}
-    {% endblock maincontent %}
-</div>
+        <div class="article-list">
+            {% for article in articles %}
+                <a href="{% pageurl article %}">{{ article.title }}</a>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock maincontent %}
