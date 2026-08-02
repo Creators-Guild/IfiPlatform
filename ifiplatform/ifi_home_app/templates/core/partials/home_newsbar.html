@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css\styles\neon_style\01_objects\newsbar_layout.css' %}">
-  <link rel="stylesheet" href="{% static 'css\styles\neon_style\02_components\newsbar_item.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles/neon_style/01_objects/newsbar_layout.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/newsbar_item.css' %}">
 {% endblock %}
 
 <div class="newsbar-layout bottom-content">
@@ -13,7 +13,7 @@
                 <img src="{% static 'images/news/' %}{{ item.image_name }}" alt="{{ item.title }}">
             {% else %}
                 <!-- simple placeholder if no image -->
-                <img src="{% static 'images\news\IfiBygg.jpg' %}" alt="{{ item.title }}">
+                <img src="{% static 'images/news/IfiBygg.jpg' %}" alt="{{ item.title }}">
             {% endif %}
             <h3>{{ item.title }}</h3>
             <p>{{ item.description|truncatechars:100 }}</p>

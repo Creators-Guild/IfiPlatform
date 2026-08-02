@@ -4,7 +4,7 @@
 
 {% block title %}Ifi Home{% endblock %}
 
-{% block extra_head %} <link rel="stylesheet" href="{% static "styles\neon_style\ifi_study\flashcards.css" %}"> {% endblock extra_head %}
+{% block extra_head %} <link rel="stylesheet" href="{% static "styles/neon_style/ifi_study/flashcards.css" %}"> {% endblock extra_head %}
 
 {% block content %}
     <a class="back-to" href="{% url 'deck_detail' deck.pk %}">{% trans '<- Back to deck' %}</a>

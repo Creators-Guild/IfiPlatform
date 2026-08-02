@@ -4,17 +4,17 @@
 {% block title %}{{ page.title }}{% endblock %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css\styles\neon_style\home_base.css' %}">
-    <link rel="stylesheet" href="{% static 'css\styles\neon_style\02_components\category_card.css' %}">
-    <link rel="stylesheet" href="{% static 'css\styles\neon_style\02_components\article_body.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/home_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/category_card.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_body.css' %}">
 {% endblock extra_head %}
 
 {% block sidemenu %}
-    {% include "info_articles\partials\article_sidemenu.html" %}
+    {% include "info_articles/partials/article_sidemenu.html" %}
 {% endblock sidemenu %}
 
 {% block maincontent %}
-    {% include "info_articles\partials\article_breadcrumbs.html" %}
+    {% include "info_articles/partials/article_breadcrumbs.html" %}
     <div class="article-page" style="--accent-color: var(--color-{{ page.category.color }})">
         <h1>{{ page.title }}</h1>
 
