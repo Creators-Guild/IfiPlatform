@@ -2,6 +2,7 @@ name: 📚 Documentation
 description: Report missing, outdated, or unclear documentation
 title: "[Docs] "
 labels: ["docs", "task"]
+type: Task
 body:
   - type: markdown
     attributes:

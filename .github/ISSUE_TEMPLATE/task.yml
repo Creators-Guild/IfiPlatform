@@ -2,6 +2,7 @@ name: 🔧 Task
 description: Maintenance, cleanup, tooling or tests (and documentation work, but has its own template)
 title: "[Task] "
 labels: ["task"]
+type: Task
 body:
   - type: markdown
     attributes:

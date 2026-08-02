@@ -2,6 +2,7 @@ name: ✨ Feature Request
 description: Propose new functionality or an improvement
 title: "[Feature] "
 labels: ["feature"]
+type: Feature
 body:
   - type: markdown
     attributes:
