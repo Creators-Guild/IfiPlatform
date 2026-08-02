@@ -1,12 +1,17 @@
-{% load i18n %}
-{% load static %}
+{% load i18n static wagtailcore_tags site_tags %}
 
 <div class="header-bar">
-    <h1 class ='ifiplatform-logo-box'>
-        <a class="ifiplatform-logo" href="{% url 'ifi_home' %}">
-            {% trans "Ifi Platform" %}
-        </a>
-    </h1>
+    <div class="ifiplatform-logo-box">
+        <h1>
+            <a class="ifiplatform-logo" href="{% url 'ifi_home' %}">
+                {% trans "Ifi Platform" %}
+            </a>
+        </h1>
+        {% get_header_message as header_message %}
+        {% if header_message %}
+            <div class="header-message">{{ header_message.text|richtext }}</div>
+        {% endif %}
+    </div>
     <a href="{% url 'ifi_home' %}"
         class="nav_link {% if request.resolver_match.url_name == 'ifi_home' or '/articles/' in request.path %}active{% endif %}">
         {% trans "Ifi Homepage" %}
