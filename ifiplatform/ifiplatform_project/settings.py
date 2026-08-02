@@ -24,8 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret! See README.md #Setup for more information
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+# SECURITY WARNING: keep the secret key used in production secret!
+# See README.md #Setup for more information
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -139,7 +140,7 @@ LANGUAGES = [
 ]
 
 USE_I18N = True  # support for mutiple languages
-USE_L10N = True  # support for formatting things (such as time, dates and numbers) to active language
+USE_L10N = True  # support for formatting dates/times/numbers to active language
 TIME_ZONE = "UTC"
 USE_TZ = True
 

@@ -1,3 +1,5 @@
+"""Models for Wagtail-managed information articles: categories, index and article pages."""
+
 from django.core.validators import RegexValidator
 from django.db import models
 from django.conf import settings
@@ -91,8 +93,11 @@ def article_image_block():
 
 # Current tree: ArticleIndexPage -> ArticleCategory -> ArticlePage
 
+
 # Model for Articles
-class ArticlePage(Page):
+class ArticlePage(Page):  # pylint: disable=too-many-ancestors
+    """A single article page, published under a CategoryPage."""
+
     template = "info_articles/pages/article_page.html"  # custom path
 
     intro = models.CharField(max_length=250, blank=True)
@@ -213,7 +218,11 @@ class ArticlePage(Page):
                                                 min_value=1,
                                                 max_value=10,
                                                 default=1,
-                                                help_text="Relative width compared to the other columns (e.g. 2 is twice as wide as 1).",
+                                                help_text=(
+                                                    "Relative width vs. the "
+                                                    "other columns (e.g. 2 is "
+                                                    "twice as wide as 1)."
+                                                ),
                                             ),
                                         ),
                                     ]
@@ -260,7 +269,9 @@ class ArticlePage(Page):
 
 
 # Model for article category to list articles within category
-class CategoryPage(Page):
+class CategoryPage(Page):  # pylint: disable=too-many-ancestors
+    """A category of articles, optionally shown only during a specific date range."""
+
     template = "info_articles/pages/article_category_page.html"
 
     intro = RichTextField(blank=True)
@@ -314,10 +325,12 @@ class CategoryPage(Page):
 
     @property
     def is_visible(self):
+        """True if this category should currently be shown to visitors."""
         return not self.is_seasonal or self.is_currently_active
 
-    def get_context(self, request):
-        context = super().get_context(request)
+    def get_context(self, request, *args, **kwargs):
+        """Add this category's live articles to the template context."""
+        context = super().get_context(request, *args, **kwargs)
         context["articles"] = (
             ArticlePage.objects.child_of(self).live().order_by("-published_date")
         )
@@ -325,7 +338,9 @@ class CategoryPage(Page):
 
 
 # parent page to list articles categories
-class ArticleIndexPage(Page):
+class ArticleIndexPage(Page):  # pylint: disable=too-many-ancestors
+    """Landing page listing all article categories and suggested articles."""
+
     template = "info_articles/pages/article_index_page.html"  # custom path
 
     intro = RichTextField(blank=True)
@@ -338,8 +353,9 @@ class ArticleIndexPage(Page):
 
     # overriding for extra data
 
-    def get_context(self, request):
-        context = super().get_context(request)
+    def get_context(self, request, *args, **kwargs):
+        """Add main/seasonal categories and suggested articles to the template context."""
+        context = super().get_context(request, *args, **kwargs)
         categories = CategoryPage.objects.child_of(self).live()
         context["main_categories"] = [c for c in categories if not c.is_seasonal]
         context["seasonal_categories"] = [

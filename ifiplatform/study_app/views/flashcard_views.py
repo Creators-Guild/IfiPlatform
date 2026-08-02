@@ -1,11 +1,13 @@
 """Views for flashcard study feature."""
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404, redirect
-from study_app.models import Deck, Card
-from study_app.forms import DeckForm, CardForm
-from django.db import IntegrityError
 from typing import cast  # removes errorlines
+
+from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
+from django.shortcuts import render, get_object_or_404, redirect
+
+from study_app.forms import DeckForm, CardForm
+from study_app.models import Deck, Card
 
 
 @login_required

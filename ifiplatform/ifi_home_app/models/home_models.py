@@ -28,6 +28,8 @@ class IfiTool(models.Model):
 
 # temp item
 class NewsItem(models.Model):
+    """A temporary news item shown on the homepage, until a real news system exists."""
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     image_name = models.CharField(max_length=100, blank=True)  # path to image in static
