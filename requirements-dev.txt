@@ -1,0 +1,16 @@
+-r requirements.txt
+astroid==4.0.4
+black==26.5.1
+click==8.4.1
+colorama==0.4.6
+dill==0.4.1
+isort==8.0.1
+mccabe==0.7.0
+mypy_extensions==1.1.0
+pathspec==1.1.1
+platformdirs==4.10.0
+pylint==4.0.6
+pylint-django==2.8.0
+pylint-plugin-utils==0.9.0
+pytokens==0.4.1
+tomlkit==0.15.1
