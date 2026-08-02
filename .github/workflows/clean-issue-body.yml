@@ -24,7 +24,7 @@ jobs:
             // Matches "### Some Label" followed by "_No response_",
             // with or without a blank line in between
             const cleaned = body
-              .replace(/^###\s+.+\n+_No response_\n+/gm, '')
+              .replace(/^###\s+.+\n+_No response_\n*/gm, '')
               .trimEnd() + '\n';
 
             if (cleaned !== body) {
