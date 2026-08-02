@@ -1,0 +1,46 @@
+{% load i18n static wagtailcore_tags %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/messageboard.css' %}">
+{% endblock %}
+
+{% if board_messages %}
+<div class="messageboard"{% if board_messages|length > 1 %} data-autorotate="true"{% endif %}>
+    {% for msg in board_messages %}
+        <div class="messageboard-slide{% if forloop.first %} active{% endif %}"
+             data-index="{{ forloop.counter0 }}"
+             data-duration="{{ msg.display_seconds }}">
+            <h2>{{ msg.title }}</h2>
+            <p class="messageboard-date">{{ msg.date|date:"d/m/Y" }}</p>
+            <div class="messageboard-body-wrap">
+                <div class="messageboard-body">{{ msg.body|richtext }}</div>
+                <div class="messageboard-scrollbar" aria-hidden="true">
+                    <div class="messageboard-scrollbar-thumb"></div>
+                </div>
+            </div>
+            {% if msg.sender_name %}
+                <p class="messageboard-signature">
+                    -{{ msg.sender_name }}{% if msg.sender_role %},<br>{{ msg.sender_role }}{% endif %}
+                </p>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    {% if board_messages|length > 1 %}
+        <button type="button" class="messageboard-prev" aria-label="{% trans 'Previous message' %}">&larr;</button>
+        <button type="button" class="messageboard-next" aria-label="{% trans 'Next message' %}">&rarr;</button>
+        <div class="messageboard-dots">
+            {% for msg in board_messages %}
+                <button type="button"
+                        class="messageboard-dot{% if forloop.first %} active{% endif %}"
+                        data-index="{{ forloop.counter0 }}"
+                        aria-label="{% blocktrans with n=forloop.counter %}Go to message {{ n }}{% endblocktrans %}"></button>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% block extra_js %}
+  <script src="{% static 'js/messageboard.js' %}" defer></script>
+{% endblock %}

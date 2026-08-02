@@ -8,7 +8,7 @@ from ..dummydata import (
     dummy_studentunions_objects,
     dummy_tools_objects,
 )
-from ..models.home_models import IfiTool, NewsItem, StudentUnion
+from ..models.home_models import HomeBoardMessage, IfiTool, NewsItem, StudentUnion
 
 
 def main_view(request):
@@ -25,11 +25,13 @@ def main_view(request):
     news_items = NewsItem.objects.order_by("-created_at")[:4]
     unions = StudentUnion.objects.all()
     tools = IfiTool.objects.all()
+    board_messages = HomeBoardMessage.objects.filter(is_active=True)
 
     context = {
         "news_items": news_items,
         "unions": unions,
         "tools": tools,
+        "board_messages": board_messages,
         "categories": CategoryPage.objects.live(),
     }
 

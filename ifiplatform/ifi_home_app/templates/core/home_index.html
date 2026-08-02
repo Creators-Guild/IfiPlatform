@@ -10,8 +10,7 @@
     {% block maincontent %}
         <div class="top">
             {% include "core/partials/home_navbar.html" %}
-            <h1>{% trans "Welcome Home:)" %}</h2>
-            <p>{% trans "This is the main content for the Ifi home page." %}</p>
+            {% include "core/partials/home_messageboard.html" %}
         </div>
         <div class="newsbar_container">
             {% include "core/partials/home_newsbar.html" %}
