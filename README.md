@@ -48,6 +48,7 @@ Generate local Secret key and copy generated key and replace 'your-secret-key-he
 ```bash
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
+*Editing remaining. For just development, add SecretKey and leave Debug=True. Ignore the rest*
 
 ### Run website on localhost
 ```bash
