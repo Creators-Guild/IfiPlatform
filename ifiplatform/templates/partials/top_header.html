@@ -1,13 +1,14 @@
 {% load i18n %}
 {% load static %}
+
 <div class="header-bar">
     <h1 class ='ifiplatform-logo-box'>
         <a class="ifiplatform-logo" href="{% url 'ifi_home' %}">
             {% trans "Ifi Platform" %}
         </a>
     </h1>
-    <a href="{% url 'ifi_home' %}" 
-        class="nav_link {% if request.resolver_match.url_name == 'ifi_home' %}active{% endif %}">
+    <a href="{% url 'ifi_home' %}"
+        class="nav_link {% if request.resolver_match.url_name == 'ifi_home' or '/articles/' in request.path %}active{% endif %}">
         {% trans "Ifi Homepage" %}
     </a>
     <a href="{% url 'study_home' %}" 

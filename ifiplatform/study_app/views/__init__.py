@@ -1,4 +1,5 @@
 """Views module for study app."""
+
 from . import flashcard_views
 from . import core_views
 from . import mix_studyset_views

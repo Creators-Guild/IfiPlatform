@@ -1,5 +1,6 @@
 """Dummy data for populating NewsItem objects during development."""
-from ..models.news_models import NewsItem
+
+from ..models.home_models import NewsItem
 
 
 def create(fresh_on_page_load: bool = False):

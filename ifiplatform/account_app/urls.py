@@ -1,4 +1,5 @@
 """URL configuration for the account app."""
+
 from django.urls import path
 from .views import login_views
 from .views import account_views

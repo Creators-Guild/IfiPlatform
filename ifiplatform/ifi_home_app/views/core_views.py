@@ -1,8 +1,14 @@
 """Views for IFI home page."""
+
 from django.shortcuts import render
-from ..models.home_models import *
-from ..models.news_models import NewsItem
-from ..dummydata import *
+from ifi_home_app.models.article_models import CategoryPage
+
+from ..dummydata import (
+    dummy_news_objects,
+    dummy_studentunions_objects,
+    dummy_tools_objects,
+)
+from ..models.home_models import IfiTool, NewsItem, StudentUnion
 
 
 def main_view(request):
@@ -24,10 +30,11 @@ def main_view(request):
         "news_items": news_items,
         "unions": unions,
         "tools": tools,
+        "categories": CategoryPage.objects.live(),
     }
 
     return render(
         request=request,
-        template_name="core/home_main.html",
+        template_name="core/home_index.html",
         context=context,
     )

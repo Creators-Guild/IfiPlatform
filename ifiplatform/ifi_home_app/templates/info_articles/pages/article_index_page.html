@@ -1,0 +1,54 @@
+{% extends "home_base.html" %}
+{% load i18n static wagtailcore_tags wagtailimages_tags %}
+
+{% block title %}Information Articles{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css\styles\neon_style\home_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css\styles\neon_style\02_components\category_card.css' %}">
+{% endblock extra_head %}
+
+{% block sidemenu %}
+    {% include "info_articles\partials\article_sidemenu.html" %}
+{% endblock sidemenu %}
+
+{% block maincontent %}
+    <a class="back-to" href="{% url 'ifi_home' %}"><span aria-hidden="true">←</span> {% trans "Back to Homepage" %}</a>
+    <h1>{{ page.title }}</h1>
+    <div class="intro">{{ page.intro|richtext }}</div>
+
+    <h2 class="section-heading">{% trans "Categories" %}</h2>
+    <div class="category-grid">
+        {% for category in main_categories %}
+            <a class="category-card" href="{% pageurl category %}" style="--accent-color: var(--color-{{ category.color }})">
+                <h2>{{ category.title }}</h2>
+            </a>
+        {% endfor %}
+    </div>
+
+    {% if seasonal_categories %}
+        <h2 class="section-heading">{% trans "Happening now" %}</h2>
+        <div class="category-grid category-grid--seasonal">
+            {% for category in seasonal_categories %}
+                <a class="category-card category-card--seasonal" href="{% pageurl category %}" style="--accent-color: var(--color-{{ category.color }})">
+                    <span class="category-badge">{% trans "Limited time" %}</span>
+                    <h2>{{ category.title }}</h2>
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <hr class="section-divider">
+
+    {% if suggested_articles %}
+        <h2 class="section-heading">{% trans "Suggested Articles" %}</h2>
+        <div class="article-suggestions">
+            {% for article in suggested_articles %}
+                <a class="article-suggestion-card" href="{% pageurl article %}" style="--accent-color: var(--color-{{ article.category.color }})">
+                    <span class="category-label">{{ article.category.title }}</span>
+                    <h3>{{ article.title }}</h3>
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock maincontent %}

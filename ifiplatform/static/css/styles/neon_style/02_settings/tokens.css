@@ -1,0 +1,14 @@
+:root {
+  --color-bg-light: #fffff9;
+  --color-bg-dark: #1f1f1f;
+
+  --color-turq: #0ef7b9;
+  --color-turq-hover: #05b4b7;
+  --color-pink: #f11eb2;
+  --color-purple: #aa43ff;
+  --color-purple-hover: #7b0ed4;
+  --color-black: #120e0e;
+  --color-black-hover: #707070;
+  
+  --color-boxshadow: rgba(0,0,0,0.2);
+}

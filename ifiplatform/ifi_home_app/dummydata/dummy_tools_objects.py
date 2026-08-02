@@ -1,4 +1,5 @@
 """Dummy data for populating IfiTool objects during development."""
+
 from ifi_home_app.models.home_models import IfiTool
 
 

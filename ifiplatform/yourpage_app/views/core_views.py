@@ -1,4 +1,5 @@
 """Views for the user's profile page."""
+
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 

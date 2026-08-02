@@ -4,4 +4,5 @@ from django.apps import AppConfig
 
 class YourPageAppConfig(AppConfig):
     """App configuration for yourpage_app."""
+
     name = "yourpage_app"
