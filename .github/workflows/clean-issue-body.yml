@@ -5,7 +5,7 @@ name: Clean issue form body
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened]
 
 permissions:
   issues: write
