@@ -1,7 +1,6 @@
 -r requirements.txt
 astroid==4.0.4
 black==26.5.1
-click==8.4.1
 colorama==0.4.6
 dill==0.4.1
 isort==8.0.1
