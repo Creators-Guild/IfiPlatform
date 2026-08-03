@@ -1,0 +1,263 @@
+/* --- Tool listing card (article_category_page.html / article_index_page.html) --- */
+/* Tools carry little content (image, title, maybe a maker), so the card leans on a
+   two-color glow + accent rule to read as "featured" among plain category/article cards. */
+
+.tool-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.tool-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 18rem;
+  overflow: hidden;
+  background-color: var(--color-bg-light);
+  border: 2px solid var(--color-black);
+  border-radius: 14px;
+  box-shadow:
+    0 2px 8px var(--color-boxshadow),
+    0 0 0 0 transparent;
+  text-decoration: none;
+  color: var(--color-black);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tool-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--color-pink), var(--color-purple), var(--color-turq));
+}
+
+.tool-card:hover,
+.tool-card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow:
+    0 6px 18px var(--color-boxshadow),
+    0 0 22px rgba(241, 30, 178, 0.3);
+}
+
+.tool-card-image {
+  width: 100%;
+  height: 9rem;
+  object-fit: cover;
+}
+
+.tool-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.tool-card-body h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.tool-card-maker {
+  font-size: 0.75rem;
+  color: var(--color-black-hover);
+}
+
+.tool-card-link-hint {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--color-purple);
+}
+
+/* --- Tool detail page (tool_page.html) --- */
+
+.tool-page {
+  display: flow-root;
+}
+
+.tool-page .article-meta {
+  display: flex;
+  justify-content: center;
+}
+
+.tool-hero {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.tool-hero-image {
+  display: block;
+  width: 100%;
+  height: 18rem;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 2px solid var(--color-black);
+}
+
+.tool-hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(to top, rgba(18, 14, 14, 0.85), rgba(18, 14, 14, 0) 65%);
+}
+
+.tool-hero-overlay h1 {
+  margin: 0;
+  color: var(--color-bg-light);
+  border: none;
+  padding: 0;
+}
+
+.tool-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.tool-made-by {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--color-pink), var(--color-purple));
+  color: var(--color-bg-light);
+  width: fit-content;
+}
+
+.tool-made-by--standalone {
+  margin-top: 0.5rem;
+}
+
+.tool-body {
+  max-width: 42rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.tool-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 1.05rem;
+  font-weight: bold;
+  background: linear-gradient(90deg, var(--color-pink), var(--color-purple));
+  border: 2px solid var(--color-black);
+  box-shadow: 0 3px 0 var(--color-black);
+}
+
+.tool-cta:hover {
+  background: linear-gradient(90deg, var(--color-pink), var(--color-purple));
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.tool-cta:active {
+  box-shadow: 0 1px 0 var(--color-black);
+  transform: translateY(2px);
+}
+
+.tool-preview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  max-width: 60rem;
+  margin: 2rem auto 0;
+}
+
+.tool-preview {
+  flex: 1 1 16rem;
+  max-width: 26rem;
+  margin: 0;
+}
+
+.tool-preview-trigger {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+}
+
+.tool-preview-image {
+  display: block;
+  width: 100%;
+  height: 14rem;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid var(--color-black);
+  box-shadow: 0 4px 14px var(--color-boxshadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tool-preview-trigger:hover .tool-preview-image,
+.tool-preview-trigger:focus-visible .tool-preview-image {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px var(--color-boxshadow);
+}
+
+.tool-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(18, 14, 14, 0.88);
+}
+
+.tool-lightbox[hidden] {
+  display: none;
+}
+
+.tool-lightbox-image {
+  display: block;
+  max-width: 90vw;
+  max-height: 85vh;
+  border-radius: 12px;
+  border: 2px solid var(--color-bg-light);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.tool-lightbox-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  border: 2px solid var(--color-bg-light);
+  background: var(--color-black);
+  color: var(--color-bg-light);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tool-lightbox-close:hover {
+  background: var(--color-pink);
+}
+
+body.tool-lightbox-open {
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .tool-hero-image {
+    height: 12rem;
+  }
+}

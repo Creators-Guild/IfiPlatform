@@ -1,0 +1,117 @@
+{% extends "home_base.html" %}
+{% load i18n static wagtailcore_tags wagtailimages_tags %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/home_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_body.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/union_page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
+{% endblock extra_head %}
+
+{% block sidemenu %}
+    {% include "info_articles/partials/article_sidemenu.html" %}
+{% endblock sidemenu %}
+
+{% block maincontent %}
+    {% include "info_articles/partials/article_breadcrumbs.html" %}
+    <div class="union-page" style="--accent-color: var(--color-purple)">
+        <div class="union-header">
+            {% if page.logo %}
+                {% image page.logo fill-160x160 as logo_img %}
+                <img class="union-logo" src="{{ logo_img.url }}" alt="{{ page.title }}">
+            {% endif %}
+            <div class="union-header-text">
+                <h1>{{ page.title }}</h1>
+                <span class="union-type-badge union-type-badge--{{ page.union_type }}">
+                    {% if page.union_type == "program" %}{% trans "Program-specific" %}{% else %}{% trans "Open to everyone" %}{% endif %}
+                </span>
+            </div>
+        </div>
+
+        {% if needs_translation %}
+            <div class="article-meta">
+                {% include "info_articles/partials/translation_warning.html" %}
+            </div>
+        {% endif %}
+
+        <div class="union-layout">
+            <article class="union-main">
+                {% if page.purpose %}
+                    <h2>{% trans "Purpose" %}</h2>
+                    <div class="prose">{{ page.purpose|richtext }}</div>
+                {% endif %}
+
+                {% if page.activities %}
+                    <h2>{% trans "Activities" %}</h2>
+                    <div class="prose">{{ page.activities|richtext }}</div>
+                {% endif %}
+
+                {% if page.sitting_members %}
+                    <h2>{% trans "Sitting Members" %}</h2>
+                    <div class="union-member-grid">
+                        {% for block in page.sitting_members %}
+                            {% with member=block.value %}
+                                <div class="union-member-card">
+                                    {% if member.picture %}
+                                        {% image member.picture fill-160x160 as member_img %}
+                                        <img class="union-member-picture" src="{{ member_img.url }}" alt="{{ member.name }}">
+                                    {% else %}
+                                        <div class="union-member-picture union-member-picture--placeholder" aria-hidden="true"></div>
+                                    {% endif %}
+                                    <h3>{{ member.name }}</h3>
+                                    <span class="union-member-role">{{ member.role }}</span>
+                                    {% if member.school_email %}
+                                        <a class="union-member-email" href="mailto:{{ member.school_email }}">{{ member.school_email }}</a>
+                                    {% endif %}
+                                </div>
+                            {% endwith %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </article>
+
+            <aside class="union-sidebar">
+                {% if page.email or page.website_url or page.social_links %}
+                    <div class="union-info-box">
+                        <h2>{% trans "Contact" %}</h2>
+                        {% if page.email %}
+                            <a class="union-info-link" href="mailto:{{ page.email }}">{{ page.email }}</a>
+                        {% endif %}
+                        {% if page.website_url %}
+                            <a class="union-info-link" href="{{ page.website_url }}" target="_blank" rel="noopener noreferrer">{% trans "Website" %}</a>
+                        {% endif %}
+                        {% for block in page.social_links %}
+                            {% with platform=block.value.platform %}
+                                <a class="union-info-link" href="{{ block.value.url }}" target="_blank" rel="noopener noreferrer">
+                                    {% if platform == "linkedin" %}LinkedIn{% elif platform == "tiktok" %}TikTok{% else %}{{ platform|title }}{% endif %}
+                                </a>
+                            {% endwith %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if page.member_count_sitting or page.member_count_intern %}
+                    <div class="union-info-box">
+                        <h2>{% trans "Members" %}</h2>
+                        <div class="union-stats">
+                            {% if page.member_count_sitting %}
+                                <div class="union-stat">
+                                    <span class="union-stat-number">{{ page.member_count_sitting }}</span>
+                                    <span class="union-stat-label">{% trans "Sitting" %}</span>
+                                </div>
+                            {% endif %}
+                            {% if page.member_count_intern %}
+                                <div class="union-stat">
+                                    <span class="union-stat-number">{{ page.member_count_intern }}</span>
+                                    <span class="union-stat-label">{% trans "Interns" %}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </aside>
+        </div>
+    </div>
+{% endblock maincontent %}

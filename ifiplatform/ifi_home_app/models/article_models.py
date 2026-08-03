@@ -146,7 +146,7 @@ def _split_categories_by_season(categories):
 # Current tree: ArticleIndexPage -> ArticleCategory -> ArticlePage
 
 
-# Model for Articles
+# Model for Articles (yeah, they are all so f*ing long, don't ask...)
 class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
     """A single article page, published under a CategoryPage."""
 
@@ -364,7 +364,12 @@ class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-a
     ]
 
     parent_page_types = ["ifi_home_app.ArticleIndexPage", "ifi_home_app.CategoryPage"]
-    subpage_types = ["ifi_home_app.ArticlePage", "ifi_home_app.CategoryPage"]
+    subpage_types = [
+        "ifi_home_app.ArticlePage",
+        "ifi_home_app.CategoryPage",
+        "ifi_home_app.StudentUnionCategoryPage",
+        "ifi_home_app.ToolPage",
+    ]
 
     @property
     def is_seasonal(self):
@@ -387,7 +392,7 @@ class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-a
         return not self.is_seasonal or self.is_currently_active
 
     def get_context(self, request, *args, **kwargs):
-        """Add this category's live subcategories and articles to the template context."""
+        """Add this category's live subcategories, union categories and articles to the template context."""
         context = super().get_context(request, *args, **kwargs)
         subcategories = (
             CategoryPage.objects.child_of(self)
@@ -397,11 +402,22 @@ class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-a
         context["main_subcategories"], context["seasonal_subcategories"] = (
             _split_categories_by_season(subcategories)
         )
+        context["union_categories"] = (
+            StudentUnionCategoryPage.objects.child_of(self)
+            .live()
+            .filter(locale=Locale.get_active())
+        )
         context["articles"] = (
             ArticlePage.objects.child_of(self)
             .live()
             .filter(locale=Locale.get_active())
             .order_by("-published_date")
+        )
+        context["tools"] = (
+            ToolPage.objects.child_of(self)
+            .live()
+            .filter(locale=Locale.get_active())
+            .order_by("title")
         )
         return context
 
@@ -418,12 +434,16 @@ class ArticleIndexPage(TranslationWarningMixin, Page):  # pylint: disable=too-ma
         FieldPanel("intro"),
     ]
 
-    subpage_types = ["ifi_home_app.CategoryPage"]
+    subpage_types = [
+        "ifi_home_app.CategoryPage",
+        "ifi_home_app.StudentUnionCategoryPage",
+        "ifi_home_app.ToolPage",
+    ]
 
     # overriding for extra data
 
     def get_context(self, request, *args, **kwargs):
-        """Add main/seasonal categories and suggested articles to the template context."""
+        """Add main/seasonal categories, union categories and suggested articles to the template context."""
         context = super().get_context(request, *args, **kwargs)
         categories = (
             CategoryPage.objects.child_of(self)
@@ -433,10 +453,220 @@ class ArticleIndexPage(TranslationWarningMixin, Page):  # pylint: disable=too-ma
         context["main_categories"], context["seasonal_categories"] = (
             _split_categories_by_season(categories)
         )
+        context["union_categories"] = (
+            StudentUnionCategoryPage.objects.child_of(self)
+            .live()
+            .filter(locale=Locale.get_active())
+        )
         context["suggested_articles"] = (
             ArticlePage.objects.descendant_of(self)
             .live()
             .filter(locale=Locale.get_active())
             .order_by("-published_date")[:4]
         )
+        context["tools"] = (
+            ToolPage.objects.child_of(self)
+            .live()
+            .filter(locale=Locale.get_active())
+            .order_by("title")
+        )
         return context
+
+
+# Model for a student union's own page, published under a StudentUnionCategoryPage
+class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+    """A single student union's page: contact info, purpose, activities and members."""
+
+    template = "info_articles/pages/union_page.html"
+
+    email = models.EmailField(blank=True)
+    logo = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+
+    purpose = RichTextField(blank=True, help_text="What the union is about.")
+    activities = RichTextField(blank=True, help_text="Activities the union offers.")
+
+    TYPE_CHOICES = [
+        ("general", "Open to everyone"),
+        ("program", "Program-specific"),
+    ]
+
+    union_type = models.CharField(
+        max_length=20,
+        choices=TYPE_CHOICES,
+        default="general",
+        help_text="Whether this union is open to everyone or tied to a specific program.",
+    )
+
+    website_url = models.URLField(blank=True)
+
+    SOCIAL_PLATFORM_CHOICES = [
+        ("facebook", "Facebook"),
+        ("instagram", "Instagram"),
+        ("discord", "Discord"),
+        ("linkedin", "LinkedIn"),
+        ("tiktok", "TikTok"),
+        ("other", "Other"),
+    ]
+
+    social_links = StreamField(
+        [
+            (
+                "social_link",
+                blocks.StructBlock(
+                    [
+                        (
+                            "platform",
+                            blocks.ChoiceBlock(choices=SOCIAL_PLATFORM_CHOICES),
+                        ),
+                        ("url", blocks.URLBlock()),
+                    ]
+                ),
+            ),
+        ],
+        use_json_field=True,
+        blank=True,
+    )
+
+    member_count_sitting = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Number of sitting board members. Leave blank to hide.",
+    )
+    member_count_intern = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Number of interns. Leave blank to hide.",
+    )
+
+    sitting_members = StreamField(
+        [
+            (
+                "member",
+                blocks.StructBlock(
+                    [
+                        ("name", blocks.CharBlock()),
+                        (
+                            "role",
+                            blocks.CharBlock(
+                                help_text="Role within the union, e.g. Chair, Treasurer."
+                            ),
+                        ),
+                        (
+                            "school_email",
+                            blocks.EmailBlock(required=False),
+                        ),
+                        ("picture", ImageChooserBlock(required=False)),
+                    ]
+                ),
+            ),
+        ],
+        use_json_field=True,
+        blank=True,
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel("email"),
+        FieldPanel("logo"),
+        FieldPanel("union_type"),
+        FieldPanel("purpose"),
+        FieldPanel("activities"),
+        FieldPanel("website_url"),
+        FieldPanel("social_links"),
+        FieldPanel("member_count_sitting"),
+        FieldPanel("member_count_intern"),
+        FieldPanel("sitting_members"),
+    ]
+
+    parent_page_types = ["ifi_home_app.StudentUnionCategoryPage"]
+    subpage_types = []  # union pages have no children
+
+    @property
+    def union_category(self):
+        """The StudentUnionCategoryPage this union lives under."""
+        return self.get_parent().specific
+
+
+# Model for the category listing all student unions
+class StudentUnionCategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+    """A category page whose only children are student union pages."""
+
+    template = "info_articles/pages/studentunion_category_page.html"
+
+    intro = RichTextField(blank=True)
+
+    content_panels = Page.content_panels + [
+        FieldPanel("intro"),
+    ]
+
+    parent_page_types = ["ifi_home_app.ArticleIndexPage", "ifi_home_app.CategoryPage"]
+    subpage_types = ["ifi_home_app.UnionPage"]
+
+    def get_context(self, request, *args, **kwargs):
+        """Add this category's live student unions to the template context."""
+        context = super().get_context(request, *args, **kwargs)
+        context["unions"] = (
+            UnionPage.objects.child_of(self)
+            .live()
+            .filter(locale=Locale.get_active())
+            .order_by("title")
+        )
+        return context
+
+
+# Model for an ifi-tool's own page (e.g. event calendar, map webpage)
+class ToolPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+    """A single ifi-tool's page: what it is, an image, an optional link and maker."""
+
+    template = "info_articles/pages/tool_page.html"
+
+    description = RichTextField(help_text="What this tool is / what it does.")
+    image = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    image_overlay = models.BooleanField(
+        default=True,
+        help_text=(
+            "Darken the image so the title/maker stay readable when overlaid on it. "
+            "Turn off to show the image plain, with the title below it instead."
+        ),
+    )
+    link = models.URLField(
+        blank=True,
+        help_text="Link to the tool itself, e.g. the calendar or map webpage.",
+    )
+    made_by = models.CharField(
+        max_length=250,
+        blank=True,
+        help_text="Who made this tool, if relevant.",
+    )
+    preview_images = StreamField(
+        [
+            ("image", ImageChooserBlock()),
+        ],
+        use_json_field=True,
+        blank=True,
+        max_num=3,
+        help_text="Up to three screenshots/previews of the tool, shown below the description.",
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel("description"),
+        FieldPanel("image"),
+        FieldPanel("image_overlay"),
+        FieldPanel("link"),
+        FieldPanel("made_by"),
+        FieldPanel("preview_images"),
+    ]
+
+    parent_page_types = ["ifi_home_app.ArticleIndexPage", "ifi_home_app.CategoryPage"]
+    subpage_types = []  # tool pages have no children

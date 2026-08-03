@@ -1,0 +1,217 @@
+/* --- Union listing card (studentunion_category_page.html) --- */
+
+.union-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.union-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  flex: 0 1 14rem;
+  padding: 1.5rem;
+  background-color: var(--color-bg-light);
+  border: 2px solid var(--color-black);
+  border-top: 6px solid var(--accent-color, var(--color-black));
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--color-boxshadow);
+  text-decoration: none;
+  color: var(--color-black);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.union-card:hover,
+.union-card:focus-visible {
+  box-shadow: 0 4px 14px var(--color-boxshadow);
+  transform: translateY(-2px);
+}
+
+.union-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.union-card-logo,
+.union-card-logo--placeholder {
+  width: 5rem;
+  height: 5rem;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 2px solid var(--color-black);
+}
+
+.union-card-logo--placeholder {
+  background-color: var(--color-bg-dark, var(--color-black-hover));
+  opacity: 0.15;
+}
+
+/* --- Union detail page (union_page.html) --- */
+
+.union-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.union-logo {
+  width: 6rem;
+  height: 6rem;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 2px solid var(--color-black);
+  flex-shrink: 0;
+}
+
+.union-header-text h1 {
+  display: inline-block;
+  margin: 0 0 0.5rem;
+  border-bottom: 4px solid var(--accent-color, var(--color-black));
+  padding-bottom: 0.3rem;
+}
+
+.union-type-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background-color: var(--accent-color, var(--color-purple));
+  color: var(--color-bg-light);
+}
+
+.union-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16rem;
+  gap: 2rem;
+  align-items: start;
+  margin-top: 1.5rem;
+}
+
+.union-main h2 {
+  margin-top: 2rem;
+}
+
+.union-main h2:first-child {
+  margin-top: 0;
+}
+
+.union-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.union-info-box {
+  padding: 1.25rem;
+  background-color: var(--color-bg-light);
+  border: 2px solid var(--color-black);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--color-boxshadow);
+}
+
+.union-info-box h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.union-info-link {
+  display: block;
+  color: var(--color-black);
+  text-decoration: underline;
+  margin-bottom: 0.4rem;
+  word-break: break-word;
+}
+
+.union-info-link:last-child {
+  margin-bottom: 0;
+}
+
+.union-stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.union-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.union-stat-number {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: var(--accent-color, var(--color-black));
+}
+
+.union-stat-label {
+  font-size: 0.8rem;
+  color: var(--color-black-hover);
+}
+
+.union-member-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.union-member-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  flex: 0 1 10rem;
+  padding: 1rem;
+  background-color: var(--color-bg-light);
+  border: 2px solid var(--color-black);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--color-boxshadow);
+}
+
+.union-member-card h3 {
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+}
+
+.union-member-picture,
+.union-member-picture--placeholder {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 2px solid var(--color-black);
+}
+
+.union-member-picture--placeholder {
+  background-color: var(--color-bg-dark, var(--color-black-hover));
+  opacity: 0.15;
+}
+
+.union-member-role {
+  font-size: 0.8rem;
+  color: var(--accent-color, var(--color-black));
+  font-weight: bold;
+}
+
+.union-member-email {
+  font-size: 0.75rem;
+  color: var(--color-black-hover);
+  word-break: break-word;
+}
+
+@media (max-width: 720px) {
+  .union-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .union-header {
+    flex-wrap: wrap;
+  }
+}

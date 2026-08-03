@@ -6,6 +6,7 @@
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/home_base.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/category_card.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/tool_page.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
 {% endblock extra_head %}
 
@@ -32,6 +33,11 @@
                 <h2>{{ category.title }}</h2>
             </a>
         {% endfor %}
+        {% for union_category in union_categories %}
+            <a class="category-card" href="{% pageurl union_category %}" style="--accent-color: var(--color-purple)">
+                <h2>{{ union_category.title }}</h2>
+            </a>
+        {% endfor %}
     </div>
 
     {% if seasonal_categories %}
@@ -55,6 +61,29 @@
                 <a class="article-suggestion-card" href="{% pageurl article %}" style="--accent-color: var(--color-{{ article.category.color }})">
                     <span class="category-label">{{ article.category.title }}</span>
                     <h3>{{ article.title }}</h3>
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if tools %}
+        <h2 class="section-heading">{% trans "Tools" %}</h2>
+        <div class="tool-grid">
+            {% for tool in tools %}
+                <a class="tool-card" href="{% pageurl tool %}">
+                    {% if tool.image %}
+                        {% image tool.image fill-512x288 as tool_thumb %}
+                        <img class="tool-card-image" src="{{ tool_thumb.url }}" alt="{{ tool.title }}">
+                    {% endif %}
+                    <div class="tool-card-body">
+                        <h3>{{ tool.title }}</h3>
+                        {% if tool.made_by %}
+                            <span class="tool-card-maker">{% trans "By" %} {{ tool.made_by }}</span>
+                        {% endif %}
+                        {% if tool.link %}
+                            <span class="tool-card-link-hint">{% trans "Open tool" %} ↗</span>
+                        {% endif %}
+                    </div>
                 </a>
             {% endfor %}
         </div>

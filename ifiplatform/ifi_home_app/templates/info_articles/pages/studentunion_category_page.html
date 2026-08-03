@@ -1,0 +1,49 @@
+{% extends "home_base.html" %}
+{% load i18n static wagtailcore_tags wagtailimages_tags %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/home_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/category_card.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/union_page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
+{% endblock extra_head %}
+
+{% block sidemenu %}
+    {% include "info_articles/partials/article_sidemenu.html" %}
+{% endblock sidemenu %}
+
+{% block maincontent %}
+    {% include "info_articles/partials/article_breadcrumbs.html" %}
+    <div class="category-page" style="--accent-color: var(--color-purple)">
+        <h1>{{ page.title }}</h1>
+
+        {% if needs_translation %}
+            <div class="article-meta">
+                {% include "info_articles/partials/translation_warning.html" %}
+            </div>
+        {% endif %}
+
+        {% if page.intro %}
+            <div class="intro">{{ page.intro|richtext }}</div>
+        {% endif %}
+
+        <div class="union-grid">
+            {% for union in unions %}
+                <a class="union-card" href="{% pageurl union %}">
+                    {% if union.logo %}
+                        {% image union.logo fill-256x256 as union_logo %}
+                        <img class="union-card-logo" src="{{ union_logo.url }}" alt="{{ union.title }}">
+                    {% else %}
+                        <div class="union-card-logo union-card-logo--placeholder" aria-hidden="true"></div>
+                    {% endif %}
+                    <h3>{{ union.title }}</h3>
+                    <span class="union-type-badge union-type-badge--{{ union.union_type }}">
+                        {% if union.union_type == "program" %}{% trans "Program-specific" %}{% else %}{% trans "Open to everyone" %}{% endif %}
+                    </span>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock maincontent %}
