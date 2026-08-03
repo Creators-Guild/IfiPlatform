@@ -46,6 +46,8 @@ def translated_page_url(context, locale_code):
     for candidate in candidates:
         translated = candidate.get_translation_or_none(locale)
         if translated is not None:
-            return translated.get_url(request)
+            url = translated.get_url(request)
+            if url is not None:
+                return url
 
     return fallback
