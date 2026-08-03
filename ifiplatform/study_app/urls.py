@@ -1,6 +1,9 @@
 """URL configuration for study app."""
 
+from django.conf import settings
 from django.urls import path
+from django.utils.translation import gettext_lazy as _
+from ifi_home_app.under_development import under_development_urlpatterns
 from .views import flashcard_views
 from .views import multiplechoice_views
 from .views import mix_studyset_views
@@ -51,10 +54,13 @@ studygames_urlpatterns = [
     path("studygames/", mix_studyset_views.menu_view, name="studygames_menu")
 ]
 
-urlpatterns = (
-    study_urlpatterns
-    + flashcard_urlpatterns
-    + multiplechoice_urlpatterns
-    + mix_studyset_urlpatterns
-    + studygames_urlpatterns
-)
+if settings.APPS_UNDER_DEVELOPMENT.get("study_app"):
+    urlpatterns = under_development_urlpatterns("study_home", _("Study"))
+else:
+    urlpatterns = (
+        study_urlpatterns
+        + flashcard_urlpatterns
+        + multiplechoice_urlpatterns
+        + mix_studyset_urlpatterns
+        + studygames_urlpatterns
+    )

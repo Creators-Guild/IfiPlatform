@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-03 14:32+0200\n"
+"POT-Creation-Date: 2026-08-03 21:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -109,17 +109,17 @@ msgid "News"
 msgstr "Nyheter"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:9
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:48
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:44
 msgid "Newsletter"
 msgstr "Nyhetbrev"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:12
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:51
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:47
 msgid "Blog"
 msgstr "Blogg"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:15
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:54
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:50
 msgid "Guest Lectures"
 msgstr "Gjesteforeleserer"
 
@@ -128,42 +128,45 @@ msgstr "Gjesteforeleserer"
 msgid "Info Articles"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:34
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:37
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:50
 #, fuzzy
 #| msgid "Student Organizations"
 msgid "Student Unions"
 msgstr "Student Foreninger"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:38
-msgid "General Info"
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:50
+msgid "No unions or articles yet"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:52
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:59
 msgid "Ifi Tools"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:67
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:72
+msgid "No tools or articles yet"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:80
 msgid "New Student?"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:71
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:84
 #, fuzzy
 #| msgid "Starer Kit"
 msgid "Starter Kit"
 msgstr "Starterpakke"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:74
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:39
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:87
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:41
 msgid "Student Life"
 msgstr "Studentlivet"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:77
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:90
 msgid "Tips n Tricks"
 msgstr "Tips og Triks"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:80
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:93
 msgid "Apps n Links"
 msgstr "Apper og linker"
 
@@ -180,45 +183,49 @@ msgstr "Ifi Plattform"
 msgid "Ifi-Guild of Creators"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:33
-#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:35
-msgid "Academics"
-msgstr ""
-
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:36
-#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:38
-msgid "Practical"
-msgstr ""
-
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:63
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:59
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:20
 msgid "All"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:66
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:62
 msgid "This Month"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:69
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:65
 msgid "Always at Ifi"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:75
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:71
 msgid "hELP"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:78
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:74
 #, fuzzy
 #| msgid "Ifi Platform"
 msgid "Ifi Platform Support"
 msgstr "Ifi Plattform"
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:81
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:77
 msgid "School Reception"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:84
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:80
 msgid "Vaktsentralen"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:28
+msgid "Subcategories"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:39
+#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:38
+msgid "Happening now"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:43
+#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:42
+msgid "Limited time"
 msgstr ""
 
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:17
@@ -231,14 +238,6 @@ msgstr "Ifi Hjemmesiden"
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:28
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:17
 msgid "Categories"
-msgstr ""
-
-#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:38
-msgid "Happening now"
-msgstr ""
-
-#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:42
-msgid "Limited time"
 msgstr ""
 
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:52
@@ -267,6 +266,14 @@ msgstr ""
 
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:32
 msgid "Buddyweek 2026"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:35
+msgid "Academics"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:38
+msgid "Practical"
 msgstr ""
 
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:47
@@ -527,6 +534,10 @@ msgstr "Velkommen til Ifi Hjemmesiden"
 msgid "This is the main menu for study games"
 msgstr "Dette er hovedinnholdet for Ifi hjemmeside"
 
+#: .\study_app\urls.py:58
+msgid "Study"
+msgstr "Studie"
+
 #: .\templates\partials\bottom_header.html:4
 msgid "This webpage was made by Ifi-Creators' Guild"
 msgstr ""
@@ -539,12 +550,20 @@ msgstr "Ifi Hjemmesiden"
 msgid "Ifi Study"
 msgstr "Ifi Studie"
 
-#: .\templates\partials\top_header.html:25
+#: .\templates\partials\top_header.html:25 .\yourpage_app\urls.py:10
 msgid "Your Page"
 msgstr "Din Side"
 
 #: .\templates\partials\top_header.html:29
 msgid "Account"
+msgstr ""
+
+#: .\templates\under_development.html:4 .\templates\under_development.html:13
+msgid "Under Development"
+msgstr ""
+
+#: .\templates\under_development.html:14
+msgid "This section of Ifi Platform is still being built. Check back soon!"
 msgstr ""
 
 #: .\yourpage_app\templates\core\yourpage_main.html:10

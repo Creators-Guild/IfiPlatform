@@ -177,6 +177,13 @@ LOCALE_PATHS = [
     BASE_DIR / "locale",
 ]
 
+# Sections not built yet are shown a placeholder instead of their real
+# views/urls -- see ifi_home_app.under_development.
+APPS_UNDER_DEVELOPMENT = {
+    "study_app": True,
+    "yourpage_app": True,
+}
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
