@@ -24,9 +24,38 @@
             </div>
         {% endif %}
 
-        <div class="article-list">
+        {% if main_subcategories %}
+            <h2 class="section-heading">{% trans "Subcategories" %}</h2>
+            <div class="category-grid">
+                {% for subcategory in main_subcategories %}
+                    <a class="category-card" href="{% pageurl subcategory %}" style="--accent-color: var(--color-{{ subcategory.color }})">
+                        <h2>{{ subcategory.title }}</h2>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if seasonal_subcategories %}
+            <h2 class="section-heading">{% trans "Happening now" %}</h2>
+            <div class="category-grid category-grid--seasonal">
+                {% for subcategory in seasonal_subcategories %}
+                    <a class="category-card category-card--seasonal" href="{% pageurl subcategory %}" style="--accent-color: var(--color-{{ subcategory.color }})">
+                        <span class="category-badge">{% trans "Limited time" %}</span>
+                        <h2>{{ subcategory.title }}</h2>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="article-card-grid">
             {% for article in articles %}
-                <a href="{% pageurl article %}">{{ article.title }}</a>
+                <a class="article-card" href="{% pageurl article %}">
+                    {% if article.hero_image %}
+                        {% image article.hero_image fill-400x250 as article_thumb %}
+                        <img class="article-card-image" src="{{ article_thumb.url }}" alt="{{ article.hero_image_alt|default:article.hero_image.title }}">
+                    {% endif %}
+                    <h3>{{ article.title }}</h3>
+                </a>
             {% endfor %}
         </div>
     </div>

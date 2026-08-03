@@ -136,6 +136,13 @@ def article_image_block():
     )
 
 
+def _split_categories_by_season(categories):
+    """Split live categories into (main, seasonal) lists, seasonal filtered to currently-active ones."""
+    main = [c for c in categories if not c.is_seasonal]
+    seasonal = [c for c in categories if c.is_seasonal and c.is_currently_active]
+    return main, seasonal
+
+
 # Current tree: ArticleIndexPage -> ArticleCategory -> ArticlePage
 
 
@@ -350,8 +357,8 @@ class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-a
         FieldPanel("active_until"),
     ]
 
-    parent_page_types = ["ifi_home_app.ArticleIndexPage"]
-    subpage_types = ["ifi_home_app.ArticlePage"]
+    parent_page_types = ["ifi_home_app.ArticleIndexPage", "ifi_home_app.CategoryPage"]
+    subpage_types = ["ifi_home_app.ArticlePage", "ifi_home_app.CategoryPage"]
 
     @property
     def is_seasonal(self):
@@ -374,8 +381,16 @@ class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-a
         return not self.is_seasonal or self.is_currently_active
 
     def get_context(self, request, *args, **kwargs):
-        """Add this category's live articles to the template context."""
+        """Add this category's live subcategories and articles to the template context."""
         context = super().get_context(request, *args, **kwargs)
+        subcategories = (
+            CategoryPage.objects.child_of(self)
+            .live()
+            .filter(locale=Locale.get_active())
+        )
+        context["main_subcategories"], context["seasonal_subcategories"] = (
+            _split_categories_by_season(subcategories)
+        )
         context["articles"] = (
             ArticlePage.objects.child_of(self)
             .live()
@@ -409,10 +424,9 @@ class ArticleIndexPage(TranslationWarningMixin, Page):  # pylint: disable=too-ma
             .live()
             .filter(locale=Locale.get_active())
         )
-        context["main_categories"] = [c for c in categories if not c.is_seasonal]
-        context["seasonal_categories"] = [
-            c for c in categories if c.is_seasonal and c.is_currently_active
-        ]
+        context["main_categories"], context["seasonal_categories"] = (
+            _split_categories_by_season(categories)
+        )
         context["suggested_articles"] = (
             ArticlePage.objects.descendant_of(self)
             .live()
