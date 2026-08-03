@@ -1,22 +1,28 @@
-{% load i18n %}
-{% load static %}
+{% load i18n static site_tags %}
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/select_language.css' %}">
 {% endblock %}
 
 {% get_current_language as LANGUAGE_CODE %}
+{% translated_page_url 'en' as en_next %}
+{% translated_page_url 'nb' as nb_next %}
 
-<form class="select-language" action="{% url 'set_language' %}" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ request.path }}">
+<div class="select-language">
+    <form action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ en_next }}">
+        <button type="submit" name="language" value="en"
+                class="lang-btn {% if LANGUAGE_CODE == 'en' %}active{% endif %}">
+            English
+        </button>
+    </form>
 
-    <button type="submit" name="language" value="en"
-            class="lang-btn {% if LANGUAGE_CODE == 'en' %}active{% endif %}">
-        English
-    </button>
-
-    <button type="submit" name="language" value="no"
-            class="lang-btn {% if LANGUAGE_CODE == 'no' %}active{% endif %}">
-        Norsk
-    </button>
-</form>
+    <form action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ nb_next }}">
+        <button type="submit" name="language" value="nb"
+                class="lang-btn {% if LANGUAGE_CODE == 'nb' %}active{% endif %}">
+            Norsk
+        </button>
+    </form>
+</div>

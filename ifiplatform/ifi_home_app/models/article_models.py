@@ -4,7 +4,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-from wagtail.models import Page
+from wagtail.models import Locale, Page
 from wagtail.fields import StreamField, RichTextField
 from wagtail.admin.panels import FieldPanel
 from wagtail.images.blocks import ImageChooserBlock
@@ -16,6 +16,51 @@ HEX_COLOR_VALIDATOR = RegexValidator(
     r"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
     "Enter a valid hex color code, e.g. #ff8800 or #f80.",
 )
+
+
+def _get_translation_progress(page):
+    """Returns (total, translated) string-segment counts for the wagtail-localize
+    Translation of `page` into its own locale, or None if there's no such record
+    (e.g. it was never submitted for translation via wagtail-localize)."""
+    try:
+        from wagtail_localize.models import Translation
+    except ImportError:
+        return None
+    translation = (
+        Translation.objects.filter(
+            source__object_id=page.translation_key,
+            target_locale_id=page.locale_id,
+            enabled=True,
+        )
+        .order_by("-created_at")
+        .first()
+    )
+    if translation is None:
+        return None
+    return translation.get_progress()
+
+
+def _page_needs_translation(page):
+    """True if `page` itself is untranslated: either it's still an untouched
+    alias auto-created by locale synchronisation (mirroring another locale's
+    content rather than having its own), or a real translation that
+    wagtail-localize considers incomplete. `alias_of` is unambiguous about
+    which side of a locale pair is the placeholder, unlike comparing text
+    between the two pages."""
+    if page.alias_of_id is not None:
+        return True
+    progress = _get_translation_progress(page)
+    return progress is not None and progress[1] < progress[0]
+
+
+class TranslationWarningMixin:
+    """Adds `needs_translation` to context: True if this specific page is
+    untranslated (an alias placeholder, or an incomplete translation)."""
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context["needs_translation"] = _page_needs_translation(self)
+        return context
 
 
 def article_image_block():
@@ -95,7 +140,7 @@ def article_image_block():
 
 
 # Model for Articles
-class ArticlePage(Page):  # pylint: disable=too-many-ancestors
+class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
     """A single article page, published under a CategoryPage."""
 
     template = "info_articles/pages/article_page.html"  # custom path
@@ -269,7 +314,7 @@ class ArticlePage(Page):  # pylint: disable=too-many-ancestors
 
 
 # Model for article category to list articles within category
-class CategoryPage(Page):  # pylint: disable=too-many-ancestors
+class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
     """A category of articles, optionally shown only during a specific date range."""
 
     template = "info_articles/pages/article_category_page.html"
@@ -332,13 +377,16 @@ class CategoryPage(Page):  # pylint: disable=too-many-ancestors
         """Add this category's live articles to the template context."""
         context = super().get_context(request, *args, **kwargs)
         context["articles"] = (
-            ArticlePage.objects.child_of(self).live().order_by("-published_date")
+            ArticlePage.objects.child_of(self)
+            .live()
+            .filter(locale=Locale.get_active())
+            .order_by("-published_date")
         )
         return context
 
 
 # parent page to list articles categories
-class ArticleIndexPage(Page):  # pylint: disable=too-many-ancestors
+class ArticleIndexPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
     """Landing page listing all article categories and suggested articles."""
 
     template = "info_articles/pages/article_index_page.html"  # custom path
@@ -356,7 +404,11 @@ class ArticleIndexPage(Page):  # pylint: disable=too-many-ancestors
     def get_context(self, request, *args, **kwargs):
         """Add main/seasonal categories and suggested articles to the template context."""
         context = super().get_context(request, *args, **kwargs)
-        categories = CategoryPage.objects.child_of(self).live()
+        categories = (
+            CategoryPage.objects.child_of(self)
+            .live()
+            .filter(locale=Locale.get_active())
+        )
         context["main_categories"] = [c for c in categories if not c.is_seasonal]
         context["seasonal_categories"] = [
             c for c in categories if c.is_seasonal and c.is_currently_active
@@ -364,6 +416,7 @@ class ArticleIndexPage(Page):  # pylint: disable=too-many-ancestors
         context["suggested_articles"] = (
             ArticlePage.objects.descendant_of(self)
             .live()
+            .filter(locale=Locale.get_active())
             .order_by("-published_date")[:4]
         )
         return context

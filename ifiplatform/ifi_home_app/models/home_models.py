@@ -4,6 +4,7 @@ from django.db import models
 from wagtail.admin.panels import FieldPanel
 from wagtail.fields import RichTextField
 from wagtail.snippets.models import register_snippet
+from wagtail.models import TranslatableMixin
 
 
 class StudentUnion(models.Model):
@@ -43,7 +44,7 @@ class NewsItem(models.Model):
 
 
 @register_snippet
-class HomeBoardMessage(models.Model):
+class HomeBoardMessage(TranslatableMixin, models.Model):
     """A rotating message shown in the homepage message board (greetings, promotions, etc.)."""
 
     title = models.CharField(max_length=200)
@@ -82,6 +83,12 @@ class HomeBoardMessage(models.Model):
 
     class Meta:
         ordering = ["order", "pk"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=("translation_key", "locale"),
+                name="unique_translation_key_locale_ifi_home_app_homeboardmessage",
+            )
+        ]
 
     def __str__(self):
         return self.title

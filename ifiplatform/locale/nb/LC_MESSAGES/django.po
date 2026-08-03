@@ -1,0 +1,562 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-03 14:32+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: nb\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .\account_app\templates\core\account_settings.html:14
+#, fuzzy
+#| msgid "Welcome to the Account Page"
+msgid "Welcome to the Account Settings Page"
+msgstr "Velkommen til Konto Hovedside"
+
+#: .\account_app\templates\core\account_settings.html:15
+#, fuzzy
+#| msgid "This is the placeholder for Account."
+msgid "This is the placeholder for Account Settings."
+msgstr "Dette er en midlertidig side for konto"
+
+#: .\account_app\templates\core\account_settings.html:17
+msgid "User"
+msgstr ""
+
+#: .\account_app\templates\core\account_settings.html:20
+msgid "Log out"
+msgstr ""
+
+#: .\account_app\templates\login\login.html:4
+#: .\account_app\templates\login\login.html:13
+#: .\account_app\templates\login\logout.html:4
+#: .\account_app\templates\login\logout.html:13
+msgid "User Login"
+msgstr ""
+
+#: .\account_app\templates\login\login.html:36
+msgid "Log in"
+msgstr ""
+
+#: .\account_app\templates\login\login.html:39
+msgid "New user? Sign in here"
+msgstr ""
+
+#: .\account_app\templates\login\logout.html:14
+msgid "You are now logged out!"
+msgstr ""
+
+#: .\account_app\templates\login\logout.html:16
+msgid "Log in again"
+msgstr ""
+
+#: .\account_app\templates\login\logout.html:17
+msgid "Return to main page"
+msgstr ""
+
+#: .\account_app\templates\login\signin.html:4
+#: .\account_app\templates\login\signin.html:13
+#: .\account_app\templates\login\signin_success.html:4
+#: .\account_app\templates\login\signin_success.html:13
+msgid "User Registration"
+msgstr ""
+
+#: .\account_app\templates\login\signin.html:45
+msgid "Sign In"
+msgstr ""
+
+#: .\account_app\templates\login\signin.html:48
+msgid "Already an user? Log in here"
+msgstr ""
+
+#: .\account_app\templates\login\signin_success.html:14
+msgid "Sign up complete!"
+msgstr ""
+
+#: .\account_app\templates\login\signin_success.html:15
+msgid "Welcome"
+msgstr ""
+
+#: .\account_app\templates\login\signin_success.html:17
+msgid "Go to your account"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:30
+msgid "Previous message"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:31
+msgid "Next message"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:37
+#, python-format
+msgid "Go to message %(n)s"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:5
+msgid "News"
+msgstr "Nyheter"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:9
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:48
+msgid "Newsletter"
+msgstr "Nyhetbrev"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:12
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:51
+msgid "Blog"
+msgstr "Blogg"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:15
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:54
+msgid "Guest Lectures"
+msgstr "Gjesteforeleserer"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:22
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:29
+msgid "Info Articles"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:34
+#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:50
+#, fuzzy
+#| msgid "Student Organizations"
+msgid "Student Unions"
+msgstr "Student Foreninger"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:38
+msgid "General Info"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:52
+msgid "Ifi Tools"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:67
+msgid "New Student?"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:71
+#, fuzzy
+#| msgid "Starer Kit"
+msgid "Starter Kit"
+msgstr "Starterpakke"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:74
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:39
+#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:41
+msgid "Student Life"
+msgstr "Studentlivet"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:77
+msgid "Tips n Tricks"
+msgstr "Tips og Triks"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:80
+msgid "Apps n Links"
+msgstr "Apper og linker"
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:15
+msgid "About"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:18
+#: .\templates\partials\top_header.html:7
+msgid "Ifi Platform"
+msgstr "Ifi Plattform"
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:21
+msgid "Ifi-Guild of Creators"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:33
+#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:35
+msgid "Academics"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:36
+#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:38
+msgid "Practical"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:63
+#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:20
+msgid "All"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:66
+msgid "This Month"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:69
+msgid "Always at Ifi"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:75
+msgid "hELP"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:78
+#, fuzzy
+#| msgid "Ifi Platform"
+msgid "Ifi Platform Support"
+msgstr "Ifi Plattform"
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:81
+msgid "School Reception"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:84
+msgid "Vaktsentralen"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:17
+#: .\ifi_home_app\templates\info_articles\partials\article_breadcrumbs.html:22
+#, fuzzy
+#| msgid "Ifi Homepage"
+msgid "Back to Homepage"
+msgstr "Ifi Hjemmesiden"
+
+#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:28
+#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:17
+msgid "Categories"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:38
+msgid "Happening now"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:42
+msgid "Limited time"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:52
+msgid "Suggested Articles"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\article_page.html:25
+msgid "By"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\article_page.html:28
+msgid "Published"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\article_page.html:31
+msgid "Last edited"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\partials\article_breadcrumbs.html:4
+msgid "Breadcrumb"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\partials\article_breadcrumbs.html:6
+msgid "Back"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:32
+msgid "Buddyweek 2026"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:47
+msgid "Often Asked Questions"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:53
+msgid "IFI Events"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\partials\translation_warning.html:3
+msgid "This page hasn't been translated yet"
+msgstr "Denne siden er ikke oversatt ennå"
+
+#: .\study_app\templates\core\partials\study_sidemenu.html:15
+#: .\study_app\templates\core\study_main.html:21
+#, fuzzy
+#| msgid "Study Home"
+msgid "Studytools"
+msgstr "Studie Hjem"
+
+#: .\study_app\templates\core\partials\study_sidemenu.html:18
+#: .\study_app\templates\core\study_main.html:23
+msgid "Flashcards"
+msgstr ""
+
+#: .\study_app\templates\core\partials\study_sidemenu.html:21
+msgid "Multiplechoice"
+msgstr ""
+
+#: .\study_app\templates\core\study_main.html:17
+msgid "Study Home"
+msgstr "Studie Hjem"
+
+#: .\study_app\templates\core\study_main.html:18
+#, fuzzy
+#| msgid "Here is content for the study section."
+msgid ""
+"Here is content for the study section. This is currently in development..."
+msgstr "Dette er en midletidig side for studieside"
+
+#: .\study_app\templates\core\study_main.html:27
+msgid "Multiple Choice"
+msgstr ""
+
+#: .\study_app\templates\core\study_main.html:31
+#, fuzzy
+#| msgid "Ifi Study"
+msgid "Mix Studyset"
+msgstr "Ifi Studie"
+
+#: .\study_app\templates\core\study_main.html:35
+#, fuzzy
+#| msgid "Study Home"
+msgid "Study Games"
+msgstr "Studie Hjem"
+
+#: .\study_app\templates\core\study_main.html:39
+#, fuzzy
+#| msgid "Ifi Study"
+msgid "Ifi Studycompanion AI"
+msgstr "Ifi Studie"
+
+#: .\study_app\templates\flashcards\core\card_form.html:4
+msgid "Create Card"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\card_form.html:7
+msgid "New card in"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\card_form.html:12
+msgid "Save"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\deck_detail.html:5
+msgid "Deck Details"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\deck_detail.html:11
+msgid "<- Back to Flashcard Menu"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\deck_detail.html:17
+msgid "Start reviewing"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\deck_detail.html:18
+msgid "Add card"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\deck_detail.html:25
+msgid "Are you sure you want to delete this card?"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\deck_detail.html:27
+#: .\study_app\templates\flashcards\partials\deck_list.html:19
+msgid "Delete"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\deck_detail.html:31
+msgid "No cards in this deck."
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\deck_form.html:4
+msgid "Create New Deck"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\deck_form.html:7
+msgid "<- Back to your decks"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\deck_form.html:8
+msgid "Create a new deck"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\deck_form.html:13
+msgid "Save deck"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\menu.html:5
+msgid "Flashcard Menu"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\menu.html:18
+#: .\study_app\templates\mix_studyset\core\menu.html:11
+#: .\study_app\templates\multiplechoice\core\menu.html:11
+#: .\study_app\templates\studygames\core\menu.html:11
+#, fuzzy
+#| msgid "Ifi Study"
+msgid "<- Back to Ifi Study"
+msgstr "Ifi Studie"
+
+#: .\study_app\templates\flashcards\core\menu.html:21
+#, fuzzy
+#| msgid "Welcome to the Your Page"
+msgid "Welcome to the FlashCard Menu"
+msgstr "Velkommen til din side"
+
+#: .\study_app\templates\flashcards\core\menu.html:22
+#, fuzzy
+#| msgid "This is the main content for the Ifi home page."
+msgid "This is the main menu for flashcards"
+msgstr "Dette er hovedinnholdet for Ifi hjemmeside"
+
+#: .\study_app\templates\flashcards\core\review.html:10
+msgid "<- Back to deck"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\review.html:15
+msgid "This deck has no cards."
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\review.html:18
+msgid "Question:"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\review.html:23
+msgid "Card"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\review.html:23
+msgid "of"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\review.html:27
+msgid "Show answer"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\review.html:31
+msgid "Answer:"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\review.html:35
+msgid "I knew it"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\review.html:36
+msgid "I didn’t know"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\review.html:47
+msgid "Previous"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\review.html:57
+msgid "Next"
+msgstr ""
+
+#: .\study_app\templates\flashcards\partials\deck_list.html:2
+#, fuzzy
+#| msgid "Your Page"
+msgid "Your Decks"
+msgstr "Din Side"
+
+#: .\study_app\templates\flashcards\partials\deck_list.html:4
+msgid "Total:"
+msgstr ""
+
+#: .\study_app\templates\flashcards\partials\deck_list.html:10
+msgid "by"
+msgstr ""
+
+#: .\study_app\templates\flashcards\partials\deck_list.html:17
+msgid "Are you sure you want to delete this deck?"
+msgstr ""
+
+#: .\study_app\templates\flashcards\partials\deck_list.html:23
+msgid "No decks found."
+msgstr ""
+
+#: .\study_app\templates\flashcards\partials\deck_list.html:27
+msgid "Create New Deck?"
+msgstr ""
+
+#: .\study_app\templates\mix_studyset\core\menu.html:5
+#, fuzzy
+#| msgid "Ifi Study"
+msgid "Mix Study Menu"
+msgstr "Ifi Studie"
+
+#: .\study_app\templates\mix_studyset\core\menu.html:14
+#, fuzzy
+#| msgid "Welcome to the Ifi Home Page"
+msgid "Welcome to the Mix Studyset Menu"
+msgstr "Velkommen til Ifi Hjemmesiden"
+
+#: .\study_app\templates\mix_studyset\core\menu.html:15
+#: .\study_app\templates\multiplechoice\core\menu.html:15
+#, fuzzy
+#| msgid "This is the main content for the Ifi home page."
+msgid "This is the main menu for mutiple choice"
+msgstr "Dette er hovedinnholdet for Ifi hjemmeside"
+
+#: .\study_app\templates\multiplechoice\core\menu.html:5
+msgid "Mutiple Choice Menu"
+msgstr ""
+
+#: .\study_app\templates\multiplechoice\core\menu.html:14
+#, fuzzy
+#| msgid "Welcome to the Ifi Home Page"
+msgid "Welcome to the Mutiple Choice Menu"
+msgstr "Velkommen til Ifi Hjemmesiden"
+
+#: .\study_app\templates\studygames\core\menu.html:5
+msgid "Study Games Launcher"
+msgstr ""
+
+#: .\study_app\templates\studygames\core\menu.html:14
+#, fuzzy
+#| msgid "Welcome to the Ifi Home Page"
+msgid "Welcome to the Study Games Launcher"
+msgstr "Velkommen til Ifi Hjemmesiden"
+
+#: .\study_app\templates\studygames\core\menu.html:15
+#, fuzzy
+#| msgid "This is the main content for the Ifi home page."
+msgid "This is the main menu for study games"
+msgstr "Dette er hovedinnholdet for Ifi hjemmeside"
+
+#: .\templates\partials\bottom_header.html:4
+msgid "This webpage was made by Ifi-Creators' Guild"
+msgstr ""
+
+#: .\templates\partials\top_header.html:17
+msgid "Ifi Homepage"
+msgstr "Ifi Hjemmesiden"
+
+#: .\templates\partials\top_header.html:21
+msgid "Ifi Study"
+msgstr "Ifi Studie"
+
+#: .\templates\partials\top_header.html:25
+msgid "Your Page"
+msgstr "Din Side"
+
+#: .\templates\partials\top_header.html:29
+msgid "Account"
+msgstr ""
+
+#: .\yourpage_app\templates\core\yourpage_main.html:10
+msgid "Welcome to the Your Page"
+msgstr "Velkommen til din side"
+
+#: .\yourpage_app\templates\core\yourpage_main.html:11
+#, fuzzy
+#| msgid "This is the placeholder for Your Page."
+msgid "This is the placeholder for Your Page. This is an upcoming feature..."
+msgstr "Dette er en midlertidig side for din side"
+
+#: .\yourpage_app\templates\core\yourpage_main.html:12
+msgid "Current user: "
+msgstr ""
