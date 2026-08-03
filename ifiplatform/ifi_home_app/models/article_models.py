@@ -350,11 +350,17 @@ class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-a
     )
     active_until = models.DateField(null=True, blank=True)
 
+    show_in_menu = models.BooleanField(
+        default=False,
+        help_text="Show this category in dropdown/sidemenu navigation.",
+    )
+
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
         FieldPanel("color"),
         FieldPanel("active_from"),
         FieldPanel("active_until"),
+        FieldPanel("show_in_menu"),
     ]
 
     parent_page_types = ["ifi_home_app.ArticleIndexPage", "ifi_home_app.CategoryPage"]

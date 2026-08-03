@@ -1,4 +1,4 @@
-{% load i18n static wagtailcore_tags article_tags%}
+{% load i18n static wagtailcore_tags wagtailimages_tags article_tags%}
 <div class="home-navbar">
     <div class="dropdown-menu">
         <button class="link">
@@ -26,42 +26,55 @@
                 <a class="drop-option" href="{% pageurl category %}">
                     {{ category.title }} <!-- dont use normal translate with wagtail, check out wagtails tranlation instead -->
                 </a>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="dropdown-menu">
-        <button class="link">
-            <a class="drop-option" href="">{% trans "Student Unions" %}</a>
-        </button>
-        <div class="drop-content">
-            <a class="drop-option" href="">
-                {% trans "General Info" %}
-            </a>
-            {% for union in unions %}
-                <a class="drop-option" href="{{union.homepage}}">
-                    <img class= "union-link-img" src="{% static 'images/studentunions/' %}{{union.image_name}}" alt="">
-                    {{union.title}}
-                </a>
             {% empty %}
-                <a class="drop-option-empty" href="">No unions</a>
+                <a class="drop-option-empty" href="">No categories yet</a>
             {% endfor %}
         </div>
     </div>
-    <div class="dropdown-menu">
-        <button class="link">
-            {% trans "Ifi Tools" %}
-        </button>
-        <div class="drop-content">
-            {% for tool in tools %}
-                <a class="drop-option" href="{{tool.link}}">
-                    <img class= "union-link-img" src="{% static 'images/ifi_tools/' %}{{tool.image_name}}" alt="">
-                    {{tool.title}} - {{tool.short_description}}
-                </a>
-            {% empty %}
-                <a class="drop-option-empty" href="">No tools</a>
-            {% endfor %}
-        </div>
-    </div>
+    {% if student_union_cat %}
+        <div class="dropdown-menu">
+                <button class="link">
+                    <a class="drop-option" href="{% pageurl student_union_cat %}">{% trans "Student Unions" %}</a>
+                </button>
+                <div class="drop-content">
+                    {% if student_union_children %}
+                        {% for child in student_union_children %}
+                            <a class="drop-option" href="{% pageurl child %}">
+                                {% if child.hero_image %}
+                                    {% image child.hero_image fill-60x60 as child_thumb %}
+                                    <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.hero_image_alt|default:child.hero_image.title }}">
+                                {% endif %}
+                                {{child.title}}
+                            </a>
+                        {% empty %}
+                            <a class="drop-option-empty" href="">{% trans "No unions or articles yet" %}</a>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    {% if ifi_tools_cat %}
+        <div class="dropdown-menu">
+                <button class="link">
+                    <a class="drop-option" href="{% pageurl ifi_tools_cat %}">{% trans "Ifi Tools" %}</a>
+                </button>
+                <div class="drop-content">
+                    {% if ifi_tools_children %}
+                        {% for child in ifi_tools_children %}
+                            <a class="drop-option" href="{% pageurl child %}">
+                                {% if child.hero_image %}
+                                    {% image child.hero_image fill-60x60 as child_thumb %}
+                                    <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.hero_image_alt|default:child.hero_image.title }}">
+                                {% endif %}
+                                {{child.title}}
+                            </a>
+                        {% empty %}
+                            <a class="drop-option-empty" href="">{% trans "No tools or articles yet" %}</a>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
     <div class="dropdown-menu">
         <button class="link">
             <a class="drop-option" href="">{% trans "New Student?" %}</a>

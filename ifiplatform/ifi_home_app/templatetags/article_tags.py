@@ -15,6 +15,8 @@ def get_article_index():
 
 @register.simple_tag
 def get_categories():
-    """Return all currently visible article categories, for the sidemenu."""
-    categories = CategoryPage.objects.live().filter(locale=Locale.get_active())
+    """Return currently visible categories flagged for menu display, for the sidemenu."""
+    categories = CategoryPage.objects.live().filter(
+        locale=Locale.get_active(), show_in_menu=True
+    )
     return [c for c in categories if c.is_visible]

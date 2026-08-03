@@ -51,7 +51,7 @@
             {% for article in articles %}
                 <a class="article-card" href="{% pageurl article %}">
                     {% if article.hero_image %}
-                        {% image article.hero_image fill-400x250 as article_thumb %}
+                        {% image article.hero_image fill-512x288 as article_thumb %}
                         <img class="article-card-image" src="{{ article_thumb.url }}" alt="{{ article.hero_image_alt|default:article.hero_image.title }}">
                     {% endif %}
                     <h3>{{ article.title }}</h3>
