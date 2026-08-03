@@ -11,6 +11,11 @@
   text-align: right;
 }
 
+.select-language form {
+  display: inline;
+  margin: 0;
+}
+
 .lang-btn {
   background: transparent;
   color: #0be9ae;

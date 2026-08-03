@@ -151,7 +151,7 @@ LANGUAGE_CODE = "en"
 
 LANGUAGES = [
     ("en", "English"),
-    ("no", "Norwegian"),
+    ("nb", "Norwegian Bokmål"),
 ]
 
 USE_I18N = True  # support for mutiple languages
@@ -193,6 +193,6 @@ WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
 WAGTAILLOCALIZE_MACHINE_TRANSLATOR = {
     "CLASS": "wagtail_localize.machine_translators.deepl.DeepLTranslator",
     "OPTIONS": {
-        "AUTH_KEY": "your-deepl-api-key",
+        "AUTH_KEY": os.environ.get("DEEPL_API_KEY"),
     },
 }

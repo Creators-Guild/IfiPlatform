@@ -1,6 +1,7 @@
 """Views for IFI home page."""
 
 from django.shortcuts import render
+from wagtail.models import Locale
 from ifi_home_app.models.article_models import CategoryPage
 
 from ..dummydata import (
@@ -32,7 +33,7 @@ def main_view(request):
         "unions": unions,
         "tools": tools,
         "board_messages": board_messages,
-        "categories": CategoryPage.objects.live(),
+        "categories": CategoryPage.objects.live().filter(locale=Locale.get_active()),
     }
 
     return render(

@@ -6,6 +6,7 @@
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/home_base.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/category_card.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
 {% endblock extra_head %}
 
 {% block sidemenu %}
@@ -16,6 +17,13 @@
     {% include "info_articles/partials/article_breadcrumbs.html" %}
     <div class="category-page" style="--accent-color: var(--color-{{ page.color }})">
         <h1>{{ page.title }}</h1>
+
+        {% if needs_translation %}
+            <div class="article-meta">
+                {% include "info_articles/partials/translation_warning.html" %}
+            </div>
+        {% endif %}
+
         <div class="article-list">
             {% for article in articles %}
                 <a href="{% pageurl article %}">{{ article.title }}</a>
