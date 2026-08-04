@@ -242,6 +242,10 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
     )
     published_date = models.DateField(null=True, blank=True)
+    show_in_newsbar = models.BooleanField(
+        default=True,
+        help_text="Whether this article can be suggested in the homepage newsbar (only relevant for news articles).",
+    )
 
     # allows for mutiple sections of one of these types:
     body = StreamField(
@@ -324,6 +328,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         FieldPanel("hero_image_box_custom_color"),
         FieldPanel("author"),
         FieldPanel("published_date"),
+        FieldPanel("show_in_newsbar"),
         FieldPanel("body"),
     ]
 

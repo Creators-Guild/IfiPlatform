@@ -44,7 +44,7 @@ def main_view(request):
     news_articles = (
         ArticlePage.objects.descendant_of(news_index_page)
         .live()
-        .filter(locale=Locale.get_active())
+        .filter(locale=Locale.get_active(), show_in_newsbar=True)
         .order_by("-published_date")[:12]
         if news_index_page
         else ArticlePage.objects.none()
