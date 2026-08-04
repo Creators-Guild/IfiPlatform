@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/home_base.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/category_card.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/tool_page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/01_objects/newsbar_layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/newsbar_item.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
 {% endblock extra_head %}
 
@@ -53,15 +55,9 @@
             </div>
         {% endif %}
 
-        <div class="article-card-grid">
+        <div class="newsbar-layout">
             {% for article in articles %}
-                <a class="article-card" href="{% pageurl article %}">
-                    {% if article.hero_image %}
-                        {% image article.hero_image fill-512x288 as article_thumb %}
-                        <img class="article-card-image" src="{{ article_thumb.url }}" alt="{{ article.hero_image_alt|default:article.hero_image.title }}">
-                    {% endif %}
-                    <h3>{{ article.title }}</h3>
-                </a>
+                {% include "info_articles/partials/article_card.html" with article=article %}
             {% endfor %}
         </div>
 
