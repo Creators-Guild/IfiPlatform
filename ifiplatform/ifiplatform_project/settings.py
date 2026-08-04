@@ -195,6 +195,17 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# File-based so the cache is shared across gunicorn worker processes --
+# the default LocMemCache is per-process, so e.g. Wagtail's site-root-paths
+# cache could go stale in some workers after a Site/page change until every
+# worker restarted.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": BASE_DIR / "django_cache",
+    }
+}
+
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "/"  # where the user will be redirected when finished logging in
 LOGOUT_REDIRECT_URL = "/"  # where the user will be redirected when finished logging out
