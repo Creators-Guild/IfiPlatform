@@ -21,6 +21,60 @@ Sidemenu hover mdoifer will still enlarge menu */
     flex: 0 0 auto;
 }
 
-.home-layout .maincontent .newsbar_container {
+/* headings live in their own grid row, separate from the card grids below -
+this is what lets the row auto-size to whichever title actually wraps
+(default grid row sizing) without also coupling the card grids' heights */
+.home-layout .maincontent .suggestions-headings {
     flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1rem;
+    align-items: end;
+}
+
+.home-layout .maincontent .suggestions-row {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.home-layout .maincontent .suggestions-row > .newsbar_container,
+.home-layout .maincontent .suggestions-row > .articlesbar_container {
+    flex: 1;
+    min-width: 0;
+}
+
+/* once there's not even room for one full-size card per column side by side,
+stack the two sections (news on top) and cap each to 4 visible cards */
+@media (max-width: 45rem) {
+    /* flatten the headings row and the grids row into .maincontent's own
+    flex-column flow, then reorder so each heading sits right above its own
+    grid (news heading, news grid, articles heading, articles grid) */
+    .home-layout .maincontent .suggestions-headings,
+    .home-layout .maincontent .suggestions-row {
+        display: contents;
+    }
+
+    .home-layout .maincontent .newsbar-heading--news {
+        order: 1;
+    }
+
+    .home-layout .maincontent .suggestions-row > .newsbar_container {
+        order: 2;
+        flex: 0 0 auto;
+    }
+
+    .home-layout .maincontent .newsbar-heading--articles {
+        order: 3;
+    }
+
+    .home-layout .maincontent .suggestions-row > .articlesbar_container {
+        order: 4;
+        flex: 0 0 auto;
+    }
+
+    .home-layout .maincontent .suggestions-row .newsbar-item:nth-child(n + 5) {
+        display: none;
+    }
 }

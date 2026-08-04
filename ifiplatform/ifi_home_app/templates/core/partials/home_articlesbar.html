@@ -1,0 +1,35 @@
+{% load i18n %}
+{% load static wagtailcore_tags wagtailimages_tags %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/styles/neon_style/01_objects/newsbar_layout.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/newsbar_item.css' %}">
+{% endblock %}
+
+<div class="newsbar-layout bottom-content">
+    {% for article in suggested_articles %}
+        <a class="newsbar-item" href="{% pageurl article %}">
+            {% if article.hero_image %}
+                {% image article.hero_image fill-400x250 as article_thumb %}
+                <img src="{{ article_thumb.url }}" alt="{{ article.hero_image_alt|default:article.title }}">
+            {% else %}
+                <!-- simple placeholder if no image -->
+                <img src="{% static 'images/news/IfiBygg.jpg' %}" alt="{{ article.title }}">
+            {% endif %}
+            <h3>{{ article.title }}</h3>
+            {% if article.author or article.published_date %}
+                <div class="newsbar-item-meta">
+                    {% if article.author %}
+                        <span>{{ article.author.get_full_name|default:article.author.username }}</span>
+                    {% endif %}
+                    {% if article.published_date %}
+                        <span>{{ article.published_date }}</span>
+                    {% endif %}
+                </div>
+            {% endif %}
+            <p class="newsbar-item-intro">{{ article.intro|truncatechars:100 }}</p>
+        </a>
+    {% empty %}
+        <p>No articles yet or something is broken ;_;</p>
+    {% endfor %}
+</div>

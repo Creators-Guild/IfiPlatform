@@ -12,8 +12,17 @@
             {% include "core/partials/home_navbar.html" %}
             {% include "core/partials/home_messageboard.html" %}
         </div>
-        <div class="newsbar_container">
-            {% include "core/partials/home_newsbar.html" %}
+        <div class="suggestions-headings">
+            <h2 class="newsbar-heading newsbar-heading--news">{% trans "Suggested News" %}</h2>
+            <h2 class="newsbar-heading newsbar-heading--articles">{% trans "Suggested Info Articles" %}</h2>
+        </div>
+        <div class="suggestions-row">
+            <div class="newsbar_container">
+                {% include "core/partials/home_newsbar.html" %}
+            </div>
+            <div class="articlesbar_container">
+                {% include "core/partials/home_articlesbar.html" %}
+            </div>
         </div>
     {% endblock maincontent %}
 </div>

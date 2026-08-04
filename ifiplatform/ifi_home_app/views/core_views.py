@@ -44,9 +44,18 @@ def main_view(request):
     news_articles = (
         ArticlePage.objects.descendant_of(news_index_page)
         .live()
-        .filter(locale=Locale.get_active())
+        .filter(locale=Locale.get_active(), show_on_homepage=True)
         .order_by("-published_date")[:12]
         if news_index_page
+        else ArticlePage.objects.none()
+    )
+    info_articles_index_page = get_section_index("info_articles")
+    suggested_articles = (
+        ArticlePage.objects.descendant_of(info_articles_index_page)
+        .live()
+        .filter(locale=Locale.get_active(), show_on_homepage=True)
+        .order_by("-published_date")[:12]
+        if info_articles_index_page
         else ArticlePage.objects.none()
     )
     unions = StudentUnion.objects.all()
@@ -73,6 +82,7 @@ def main_view(request):
     context = {
         "news_items": news_items,
         "news_articles": news_articles,
+        "suggested_articles": suggested_articles,
         "unions": unions,
         "tools": tools,
         "board_messages": board_messages,
