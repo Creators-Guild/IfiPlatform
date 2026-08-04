@@ -65,93 +65,10 @@
   margin-top: 0.75rem;
 }
 
-.article-suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 1.25rem;
-}
-
-.article-suggestion-card {
-  display: block;
-  flex: 0 1 16rem;
-  padding: 1rem 1.25rem;
-  background-color: white;
-  border: 2px solid var(--color-black);
-  border-left: 6px solid var(--accent-color, var(--color-black));
-  border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
-  text-decoration: none;
-  color: var(--color-black);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.article-suggestion-card:hover,
-.article-suggestion-card:focus-visible {
-  box-shadow: 0 4px 14px var(--color-boxshadow);
-  transform: translateY(-2px);
-}
-
-.article-suggestion-card .category-label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: bold;
-  color: var(--accent-color, var(--color-black));
-  margin-bottom: 0.35rem;
-}
-
-.article-suggestion-card h3 {
-  margin: 0;
-  font-size: 1rem;
-}
-
 /* accent color carried from a category onto its own page and its articles */
 .category-page h1,
 .article-page h1 {
   display: inline-block;
   border-bottom: 4px solid var(--accent-color, var(--color-black));
   padding-bottom: 0.4rem;
-}
-
-.article-card-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 1.25rem;
-  margin-top: 1.5rem;
-}
-
-.article-card {
-  display: flex;
-  flex-direction: column;
-  flex: 0 1 16rem;
-  overflow: hidden;
-  background-color: white;
-  border: 2px solid var(--color-black);
-  border-top: 6px solid var(--accent-color, var(--color-black));
-  border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
-  text-decoration: none;
-  color: var(--color-black);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.article-card:hover,
-.article-card:focus-visible {
-  box-shadow: 0 4px 14px var(--color-boxshadow);
-  transform: translateY(-2px);
-}
-
-.article-card-image {
-  width: 100%;
-  height: 9rem;
-  object-fit: cover;
-}
-
-.article-card h3 {
-  margin: 0;
-  padding: 1rem 1.25rem;
-  font-size: 1rem;
-  font-weight: bold;
-  color: var(--accent-color, var(--color-black));
 }

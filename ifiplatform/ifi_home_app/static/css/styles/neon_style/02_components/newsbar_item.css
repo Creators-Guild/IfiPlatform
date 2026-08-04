@@ -1,4 +1,4 @@
-.newsbar-item {
+.articlecard {
   display: block;
   margin: 0.1rem;
   padding: 0.5rem;
@@ -12,13 +12,17 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.newsbar-item:hover,
-.newsbar-item:focus-visible {
+.articlecard:hover,
+.articlecard:focus-visible {
   box-shadow: 0 4px 14px var(--color-boxshadow);
   transform: translateY(-2px);
 }
 
-.newsbar-item img {
+.articlecard--category {
+  border-left: 6px solid var(--accent-color, var(--color-black));
+}
+
+.articlecard img {
   height: auto;
   width: 100%;
   display: block;
@@ -26,11 +30,11 @@
   border-radius: 8px;
 }
 
-.newsbar-item h3 {
+.articlecard h3 {
   margin: 0.5rem 0 0.2rem;
 }
 
-.newsbar-item-meta {
+.articlecard-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem 0.75rem;
@@ -39,7 +43,7 @@
   color: var(--color-black-hover);
 }
 
-.newsbar-item-intro {
+.articlecard-intro {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;

@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/home_base.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/category_card.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/tool_page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/01_objects/newsbar_layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/newsbar_item.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
 {% endblock extra_head %}
 
@@ -56,12 +58,9 @@
 
     {% if suggested_articles %}
         <h2 class="section-heading">{% trans "Suggested Articles" %}</h2>
-        <div class="article-suggestions">
+        <div class="newsbar-layout">
             {% for article in suggested_articles %}
-                <a class="article-suggestion-card" href="{% pageurl article %}" style="--accent-color: var(--color-{{ article.category.color }})">
-                    <span class="category-label">{{ article.category.title }}</span>
-                    <h3>{{ article.title }}</h3>
-                </a>
+                {% include "info_articles/partials/article_card.html" with article=article %}
             {% endfor %}
         </div>
     {% endif %}

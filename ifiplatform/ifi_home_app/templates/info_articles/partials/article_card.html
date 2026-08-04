@@ -1,0 +1,26 @@
+{% load i18n static wagtailcore_tags wagtailimages_tags %}
+{% with category=article.category %}
+<a class="articlecard{% if category.category_section == "info_articles" %} articlecard--category{% endif %}"
+   href="{% pageurl article %}"
+   {% if category.category_section == "info_articles" %}style="--accent-color: var(--color-{{ category.color }})"{% endif %}>
+    {% if article.hero_image %}
+        {% image article.hero_image fill-400x250 as article_thumb %}
+        <img src="{{ article_thumb.url }}" alt="{{ article.hero_image_alt|default:article.title }}">
+    {% else %}
+        <!-- simple placeholder if no image -->
+        <img src="{% static 'images/news/IfiBygg.jpg' %}" alt="{{ article.title }}">
+    {% endif %}
+    <h3>{{ article.title }}</h3>
+    {% if article.author or article.published_date %}
+        <div class="articlecard-meta">
+            {% if article.author %}
+                <span>{{ article.author.get_full_name|default:article.author.username }}</span>
+            {% endif %}
+            {% if article.published_date %}
+                <span>{{ article.published_date }}</span>
+            {% endif %}
+        </div>
+    {% endif %}
+    <p class="articlecard-intro">{{ article.intro|truncatechars:100 }}</p>
+</a>
+{% endwith %}
