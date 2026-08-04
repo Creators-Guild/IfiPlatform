@@ -52,7 +52,7 @@
         <ul>
             {% for block in page.body %}
             {% if block.block_type == "heading" %}
-                <li><a href="#{{ block.value|slugify }}">{{ block.value }}</a></li>
+                <li class="toc-{{ block.value.level }}"><a href="#{{ block.value.text|slugify }}">{{ block.value.text }}</a></li>
             {% endif %}
             {% endfor %}
         </ul>
@@ -60,7 +60,11 @@
         <article>
             {% for block in page.body %}
             {% if block.block_type == "heading" %}
-                <h2 id="{{ block.value|slugify }}">{{ block.value }}</h2>
+                {% if block.value.level == "h3" %}
+                    <h3 id="{{ block.value.text|slugify }}">{{ block.value.text }}</h3>
+                {% else %}
+                    <h2 id="{{ block.value.text|slugify }}">{{ block.value.text }}</h2>
+                {% endif %}
 
             {% elif block.block_type == "paragraph" %}
                 <div class="prose">{{ block.value }}</div>
