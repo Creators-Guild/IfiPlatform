@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/newsbar_item.css' %}">
 {% endblock %}
 
+<h2 class="newsbar-heading">{% trans "Suggested News" %}</h2>
 <div class="newsbar-layout bottom-content">
     {% for article in news_articles %}
         <a class="newsbar-item" href="{% pageurl article %}">

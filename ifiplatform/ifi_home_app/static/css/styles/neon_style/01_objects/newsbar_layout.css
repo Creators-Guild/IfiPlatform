@@ -1,3 +1,7 @@
+.newsbar-heading {
+  margin: 1rem 1em 0;
+}
+
 .newsbar-layout {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));    /* fits as many 18rem+ columns as there's room for, wraps/stacks otherwise */

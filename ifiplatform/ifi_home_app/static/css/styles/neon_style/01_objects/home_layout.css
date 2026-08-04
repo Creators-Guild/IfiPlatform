@@ -18,9 +18,9 @@ Sidemenu hover mdoifer will still enlarge menu */
 }
 
 .home-layout .maincontent .top {
-    flex: 1;
+    flex: 0 0 auto;
 }
 
 .home-layout .maincontent .newsbar_container {
-    flex: 1;
+    flex: 0 0 auto;
 }
