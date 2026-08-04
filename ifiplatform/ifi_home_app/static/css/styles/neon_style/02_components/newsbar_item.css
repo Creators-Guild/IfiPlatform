@@ -1,13 +1,12 @@
 .newsbar-item {
   display: block;
-  margin: 1rem;
-  padding: 1rem;
-  max-width: 25rem;
+  margin: 0.1rem;
+  padding: 0.5rem;
+  min-height: 18rem;
   color: inherit;
   text-decoration: none;
-  background-color: var(--color-bg-light);
-  border: 2px solid var(--color-black);
-  border-radius: 12px;
+  background-color: white;
+  border-radius: 3px;
   box-shadow: 0 2px 8px var(--color-boxshadow);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -22,5 +21,28 @@
   height: auto;
   width: 100%;
   display: block;
+  object-fit: cover;
   border-radius: 8px;
+}
+
+.newsbar-item h3 {
+  margin: 0.5rem 0 0.2rem;
+}
+
+.newsbar-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  margin: 0.15rem 0 0.5rem;
+  font-size: 0.8rem;
+  color: var(--color-black-hover);
+}
+
+.newsbar-item-intro {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin: 0;
 }

@@ -15,7 +15,7 @@
   flex: 0 1 14rem;
   min-height: 8rem;
   padding: 1.5rem;
-  background-color: var(--color-bg-light);
+  background-color: white;
   border: 2px solid var(--color-black);
   border-top: 6px solid var(--accent-color, var(--color-black));
   border-radius: 12px;
@@ -76,7 +76,7 @@
   display: block;
   flex: 0 1 16rem;
   padding: 1rem 1.25rem;
-  background-color: var(--color-bg-light);
+  background-color: white;
   border: 2px solid var(--color-black);
   border-left: 6px solid var(--accent-color, var(--color-black));
   border-radius: 12px;
@@ -126,7 +126,7 @@
   flex-direction: column;
   flex: 0 1 16rem;
   overflow: hidden;
-  background-color: var(--color-bg-light);
+  background-color: white;
   border: 2px solid var(--color-black);
   border-top: 6px solid var(--accent-color, var(--color-black));
   border-radius: 12px;

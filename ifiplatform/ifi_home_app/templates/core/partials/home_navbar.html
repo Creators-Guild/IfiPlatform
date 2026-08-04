@@ -41,9 +41,9 @@
                     {% if student_union_children %}
                         {% for child in student_union_children %}
                             <a class="drop-option" href="{% pageurl child %}">
-                                {% if child.hero_image %}
-                                    {% image child.hero_image fill-60x60 as child_thumb %}
-                                    <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.hero_image_alt|default:child.hero_image.title }}">
+                                {% if child.logo %}
+                                    {% image child.logo fill-60x60 as child_thumb %}
+                                    <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.title }}">
                                 {% endif %}
                                 {{child.title}}
                             </a>
@@ -63,9 +63,12 @@
                     {% if ifi_tools_children %}
                         {% for child in ifi_tools_children %}
                             <a class="drop-option" href="{% pageurl child %}">
-                                {% if child.hero_image %}
+                                {% if child.image %}
+                                    {% image child.image fill-60x60 as child_thumb %}
+                                    <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.title }}">
+                                {% elif child.hero_image %}
                                     {% image child.hero_image fill-60x60 as child_thumb %}
-                                    <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.hero_image_alt|default:child.hero_image.title }}">
+                                    <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.title }}">
                                 {% endif %}
                                 {{child.title}}
                             </a>

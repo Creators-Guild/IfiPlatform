@@ -1,11 +1,9 @@
 .newsbar-layout {
   display: grid;
-  grid-auto-flow: column;      /* put items in columns (one row) */
-  grid-auto-columns: minmax(15rem, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));    /* fits as many 18rem+ columns as there's room for, wraps/stacks otherwise */
 
   gap: 1rem;
   margin: 0%;
   padding: 0.5em 1em;
   box-sizing: border-box;
-  overflow-x: auto;
 }

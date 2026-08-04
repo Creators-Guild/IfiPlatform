@@ -17,7 +17,17 @@
                 <img src="{% static 'images/news/IfiBygg.jpg' %}" alt="{{ article.title }}">
             {% endif %}
             <h3>{{ article.title }}</h3>
-            <p>{{ article.intro|truncatechars:100 }}</p>
+            {% if article.author or article.published_date %}
+                <div class="newsbar-item-meta">
+                    {% if article.author %}
+                        <span>{{ article.author.get_full_name|default:article.author.username }}</span>
+                    {% endif %}
+                    {% if article.published_date %}
+                        <span>{{ article.published_date }}</span>
+                    {% endif %}
+                </div>
+            {% endif %}
+            <p class="newsbar-item-intro">{{ article.intro|truncatechars:100 }}</p>
         </a>
     {% empty %}
         <p>No news yet or something is broken ;_;</p>

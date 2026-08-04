@@ -2,7 +2,12 @@
 
 from django.shortcuts import render
 from wagtail.models import Locale
-from ifi_home_app.models.article_models import ArticlePage, CategoryPage, get_section_index
+from ifi_home_app.models.article_models import (
+    ArticlePage,
+    CategoryPage,
+    StudentUnionCategoryPage,
+    get_section_index,
+)
 
 from ..dummydata import (
     dummy_news_objects,
@@ -12,11 +17,11 @@ from ..dummydata import (
 from ..models.home_models import HomeBoardMessage, IfiTool, NewsItem, StudentUnion
 
 
-def _get_localized_category(slug, language_code):
-    """Look up a CategoryPage by a fixed slug/locale, then resolve it to the
+def _get_localized_category(slug, language_code, model=CategoryPage):
+    """Look up a `model` page by a fixed slug/locale, then resolve it to the
     visitor's active locale (falling back to the anchor locale if untranslated)."""
     category = (
-        CategoryPage.objects.live()
+        model.objects.live()
         .filter(slug=slug, locale=Locale.objects.get(language_code=language_code))
         .first()
     )
@@ -40,7 +45,7 @@ def main_view(request):
         ArticlePage.objects.descendant_of(news_index_page)
         .live()
         .filter(locale=Locale.get_active())
-        .order_by("-published_date")[:4]
+        .order_by("-published_date")[:12]
         if news_index_page
         else ArticlePage.objects.none()
     )
@@ -49,7 +54,9 @@ def main_view(request):
     board_messages = HomeBoardMessage.objects.filter(is_active=True)
     categories = CategoryPage.objects.live().filter(locale=Locale.get_active(), show_in_menu=True) 
     
-    student_union_category = _get_localized_category("studentforeninger", "nb")
+    student_union_category = _get_localized_category(
+        "studentforeninger", "nb", model=StudentUnionCategoryPage
+    )
     student_union_children = (
         student_union_category.get_children().live().specific()
         if student_union_category

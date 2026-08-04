@@ -16,7 +16,7 @@
   flex-direction: column;
   flex: 0 1 18rem;
   overflow: hidden;
-  background-color: var(--color-bg-light);
+  background-color: white;
   border: 2px solid var(--color-black);
   border-radius: 14px;
   box-shadow:
