@@ -187,13 +187,24 @@ APPS_UNDER_DEVELOPMENT = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Media files (user uploads, e.g. Wagtail images)
-MEDIA_URL = "media/"
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# File-based so the cache is shared across gunicorn worker processes --
+# the default LocMemCache is per-process, so e.g. Wagtail's site-root-paths
+# cache could go stale in some workers after a Site/page change until every
+# worker restarted.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": BASE_DIR / "django_cache",
+    }
+}
 
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "/"  # where the user will be redirected when finished logging in

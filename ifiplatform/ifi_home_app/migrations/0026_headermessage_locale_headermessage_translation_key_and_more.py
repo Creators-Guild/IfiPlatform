@@ -5,6 +5,22 @@ import uuid
 from django.db import migrations, models
 
 
+def assign_unique_translation_keys(apps, schema_editor):
+    # AddField only calls a callable default once and reuses that value for
+    # every existing row, so HeaderMessage/HomeBoardMessage rows all end up
+    # sharing one translation_key. Give each existing row its own UUID
+    # before the unique_together/UniqueConstraint below is applied.
+    HeaderMessage = apps.get_model("ifi_home_app", "HeaderMessage")
+    for message in HeaderMessage.objects.all():
+        message.translation_key = uuid.uuid4()
+        message.save(update_fields=["translation_key"])
+
+    HomeBoardMessage = apps.get_model("ifi_home_app", "HomeBoardMessage")
+    for message in HomeBoardMessage.objects.all():
+        message.translation_key = uuid.uuid4()
+        message.save(update_fields=["translation_key"])
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -48,6 +64,9 @@ class Migration(migrations.Migration):
             model_name="homeboardmessage",
             name="translation_key",
             field=models.UUIDField(default=uuid.uuid4, editable=False),
+        ),
+        migrations.RunPython(
+            assign_unique_translation_keys, migrations.RunPython.noop
         ),
         migrations.AlterUniqueTogether(
             name="headermessage",
