@@ -2,7 +2,7 @@
 
 from django.shortcuts import render
 from wagtail.models import Locale
-from ifi_home_app.models.article_models import CategoryPage
+from ifi_home_app.models.article_models import ArticlePage, CategoryPage, get_section_index
 
 from ..dummydata import (
     dummy_news_objects,
@@ -35,6 +35,15 @@ def main_view(request):
 
     # create context
     news_items = NewsItem.objects.order_by("-created_at")[:4]
+    news_index_page = get_section_index("news")
+    news_articles = (
+        ArticlePage.objects.descendant_of(news_index_page)
+        .live()
+        .filter(locale=Locale.get_active())
+        .order_by("-published_date")[:4]
+        if news_index_page
+        else ArticlePage.objects.none()
+    )
     unions = StudentUnion.objects.all()
     tools = IfiTool.objects.all()
     board_messages = HomeBoardMessage.objects.filter(is_active=True)
@@ -56,6 +65,7 @@ def main_view(request):
 
     context = {
         "news_items": news_items,
+        "news_articles": news_articles,
         "unions": unions,
         "tools": tools,
         "board_messages": board_messages,

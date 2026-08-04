@@ -1,6 +1,8 @@
 {% load static i18n article_tags wagtailcore_tags %}
 {% get_categories as categories %}
 {% get_article_index as article_index_page %}
+{% get_news_categories as news_categories %}
+{% get_news_index as news_index_page %}
 
 <!-- to avoid mutiple loads of the same css if partial is used mutiple times -->
 {% block extra_css %}
@@ -29,29 +31,16 @@
     </div>
 
     <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="">{% trans "Buddyweek 2026" %}</a>
+        <a class="sidemenu-option" href="{% pageurl news_index_page %}">{% trans "News" %}</a>
         <div class="drop-content">
-            <a href="">
-                {% trans "Academics" %}
+            <a href="{% pageurl news_index_page %}">
+                {% trans "All" %}
             </a>
-            <a href="">
-                {% trans "Practical" %}
-            </a>
-            <a href="">
-                {% trans "Student Life" %}
-            </a>
-        </div>
-    </div>
-
-    <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="">{% trans "Often Asked Questions" %}</a>
-        <div class="drop-content">
-            <a href="">
-                {% trans "Student Unions" %}
-            </a>
-            <a href="">
-                {% trans "IFI Events" %}
-            </a>
+            {% for category in news_categories %}
+                <a href="{% pageurl category %}">
+                    {{category.title}}
+                </a>
+            {% endfor %}
         </div>
     </div>
 

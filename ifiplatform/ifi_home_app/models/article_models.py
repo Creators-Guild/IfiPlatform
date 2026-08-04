@@ -143,6 +143,24 @@ def _split_categories_by_season(categories):
     return main, seasonal
 
 
+def get_section_index(section):
+    """The site's live ArticleIndexPage for `section` ('info_articles' or 'news'),
+    in the active locale."""
+    return (
+        ArticleIndexPage.objects.live()
+        .filter(locale=Locale.get_active(), section=section)
+        .first()
+    )
+
+
+def get_section_categories(section):
+    """Currently visible categories in `section` flagged for menu display."""
+    categories = CategoryPage.objects.live().filter(
+        locale=Locale.get_active(), show_in_menu=True
+    )
+    return [c for c in categories if c.is_visible and c.category_section == section]
+
+
 # Current tree: ArticleIndexPage -> ArticleCategory -> ArticlePage
 
 
@@ -391,6 +409,14 @@ class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-a
         """True if this category should currently be shown to visitors."""
         return not self.is_seasonal or self.is_currently_active
 
+    @property
+    def category_section(self):
+        """This category's section ('info_articles' or 'news'), inherited from
+        the nearest ArticleIndexPage ancestor (categories can nest under other
+        categories, so this isn't always the immediate parent)."""
+        nearest_index = self.get_ancestors().type(ArticleIndexPage).specific().last()
+        return nearest_index.section if nearest_index else None
+
     def get_context(self, request, *args, **kwargs):
         """Add this category's live subcategories, union categories and articles to the template context."""
         context = super().get_context(request, *args, **kwargs)
@@ -430,11 +456,32 @@ class ArticleIndexPage(TranslationWarningMixin, Page):  # pylint: disable=too-ma
 
     intro = RichTextField(blank=True)
 
+    SECTION_CHOICES = [
+        ("info_articles", "Info articles"),
+        ("news", "News"),
+        ("hub", "Hub (structural only, not a content section itself)"),
+    ]
+
+    section = models.CharField(
+        max_length=20,
+        choices=SECTION_CHOICES,
+        default="info_articles",
+        help_text=(
+            "Which part of the site this index (and the categories under it) "
+            "belongs to - used to keep e.g. news categories out of the info-articles "
+            "sidemenu, and vice versa. Use 'Hub' for a purely structural index "
+            "whose children are other index pages (e.g. the top-level page holding "
+            "both the info-articles and news indexes)."
+        ),
+    )
+
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
+        FieldPanel("section"),
     ]
 
     subpage_types = [
+        "ifi_home_app.ArticleIndexPage",
         "ifi_home_app.CategoryPage",
         "ifi_home_app.StudentUnionCategoryPage",
         "ifi_home_app.ToolPage",
