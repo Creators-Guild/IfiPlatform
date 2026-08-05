@@ -38,3 +38,22 @@
   color: #1f1f1f;
   font-weight: bold;
 }
+
+/* this never shrank at any breakpoint before -- at extreme zoom the
+   buttons (font: inherit, no cap) eventually become individually wider
+   than the effective viewport, which wrapping alone can't fix since each
+   is one unbreakable inline-block token */
+@media (max-width: 700px) {
+  .lang-btn {
+    padding: 2px 6px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lang-btn {
+    padding: 1px 5px;
+    margin-left: 4px;
+    font-size: 11px;
+  }
+}

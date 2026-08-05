@@ -110,8 +110,14 @@
    desktop hover panel and end up oversized and spaced-out on a small
    screen -- tighten both so more of the menu is visible at once */
 @media (max-width: 480px) {
+    .sidemenu {
+        width: 40px;
+        padding: 0.5rem;
+    }
+
     .sidemenu:hover {
         width: 200px;
+        padding: 0.5rem;
     }
 
     .sidemenu-item {
