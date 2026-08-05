@@ -12,7 +12,7 @@ Note: the site is bilingual (Norwegian Bokmål + English) via wagtail-localize �
 
 ## Tools and Languages
 1. Framework: Django + Wagtail (CMS layer — pages, articles, categories, admin editing)
-2. Languages: Python, HTML and CSS
+2. Languages: Python, HTML and CSS (and JavaScript. I know, I'm sorry;_;)
 3. Key dependencies: wagtail-localize (nb/en translation)
 4. Requirements:
     - Python
