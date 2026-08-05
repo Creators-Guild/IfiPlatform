@@ -21,7 +21,20 @@
    others each on their own line) instead of staying together */
 .nav_links {
   display: flex;
-  flex: 0 0 auto; /* at normal size, stay sized to content -- hug the right, don't stretch */
+  /* shrink:1 (not 0) as a last-resort safety net: if compact mode hasn't
+     kicked in yet for any reason (JS not run yet, a gap in the detection
+     logic, ...), this can still shrink and let its own overflow-x:auto
+     scroll internally, rather than rigidly refusing to shrink and
+     overflowing the whole page instead. */
+  flex: 0 1 auto; /* at normal size, stay sized to content -- hug the right, don't stretch */
+  /* flex items default to min-width:auto (not 0), which stops them
+     shrinking below their content's natural min size -- since .nav_link
+     children are flex-shrink:0 + white-space:nowrap, that natural size is
+     the full sum of all four links, so without this override,
+     overflow-x:auto below never actually gets a chance to kick in: the
+     box itself never shrinks small enough to need it, so it just stays
+     wide and pushes .header-bar (and the whole page) out with it. */
+  min-width: 0;
   flex-wrap: nowrap;
   align-items: center;
   margin-left: auto;

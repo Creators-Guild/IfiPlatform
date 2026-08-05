@@ -12,6 +12,13 @@ Sidemenu hover mdoifer will still enlarge menu */
 
 .home-layout .maincontent {
     flex: 1;
+    /* flex items default to min-width:auto (not 0), which stops them
+       shrinking below their content's natural min size. sidemenu_container
+       is flex-shrink:0 and grows further on hover, so maincontent is the
+       one that's supposed to give up the width -- without this it can't
+       shrink past its content's own minimum, and the whole .home-layout
+       row overflows the viewport instead. */
+    min-width: 0;
     display: flex;
     flex-direction: column;
     padding: 1rem 2rem;
@@ -76,5 +83,11 @@ stack the two sections (news on top) and cap each to 4 visible cards */
 
     .home-layout .maincontent .suggestions-row .newsbar-item:nth-child(n + 5) {
         display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .home-layout .maincontent {
+        padding: 0.75rem 0.75rem;
     }
 }

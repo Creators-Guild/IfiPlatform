@@ -4,10 +4,28 @@
 
 .newsbar-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));    /* fits as many 18rem+ columns as there's room for, wraps/stacks otherwise */
+  /* fits as many columns as there's room for, wraps/stacks otherwise.
+     minmax()'s minimum is a hard floor for grid tracks -- wrapping
+     min(13rem, 100%) means that floor can never exceed the available
+     width, so the grid can't force the whole page to overflow
+     horizontally on a narrow screen the way a bare 13rem minimum would. */
+  grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
 
   gap: 1rem;
   margin: 0%;
   padding: 0.5em 1em;
   box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .newsbar-heading {
+    margin: 0.75rem 0.5rem 0;
+    font-size: 1.25rem;
+  }
+
+  .newsbar-layout {
+    grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
+    gap: 0.5rem;
+    padding: 0.35rem 0.5rem;
+  }
 }
