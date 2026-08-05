@@ -48,11 +48,20 @@
             </figure>
         {% endif %}
 
-        <nav class="table_of_content">
-        <ul>
+        <div class="article-layout">
+        <nav class="table_of_content" id="table-of-content">
+        <div class="table_of_content-header">
+            <p class="table_of_content-label">{% trans "On this page" %}</p>
+            <button type="button" class="table_of_content-toggle"
+                    aria-expanded="true" aria-controls="table-of-content-list"
+                    data-show-text="{% trans 'Show' %}" data-hide-text="{% trans 'Hide' %}">
+                {% trans "Hide" %}
+            </button>
+        </div>
+        <ul id="table-of-content-list">
             {% for block in page.body %}
             {% if block.block_type == "heading" %}
-                <li><a href="#{{ block.value|slugify }}">{{ block.value }}</a></li>
+                <li class="toc-{{ block.value.level }}"><a href="#{{ block.value.text|slugify }}">{{ block.value.text }}</a></li>
             {% endif %}
             {% endfor %}
         </ul>
@@ -60,7 +69,11 @@
         <article>
             {% for block in page.body %}
             {% if block.block_type == "heading" %}
-                <h2 id="{{ block.value|slugify }}">{{ block.value }}</h2>
+                {% if block.value.level == "h3" %}
+                    <h3 id="{{ block.value.text|slugify }}">{{ block.value.text }}</h3>
+                {% else %}
+                    <h2 id="{{ block.value.text|slugify }}">{{ block.value.text }}</h2>
+                {% endif %}
 
             {% elif block.block_type == "paragraph" %}
                 <div class="prose">{{ block.value }}</div>
@@ -87,5 +100,7 @@
 
             {% endfor %}
         </article>
+        </div>
     </div>
+    <script src="{% static 'js/table_of_content.js' %}" defer></script>
 {% endblock maincontent %}

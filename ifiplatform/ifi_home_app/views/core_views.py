@@ -60,7 +60,9 @@ def main_view(request):
     )
     unions = StudentUnion.objects.all()
     tools = IfiTool.objects.all()
-    board_messages = HomeBoardMessage.objects.filter(is_active=True)
+    board_messages = HomeBoardMessage.objects.filter(
+        is_active=True, locale=Locale.get_active()
+    )
     categories = CategoryPage.objects.live().filter(locale=Locale.get_active(), show_in_menu=True) 
     
     student_union_category = _get_localized_category(

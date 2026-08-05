@@ -8,16 +8,23 @@ Goals:
 - A growing student library with study-resources made by IFI-students with main focus on IFI-subjects (based on IFI curriculum) and reuse
 - A collection of study tools to build and represent study-resources (ex. flashcards, multiple choice, mock exam etc.)
 
+Note: the site is bilingual (Norwegian Bokmål + English) via wagtail-localize — new content pages generally need both locales.
+
 ## Tools and Languages
-1. Framework: Django
+1. Framework: Django + Wagtail (CMS layer — pages, articles, categories, admin editing)
 2. Languages: Python, HTML and CSS
-3. Requirements:
+3. Key dependencies: wagtail-localize (nb/en translation)
+4. Requirements:
     - Python
       - Minimum 3.12
       - Supported and tested on 3.12, 3.13, 3.14
     - SQLite (default, via Django)
 
 ## Setup
+> **A note on file paths below:** "repo root" means the top-level folder you get from cloning (likely named `IfiPlatform`). 
+
+>Steps also reference the `ifiplatform/` subdirectory inside it (likely named `ifiplatform`, lowercase (*not to be confused with `ifiplatform/ifiplatform_project/`, which is just the Django settings package*) — that's where manage.py, `.env` and all the Django apps actually live. Steps say which one they're relative to.
+
 ### Set up Virtual Environment
 #### Windows (PowerShell)
 ```bash
@@ -29,14 +36,21 @@ venv\Scripts\Activate.ps1
 python3 -m venv venv
 source venv/bin/activate
 ```
-#### Or through Visual Studio COde
+#### Or through Visual Studio Code
 Run this command from the Command Palette:
 ```bash
 Python: Create Environment
 ```
 ### Install dependencies
+Run from the repo root:
 ```bash
-pip install -r <path to requirements.txt>
+pip install -r requirements.txt
+```
+
+### Move into the ifiplatform/ folder
+manage.py, `.env` and all the Django apps live in `ifiplatform/`. Every command from here on assumes you're inside it:
+```bash
+cd ifiplatform
 ```
 
 ### Create .env for Secrets
@@ -48,42 +62,89 @@ Generate local Secret key and copy generated key and replace 'your-secret-key-he
 ```bash
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
-*Editing remaining. For just development, add SecretKey and leave Debug=True. Ignore the rest*
+*Editing remaining if necessary. For just development, add SecretKey and leave Debug=True. Ignore the rest*
+
+### Run Migrations
+```bash
+py manage.py migrate
+```
+
+### Fill database with dummy data(recommended)
+```bash
+py manage.py seed_dev_data
+```
+Fills your local database with a dummy article tree (index pages, categories, a test article, a test student union and a test tool) so you're not starting from a blank site. Safe to re-run — it skips anything that already exists instead of duplicating it.
 
 ### Run website on localhost
 ```bash
-py <path to manage.py> runserver
+py manage.py runserver
 ```
 Once running, open your browser and go to:
 ```
 http://localhost:8000
 ```
 
-## Project Structure (coming)
+### Often used commands and actions
+#### If you change a model (i.e. need a new migration)
+```bash
+py manage.py makemigrations
+py manage.py migrate
+```
+#### To create superuser/admin user
+```bash
+py manage.py createsuperuser
+```
+Fill out the terminal's questions
+#### Running tests
+```bash
+py manage.py test
+```
+CI runs this on every push/PR (`.github/workflows/django.yml`) across Python 3.12–3.14, so it's worth running locally before opening a PR.
+#### Log in on admin interface or wagtail-admin interface
+Log in via a superuser you have created.
+```
+http://localhost:8000/admin
+```
+Django's own admin — user accounts, permissions, raw model tables.
+```
+http://localhost:8000/wagtail-admin
+```
+Wagtail's CMS admin — this is where you edit articles, categories and their index pages.
+- Highly recommend filling the database with seed data first (see above) so you can see the real page structure.
+
+## Project Structure
 ```
 IfiPlatform/
-├── manage.py
 ├── requirements.txt
-├── <app_name>/
-│   ├── models.py
-│   ├── views.py
-│   └── templates/
-└── README.md
+├── docs/                     # architecture & design references
+├── CONTRIBUTING.md
+├── LICENSE
+└── ifiplatform/              # the actual Django project
+    ├── manage.py
+    ├── .env                  # secrets
+    ├── ifiplatform_project/  # settings, urls
+    ├── ifi_home_app/         # articles, categories, homepage
+    ├── study_app/
+    ├── account_app/
+    ├── yourpage_app/
+    ├── locale/               # i18n .po/.mo files
+    └── static/ & templates/
 ```
 
-## Architecture (coming)
-Check out...
+## Architecture
+- Feature concept map: see [docs/architecture/eraser_links.md](docs/architecture/eraser_links.md)
+- UI/design references: see [docs/design/figma_links.md](docs/design/figma_links.md)
 
-## Tutorials (coming)
+## Tutorials
 Check out [TUTORIALS.md](TUTORIALS.md) for more about Django Framework and other dependencies used in this project.
 
 ## Contributing
-We welcome contributions from IFI students(with certain exceptions)! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+We welcome contributions mainly from IFI students(with certain exceptions)! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - How to open issues (bug/feature/task reports, with examples)
 - How to submit pull requests
 - Code style expectations (Black/Pylint)
 - The different contributor roles in this project
-- Precisly who can contribute
+- Precisely who can contribute
 
-## License (coming)
-This project is licensed under the...
+## License
+This project is licensed under the [MIT License](LICENSE).

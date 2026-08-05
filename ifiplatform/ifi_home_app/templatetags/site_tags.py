@@ -12,7 +12,11 @@ register = template.Library()
 @register.simple_tag
 def get_header_message():
     """Return today's header message, cycling through active messages once per day."""
-    messages = list(HeaderMessage.objects.filter(is_active=True).order_by("pk"))
+    messages = list(
+        HeaderMessage.objects.filter(
+            is_active=True, locale=Locale.get_active()
+        ).order_by("pk")
+    )
     if not messages:
         return None
     index = timezone.now().date().toordinal() % len(messages)
