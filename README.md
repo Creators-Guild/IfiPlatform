@@ -50,6 +50,17 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 ```
 *Editing remaining. For just development, add SecretKey and leave Debug=True. Ignore the rest*
 
+### Run Migrations
+```bash
+py <path/to/manage.py> migrate
+```
+
+### Fill database with dummy data(recommended)
+```bash
+py <path/to/manage.py> seed_dev_data
+```
+Fills your local database with a dummy article tree (index pages, categories, a test article, a test student union and a test tool) so you're not starting from a blank site. Safe to re-run — it skips anything that already exists instead of duplicating it.
+
 ### Run website on localhost
 ```bash
 py <path to manage.py> runserver
@@ -57,6 +68,20 @@ py <path to manage.py> runserver
 Once running, open your browser and go to:
 ```
 http://localhost:8000
+```
+
+### Often used commands 
+```bash
+py <path to manage.py> runserver
+```
+```bash
+py <path to manage.py> makemigrations
+```
+```bash
+py <path to manage.py> migrate
+```
+```bash
+py <path to manage.py> createsuperuser
 ```
 
 ## Project Structure (coming)
@@ -74,16 +99,16 @@ IfiPlatform/
 ## Architecture (coming)
 Check out...
 
-## Tutorials (coming)
+## Tutorials
 Check out [TUTORIALS.md](TUTORIALS.md) for more about Django Framework and other dependencies used in this project.
 
 ## Contributing
-We welcome contributions from IFI students(with certain exceptions)! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+We welcome contributions mainly from IFI students(with certain exceptions)! Please see [CONTRIBUING.md](CONTRIBUTING.md) for:
 - How to open issues (bug/feature/task reports, with examples)
 - How to submit pull requests
 - Code style expectations (Black/Pylint)
 - The different contributor roles in this project
 - Precisly who can contribute
 
-## License (coming)
-This project is licensed under the...
+## License
+This project is licensed under the [MIT License](LICENSE).
