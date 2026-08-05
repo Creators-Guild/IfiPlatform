@@ -121,7 +121,7 @@ IfiPlatform/
 ├── LICENSE
 └── ifiplatform/              # the actual Django project
     ├── manage.py
-    ├── .env
+    ├── .env                  # secrets
     ├── ifiplatform_project/  # settings, urls
     ├── ifi_home_app/         # articles, categories, homepage
     ├── study_app/
