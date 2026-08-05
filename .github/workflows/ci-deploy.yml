@@ -4,6 +4,11 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  schedule:
+    # 01:00 UTC daily -- batches whatever merged to main since the last run
+    # into one nightly deploy instead of deploying on every push. Adjust
+    # the hour here if 01:00 UTC isn't the right window.
+    - cron: "0 1 * * *"
   workflow_dispatch:
     inputs:
       force_deploy:
@@ -67,16 +72,21 @@ jobs:
 
   deploy:
     needs: [test, lint]
-    # Runs on a real push to main once test+lint both pass, OR on a manual
-    # workflow_dispatch run with force_deploy checked (emergency override --
+    # A plain push to main no longer deploys directly -- it still runs
+    # test+lint above for early feedback, but actually shipping happens:
+    #   - on the nightly schedule trigger, once test+lint both pass against
+    #     whatever is on main at that time (batches same-day merges), or
+    #   - on a manual workflow_dispatch run ("Run workflow" in the Actions
+    #     tab), either safely (still requires test+lint to pass) or with
+    #     force_deploy checked to bypass that (emergency override).
     # `always()` is required here because a failed `needs` job would
-    # otherwise skip this job before its own `if` is even evaluated).
+    # otherwise skip this job before its own `if` is even evaluated.
     if: >
       always() &&
       (
-        (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.test.result == 'success' && needs.lint.result == 'success')
+        (github.event_name == 'schedule' && needs.test.result == 'success' && needs.lint.result == 'success')
         ||
-        (github.event_name == 'workflow_dispatch' && github.event.inputs.force_deploy == 'true')
+        (github.event_name == 'workflow_dispatch' && (github.event.inputs.force_deploy == 'true' || (needs.test.result == 'success' && needs.lint.result == 'success')))
       )
     runs-on: ubuntu-latest
     steps:
