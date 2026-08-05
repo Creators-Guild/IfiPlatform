@@ -6,7 +6,8 @@
 {% endblock %}
 
 <div class= "sidemenu">
-    <div class="sidemenu-header">
+    <button type="button" class="sidemenu-close" aria-label="{% trans "Close menu" %}">&times;</button>
+    <div class="sidemenu-header" role="button" tabindex="0" aria-expanded="false">
         <img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="menu">
         <span class="icon-text">Menu</span>
     </div>
@@ -14,6 +15,7 @@
     <div class= "sidemenu-item">
         <a class="sidemenu-option" href="">{% trans "Studytools" %}</a>
         <div class="drop-content">
+            <a class="drop-option drop-option--all" href="">{% trans "All" %}</a>
             <a href="">
                 {% trans "Flashcards" %}
             </a>
@@ -23,3 +25,4 @@
         </div>
     </div>
 </div>
+<script src="{% static 'js/dropdown_menu.js' %}" defer></script>

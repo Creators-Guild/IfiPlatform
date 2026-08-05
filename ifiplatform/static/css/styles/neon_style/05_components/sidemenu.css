@@ -1,10 +1,19 @@
 .sidemenu {
+    /* no explicit height -- it sizes to its own content (header + items),
+    which is normally much shorter than a full screen. .sidemenu_container
+    (its sticky containing block) actually stretches to span the whole
+    scrollable page height via the flex-stretch chain in home_base.html /
+    page_layout.css, so a short sticky element here can stay reachable the
+    entire time you're scrolling; a height:100vh sidebar couldn't fit in
+    the shrinking remaining space near the very bottom of the page and got
+    visibly squeezed/pushed as a result, right where the footer begins.
+    No background-color here either -- it's on .sidemenu_container instead
+    (see home_layout.css), so the rail color fills that full container
+    height while this stays short; transparent lets that show through. */
     position: sticky;
     top: 0;
     width: 60px;
-    height: 100vh;
     padding: 1rem;
-    background-color: var(--color-turq-hover);
     transition:
         width 0.2s ease,
         opacity 0.3s ease;
@@ -12,6 +21,17 @@
     display: grid;
     grid-auto-rows: min-content;
     overflow: hidden;
+}
+
+/* grid items default to min-width:auto, meaning their content's natural
+width (e.g. .sidemenu-item's "Info Articles" text) can silently force the
+grid's implicit column wider than .sidemenu's own explicit 60px/56px --
+overflow:hidden above only clips what renders, it doesn't stop the grid
+from actually being laid out wider internally. That wider-than-visible
+column is what made centering the icon (below) land it outside the visibly
+clipped area instead of the true collapsed width. */
+.sidemenu > * {
+    min-width: 0;
 }
 
 
@@ -34,7 +54,10 @@
 }
 
 .sidemenu-header {
-    display: block
+    display: flex;
+    align-items: center;
+    justify-content: center; /* centers the icon while collapsed */
+    transition: justify-content 0.2s ease;
 }
 
 .icon {
@@ -45,7 +68,15 @@
   transition: opacity 0.1s ease;
 }
 
-/* text (hidden when collapsed) */
+/* text (hidden when collapsed). max-width:0 + overflow:hidden, not just
+opacity:0 -- otherwise the invisible text still occupies space in the
+.sidemenu-header flex row, which throws off centering the icon in the
+collapsed bar (it'd be centered together with this invisible text, not by
+itself). min-width:0 is required too: flex items default to min-width:auto,
+which for white-space:nowrap text means "at least the full unwrapped text
+width" -- that silently overrides max-width:0, so without this the text
+was still taking up its full (invisible) width, overflowing the row and
+pushing the icon out past .sidemenu's overflow:hidden edge. */
 .icon-text {
     font-size: larger;
     font-weight: bold;
@@ -53,26 +84,87 @@
     text-decoration: underline;
 
     opacity: 0;
+    min-width: 0;
+    max-width: 0;
+    overflow: hidden;
     white-space: nowrap;
-    transition: opacity 0.1s ease;
+    transition: opacity 0.1s ease, max-width 0.2s ease;
 }
 
-.sidemenu:hover {
+/* .is-open is the JS-driven equivalent of :hover below, for touch devices
+(tapping .sidemenu-header expands it, .sidemenu-close collapses it back) --
+see dropdown_menu.js. Kept unscoped (unlike :hover) since it's only ever
+added by JS, which already gates itself on hover-capability, so there's no
+risk of it firing on a hover device. */
+.sidemenu.is-open {
     width: 250px;
     padding: 1rem;
     border-right: 1px solid #ddd;
 }
 
-.sidemenu:hover .sidemenu-item {
+.sidemenu.is-open .sidemenu-item {
     opacity: 1;
 }
 
-.sidemenu:hover .icon {
+.sidemenu.is-open .icon {
     opacity: 0;
 }
 
-.sidemenu:hover .icon-text {
+.sidemenu.is-open .icon-text {
     opacity: 1;
+    max-width: 200px;
+}
+
+.sidemenu.is-open .sidemenu-header {
+    justify-content: flex-start; /* matches the left-aligned items below it */
+}
+
+/* :hover only, not touch -- scoped so a tap's simulated/sticky :hover state
+(a well-known mobile quirk, since hover has no real meaning on touch) can't
+keep the rail expanded after dropdown_menu.js has already toggled .is-open
+off. Touch devices rely purely on the JS-driven class above. */
+@media (hover: hover) and (pointer: fine) {
+    .sidemenu:hover {
+        width: 250px;
+        padding: 1rem;
+        border-right: 1px solid #ddd;
+    }
+
+    .sidemenu:hover .sidemenu-item {
+        opacity: 1;
+    }
+
+    .sidemenu:hover .icon {
+        opacity: 0;
+    }
+
+    .sidemenu:hover .icon-text {
+        opacity: 1;
+        max-width: 200px;
+    }
+
+    .sidemenu:hover .sidemenu-header {
+        justify-content: flex-start;
+    }
+}
+
+.sidemenu-close {
+    display: none;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: none;
+    background: transparent;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--color-black);
+}
+
+.sidemenu.is-open .sidemenu-close {
+    display: block;
 }
 
 .sidemenu-item .drop-content {
@@ -99,25 +191,69 @@
     padding: 0.25rem 0.75rem;
 }
 
-/* when hovering a menu item, expand its dropdown */
-.sidemenu-item:hover .drop-content {
+/* is-open is the JS-driven equivalent of :hover below, for touch devices --
+see dropdown_menu.js. Kept unscoped (unlike :hover) since it's only ever
+added by JS, which already gates itself on hover-capability, so there's no
+risk of it firing on a hover device. */
+.sidemenu-item.is-open .drop-content {
     max-height: 500px;               /* big enough to fit children */
     opacity: 1;
+}
 
+/* :hover only, not touch -- scoped so a tap's simulated/sticky :hover state
+(a well-known mobile quirk, since hover has no real meaning on touch) can't
+keep the submenu expanded after dropdown_menu.js has already toggled
+.is-open off. Touch devices rely purely on the JS-driven class above. */
+@media (hover: hover) and (pointer: fine) {
+    .sidemenu-item:hover .drop-content {
+        max-height: 500px;
+        opacity: 1;
+    }
+}
+
+/* the top-level link still doubles as a direct navigation link for mouse
+users (hover reveals the dropdown underneath it), so "All" would be
+redundant there. On touch it's the only way in, since the top-level tap is
+now toggle-only -- see dropdown_menu.js. Keep this condition the mirror of
+the JS's hover-capability check. */
+.sidemenu-item .drop-option--all {
+    display: none;
+}
+
+@media not all and (hover: hover) and (pointer: fine) {
+    .sidemenu-item .drop-option--all {
+        display: block;
+    }
 }
 
 /* phone-sized screens: the default font-size/margins are tuned for a
    desktop hover panel and end up oversized and spaced-out on a small
    screen -- tighten both so more of the menu is visible at once */
 @media (max-width: 480px) {
+    /* stays position:sticky (inherited from the base rule) rather than
+    switching to fixed -- sticky already adapts correctly to the header
+    scrolling away (it just settles at top:0 once you've scrolled past its
+    natural position, the same mechanism the desktop sidebar already
+    relies on), which a fixed element with a hardcoded top offset cannot
+    do without extra JS to track the header's height.
+    "overlay, don't push .maincontent" comes from a different mechanism:
+    .sidemenu_container's width is locked to the collapsed 56px in
+    home_layout.css regardless of .sidemenu's own width, and stays at its
+    default overflow:visible -- so when .sidemenu widens to 200px below,
+    it visually spills out past its parent's boundary and over
+    .maincontent instead of growing the parent (which is what pushed
+    content before). z-index keeps it stacked above .maincontent while
+    doing so. Own background here (not .sidemenu_container's, that's for
+    desktop) since this is visually a self-contained overlay panel. */
     .sidemenu {
-        width: 40px;
+        width: 56px;
         padding: 0.5rem;
+        z-index: 100;
+        background-color: var(--color-turq-hover);
     }
 
-    .sidemenu:hover {
+    .sidemenu.is-open {
         width: 200px;
-        padding: 0.5rem;
     }
 
     .sidemenu-item {
@@ -133,3 +269,9 @@
     }
 }
 
+@media (max-width: 480px) and (hover: hover) and (pointer: fine) {
+    .sidemenu:hover {
+        width: 200px;
+        padding: 0.5rem;
+    }
+}

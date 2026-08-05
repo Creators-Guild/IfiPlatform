@@ -8,6 +8,15 @@ but width is the actual width of object.
 Sidemenu hover mdoifer will still enlarge menu */
 .home-layout .sidemenu_container {
     flex: 0 0 auto;
+    /* the colored rail background lives here, not on .sidemenu itself --
+    this container stretches (default align-items:stretch on the flex row
+    above) to the full scrollable page height, while .sidemenu is sticky
+    and sized to just its own content. That split is what lets the color
+    fill the whole rail top-to-bottom without the sticky menu itself
+    needing to be page-height (which caused it to get squeezed/pushed near
+    the footer -- see sidemenu.css). Width tracks .sidemenu automatically
+    since it's flex-basis:auto around that single child. */
+    background-color: var(--color-turq-hover);
 }
 
 .home-layout .maincontent {
@@ -73,5 +82,15 @@ stack the two sections (news on top) and cap each to 4 visible cards */
 @media (max-width: 480px) {
     .home-layout .maincontent {
         padding: 0.75rem 0.75rem;
+    }
+
+    /* locked to the collapsed width, regardless of .sidemenu's own current
+    width -- on a phone, an expanded (200px) .sidemenu is meant to overlay
+    .maincontent rather than push it aside (see sidemenu.css). Since this
+    container's width no longer tracks its child, .sidemenu just visually
+    spills out past this box's boundary (default overflow:visible) instead
+    of growing it. */
+    .home-layout .sidemenu_container {
+        width: 56px;
     }
 }
