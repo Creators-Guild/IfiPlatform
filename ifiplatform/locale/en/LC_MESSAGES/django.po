@@ -89,9 +89,17 @@ msgstr "Ifi Platform"
 msgid "Ifi Homepage"
 msgstr "Ifi Homepage"
 
+#: .\templates\partials\top_header.html:18
+msgid "Home"
+msgstr "Home"
+
 #: .\templates\ifi_base.html:23
 msgid "Ifi Study"
 msgstr "Ifi Study"
+
+#: .\templates\partials\top_header.html:23
+msgid "Study"
+msgstr "Study"
 
 #: .\templates\ifi_base.html:27
 msgid "Your Page"

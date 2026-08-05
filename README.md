@@ -100,6 +100,20 @@ Fill out the terminal's questions
 py manage.py test
 ```
 CI runs this on every push/PR (`.github/workflows/django.yml`) across Python 3.12–3.14, so it's worth running locally before opening a PR.
+#### If you change translatable text (`{% trans %}` / `_(...)`)
+Update the `.po` files with the new/changed strings:
+```bash
+py manage.py makemessages -l nb -l en
+```
+Then compile them so Django actually picks up the changes:
+```bash
+py manage.py compilemessages
+```
+If that fails because `msgfmt` (part of GNU gettext) isn't installed — common on Windows, and it needs admin rights to install via `choco install gettext` — use this project's pure-Python fallback instead:
+```bash
+py manage.py compile_translations
+```
+Same effect, no system dependency. Only compiles this project's own `.po` files (`ifiplatform/locale/`), not any third-party package's.
 #### Log in on admin interface or wagtail-admin interface
 Log in via a superuser you have created.
 ```

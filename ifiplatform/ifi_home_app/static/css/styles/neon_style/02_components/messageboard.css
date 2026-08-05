@@ -95,6 +95,15 @@
   line-height: 1.15;
 }
 
+/* invisible at desktop size -- lets .messageboard-prev/-dots/-next keep
+   positioning relative to .messageboard (the nearest *positioned*
+   ancestor) exactly as if this wrapper weren't there. At the mobile
+   breakpoint it becomes a real flex row instead, so the group can move
+   as a unit (arrows flanking the dots) without touching desktop layout. */
+.messageboard-controls {
+  display: contents;
+}
+
 .messageboard-prev,
 .messageboard-next {
   position: absolute;
@@ -136,6 +145,68 @@
   background-color: var(--color-bg-light);
   border: 2px solid var(--color-black);
   border-radius: 999px;
+}
+
+/* on a narrow card there isn't room for the centered dots and the
+   right-aligned signature to share a row without colliding -- make both
+   normal flow instead of absolutely positioned, so they stack (signature,
+   then the prev/dots/next controls row) as regular block content below
+   the body text rather than floating on top of it or each other.
+
+   Height switches from a fixed size to auto + max-height: a short message
+   should stay compact instead of leaving a big empty gap, while a long
+   one can grow up to the cap before its body text starts scrolling
+   internally (see .messageboard-body below). */
+@media (max-width: 480px) {
+  .messageboard {
+    height: auto;
+    max-height: 24rem;
+    /* left/right still need to clear the prev/next arrows plus a small buffer */
+    padding: 1.25rem 2.25rem 1rem;
+  }
+
+  .messageboard-slide {
+    height: auto;
+  }
+
+  .messageboard-body-wrap {
+    flex: 0 1 auto;
+  }
+
+  .messageboard-body {
+    height: auto;
+    max-height: 8rem; /* ~5-6 lines -- short messages stay smaller, longer ones scroll within this */
+  }
+
+  .messageboard-signature {
+    position: static;
+    max-width: none;
+    padding-left: 0;
+    margin-top: 0.5rem;
+    text-align: right;
+  }
+
+  .messageboard-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  .messageboard-prev,
+  .messageboard-next {
+    position: static;
+    transform: none;
+  }
+
+  .messageboard-dots {
+    position: static;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    margin: 0;
+  }
 }
 
 .messageboard-dot {

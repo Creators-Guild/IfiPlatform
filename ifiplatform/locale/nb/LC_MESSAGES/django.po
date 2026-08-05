@@ -534,7 +534,7 @@ msgstr "Velkommen til Ifi Hjemmesiden"
 msgid "This is the main menu for study games"
 msgstr "Dette er hovedinnholdet for Ifi hjemmeside"
 
-#: .\study_app\urls.py:58
+#: .\study_app\urls.py:58 .\templates\partials\top_header.html:23
 msgid "Study"
 msgstr "Studie"
 
@@ -546,17 +546,21 @@ msgstr ""
 msgid "Ifi Homepage"
 msgstr "Ifi Hjemmesiden"
 
-#: .\templates\partials\top_header.html:21
+#: .\templates\partials\top_header.html:18
+msgid "Home"
+msgstr "Hjem"
+
+#: .\templates\partials\top_header.html:22
 msgid "Ifi Study"
 msgstr "Ifi Studie"
 
-#: .\templates\partials\top_header.html:25 .\yourpage_app\urls.py:10
+#: .\templates\partials\top_header.html:26 .\yourpage_app\urls.py:10
 msgid "Your Page"
 msgstr "Din Side"
 
-#: .\templates\partials\top_header.html:29
+#: .\templates\partials\top_header.html:30
 msgid "Account"
-msgstr ""
+msgstr "Konto"
 
 #: .\templates\under_development.html:4 .\templates\under_development.html:13
 msgid "Under Development"

@@ -103,6 +103,27 @@
 .sidemenu-item:hover .drop-content {
     max-height: 500px;               /* big enough to fit children */
     opacity: 1;
-    
+
+}
+
+/* phone-sized screens: the default font-size/margins are tuned for a
+   desktop hover panel and end up oversized and spaced-out on a small
+   screen -- tighten both so more of the menu is visible at once */
+@media (max-width: 480px) {
+    .sidemenu:hover {
+        width: 200px;
+    }
+
+    .sidemenu-item {
+        margin: 0.5rem 0.75rem;
+    }
+
+    .sidemenu-item a {
+        font-size: 15px;
+    }
+
+    .icon-text {
+        font-size: 15px;
+    }
 }
 
