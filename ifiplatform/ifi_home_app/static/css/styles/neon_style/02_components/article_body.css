@@ -21,6 +21,21 @@
 
 .article-layout.toc-collapsed .table_of_content {
   width: auto;
+  /* collapsed = just the header row, so it only pushes the first line of
+     the article beside it (roughly one heading's worth of height) instead
+     of a couple lines' worth of padded box */
+  padding: 0.3rem 0.75rem;
+}
+
+/* the body's first block isn't a heading, so floating would just push
+   whatever random paragraph/image happens to come first -- stack the ToC
+   above the content instead, sized to fit its own content (not stretched
+   full-width) whether that's just the collapsed header row or the full
+   list of links */
+.article-layout.toc-stacked .table_of_content {
+  float: none;
+  width: fit-content;
+  margin: 0 0 1.5rem;
 }
 
 .table_of_content-header {

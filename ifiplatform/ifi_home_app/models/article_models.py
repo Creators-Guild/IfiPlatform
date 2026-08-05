@@ -347,6 +347,21 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         """The CategoryPage this article lives under."""
         return self.get_parent().specific
 
+    @property
+    def has_headings(self):
+        """True if the body has at least one heading block, i.e. there's
+        something for the table of contents to actually link to."""
+        return any(block.block_type == "heading" for block in self.body)
+
+    @property
+    def starts_with_heading(self):
+        """True if the body's first block is a heading. Used to decide
+        whether the table of contents can safely float beside the article
+        (looks right when the first line is a heading) or should instead
+        stack above it full-width (otherwise it'd push whatever random
+        block -- a paragraph, an image -- happens to come first)."""
+        return bool(self.body) and self.body[0].block_type == "heading"
+
 
 # Model for article category to list articles within category
 class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
