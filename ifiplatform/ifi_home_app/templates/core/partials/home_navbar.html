@@ -8,6 +8,7 @@
             <a class="drop-option" href="{% pageurl news_index_page %}">{% trans "News" %}</a>
         </button>
         <div class="drop-content">
+            <a class="drop-option drop-option--all" href="{% pageurl news_index_page %}">{% trans "All" %}</a>
             {% for category in news_categories %}
                 <a class="drop-option" href="{% pageurl category %}">
                     {{ category.title }}
@@ -23,6 +24,7 @@
             <a class="drop-option" href="{% pageurl article_index_page %}">{% trans "Info Articles" %}</a>
         </button>
         <div class="drop-content">
+            <a class="drop-option drop-option--all" href="{% pageurl article_index_page %}">{% trans "All" %}</a>
             {% for category in categories %}
                 <a class="drop-option" href="{% pageurl category %}">
                     {{ category.title }} <!-- dont use normal translate with wagtail, check out wagtails tranlation instead -->
@@ -38,6 +40,7 @@
                     <a class="drop-option" href="{% pageurl student_union_cat %}">{% trans "Student Unions" %}</a>
                 </button>
                 <div class="drop-content">
+                    <a class="drop-option drop-option--all" href="{% pageurl student_union_cat %}">{% trans "All" %}</a>
                     {% if student_union_children %}
                         {% for child in student_union_children %}
                             <a class="drop-option" href="{% pageurl child %}">
@@ -60,6 +63,7 @@
                     <a class="drop-option" href="{% pageurl ifi_tools_cat %}">{% trans "Ifi Tools" %}</a>
                 </button>
                 <div class="drop-content">
+                    <a class="drop-option drop-option--all" href="{% pageurl ifi_tools_cat %}">{% trans "All" %}</a>
                     {% if ifi_tools_children %}
                         {% for child in ifi_tools_children %}
                             <a class="drop-option" href="{% pageurl child %}">
@@ -84,6 +88,7 @@
             <a class="drop-option" href="">{% trans "New Student?" %}</a>
         </button>
         <div class="drop-content">
+            <a class="drop-option drop-option--all" href="">{% trans "All" %}</a>
             <a class="drop-option" href="">
                 {% trans "Starter Kit" %}
             </a>
@@ -99,3 +104,4 @@
         </div>
     </div>
 </div>
+<script src="{% static 'js/dropdown_menu.js' %}" defer></script>

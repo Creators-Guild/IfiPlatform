@@ -1,14 +1,6 @@
 .articlecard {
-  /* box-sizing: border-box is already set globally in reset.css, so it's
-     not repeated here. No explicit width either -- grid's default
-     stretch already fills the track while correctly subtracting margin;
-     an explicit width:100% would override that and add both margins on
-     top of the full track width instead. */
   display: block;
-  margin: 0.1rem;
   padding: 0.5rem;
-  min-height: 18rem;
-  max-width: 22rem;
   color: inherit;
   text-decoration: none;
   background-color: white;
@@ -28,7 +20,7 @@
 }
 
 .articlecard img {
-  height: auto;
+  aspect-ratio: 8 / 5;
   width: 100%;
   display: block;
   object-fit: cover;
@@ -37,6 +29,9 @@
 
 .articlecard h3 {
   margin: 0.5rem 0 0.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .articlecard-meta {

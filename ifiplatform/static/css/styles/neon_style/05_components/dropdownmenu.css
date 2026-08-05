@@ -42,11 +42,62 @@
   color: var(--color-black-hover);
 }
 
-.dropdown-menu:hover .drop-content {
+.dropdown-menu.is-open .drop-content {
   display: block;
+}
+
+/* :hover only, not touch -- scoped so a tap's simulated/sticky :hover state
+(a well-known mobile quirk, since hover has no real meaning on touch) can't
+keep the submenu visible after dropdown_menu.js has already toggled
+.is-open off. Touch devices rely purely on the JS-driven class above. */
+@media (hover: hover) and (pointer: fine) {
+  .dropdown-menu:hover .drop-content {
+    display: block;
+  }
+}
+
+/* on touch devices dropdown_menu.js makes the top-level link only ever
+open/close the submenu (there's no hover to reveal it, and a tap can't
+mean both "open" and "go there") -- the .drop-option--all link below is
+how a touch user actually reaches that page. This caret is the visual cue
+that the tap opens a submenu rather than silently doing nothing. Real
+hover devices get the same caret, flipped on :hover, for free. */
+.dropdown-menu .link::after {
+  content: "";
+  display: inline-block;
+  margin-left: 0.35em;
+  border: 0.35em solid transparent;
+  border-top-color: currentColor;
+  vertical-align: middle;
+  transition: transform 0.15s ease;
+}
+
+.dropdown-menu.is-open .link::after {
+  transform: rotate(180deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dropdown-menu:hover .link::after {
+    transform: rotate(180deg);
+  }
 }
 
 .dropdown-menu .drop-content a img.union-link-img  {
   max-width: 30px;
   max-height: 30px;
+}
+
+/* the top-level link still doubles as a direct navigation link for mouse
+users (hover reveals the submenu underneath it), so "All" would be
+redundant there. On touch it's the only way in, since the top-level tap is
+now toggle-only -- see dropdown_menu.js. Keep this condition the mirror of
+the JS's hover-capability check. */
+.dropdown-menu .drop-option--all {
+  display: none;
+}
+
+@media not all and (hover: hover) and (pointer: fine) {
+  .dropdown-menu .drop-option--all {
+    display: block;
+  }
 }

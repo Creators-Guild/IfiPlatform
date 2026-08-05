@@ -10,7 +10,8 @@
 {% endblock %}
 
 <div class= "sidemenu">
-    <div class="sidemenu-header">
+    <button type="button" class="sidemenu-close" aria-label="{% trans "Close menu" %}">&times;</button>
+    <div class="sidemenu-header" role="button" tabindex="0" aria-expanded="false">
         <img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="menu">
         <span class="icon-text">Menu</span>
     </div>
@@ -18,7 +19,7 @@
     <div class= "sidemenu-item">
         <a class="sidemenu-option" href="{% pageurl article_index_page %}">{% trans "Categories" %}</a>
         <div class="drop-content">
-            <a href="{% pageurl article_index_page %}">
+            <a class="drop-option drop-option--all" href="{% pageurl article_index_page %}">
                 {% trans "All" %}
             </a>
             <!-- Get category context n store in varible -->
@@ -33,7 +34,7 @@
     <div class= "sidemenu-item">
         <a class="sidemenu-option" href="{% pageurl news_index_page %}">{% trans "News" %}</a>
         <div class="drop-content">
-            <a href="{% pageurl news_index_page %}">
+            <a class="drop-option drop-option--all" href="{% pageurl news_index_page %}">
                 {% trans "All" %}
             </a>
             {% for category in news_categories %}
@@ -45,3 +46,4 @@
     </div>
 
 </div>
+<script src="{% static 'js/dropdown_menu.js' %}" defer></script>
