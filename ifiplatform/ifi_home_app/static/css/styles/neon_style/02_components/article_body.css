@@ -2,6 +2,106 @@
   display: flow-root;
 }
 
+/* .article-layout is a plain flow container now, not a flex row -- the
+   ToC is a float, same as the hero image, so article text wraps around
+   both instead of being pushed into a constrained column beside them. */
+
+.table_of_content {
+  float: left;
+  width: 15rem;
+  box-sizing: border-box;
+  margin: 0 1.5rem 1rem 0;
+  padding: 1rem 1.25rem;
+  background-color: var(--color-bg-light);
+  border: 2px solid var(--color-black);
+  border-left: 6px solid var(--accent-color, var(--color-black));
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--color-boxshadow);
+}
+
+.article-layout.toc-collapsed .table_of_content {
+  width: auto;
+}
+
+.table_of_content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.table_of_content-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-black-hover);
+}
+
+.table_of_content-toggle {
+  flex: 0 0 auto;
+  padding: 0.1rem 0.5rem;
+  background: none;
+  border: 1px solid var(--color-black-hover);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: var(--color-black-hover);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.table_of_content-toggle:hover {
+  color: var(--color-black);
+  border-color: var(--color-black);
+}
+
+.table_of_content ul {
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.article-layout.toc-collapsed .table_of_content ul {
+  display: none;
+}
+
+.table_of_content li {
+  margin: 0.3rem 0;
+}
+
+.table_of_content li.toc-h3 {
+  margin-left: 1.25rem;
+}
+
+.table_of_content a {
+  color: var(--color-black);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.table_of_content a::before {
+  content: "→";
+  display: inline-block;
+  margin-right: 0.4rem;
+  color: var(--accent-color, var(--color-turq));
+}
+
+.table_of_content a:hover {
+  color: var(--color-black-hover);
+  border-bottom-color: var(--accent-color, var(--color-black-hover));
+}
+
+@media (max-width: 640px) {
+  .table_of_content {
+    float: none;
+    width: 100%;
+    margin: 0 0 1.5rem;
+  }
+}
+
 .article-meta {
   display: flex;
   flex-wrap: wrap;
