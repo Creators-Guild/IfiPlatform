@@ -136,7 +136,7 @@ class Command(BaseCommand):
 
             self._sync_english_locale(nb_locale, en_locale)
 
-            self._seed_header_message(nb_locale)
+            self._seed_header_message(nb_locale, en_locale)
             self._seed_home_board_message(nb_locale, en_locale)
 
         self.stdout.write(
@@ -223,17 +223,25 @@ class Command(BaseCommand):
             )),
         ]
 
-    def _seed_header_message(self, nb_locale):
+    def _seed_header_message(self, nb_locale, en_locale):
         text = f"<p>{BANNER_TEXT}</p>"
-        if HeaderMessage.objects.filter(text=text).exists():
+        message = HeaderMessage.objects.filter(text=text, locale=nb_locale).first()
+        if message is None:
+            message = HeaderMessage.objects.create(
+                text=RichText(text), is_active=True, locale=nb_locale,
+            )
+            self.created_count += 1
+            self.stdout.write(f"  created HeaderMessage: {BANNER_TEXT}")
+        else:
             self.skipped_count += 1
-            return
 
-        HeaderMessage.objects.create(
-            text=RichText(text), is_active=True, locale=nb_locale,
-        )
-        self.created_count += 1
-        self.stdout.write(f"  created HeaderMessage: {BANNER_TEXT}")
+        if not message.has_translation(en_locale):
+            translation = message.copy_for_translation(en_locale)
+            translation.save()
+            self.created_count += 1
+            self.stdout.write(f"  created HeaderMessage (en): {BANNER_TEXT}")
+        else:
+            self.skipped_count += 1
 
     def _seed_home_board_message(self, nb_locale, en_locale):
         title = "Lorem Ipsum"
