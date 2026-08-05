@@ -1,9 +1,11 @@
 .sidemenu {
+    position: sticky;
+    top: 0;
     width: 60px;
-    height: 100%;
+    height: 100vh;
     padding: 1rem;
     background-color: var(--color-turq-hover);
-    transition: 
+    transition:
         width 0.2s ease,
         opacity 0.3s ease;
 
