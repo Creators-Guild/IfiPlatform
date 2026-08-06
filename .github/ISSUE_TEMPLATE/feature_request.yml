@@ -1,6 +1,6 @@
 name: ✨ Feature Request
 description: Propose new functionality or an improvement
-title: "[Feature] "
+title: "[Feature Request] "
 labels: ["feature"]
 type: Feature
 body:
