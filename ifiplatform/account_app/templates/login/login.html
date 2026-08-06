@@ -38,6 +38,9 @@
             <p class="auth-links">
                 <a class="back-to" href="{% url 'signin' %}">{% trans "New user? Sign in here" %}</a>
             </p>
+            <p class="auth-links">
+                <a class="back-to" href="{% url 'resend_verification' %}">{% trans "Didn't get a verification email?" %}</a>
+            </p>
         </div>
     </div>
 {% endblock %}
