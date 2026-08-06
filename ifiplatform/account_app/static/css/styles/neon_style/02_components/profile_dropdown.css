@@ -1,0 +1,132 @@
+/* profile icon dropdown -- shares .dropdown-menu/.drop-content/.drop-option
+   from dropdownmenu.css (same hover/tap-toggle behavior as the other nav
+   dropdowns, see dropdown_menu.js) with just the trigger button and the
+   header/username block inside .drop-content styled here. */
+button.profile-trigger {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  padding: 0;
+  background: none;
+  border: 2px solid var(--color-purple);
+  border-radius: 50%;
+  color: var(--color-purple);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+
+.profile-trigger:hover,
+.profile-dropdown.is-open .profile-trigger {
+  color: var(--color-pink);
+  border-color: var(--color-pink);
+  transform: translateY(-1px);
+}
+
+/* the dropdown caret from dropdownmenu.css assumes a trailing inline
+   trigger label -- there isn't one here, just the icon, and the caret
+   (a flex sibling of the icon inside the same row) was pushing the pair
+   off-center as a group rather than sitting cleanly below it. Just drop
+   it -- the icon alone is enough of an affordance here. */
+.profile-dropdown .link::after {
+  display: none;
+}
+
+.profile-icon {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+/* .nav_links (topheader_bar.css) has overflow-x:auto -- per the CSS
+   overflow spec, pairing that with overflow-y:visible forces overflow-y
+   to auto too, so position:absolute here would get silently clipped by
+   that ancestor (same category of bug as .sidemenu clipping the mobile
+   ToC popover). position:fixed escapes it entirely; top/right are then
+   set inline by dropdown_menu.js from the button's actual
+   getBoundingClientRect() on each click, so the panel always lands
+   directly under the icon rather than a guessed static offset (which
+   drifts against the real header height and ended up overlapping the
+   icon instead of sitting below it). Light card + icon rows, closer to
+   GitHub's account menu (light mode) than the plain white/right-aligned
+   look .drop-content gets by default. */
+.dropdown-menu.profile-dropdown .drop-content {
+  position: fixed;
+  left: auto;
+  min-width: 18rem;
+  text-align: left;
+  padding: 0;
+  background-color: var(--color-bg-light);
+  border: 1px solid color-mix(in srgb, var(--color-black) 15%, transparent);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px var(--color-boxshadow);
+  overflow: hidden;
+}
+
+.profile-drop-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-black) 15%, transparent);
+}
+
+.profile-avatar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: var(--color-purple);
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.profile-drop-identity {
+  min-width: 0;
+}
+
+.profile-drop-name {
+  margin: 0;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--color-black);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-drop-username {
+  margin: 0.15rem 0 0;
+  font-size: 1rem;
+  color: var(--color-black-hover);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-drop-options {
+  padding: 0.4rem;
+}
+
+.dropdown-menu.profile-dropdown .drop-content a.drop-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem;
+  border-radius: 6px;
+  border-bottom: none;
+  color: var(--color-black);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.dropdown-menu.profile-dropdown .drop-content a.drop-option:hover {
+  background-color: color-mix(in srgb, var(--color-black) 8%, var(--color-bg-light));
+  color: var(--color-black);
+}

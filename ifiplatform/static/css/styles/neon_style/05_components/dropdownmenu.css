@@ -49,9 +49,11 @@
 /* :hover only, not touch -- scoped so a tap's simulated/sticky :hover state
 (a well-known mobile quirk, since hover has no real meaning on touch) can't
 keep the submenu visible after dropdown_menu.js has already toggled
-.is-open off. Touch devices rely purely on the JS-driven class above. */
+.is-open off. Touch devices rely purely on the JS-driven class above.
+.profile-dropdown opts out entirely -- click-only on every device, see
+dropdown_menu.js, so hovering it should never reveal the menu. */
 @media (hover: hover) and (pointer: fine) {
-  .dropdown-menu:hover .drop-content {
+  .dropdown-menu:not(.profile-dropdown):hover .drop-content {
     display: block;
   }
 }

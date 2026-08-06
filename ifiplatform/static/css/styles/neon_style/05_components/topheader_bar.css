@@ -40,6 +40,14 @@
   margin-left: auto;
   gap: 8rem;
   overflow-x: auto; /* safety net if a link still doesn't fit on very small screens */
+  /* overflow-x:auto here forces overflow-y to compute to auto too (per the
+     CSS overflow spec -- explicitly setting overflow-y:visible doesn't
+     escape it, the spec overrides that back to auto regardless), so this
+     row now clips anything taller than its own content box. Padding gives
+     .profile-trigger (3.25rem, taller than the plain text nav links) real
+     clearance instead of being flush against that clip boundary, which is
+     what made it visibly clip on :hover's 1px transform. */
+  padding: 0.5rem 0;
 }
 
 .ifiplatform-logo-box {
