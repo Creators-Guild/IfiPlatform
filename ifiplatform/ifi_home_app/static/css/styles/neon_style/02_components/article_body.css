@@ -97,8 +97,8 @@
 /* zero-height + position:sticky, same trick as .toc-open-sticky above --
    .article-page is tall (it wraps the whole article), so this can keep
    sticking all the way down the page. Being .article-page's first child
-   (before h1) means its floated button renders at the top-right corner of
-   the content area, right where the title starts. */
+   (before h1) means the button renders at the top-right corner of the
+   content area, right where the title starts. */
 .toc-title-sticky {
   display: none;
 }
@@ -123,7 +123,13 @@
 }
 
 .toc-title-button {
-  float: right;
+  /* absolute, not float -- float makes the h1 text reflow around it
+     (shrinking/rewrapping the title to avoid it), which is the opposite of
+     what's wanted here: it should just sit on top of the title, ignored by
+     its layout entirely, overlapping is fine. */
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -373,6 +379,12 @@ body.toc-modal-open {
   width: 0;
   min-width: 100%;
   box-sizing: border-box;
+  /* the fix above only stops the caption from stretching the figure -- it
+     still doesn't wrap on its own if it's one long word/string with no
+     spaces or hyphens to break at (the actual bug here: it just overflows
+     past the box's own edge instead). This forces a break wherever needed
+     so it stays within the resolved width either way. */
+  overflow-wrap: anywhere;
 }
 
 .image-title {
