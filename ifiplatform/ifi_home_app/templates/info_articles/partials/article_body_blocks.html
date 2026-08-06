@@ -1,4 +1,4 @@
-{% load i18n static wagtailcore_tags wagtailimages_tags article_tags %}
+{% load i18n static wagtailcore_tags wagtailimages_tags %}
 {% comment %}
 Renders a list of article body blocks (heading/paragraph/styled_text/
 multi_column/image/box). Shared by the top-level article body and the
@@ -25,51 +25,13 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
              style="padding-left: clamp(0rem, {{ block.value.side_padding }}rem, 20vw); padding-right: clamp(0rem, {{ block.value.side_padding }}rem, 20vw);">{{ block.value.text }}</div>
 
     {% elif block.block_type == "multi_column" %}
-        {% comment %}
-        each 'cell' below is one outer flex lane -- a plain wrap=False
-        column on its own, or a wrap=False column with wrap=True column(s)
-        grouped into the SAME lane as internal floats (see grouped_columns()
-        in article_tags.py). This is how an image can sit "inside" the same
-        lane as the column whose text should wrap around it and reclaim
-        space below it, while a separate lane (e.g. a 3rd column) stays
-        completely untouched next to it.
-        {% endcomment %}
         <div class="multi-col-grid multi-col-grid--align-{{ block.value.column_alignment }}"
              style="gap: {{ block.value.gap }}rem; padding-left: clamp(0rem, {{ block.value.side_padding }}rem, 20vw); padding-right: clamp(0rem, {{ block.value.side_padding }}rem, 20vw);">
-            {% for cell in block.value.columns|grouped_columns %}
-                {% if cell.floats %}
-                    <div class="multi-col-item multi-col-item--flow" style="flex: {{ cell.main.width|default:1 }} 1 0;">
-                        {% comment %}
-                        floats first in the HTML, same reason as ever: a
-                        float only affects content that comes after it, so the
-                        main column's text needs the float(s) declared before
-                        it to actually wrap around them.
-                        {% endcomment %}
-                        {% for float_col in cell.floats %}
-                            {% comment %}
-                            wrap_side is framed from the wrapped column's
-                            perspective ("from which side does the other
-                            text flow in") -- the opposite of the CSS float
-                            direction, so "right" (text flows in from the
-                            right) means THIS column floats left, and vice
-                            versa.
-                            {% endcomment %}
-                            <div class="multi-col-inner-float multi-col-inner-float--{% if float_col.wrap_side == 'right' %}left{% else %}right{% endif %}" style="width: {{ float_col.wrap_width }}%;">
-                                {% if float_col.title %}<h3 class="column-title">{{ float_col.title }}</h3>{% endif %}
-                                {% include "info_articles/partials/article_column_content.html" with content=float_col.content %}
-                            </div>
-                        {% endfor %}
-                        {% if cell.main %}
-                            {% if cell.main.title %}<h3 class="column-title">{{ cell.main.title }}</h3>{% endif %}
-                            {% include "info_articles/partials/article_column_content.html" with content=cell.main.content %}
-                        {% endif %}
-                    </div>
-                {% else %}
-                    <div class="multi-col-item" style="flex: {{ cell.main.width }} 1 0;">
-                        {% if cell.main.title %}<h3 class="column-title">{{ cell.main.title }}</h3>{% endif %}
-                        {% include "info_articles/partials/article_column_content.html" with content=cell.main.content %}
-                    </div>
-                {% endif %}
+            {% for column in block.value.columns %}
+                <div class="multi-col-item" style="flex: {{ column.width }} 1 0;">
+                    {% if column.title %}<h3 class="column-title">{{ column.title }}</h3>{% endif %}
+                    {% include "info_articles/partials/article_column_content.html" with content=column.content %}
+                </div>
             {% endfor %}
         </div>
 

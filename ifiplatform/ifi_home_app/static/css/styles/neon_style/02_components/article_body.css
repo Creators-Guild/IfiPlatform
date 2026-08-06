@@ -369,29 +369,6 @@ classes here, same reasoning as the styled text padding above. */
   margin-top: 0;
 }
 
-/* a cell that absorbed float column(s) (see grouped_columns() in
-article_tags.py) -- flow-root, not flex, since float has no effect on a
-flex item; this div is itself a normal flex item in .multi-col-grid, but
-establishes its own block formatting context for the float(s) and main
-text nested inside it. The main column's content renders as direct
-children here (no extra wrapping box), so it's just normal block content
-wrapping around whichever inner float(s) come before it in the HTML, same
-mechanism as .hero-image-figure / .content-box, just scoped to this one
-lane instead of the whole row. */
-.multi-col-item--flow {
-  display: flow-root;
-}
-
-.multi-col-inner-float--left {
-  float: left;
-  margin: 0 1.5rem 1rem 0;
-}
-
-.multi-col-inner-float--right {
-  float: right;
-  margin: 0 0 1rem 1.5rem;
-}
-
 .column-title {
   display: inline-block;
   margin: 0 0 0.5rem;
@@ -409,12 +386,5 @@ lane instead of the whole row. */
 
   .multi-col-item {
     flex-basis: auto !important;
-  }
-
-  .multi-col-inner-float--left,
-  .multi-col-inner-float--right {
-    float: none;
-    width: 100% !important;
-    margin: 0 0 1.5rem;
   }
 }

@@ -255,62 +255,9 @@ def _body_content_blocks():
                                             max_value=10,
                                             default=1,
                                             help_text=(
-                                                "Relative width vs. the "
-                                                "other columns (e.g. 2 is "
-                                                "twice as wide as 1). Only "
-                                                "used while this column "
-                                                "isn't set to flow around "
-                                                "the previous one below."
+                                                "Relative width vs. the other columns "
+                                                "(e.g. 2 is twice as wide as 1)."
                                             ),
-                                        ),
-                                    ),
-                                    (
-                                        "wrap",
-                                        blocks.BooleanBlock(
-                                            required=False,
-                                            default=False,
-                                            label="Let text flow around this, instead of its own column",
-                                            help_text=(
-                                                "Off (default): this column gets its "
-                                                "own side-by-side lane, like the others. "
-                                                "On: nests this column, like the hero "
-                                                "image, INSIDE the lane of the nearest "
-                                                "column above it that ISN'T set to flow "
-                                                "-- that column's text wraps around it "
-                                                "and reclaims the full lane width again "
-                                                "once past it, rather than the two "
-                                                "sitting in separate lanes side by side. "
-                                                "Turning this on for two columns in a "
-                                                "row nests both into the same lane, one "
-                                                "on each side (see 'From which side' "
-                                                "below)."
-                                            ),
-                                        ),
-                                    ),
-                                    (
-                                        "wrap_side",
-                                        blocks.ChoiceBlock(
-                                            choices=[("left", "Left"), ("right", "Right")],
-                                            default="right",
-                                            label="From which side",
-                                            help_text=(
-                                                "Which side the other text should flow "
-                                                "in from -- e.g. 'Right' means the text "
-                                                "wraps around this column from the "
-                                                "right, so this column itself sits on "
-                                                "the left. Only used while 'Let text "
-                                                "flow around this' above is turned on."
-                                            ),
-                                        ),
-                                    ),
-                                    (
-                                        "wrap_width",
-                                        blocks.FloatBlock(
-                                            min_value=10,
-                                            max_value=100,
-                                            default=40,
-                                            label="Width",
-                                            help_text="Width as a % of the lane it's nested in. Only used while 'Let text flow around this' above is turned on.",
                                         ),
                                     ),
                                 ]
