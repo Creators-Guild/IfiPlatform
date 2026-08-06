@@ -16,8 +16,44 @@
 
 {% block maincontent %}
     {% include "info_articles/partials/article_breadcrumbs.html" %}
-    <div class="article-page" style="--accent-color: var(--color-{{ page.category.color }})">
+    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="--accent-color: var(--color-{{ page.category.color }})">
+        {% if page.has_headings %}
+            {% comment %}
+            mobile only (see article_body.css) -- wider viewports keep the separate floating "contents" icon next to the article body instead.
+            Sticky + a zero-height wrapper (rather than sticky directly on a flex item next to h1) so its containing block spans the whole
+            tall .article-page instead of just the short title row -- otherwise it stops sticking the moment that short row scrolls out of view.
+            {% endcomment %}
+            <div class="toc-title-sticky">
+                <button type="button" class="toc-title-button" id="toc-modal-open"
+                        aria-haspopup="dialog" aria-controls="toc-modal" aria-label="{% trans 'Contents' %}">
+                    <svg class="toc-open-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <circle cx="4" cy="6" r="1.3" fill="currentColor"/>
+                        <path d="M9 6h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="4" cy="12" r="1.3" fill="currentColor"/>
+                        <path d="M9 12h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="4" cy="18" r="1.3" fill="currentColor"/>
+                        <path d="M9 18h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        {% endif %}
+
         <h1>{{ page.title }}</h1>
+
+        {% if page.has_headings %}
+            <div class="toc-modal" id="toc-modal" role="dialog" aria-modal="true" aria-labelledby="toc-modal-title" hidden>
+                <div class="toc-modal-backdrop" id="toc-modal-backdrop"></div>
+                <div class="toc-modal-panel">
+                    <button type="button" class="toc-modal-close" id="toc-modal-close" aria-label="{% trans 'Close' %}">&times;</button>
+                    <p class="toc-modal-title" id="toc-modal-title">{% trans "Contents" %}</p>
+                    <ul class="toc-modal-list">
+                        {% for level, text in page.toc_entries %}
+                            <li class="toc-{{ level }}"><a href="#{{ text|slugify }}">{{ text }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
 
         {% if page.author or page.published_date or page.last_published_at or needs_translation %}
             <div class="article-meta">
@@ -39,39 +75,46 @@
             <figure class="hero-image-figure hero-image--{{ page.hero_image_position }} hero-image--size-{{ page.hero_image_size }}{% if page.hero_image_boxed %} image-figure--boxed box-color--{{ page.hero_image_box_color }}{% endif %}"
                 {% if page.hero_image_boxed %}style="--box-bg: {% if page.hero_image_box_color == 'custom' %}{{ page.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.hero_image_box_color }}){% endif %}; border-radius: {{ page.hero_image_box_border_radius }}rem;"{% endif %}>
                 <img class="hero-image" src="{{ hero.url }}" alt="{{ page.hero_image_alt|default:page.hero_image.title }}">
-                {% if page.hero_image_alt or page.hero_image_caption %}
+                {% if page.hero_image_title or page.hero_image_caption %}
                     <figcaption>
-                        {% if page.hero_image_alt %}<span class="image-title">{{ page.hero_image_alt }}</span>{% endif %}
+                        {% if page.hero_image_title %}<span class="image-title">{{ page.hero_image_title }}</span>{% endif %}
                         {% if page.hero_image_caption %}<span class="image-caption">{{ page.hero_image_caption }}</span>{% endif %}
                     </figcaption>
                 {% endif %}
             </figure>
         {% endif %}
 
-        <div class="article-layout{% if page.has_headings and not page.starts_with_heading %} toc-stacked{% endif %}">
-        {% if page.has_headings %}
-        <nav class="table_of_content" id="table-of-content">
-        <div class="table_of_content-header">
-            <p class="table_of_content-label">{% trans "On this page" %}</p>
-            <button type="button" class="table_of_content-toggle"
-                    aria-expanded="true" aria-controls="table-of-content-list"
-                    data-show-text="{% trans 'Show' %}" data-hide-text="{% trans 'Hide' %}">
-                {% trans "Hide" %}
-            </button>
-        </div>
-        <ul id="table-of-content-list">
-            {% for block in page.body %}
-            {% if block.block_type == "heading" %}
-                <li class="toc-{{ block.value.level }}"><a href="#{{ block.value.text|slugify }}">{{ block.value.text }}</a></li>
-            {% endif %}
-            {% endfor %}
-        </ul>
-        </nav>
-        {% endif %}
         <article>
+            {% if page.has_headings %}
+                {# desktop/tablet only (see article_body.css) -- mobile gets a "contents" icon next to the title and a full-screen modal instead #}
+                <div class="toc-open-sticky toc-widget">
+                    <button type="button" class="toc-open-button" id="toc-open-button-desktop"
+                            aria-haspopup="dialog" aria-controls="toc-overlay-desktop" aria-label="{% trans 'Contents' %}"
+                            aria-expanded="false">
+                        <svg class="toc-open-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="4" cy="6" r="1.3" fill="currentColor"/>
+                            <path d="M9 6h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="4" cy="12" r="1.3" fill="currentColor"/>
+                            <path d="M9 12h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="4" cy="18" r="1.3" fill="currentColor"/>
+                            <path d="M9 18h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <div class="toc-overlay-panel" id="toc-overlay-desktop" role="dialog" aria-labelledby="toc-overlay-title-desktop" hidden>
+                        <div class="toc-overlay-header">
+                            <p class="toc-overlay-title" id="toc-overlay-title-desktop">{% trans "Contents" %}</p>
+                            <button type="button" class="toc-overlay-close" aria-label="{% trans 'Close' %}">&times;</button>
+                        </div>
+                        <ul class="toc-overlay-list">
+                            {% for level, text in page.toc_entries %}
+                                <li class="toc-{{ level }}"><a href="#{{ text|slugify }}">{{ text }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
             {% include "info_articles/partials/article_body_blocks.html" with blocks=page.body %}
         </article>
-        </div>
     </div>
     <script src="{% static 'js/table_of_content.js' %}" defer></script>
 {% endblock maincontent %}

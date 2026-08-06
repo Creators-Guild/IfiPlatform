@@ -29,7 +29,7 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
              style="gap: {{ block.value.gap }}rem; padding-left: clamp(0rem, {{ block.value.side_padding }}rem, 20vw); padding-right: clamp(0rem, {{ block.value.side_padding }}rem, 20vw);">
             {% for column in block.value.columns %}
                 <div class="multi-col-item" style="flex: {{ column.width }} 1 0;">
-                    {% if column.title %}<h3 class="column-title">{{ column.title }}</h3>{% endif %}
+                    {% if column.title %}<h3 class="column-title" id="{{ column.title|slugify }}">{{ column.title }}</h3>{% endif %}
                     {% include "info_articles/partials/article_column_content.html" with content=column.content %}
                 </div>
             {% endfor %}

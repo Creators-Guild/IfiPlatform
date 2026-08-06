@@ -388,6 +388,28 @@ def article_box_block():
     )
 
 
+def _iter_toc_entries(body_stream):
+    """Recursively walks a body StreamValue (or a box's own nested content
+    StreamValue, which holds the same block types) yielding (level, text)
+    pairs for anything the table of contents should link to: top-level
+    headings, headings nested inside a box, and multi_column column titles
+    (treated as h3s, since they're a smaller heading-like label rather than
+    a real 'heading' block -- see article_body_blocks.html, which gives
+    both an id built the same way (slugify(text)), so these pairs line up
+    with the actual anchors on the page. Box content can't itself contain
+    another box (see _body_content_blocks()), so this can't recurse
+    forever."""
+    for block in body_stream:
+        if block.block_type == "heading":
+            yield block.value["level"], block.value["text"]
+        elif block.block_type == "multi_column":
+            for column in block.value["columns"]:
+                if column.get("title"):
+                    yield "h3", column["title"]
+        elif block.block_type == "box":
+            yield from _iter_toc_entries(block.value["content"])
+
+
 def _split_categories_by_season(categories):
     """Split live categories into (main, seasonal) lists, seasonal filtered to currently-active ones."""
     main = [c for c in categories if not c.is_seasonal]
@@ -457,10 +479,15 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         default="medium",
     )
 
+    hero_image_title = models.CharField(
+        max_length=250,
+        blank=True,
+        help_text="Shown under the image, above the caption. Leave blank for none.",
+    )
     hero_image_alt = models.CharField(
         max_length=250,
         blank=True,
-        help_text="Accessible description of the image. Leave blank to use the image's own title.",
+        help_text="Accessible description of the image, for screen readers -- not shown visibly. Leave blank to use the image's own title.",
     )
     hero_image_caption = models.CharField(max_length=250, blank=True)
     hero_image_boxed = models.BooleanField(
@@ -519,6 +546,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         FieldPanel("hero_image"),
         FieldPanel("hero_image_position"),
         FieldPanel("hero_image_size"),
+        FieldPanel("hero_image_title"),
         FieldPanel("hero_image_alt"),
         FieldPanel("hero_image_caption"),
         FieldPanel("hero_image_boxed"),
@@ -543,19 +571,17 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         return self.get_parent().specific
 
     @property
-    def has_headings(self):
-        """True if the body has at least one heading block, i.e. there's
-        something for the table of contents to actually link to."""
-        return any(block.block_type == "heading" for block in self.body)
+    def toc_entries(self):
+        """(level, text) pairs for the table of contents -- see
+        _iter_toc_entries() for what counts (top-level headings, headings
+        nested in a box, multi_column column titles)."""
+        return list(_iter_toc_entries(self.body))
 
     @property
-    def starts_with_heading(self):
-        """True if the body's first block is a heading. Used to decide
-        whether the table of contents can safely float beside the article
-        (looks right when the first line is a heading) or should instead
-        stack above it full-width (otherwise it'd push whatever random
-        block -- a paragraph, an image -- happens to come first)."""
-        return bool(self.body) and self.body[0].block_type == "heading"
+    def has_headings(self):
+        """True if there's at least one table-of-contents entry, i.e.
+        something for it to actually link to."""
+        return bool(self.toc_entries)
 
 
 # Model for article category to list articles within category
