@@ -9,8 +9,15 @@
             <span aria-hidden="true">  </span>
         {% endwith %}
 
-        {% for ancestor in page.get_ancestors.live %}
-            {% if not ancestor.is_root %}
+        {% comment %}
+        .specific so ancestor.section actually resolves for ArticleIndexPage
+        ancestors (the base Page from .live() alone doesn't have it) --
+        "hub" index pages (e.g. the top-level page holding both the
+        info-articles and news indexes) are structural only, not a real
+        destination, so they're left out of the trail entirely.
+        {% endcomment %}
+        {% for ancestor in page.get_ancestors.live.specific %}
+            {% if not ancestor.is_root and ancestor.section != "hub" %}
                 <a class="back-to" href="{% pageurl ancestor %}">{{ ancestor.title }}</a>
                 <span aria-hidden="true">/</span>
             {% endif %}
