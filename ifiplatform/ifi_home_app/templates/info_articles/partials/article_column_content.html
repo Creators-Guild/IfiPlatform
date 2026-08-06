@@ -1,0 +1,19 @@
+{% load wagtailimages_tags %}
+{% comment %}
+Renders a multi-column column's content stream (text/styled_text/image).
+Shared by both multi_column rendering modes in article_body_blocks.html
+(side-by-side flex, and float+flow), since a column's own content looks
+the same either way -- only the column's outer wrapper differs.
+
+Usage: {% include "info_articles/partials/article_column_content.html" with content=<a column's content StreamValue> %}
+{% endcomment %}
+{% for sub in content %}
+    {% if sub.block_type == "text" %}
+        <div class="prose">{{ sub.value }}</div>
+    {% elif sub.block_type == "styled_text" %}
+        <div class="prose prose--align-{{ sub.value.alignment }} prose--size-{{ sub.value.letter_size }}"
+             style="padding-left: clamp(0rem, {{ sub.value.side_padding }}rem, 20vw); padding-right: clamp(0rem, {{ sub.value.side_padding }}rem, 20vw);">{{ sub.value.text }}</div>
+    {% elif sub.block_type == "image" %}
+        {% include "info_articles/partials/article_image_block.html" with image_value=sub.value %}
+    {% endif %}
+{% endfor %}

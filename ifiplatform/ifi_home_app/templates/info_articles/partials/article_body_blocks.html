@@ -1,0 +1,50 @@
+{% load i18n static wagtailcore_tags wagtailimages_tags %}
+{% comment %}
+Renders a list of article body blocks (heading/paragraph/styled_text/
+multi_column/image/box). Shared by the top-level article body and the
+"box" block's own content, since a box can hold any of the same block
+types -- this include is called recursively for that (box content can't
+itself contain another box, so there's a guaranteed termination point,
+see article_models.py's _body_content_blocks()).
+
+Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=<a StreamValue or list of blocks> %}
+{% endcomment %}
+{% for block in blocks %}
+    {% if block.block_type == "heading" %}
+        {% if block.value.level == "h3" %}
+            <h3 id="{{ block.value.text|slugify }}">{{ block.value.text }}</h3>
+        {% else %}
+            <h2 id="{{ block.value.text|slugify }}">{{ block.value.text }}</h2>
+        {% endif %}
+
+    {% elif block.block_type == "paragraph" %}
+        <div class="prose">{{ block.value }}</div>
+
+    {% elif block.block_type == "styled_text" %}
+        <div class="prose prose--align-{{ block.value.alignment }} prose--size-{{ block.value.letter_size }}"
+             style="padding-left: clamp(0rem, {{ block.value.side_padding }}rem, 20vw); padding-right: clamp(0rem, {{ block.value.side_padding }}rem, 20vw);">{{ block.value.text }}</div>
+
+    {% elif block.block_type == "multi_column" %}
+        <div class="multi-col-grid multi-col-grid--align-{{ block.value.column_alignment }}"
+             style="gap: {{ block.value.gap }}rem; padding-left: clamp(0rem, {{ block.value.side_padding }}rem, 20vw); padding-right: clamp(0rem, {{ block.value.side_padding }}rem, 20vw);">
+            {% for column in block.value.columns %}
+                <div class="multi-col-item" style="flex: {{ column.width }} 1 0;">
+                    {% if column.title %}<h3 class="column-title" id="{{ column.title|slugify }}">{{ column.title }}</h3>{% endif %}
+                    {% include "info_articles/partials/article_column_content.html" with content=column.content %}
+                </div>
+            {% endfor %}
+        </div>
+
+    {% elif block.block_type == "image" %}
+        {% include "info_articles/partials/article_image_block.html" with image_value=block.value %}
+
+    {% elif block.block_type == "box" %}
+        <div class="content-box{% if block.value.float != 'none' %} content-box--float-{{ block.value.float }}{% endif %}"
+             style="--box-bg: {% if block.value.background_color == 'custom' %}{{ block.value.background_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ block.value.background_color }}){% endif %};
+                    --box-border-color: {% if block.value.border_color == 'custom' %}{{ block.value.border_custom_color|default:'var(--color-black)' }}{% else %}var(--color-{{ block.value.border_color }}){% endif %};
+                    border-radius: {{ block.value.border_radius }}rem;
+                    {% if block.value.float != 'none' %}width: {{ block.value.float_width }}%;{% endif %}">
+            {% include "info_articles/partials/article_body_blocks.html" with blocks=block.value.content %}
+        </div>
+    {% endif %}
+{% endfor %}
