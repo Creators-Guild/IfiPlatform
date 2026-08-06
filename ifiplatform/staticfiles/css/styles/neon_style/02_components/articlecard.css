@@ -1,0 +1,53 @@
+.articlecard {
+  display: block;
+  padding: 0.5rem;
+  color: inherit;
+  text-decoration: none;
+  background-color: var(--color-bg);
+  border-radius: 3px;
+  box-shadow: 0 2px 8px var(--color-shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.articlecard:hover,
+.articlecard:focus-visible {
+  box-shadow: 0 4px 14px var(--color-shadow);
+  transform: translateY(-2px);
+}
+
+.articlecard--category {
+  border-left: 6px solid var(--accent-color, var(--color-border));
+}
+
+.articlecard img {
+  aspect-ratio: 8 / 5;
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.articlecard h3 {
+  margin: 0.5rem 0 0.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.articlecard-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  margin: 0.15rem 0 0.5rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.articlecard-intro {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin: 0;
+}

@@ -4,7 +4,7 @@
   font-weight: bold;
   padding: 3px;
 
-  color: #001f5e;
+  color: var(--color-link);
 
   transition:
     background-color 0.15s ease,
@@ -16,7 +16,7 @@
 /* modifiers */
 .back-to:hover {
   transform: translateY(-1px);
-  color: #197dc4;
+  color: var(--color-link-hover);
 }
 
 .back-to:active {

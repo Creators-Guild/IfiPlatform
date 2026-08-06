@@ -11,10 +11,15 @@
   text-align: right;
 }
 
+.select-language form {
+  display: inline;
+  margin: 0;
+}
+
 .lang-btn {
   background: transparent;
-  color: #0be9ae;
-  border: 1px solid #0be9ae;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
   padding: 3px 8px;
   margin-left: 6px;
   cursor: pointer;
@@ -23,13 +28,32 @@
 
 /* hover effect */
 .lang-btn:hover {
-  background: #0be9ae;
-  color: #1f1f1f;
+  background: var(--color-accent);
+  color: var(--color-bg-dark);
 }
 
 /* current language */
 .lang-btn.active {
-  background: #0be9ae;
-  color: #1f1f1f;
+  background: var(--color-accent);
+  color: var(--color-bg-dark);
   font-weight: bold;
+}
+
+/* this never shrank at any breakpoint before -- at extreme zoom the
+   buttons (font: inherit, no cap) eventually become individually wider
+   than the effective viewport, which wrapping alone can't fix since each
+   is one unbreakable inline-block token */
+@media (max-width: 700px) {
+  .lang-btn {
+    padding: 2px 6px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lang-btn {
+    padding: 1px 5px;
+    margin-left: 4px;
+    font-size: 11px;
+  }
 }

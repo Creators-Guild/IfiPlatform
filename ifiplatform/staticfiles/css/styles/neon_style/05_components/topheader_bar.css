@@ -1,11 +1,53 @@
 /* Topbar Navigation Bar */
 .header-bar  {
   background: var(--color-bg-dark);
-  padding: 2px;
-  display: flex; /* place all in row */
+  /* symmetric left/right padding -- flex-wrap respects this on every
+     wrapped line, not just the last one, so an item that wraps onto its
+     own row (e.g. Konto at high zoom) still gets edge breathing room
+     instead of sitting flush left. Extra bottom padding so a wrapped
+     nav_links row doesn't sit flush against the banner's bottom edge. */
+  padding: 2px 2rem 1rem;
+  display: flex; /* place all in row: logo-box, then the nav_links group */
+  flex-wrap: wrap; /* the two groups can drop to their own row when tight */
   align-items: center; /* center vertically */
-  gap: 16px; /* gaap between each item */
+  gap: 16px 2rem;
   width: 100%;
+  box-sizing: border-box;
+}
+
+/* the nav links live in their own flex row so they always move as one
+   group -- without this they're flat siblings of the logo box, and
+   wrapping scatters them individually (one ending up next to the logo,
+   others each on their own line) instead of staying together */
+.nav_links {
+  display: flex;
+  /* shrink:1 (not 0) as a last-resort safety net: if compact mode hasn't
+     kicked in yet for any reason (JS not run yet, a gap in the detection
+     logic, ...), this can still shrink and let its own overflow-x:auto
+     scroll internally, rather than rigidly refusing to shrink and
+     overflowing the whole page instead. */
+  flex: 0 1 auto; /* at normal size, stay sized to content -- hug the right, don't stretch */
+  /* flex items default to min-width:auto (not 0), which stops them
+     shrinking below their content's natural min size -- since .nav_link
+     children are flex-shrink:0 + white-space:nowrap, that natural size is
+     the full sum of all four links, so without this override,
+     overflow-x:auto below never actually gets a chance to kick in: the
+     box itself never shrinks small enough to need it, so it just stays
+     wide and pushes .header-bar (and the whole page) out with it. */
+  min-width: 0;
+  flex-wrap: nowrap;
+  align-items: center;
+  margin-left: auto;
+  gap: 8rem;
+  overflow-x: auto; /* safety net if a link still doesn't fit on very small screens */
+  /* overflow-x:auto here forces overflow-y to compute to auto too (per the
+     CSS overflow spec -- explicitly setting overflow-y:visible doesn't
+     escape it, the spec overrides that back to auto regardless), so this
+     row now clips anything taller than its own content box. Padding gives
+     .profile-trigger (3.25rem, taller than the plain text nav links) real
+     clearance instead of being flush against that clip boundary, which is
+     what made it visibly clip on :hover's 1px transform. */
+  padding: 0.5rem 0;
 }
 
 .ifiplatform-logo-box {
@@ -31,17 +73,17 @@
 
 .ifiplatform-logo {
   text-decoration: none;
-  color: var(--color-turq);
+  color: var(--color-accent);
 }
 
 .ifiplatform-logo:hover {
-  color: var(--color-turq-hover);
+  color: var(--color-accent-hover);
 }
 
 .header-message {
   margin-left: 40px;
   font-size: 16px;
-  color: var(--color-turq-hover);
+  color: var(--color-accent-hover);
   transform-origin: left center;
   animation: header-message-pulse 2.5s ease-in-out infinite;
 }
@@ -68,14 +110,15 @@
 
 .header-message b,
 .header-message strong {
-  color: var(--color-turq);
+  color: var(--color-accent);
 }
 
 .nav_link {
-  color: var(--color-purple);
+  flex-shrink: 0; /* keep natural size in the nowrap row -- .nav_links scrolls instead of squishing them */
+  color: var(--color-secondary);
   text-decoration: none;
-  margin-right: 100px;
   font-size: 18px;
+  white-space: nowrap;
   transition:
     background-color 0.15s ease,
     transform 0.05s ease;
@@ -85,11 +128,91 @@
 .nav_link.active {
   font-size: 25px;
   font-weight: bold;
-  color: var(--color-pink);
+  color: var(--color-cta);
 }
 
 .nav_link:hover {
   font-weight: bold;
   text-decoration: underline;
   transform: translateY(-1px);
+}
+
+/* swap to short labels once the header is tight on space (zoomed in far
+   or a narrow viewport), instead of wrapping the full-length link text */
+.nav_link-short {
+  display: none;
+}
+
+/* "compact" mode: applied by nav_overflow.js the moment it measures that
+   the full-label layout would actually overflow, whatever the reason --
+   narrow viewport, high zoom, or a custom gap value like this one. A
+   fixed max-width breakpoint can't stay accurate against that, since it's
+   only ever a guess at what the content needs; a real measurement is. */
+.header-bar.nav-compact .nav_link-full {
+  display: none;
+}
+
+.header-bar.nav-compact .nav_link-short {
+  display: inline;
+}
+
+.header-bar.nav-compact .nav_links {
+  flex: 1 1 auto;
+  justify-content: space-between;
+  margin-left: 0;
+  gap: 1.5rem;
+}
+
+/* max-width fallback, in case JS fails to load */
+@media (max-width: 700px) {
+  .nav_link-full {
+    display: none;
+  }
+
+  .nav_link-short {
+    display: inline;
+  }
+
+  .nav_links {
+    flex: 1 1 auto;
+    justify-content: space-between;
+    margin-left: 0;
+    gap: 1.5rem;
+  }
+}
+
+/* phone-sized screens: shrink everything so the banner doesn't eat the
+   whole first screenful, and the nav group reliably stays on one line */
+@media (max-width: 480px) {
+  .header-bar {
+    padding: 2px 0.75rem 1rem;
+    gap: 8px 0.75rem;
+  }
+
+  .ifiplatform-logo-box {
+    margin-left: 0;
+    padding: 8px 0;
+  }
+
+  .ifiplatform-logo-box h1 {
+    font-size: 20px;
+  }
+
+  .header-message {
+    margin-left: 0;
+    font-size: 12px;
+  }
+
+  .nav_links {
+    gap: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  .nav_link {
+    font-size: 13px;
+  }
+
+  .nav_link.active {
+    font-size: 16px;
+  }
 }

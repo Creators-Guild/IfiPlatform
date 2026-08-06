@@ -1,7 +1,7 @@
 .category-grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 1.25rem;
   margin-top: 1.5rem;
 }
@@ -15,39 +15,39 @@
   flex: 0 1 14rem;
   min-height: 8rem;
   padding: 1.5rem;
-  background-color: var(--color-bg-light);
-  border: 2px solid var(--color-black);
-  border-top: 6px solid var(--accent-color, var(--color-black));
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-top: 6px solid var(--accent-color, var(--color-border));
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
+  box-shadow: 0 2px 8px var(--color-shadow);
   text-decoration: none;
-  color: var(--color-black);
+  color: var(--color-text);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .category-card:hover,
 .category-card:focus-visible {
-  box-shadow: 0 4px 14px var(--color-boxshadow);
+  box-shadow: 0 4px 14px var(--color-shadow);
   transform: translateY(-2px);
 }
 
 .category-card h2 {
   margin: 0;
   font-size: 1.1rem;
-  color: var(--color-black);
+  color: var(--color-text);
 }
 
 .section-heading {
   margin-top: 2.5rem;
-  text-align: center;
+  text-align: left;
 }
 
 .category-badge {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background-color: var(--accent-color, var(--color-purple));
-  color: var(--color-bg-light);
+  background-color: var(--accent-color, var(--color-secondary));
+  color: var(--color-on-accent);
   font-size: 0.7rem;
   font-weight: bold;
   padding: 0.2rem 0.5rem;
@@ -56,72 +56,19 @@
 
 .section-divider {
   border: none;
-  border-top: 2px solid var(--color-black);
+  border-top: 2px solid var(--color-border);
   opacity: 0.15;
   margin: 2.5rem 0 1.5rem;
 }
 
-.article-suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.25rem;
-}
-
-.article-suggestion-card {
-  display: block;
-  flex: 0 1 16rem;
-  padding: 1rem 1.25rem;
-  background-color: var(--color-bg-light);
-  border: 2px solid var(--color-black);
-  border-left: 6px solid var(--accent-color, var(--color-black));
-  border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
-  text-decoration: none;
-  color: var(--color-black);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.article-suggestion-card:hover,
-.article-suggestion-card:focus-visible {
-  box-shadow: 0 4px 14px var(--color-boxshadow);
-  transform: translateY(-2px);
-}
-
-.article-suggestion-card .category-label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: bold;
-  color: var(--accent-color, var(--color-black));
-  margin-bottom: 0.35rem;
-}
-
-.article-suggestion-card h3 {
-  margin: 0;
-  font-size: 1rem;
+.section-divider + .section-heading {
+  margin-top: 0.75rem;
 }
 
 /* accent color carried from a category onto its own page and its articles */
 .category-page h1,
 .article-page h1 {
   display: inline-block;
-  border-bottom: 4px solid var(--accent-color, var(--color-black));
+  border-bottom: 4px solid var(--accent-color, var(--color-border));
   padding-bottom: 0.4rem;
-}
-
-.category-page .article-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-}
-
-.category-page .article-list a {
-  color: var(--accent-color, var(--color-black));
-  font-weight: bold;
-  text-decoration: none;
-}
-
-.category-page .article-list a:hover {
-  text-decoration: underline;
 }

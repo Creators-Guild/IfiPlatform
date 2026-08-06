@@ -1,0 +1,904 @@
+Task id=6TbTE7NJz9jxwsumhgQhrEluJ2JdOE2G path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=jeBkrCPnA6Z38TN7peT1CpIWv2QMFGP4 path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=alEto04rAnptG5fKpdAwh4fW1vgHYkHZ path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=yDp3gXZUmt4dwGpqWJIaK4iC9FpNOwAz path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=zpZp1wLLS2ISt8vYW3MrBSY6nbjXe3Cm path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=2eOAqB8KNXs7oWaH7CBBup1RAafUyCjt path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=hsJHSoemuwdpivZQ7eABlZXfh3UCSS57 path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=O75kWtWR9kYOThqnJxBC5vkpmlSYNoEV path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=Pnyo6lVYR0NvysFJaxYXKCRZyOHeLjpX path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=AFsZh4bQPLz8tb4xas46aqCUOUoi2hhW path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=cixA5tRS200A8wBBFNECZUEplQxdES7i path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=scxSVrzBHxD0khvIuzlDZkTvBLtIlooi path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=1wsaVlDYouhR3fcEFgHu5mwcmjs5KLiI path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticlePage.DoesNotExist: ArticlePage matching query does not exist.
+Task id=uAHMCd2468ZVvTrWsVzKsYMctmriwcbh path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=PfxHznGvnBr4mID2pavXGg9ubsDOXLc0 path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=RlU0qHcUiNz415bMa9ywx8GIcbdt12Sw path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=WuOFyDwbiQqjpYpvtmQQr1rU6nLRUbE2 path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=E3PZ51H7zSG5KGRgco3hBxuJLNDEaYdS path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=6GqwruZi4XxzIz4TO8M9wKjWwzVpSpYd path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=pABTG6QVb5mRxp3xovhpxcEyYyr1o4xw path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=z3w95fwd8bUBq0OJQ4n7nqVWqmdjUmYB path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=QTL09Wu2bnorq1CPalKa7vyRGJN8WBZz path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=xTYRFHxVYnDd0NU4bqjzWzZ2Xehp0ngt path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=K57X2Usyc6r0jNeHky1D7uHjHsl1jRcP path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=tayGsSrdHZVQ2JJZQLe2LttzfyZf5BTA path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=To6SJCF0g3LvhT8kwx5dilapfKvDjizu path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=W8TJ2St3rcVSHw2Y5hsR59CL1eJbZH4n path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=Oi79sw25IgWyjidANfLr0yzJ27VxvEAT path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=VbX489ytedtYFCjE0y3paIjPT1LfH8Yr path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=Nh0LGwK9rWA1wbyNyWv8XsUUeB1UKti2 path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=iS1DdqbhEXY9YXDl73IOPlXjHN73gGPh path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=IsqOqnJyqu1qLW4gnEBmNKWcXALRRzun path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=B8GbYSmaRmu4MP8UuUz5EY80YXVCyDFw path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=oYumrXTIC9jn1OdJnxJLDVSxkL4hpOvi path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=Loep1NfbyMK82QTLVPBuGt2RImgLBQVb path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.CategoryPage.DoesNotExist: CategoryPage matching query does not exist.
+Task id=J5DTGaNuoU7sAppeoij5y5mJlmp3WMF2 path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticleIndexPage.DoesNotExist: ArticleIndexPage matching query does not exist.
+Task id=nEuuT22qNSZh4GbXAXK9LxPLcqAkOjiF path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticleIndexPage.DoesNotExist: ArticleIndexPage matching query does not exist.
+Task id=zfZ7vs88OX9dz2Igt23Iyaz0GbPg5tmK path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticleIndexPage.DoesNotExist: ArticleIndexPage matching query does not exist.
+Task id=Bp5St2f9H0kLYBIsFdYvZG2BNGWUYDkz path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticleIndexPage.DoesNotExist: ArticleIndexPage matching query does not exist.
+Task id=cdg9JEWCsmq2oS6AqQ1TY5s2AgSeBInr path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticleIndexPage.DoesNotExist: ArticleIndexPage matching query does not exist.
+Task id=Gq2aHo7vKmoCZP64BR8FwysX2y8492lj path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ArticleIndexPage.DoesNotExist: ArticleIndexPage matching query does not exist.
+Task id=ROHGI14vTHsYXL9SpwUSmv4tmEd4gt6j path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.UnionPage.DoesNotExist: UnionPage matching query does not exist.
+Task id=tJ6Rms7sFYayS1Tp76f6bIUjoApJHxAZ path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.UnionPage.DoesNotExist: UnionPage matching query does not exist.
+Task id=3vGovDLjwsd6eKKk7xKuVmvhJkgJDRN8 path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.UnionPage.DoesNotExist: UnionPage matching query does not exist.
+Task id=IlFcnmfr9307TFVe5bPJ9GRcehgVspD0 path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.UnionPage.DoesNotExist: UnionPage matching query does not exist.
+Task id=H94UXMYEyez5L6R1oYtW9fJhAybdLPzz path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.UnionPage.DoesNotExist: UnionPage matching query does not exist.
+Task id=QYhP5lKl3WvtxdARCL7oJ5GjhKW7Hy3t path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.UnionPage.DoesNotExist: UnionPage matching query does not exist.
+Task id=LE95Em65k16jTSFQc2AS7WRq2aX89lnp path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.UnionPage.DoesNotExist: UnionPage matching query does not exist.
+Task id=30ZamsYV7kve1vrVlgXTVnefPZs0HtQX path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.UnionPage.DoesNotExist: UnionPage matching query does not exist.
+Task id=6nAMPXaWQ9Se8B8mUFIfO7jYHmpdKVR1 path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.StudentUnionCategoryPage.DoesNotExist: StudentUnionCategoryPage matching query does not exist.
+Task id=FlQwDYVzUwlOrzihbMu2pRNCnWKqhUi1 path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.StudentUnionCategoryPage.DoesNotExist: StudentUnionCategoryPage matching query does not exist.
+Task id=r3ApYRwPHu3cm2ODlbMhs5PpomYpfTGY path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ToolPage.DoesNotExist: ToolPage matching query does not exist.
+Task id=A2KeGENAIBkkhHgMnDWh3ODKt8LFbpiu path=modelsearch.tasks.insert_or_update_object_task state=FAILED
+Traceback (most recent call last):
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/backends/immediate.py", line 59, in _execute_task
+    raw_return_value = task.call(*task_result.args, **task_result.kwargs)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django_tasks/base.py", line 165, in call
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/modelsearch/tasks.py", line 10, in insert_or_update_object_task
+    index.insert_or_update_object(model.objects.get(pk=pk))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/IfiPlatform/venv/lib/python3.12/site-packages/django/db/models/query.py", line 639, in get
+    raise self.model.DoesNotExist(
+ifi_home_app.models.article_models.ToolPage.DoesNotExist: ToolPage matching query does not exist.
+77 objects imported automatically (use -v 2 for details).
+
+Installed 2466 object(s) from 1 fixture(s)

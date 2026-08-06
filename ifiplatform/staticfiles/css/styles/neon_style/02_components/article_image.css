@@ -1,16 +1,3 @@
-.article-page {
-  display: flow-root;
-}
-
-.article-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
-  margin: 0 0 1.5rem;
-  font-size: 0.9rem;
-  color: var(--color-black);
-}
-
 .hero-image-figure,
 .body-image-figure {
   margin: 0;
@@ -19,20 +6,36 @@
 .hero-image-figure figcaption,
 .body-image-figure figcaption {
   font-size: 0.85rem;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
   margin-top: 0.35rem;
   text-align: center;
+  /* left/right-positioned figures are floated with width:auto, which uses
+     shrink-to-fit sizing -- without this, a long caption's unwrapped
+     (max-content) width feeds into that calculation and can stretch the
+     whole figure (and the 100%-width image inside it) wider than intended.
+     width:0 removes the figcaption's own contribution to that calculation;
+     min-width:100% then fills whatever width the figure settles on from
+     the image alone, so a long caption just wraps onto more lines instead. */
+  width: 0;
+  min-width: 100%;
+  box-sizing: border-box;
+  /* the fix above only stops the caption from stretching the figure -- it
+     still doesn't wrap on its own if it's one long word/string with no
+     spaces or hyphens to break at (the actual bug here: it just overflows
+     past the box's own edge instead). This forces a break wherever needed
+     so it stays within the resolved width either way. */
+  overflow-wrap: anywhere;
 }
 
 .image-title {
   display: block;
   font-weight: bold;
-  color: var(--color-black);
+  color: var(--color-text);
 }
 
 .image-caption {
   display: block;
-  color: var(--color-black);
+  color: var(--color-text);
 }
 
 .hero-image,
@@ -126,52 +129,18 @@
   }
 }
 
+/* border-radius comes from inline style (box_border_radius, an editor-chosen
+rem number) rather than being fixed here -- see article_image_block.html /
+article_page.html's hero image figure. */
 .image-figure--boxed {
   padding: 1rem;
-  background-color: var(--box-bg, var(--color-bg-light));
-  border: 2px solid var(--color-black);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
+  background-color: var(--box-bg, var(--color-bg));
+  border: 2px solid var(--color-border);
+  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 /* keep title/caption readable on a dark box background */
 .box-color--black .image-title,
 .box-color--black .image-caption {
-  color: var(--color-bg-light);
-}
-
-.multi-col-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  align-items: start;
-  margin: 1.5rem 0;
-}
-
-.multi-col-item {
-  min-width: 0;
-}
-
-.multi-col-item :first-child {
-  margin-top: 0;
-}
-
-.column-title {
-  display: inline-block;
-  margin: 0 0 0.5rem;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: var(--color-black);
-  border-bottom: 3px solid var(--accent-color, var(--color-black));
-  padding-bottom: 0.2rem;
-}
-
-@media (max-width: 640px) {
-  .multi-col-grid {
-    flex-direction: column;
-  }
-
-  .multi-col-item {
-    flex-basis: auto !important;
-  }
+  color: var(--color-on-accent);
 }
