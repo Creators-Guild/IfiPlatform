@@ -195,6 +195,22 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Email (used for account verification, see account_app) -- defaults to the
+# console backend (prints emails to the server log instead of sending them),
+# so local dev works with no setup. Set EMAIL_HOST in .env to switch to real
+# SMTP once there's a relay/provider to send through.
+if os.environ.get("EMAIL_HOST"):
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = os.environ.get("EMAIL_HOST")
+    EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+    EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@ifiplatform.no")
+
 # File-based so the cache is shared across gunicorn worker processes --
 # the default LocMemCache is per-process, so e.g. Wagtail's site-root-paths
 # cache could go stale in some workers after a Site/page change until every

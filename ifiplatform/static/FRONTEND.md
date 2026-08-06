@@ -18,7 +18,7 @@ Try to avoid long files with lots of scrolling. Instead seperate into new and mo
         07-utilities/    # Overrides, helpers (.hidden, .text-center)
     
 - load order follows numbering
-- load necessary with one main CSS file ex.
+- load necessary with one or a few CSS files ex.
 
         @import "01_generic/reset.css";
         @import "02_settings/tokens.css";

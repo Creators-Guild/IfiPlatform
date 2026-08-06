@@ -1,57 +1,4 @@
-/* --- Union listing card (studentunion_category_page.html) --- */
-
-.union-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 1.25rem;
-  margin-top: 1.5rem;
-}
-
-.union-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.6rem;
-  flex: 0 1 14rem;
-  padding: 1.5rem;
-  background-color: white;
-  border: 2px solid var(--color-black);
-  border-top: 6px solid var(--accent-color, var(--color-black));
-  border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
-  text-decoration: none;
-  color: var(--color-black);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.union-card:hover,
-.union-card:focus-visible {
-  box-shadow: 0 4px 14px var(--color-boxshadow);
-  transform: translateY(-2px);
-}
-
-.union-card h3 {
-  margin: 0;
-  font-size: 1.05rem;
-}
-
-.union-card-logo,
-.union-card-logo--placeholder {
-  width: 5rem;
-  height: 5rem;
-  object-fit: cover;
-  border-radius: 999px;
-  border: 2px solid var(--color-black);
-}
-
-.union-card-logo--placeholder {
-  background-color: var(--color-bg-dark, var(--color-black-hover));
-  opacity: 0.15;
-}
-
-/* --- Union detail page (union_page.html) --- */
+/* Union detail page (union_page.html) */
 
 .union-header {
   display: flex;
@@ -65,14 +12,14 @@
   height: 6rem;
   object-fit: cover;
   border-radius: 999px;
-  border: 2px solid var(--color-black);
+  border: 2px solid var(--color-border);
   flex-shrink: 0;
 }
 
 .union-header-text h1 {
   display: inline-block;
   margin: 0 0 0.5rem;
-  border-bottom: 4px solid var(--accent-color, var(--color-black));
+  border-bottom: 4px solid var(--accent-color, var(--color-border));
   padding-bottom: 0.3rem;
 }
 
@@ -82,8 +29,8 @@
   font-weight: bold;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  background-color: var(--accent-color, var(--color-purple));
-  color: var(--color-bg-light);
+  background-color: var(--accent-color, var(--color-secondary));
+  color: var(--color-on-accent);
 }
 
 .union-layout {
@@ -110,10 +57,10 @@
 
 .union-info-box {
   padding: 1.25rem;
-  background-color: white;
-  border: 2px solid var(--color-black);
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
+  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 .union-info-box h2 {
@@ -123,7 +70,7 @@
 
 .union-info-link {
   display: block;
-  color: var(--color-black);
+  color: var(--color-text);
   text-decoration: underline;
   margin-bottom: 0.4rem;
   word-break: break-word;
@@ -146,12 +93,12 @@
 .union-stat-number {
   font-size: 1.6rem;
   font-weight: bold;
-  color: var(--accent-color, var(--color-black));
+  color: var(--accent-color, var(--color-border));
 }
 
 .union-stat-label {
   font-size: 0.8rem;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
 }
 
 .union-member-grid {
@@ -169,10 +116,10 @@
   gap: 0.35rem;
   flex: 0 1 10rem;
   padding: 1rem;
-  background-color: white;
-  border: 2px solid var(--color-black);
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
+  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 .union-member-card h3 {
@@ -186,23 +133,23 @@
   height: 4.5rem;
   object-fit: cover;
   border-radius: 999px;
-  border: 2px solid var(--color-black);
+  border: 2px solid var(--color-border);
 }
 
 .union-member-picture--placeholder {
-  background-color: var(--color-bg-dark, var(--color-black-hover));
+  background-color: var(--color-bg-dark, var(--color-text-muted));
   opacity: 0.15;
 }
 
 .union-member-role {
   font-size: 0.8rem;
-  color: var(--accent-color, var(--color-black));
+  color: var(--accent-color, var(--color-border));
   font-weight: bold;
 }
 
 .union-member-email {
   font-size: 0.75rem;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
   word-break: break-word;
 }
 

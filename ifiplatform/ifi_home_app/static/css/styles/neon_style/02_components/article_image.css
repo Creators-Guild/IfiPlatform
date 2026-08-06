@@ -1,0 +1,146 @@
+.hero-image-figure,
+.body-image-figure {
+  margin: 0;
+}
+
+.hero-image-figure figcaption,
+.body-image-figure figcaption {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 0.35rem;
+  text-align: center;
+  /* left/right-positioned figures are floated with width:auto, which uses
+     shrink-to-fit sizing -- without this, a long caption's unwrapped
+     (max-content) width feeds into that calculation and can stretch the
+     whole figure (and the 100%-width image inside it) wider than intended.
+     width:0 removes the figcaption's own contribution to that calculation;
+     min-width:100% then fills whatever width the figure settles on from
+     the image alone, so a long caption just wraps onto more lines instead. */
+  width: 0;
+  min-width: 100%;
+  box-sizing: border-box;
+  /* the fix above only stops the caption from stretching the figure -- it
+     still doesn't wrap on its own if it's one long word/string with no
+     spaces or hyphens to break at (the actual bug here: it just overflows
+     past the box's own edge instead). This forces a break wherever needed
+     so it stays within the resolved width either way. */
+  overflow-wrap: anywhere;
+}
+
+.image-title {
+  display: block;
+  font-weight: bold;
+  color: var(--color-text);
+}
+
+.image-caption {
+  display: block;
+  color: var(--color-text);
+}
+
+.hero-image,
+.body-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+/* hero image: alignment (float / position) */
+.hero-image--right {
+  float: right;
+  margin: 0 0 1rem 1.5rem;
+}
+
+.hero-image--left {
+  float: left;
+  margin: 0 1.5rem 1rem 0;
+}
+
+.hero-image--center {
+  margin: 0 auto 1.5rem;
+}
+
+/* hero image: size (max-width) */
+.hero-image--size-small {
+  max-width: 12rem;
+}
+
+.hero-image--size-medium {
+  max-width: 18rem;
+}
+
+.hero-image--size-large {
+  max-width: 30rem;
+}
+
+.hero-image--size-full {
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .hero-image--left,
+  .hero-image--right {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem;
+  }
+}
+
+/* body images: size (max-width) */
+.body-image-figure {
+  margin: 1rem 0;
+}
+
+.body-image--small {
+  max-width: 12rem;
+}
+
+.body-image--medium {
+  max-width: 20rem;
+}
+
+.body-image--large {
+  max-width: 100%;
+}
+
+/* body images: alignment (float / position) */
+.body-image--left {
+  float: left;
+  margin: 0 1.5rem 1rem 0;
+}
+
+.body-image--right {
+  float: right;
+  margin: 0 0 1rem 1.5rem;
+}
+
+.body-image--center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 640px) {
+  .body-image--left,
+  .body-image--right {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem;
+  }
+}
+
+/* border-radius comes from inline style (box_border_radius, an editor-chosen
+rem number) rather than being fixed here -- see article_image_block.html /
+article_page.html's hero image figure. */
+.image-figure--boxed {
+  padding: 1rem;
+  background-color: var(--box-bg, var(--color-bg));
+  border: 2px solid var(--color-border);
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+/* keep title/caption readable on a dark box background */
+.box-color--black .image-title,
+.box-color--black .image-caption {
+  color: var(--color-on-accent);
+}

@@ -64,7 +64,7 @@ background/border/shadow styling. */
     gap: 0.15rem;
     margin: 0;
     font-size: 0.85rem;
-    color: var(--color-black);
+    color: var(--color-text);
   }
 
   .newsbar-layout .articlecard:nth-child(n + 3) .articlecard-intro {

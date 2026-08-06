@@ -1,0 +1,6 @@
+/* flow-root so floated content inside (hero image, ToC popover anchors,
+   floated body images/boxes) is properly contained -- the article's own
+   height wraps around them instead of collapsing past their bottom edge. */
+.article-page {
+  display: flow-root;
+}

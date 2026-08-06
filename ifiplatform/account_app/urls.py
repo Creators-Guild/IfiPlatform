@@ -7,9 +7,39 @@ from .views import account_views
 urlpatterns = [
     path("signin", login_views.signin_view, name="signin"),
     path("signin_success", login_views.signin_success_view, name="signin_success"),
+    path(
+        "verify_email_sent",
+        login_views.verify_email_sent_view,
+        name="verify_email_sent",
+    ),
+    path(
+        "verify/<uidb64>/<token>/",
+        login_views.verify_email_view,
+        name="verify_email",
+    ),
+    path(
+        "resend_verification",
+        login_views.resend_verification_view,
+        name="resend_verification",
+    ),
     path("login", login_views.login_view, name="login"),
     path("logout", login_views.logout_view, name="logout"),
     path(
         "account_settings", account_views.account_settings_view, name="account_settings"
+    ),
+    path(
+        "email_change_sent",
+        account_views.email_change_sent_view,
+        name="email_change_sent",
+    ),
+    path(
+        "confirm_email_change/<token>/",
+        account_views.confirm_email_change_view,
+        name="confirm_email_change",
+    ),
+    path(
+        "cancel_email_change",
+        account_views.cancel_email_change_view,
+        name="cancel_email_change",
     ),
 ]

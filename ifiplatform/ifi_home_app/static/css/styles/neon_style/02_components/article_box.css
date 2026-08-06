@@ -1,0 +1,46 @@
+/* the "box" body block -- background/border color and border-radius come
+from inline style (--box-bg/--box-border-color custom properties + a
+direct border-radius, set in article_body_blocks.html since they're
+editor-chosen colors/numbers, not a fixed set of steps). flow-root so the
+box's background/border properly wraps floated content (e.g. a left/right
+-aligned image) inside it, same reasoning as .article-page. */
+.content-box {
+  display: flow-root;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  background-color: var(--box-bg, var(--color-bg));
+  border: 2px solid var(--box-border-color, var(--color-border));
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.content-box > :first-child {
+  margin-top: 0;
+}
+
+.content-box > :last-child {
+  margin-bottom: 0;
+}
+
+/* floated (see article_models.py's "float" field help text for why this is
+the actual mechanism for "surrounding text reclaims space once past a
+shorter box" -- same technique as .hero-image--left/right, just on the box
+instead of an image). Width comes from inline style (float_width, an
+editor-chosen %). */
+.content-box--float-left {
+  float: left;
+  margin: 0 1.5rem 1rem 0;
+}
+
+.content-box--float-right {
+  float: right;
+  margin: 0 0 1rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .content-box--float-left,
+  .content-box--float-right {
+    float: none;
+    width: 100% !important;
+    margin: 0 0 1.5rem;
+  }
+}

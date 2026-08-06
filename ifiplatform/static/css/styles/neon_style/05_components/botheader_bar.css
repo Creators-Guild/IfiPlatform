@@ -9,7 +9,7 @@
 }
 
 .bot-bar p {
-  color: var(--color-bg-light);
+  color: var(--color-on-accent);
 }
 
 .bot-bar img {

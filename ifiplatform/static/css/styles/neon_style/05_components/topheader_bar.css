@@ -40,6 +40,14 @@
   margin-left: auto;
   gap: 8rem;
   overflow-x: auto; /* safety net if a link still doesn't fit on very small screens */
+  /* overflow-x:auto here forces overflow-y to compute to auto too (per the
+     CSS overflow spec -- explicitly setting overflow-y:visible doesn't
+     escape it, the spec overrides that back to auto regardless), so this
+     row now clips anything taller than its own content box. Padding gives
+     .profile-trigger (3.25rem, taller than the plain text nav links) real
+     clearance instead of being flush against that clip boundary, which is
+     what made it visibly clip on :hover's 1px transform. */
+  padding: 0.5rem 0;
 }
 
 .ifiplatform-logo-box {
@@ -65,17 +73,17 @@
 
 .ifiplatform-logo {
   text-decoration: none;
-  color: var(--color-turq);
+  color: var(--color-accent);
 }
 
 .ifiplatform-logo:hover {
-  color: var(--color-turq-hover);
+  color: var(--color-accent-hover);
 }
 
 .header-message {
   margin-left: 40px;
   font-size: 16px;
-  color: var(--color-turq-hover);
+  color: var(--color-accent-hover);
   transform-origin: left center;
   animation: header-message-pulse 2.5s ease-in-out infinite;
 }
@@ -102,12 +110,12 @@
 
 .header-message b,
 .header-message strong {
-  color: var(--color-turq);
+  color: var(--color-accent);
 }
 
 .nav_link {
   flex-shrink: 0; /* keep natural size in the nowrap row -- .nav_links scrolls instead of squishing them */
-  color: var(--color-purple);
+  color: var(--color-secondary);
   text-decoration: none;
   font-size: 18px;
   white-space: nowrap;
@@ -120,7 +128,7 @@
 .nav_link.active {
   font-size: 25px;
   font-weight: bold;
-  color: var(--color-pink);
+  color: var(--color-cta);
 }
 
 .nav_link:hover {
