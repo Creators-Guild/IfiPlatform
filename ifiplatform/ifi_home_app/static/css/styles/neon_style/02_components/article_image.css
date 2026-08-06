@@ -6,7 +6,7 @@
 .hero-image-figure figcaption,
 .body-image-figure figcaption {
   font-size: 0.85rem;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
   margin-top: 0.35rem;
   text-align: center;
   /* left/right-positioned figures are floated with width:auto, which uses
@@ -30,12 +30,12 @@
 .image-title {
   display: block;
   font-weight: bold;
-  color: var(--color-black);
+  color: var(--color-text);
 }
 
 .image-caption {
   display: block;
-  color: var(--color-black);
+  color: var(--color-text);
 }
 
 .hero-image,
@@ -134,13 +134,13 @@ rem number) rather than being fixed here -- see article_image_block.html /
 article_page.html's hero image figure. */
 .image-figure--boxed {
   padding: 1rem;
-  background-color: var(--box-bg, var(--color-bg-light));
-  border: 2px solid var(--color-black);
-  box-shadow: 0 2px 8px var(--color-boxshadow);
+  background-color: var(--box-bg, var(--color-bg));
+  border: 2px solid var(--color-border);
+  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 /* keep title/caption readable on a dark box background */
 .box-color--black .image-title,
 .box-color--black .image-caption {
-  color: var(--color-bg-light);
+  color: var(--color-on-accent);
 }

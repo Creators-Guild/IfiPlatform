@@ -15,7 +15,7 @@
 }
 
 .link a {
-  color: var(--color-black);
+  color: var(--color-text);
 }
 
 .link a:active {
@@ -23,5 +23,5 @@
 }
 
 .link a:hover {
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
 }

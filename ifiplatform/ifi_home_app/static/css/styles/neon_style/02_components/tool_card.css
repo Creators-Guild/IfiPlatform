@@ -16,14 +16,14 @@
   flex-direction: column;
   flex: 0 1 18rem;
   overflow: hidden;
-  background-color: white;
-  border: 2px solid var(--color-black);
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
   border-radius: 14px;
   box-shadow:
-    0 2px 8px var(--color-boxshadow),
+    0 2px 8px var(--color-shadow),
     0 0 0 0 transparent;
   text-decoration: none;
-  color: var(--color-black);
+  color: var(--color-text);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -32,15 +32,15 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 5px;
-  background: linear-gradient(90deg, var(--color-pink), var(--color-purple), var(--color-turq));
+  background: linear-gradient(90deg, var(--color-cta), var(--color-secondary), var(--color-accent));
 }
 
 .tool-card:hover,
 .tool-card:focus-visible {
   transform: translateY(-3px);
   box-shadow:
-    0 6px 18px var(--color-boxshadow),
-    0 0 22px rgba(241, 30, 178, 0.3);
+    0 6px 18px var(--color-shadow),
+    0 0 22px color-mix(in srgb, var(--color-cta) 30%, transparent);
 }
 
 .tool-card-image {
@@ -65,11 +65,11 @@
 
 .tool-card-maker {
   font-size: 0.75rem;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
 }
 
 .tool-card-link-hint {
   font-size: 0.75rem;
   font-weight: bold;
-  color: var(--color-purple);
+  color: var(--color-secondary);
 }

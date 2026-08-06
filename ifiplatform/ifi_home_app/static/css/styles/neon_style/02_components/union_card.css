@@ -16,19 +16,19 @@
   gap: 0.6rem;
   flex: 0 1 14rem;
   padding: 1.5rem;
-  background-color: white;
-  border: 2px solid var(--color-black);
-  border-top: 6px solid var(--accent-color, var(--color-black));
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-top: 6px solid var(--accent-color, var(--color-border));
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
+  box-shadow: 0 2px 8px var(--color-shadow);
   text-decoration: none;
-  color: var(--color-black);
+  color: var(--color-text);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .union-card:hover,
 .union-card:focus-visible {
-  box-shadow: 0 4px 14px var(--color-boxshadow);
+  box-shadow: 0 4px 14px var(--color-shadow);
   transform: translateY(-2px);
 }
 
@@ -43,10 +43,10 @@
   height: 5rem;
   object-fit: cover;
   border-radius: 999px;
-  border: 2px solid var(--color-black);
+  border: 2px solid var(--color-border);
 }
 
 .union-card-logo--placeholder {
-  background-color: var(--color-bg-dark, var(--color-black-hover));
+  background-color: var(--color-bg-dark, var(--color-text-muted));
   opacity: 0.15;
 }

@@ -1,8 +1,8 @@
 .account-card {
-  background-color: var(--color-bg-light);
-  border: 2px solid var(--color-purple);
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-secondary);
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
+  box-shadow: 0 2px 8px var(--color-shadow);
   padding: 2rem 2.25rem;
   width: 100%;
   max-width: 32rem;
@@ -11,7 +11,7 @@
 }
 
 .account-card h2 {
-  color: var(--color-purple);
+  color: var(--color-secondary);
   margin-top: 0;
   font-size: 1.4rem;
 }
@@ -19,20 +19,20 @@
 .account-card .account-info {
   margin: 0 0 1.5rem;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-black) 12%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 12%, transparent);
   font-size: 0.95rem;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
 }
 
 .account-card .account-info span {
   font-weight: bold;
-  color: var(--color-black);
+  color: var(--color-text);
 }
 
 .account-card .account-actions {
   margin-top: 1.75rem;
   padding-top: 1.25rem;
-  border-top: 1px solid color-mix(in srgb, var(--color-black) 12%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 12%, transparent);
   display: flex;
   justify-content: flex-end;
 }
@@ -46,13 +46,13 @@
   position: relative;
   margin: 0 0 1rem;
   padding: 0.9rem 1.1rem 0.9rem 2.75rem;
-  background-color: var(--color-turq);
-  border: 2px solid var(--color-black);
+  background-color: var(--color-accent);
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.95rem;
   line-height: 1.5;
   font-weight: 600;
-  color: var(--color-black);
+  color: var(--color-text);
 }
 
 .account-card .profile-notice::before {
@@ -66,8 +66,8 @@
   width: 1.4rem;
   height: 1.4rem;
   border-radius: 50%;
-  background-color: var(--color-black);
-  color: var(--color-turq);
+  background-color: var(--color-text);
+  color: var(--color-accent);
   font-size: 0.9rem;
   line-height: 1;
 }
@@ -92,7 +92,7 @@
   font-size: 0.85rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
   margin-bottom: 0.4rem;
 }
 
@@ -101,21 +101,21 @@
   width: 100%;
   box-sizing: border-box;
   padding: 0.6rem 0.7rem;
-  border: 1px solid var(--color-black);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   font-family: inherit;
   font-size: 1.05rem;
 }
 
 .account-card .profile-form input:focus {
-  outline: 2px solid var(--color-turq);
-  border-color: var(--color-turq);
+  outline: 2px solid var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .account-card .profile-form .field-locked {
-  background-color: color-mix(in srgb, var(--color-black) 8%, var(--color-bg-light));
+  background-color: color-mix(in srgb, var(--color-text) 8%, var(--color-bg));
   border-style: dashed;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
   cursor: default;
 }
 
@@ -131,7 +131,7 @@
   padding: 0;
   background: none;
   border: none;
-  color: var(--color-purple);
+  color: var(--color-secondary);
   font-weight: bold;
   font-size: 0.9rem;
   text-decoration: underline;
@@ -141,7 +141,7 @@
 }
 
 .account-card .field-edit-toggle:hover {
-  color: var(--color-purple-hover);
+  color: var(--color-secondary-hover);
 }
 
 .account-card .field-save-btn {
@@ -150,19 +150,19 @@
 }
 
 .account-card .profile-form .error {
-  color: var(--color-pink);
+  color: var(--color-error);
   font-size: 0.85rem;
   font-weight: bold;
   margin: 0.4rem 0 0;
 }
 
 .account-card .btn-secondary {
-  background-color: var(--color-bg-light);
-  color: var(--color-black);
-  border: 2px solid var(--color-black);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: 2px solid var(--color-border);
 }
 
 .account-card .btn-secondary:hover {
-  background-color: var(--color-black);
-  color: var(--color-bg-light);
+  background-color: var(--color-text);
+  color: var(--color-on-accent);
 }

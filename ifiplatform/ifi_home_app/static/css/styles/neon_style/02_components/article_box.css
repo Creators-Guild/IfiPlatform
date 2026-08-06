@@ -8,9 +8,9 @@ box's background/border properly wraps floated content (e.g. a left/right
   display: flow-root;
   padding: 1.5rem;
   margin: 1.5rem 0;
-  background-color: var(--box-bg, var(--color-bg-light));
-  border: 2px solid var(--box-border-color, var(--color-black));
-  box-shadow: 0 2px 8px var(--color-boxshadow);
+  background-color: var(--box-bg, var(--color-bg));
+  border: 2px solid var(--box-border-color, var(--color-border));
+  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 .content-box > :first-child {

@@ -32,8 +32,8 @@ classes here, same reasoning as the styled text padding above. */
   margin: 0 0 0.5rem;
   font-size: 1.2rem;
   font-weight: bold;
-  color: var(--color-black);
-  border-bottom: 3px solid var(--accent-color, var(--color-black));
+  color: var(--color-text);
+  border-bottom: 3px solid var(--accent-color, var(--color-border));
   padding-bottom: 0.2rem;
 }
 

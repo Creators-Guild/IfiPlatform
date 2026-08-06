@@ -16,7 +16,7 @@ Sidemenu hover mdoifer will still enlarge menu */
     needing to be page-height (which caused it to get squeezed/pushed near
     the footer -- see sidemenu.css). Width tracks .sidemenu automatically
     since it's flex-basis:auto around that single child. */
-    background-color: var(--color-turq-hover);
+    background-color: var(--color-accent-hover);
 }
 
 .home-layout .maincontent {

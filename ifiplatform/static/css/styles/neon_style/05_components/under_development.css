@@ -11,13 +11,13 @@
 
 .under-development h1 {
   display: inline-block;
-  border-bottom: 4px solid var(--color-turq);
+  border-bottom: 4px solid var(--color-accent);
   padding-bottom: 0.4rem;
 }
 
 .under-development-status {
   font-weight: bold;
-  color: var(--color-turq-hover);
+  color: var(--color-accent-hover);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0;
@@ -25,7 +25,7 @@
 
 .under-development p {
   max-width: 32rem;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
 }
 
 .under-development .join-today-msg {

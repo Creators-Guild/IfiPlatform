@@ -73,17 +73,17 @@
 
 .ifiplatform-logo {
   text-decoration: none;
-  color: var(--color-turq);
+  color: var(--color-accent);
 }
 
 .ifiplatform-logo:hover {
-  color: var(--color-turq-hover);
+  color: var(--color-accent-hover);
 }
 
 .header-message {
   margin-left: 40px;
   font-size: 16px;
-  color: var(--color-turq-hover);
+  color: var(--color-accent-hover);
   transform-origin: left center;
   animation: header-message-pulse 2.5s ease-in-out infinite;
 }
@@ -110,12 +110,12 @@
 
 .header-message b,
 .header-message strong {
-  color: var(--color-turq);
+  color: var(--color-accent);
 }
 
 .nav_link {
   flex-shrink: 0; /* keep natural size in the nowrap row -- .nav_links scrolls instead of squishing them */
-  color: var(--color-purple);
+  color: var(--color-secondary);
   text-decoration: none;
   font-size: 18px;
   white-space: nowrap;
@@ -128,7 +128,7 @@
 .nav_link.active {
   font-size: 25px;
   font-weight: bold;
-  color: var(--color-pink);
+  color: var(--color-cta);
 }
 
 .nav_link:hover {

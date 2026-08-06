@@ -11,17 +11,17 @@ button.profile-trigger {
   height: 3.25rem;
   padding: 0;
   background: none;
-  border: 2px solid var(--color-purple);
+  border: 2px solid var(--color-secondary);
   border-radius: 50%;
-  color: var(--color-purple);
+  color: var(--color-secondary);
   cursor: pointer;
   transition: color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
 }
 
 .profile-trigger:hover,
 .profile-dropdown.is-open .profile-trigger {
-  color: var(--color-pink);
-  border-color: var(--color-pink);
+  color: var(--color-cta);
+  border-color: var(--color-cta);
   transform: translateY(-1px);
 }
 
@@ -57,10 +57,10 @@ button.profile-trigger {
   min-width: 18rem;
   text-align: left;
   padding: 0;
-  background-color: var(--color-bg-light);
-  border: 1px solid color-mix(in srgb, var(--color-black) 15%, transparent);
+  background-color: var(--color-bg);
+  border: 1px solid color-mix(in srgb, var(--color-border) 15%, transparent);
   border-radius: 10px;
-  box-shadow: 0 8px 24px var(--color-boxshadow);
+  box-shadow: 0 8px 24px var(--color-shadow);
   overflow: hidden;
 }
 
@@ -69,7 +69,7 @@ button.profile-trigger {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-black) 15%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 15%, transparent);
 }
 
 .profile-avatar {
@@ -80,8 +80,8 @@ button.profile-trigger {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  background-color: var(--color-purple);
-  color: white;
+  background-color: var(--color-secondary);
+  color: var(--color-white);
   font-weight: bold;
   font-size: 1.1rem;
 }
@@ -94,7 +94,7 @@ button.profile-trigger {
   margin: 0;
   font-weight: bold;
   font-size: 1.1rem;
-  color: var(--color-black);
+  color: var(--color-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -103,7 +103,7 @@ button.profile-trigger {
 .profile-drop-username {
   margin: 0.15rem 0 0;
   font-size: 1rem;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -120,13 +120,13 @@ button.profile-trigger {
   padding: 0.6rem;
   border-radius: 6px;
   border-bottom: none;
-  color: var(--color-black);
+  color: var(--color-text);
   font-size: 1.1rem;
   font-weight: 700;
   text-decoration: none;
 }
 
 .dropdown-menu.profile-dropdown .drop-content a.drop-option:hover {
-  background-color: color-mix(in srgb, var(--color-black) 8%, var(--color-bg-light));
-  color: var(--color-black);
+  background-color: color-mix(in srgb, var(--color-text) 8%, var(--color-bg));
+  color: var(--color-text);
 }

@@ -20,7 +20,7 @@
   height: 18rem;
   object-fit: cover;
   border-radius: 16px;
-  border: 2px solid var(--color-black);
+  border: 2px solid var(--color-border);
 }
 
 .tool-hero-overlay {
@@ -32,12 +32,12 @@
   gap: 0.5rem;
   padding: 1.5rem;
   border-radius: 16px;
-  background: linear-gradient(to top, rgba(18, 14, 14, 0.85), rgba(18, 14, 14, 0) 65%);
+  background: linear-gradient(to top, color-mix(in srgb, var(--color-text) 85%, transparent), transparent 65%);
 }
 
 .tool-hero-overlay h1 {
   margin: 0;
-  color: var(--color-bg-light);
+  color: var(--color-on-accent);
   border: none;
   padding: 0;
 }
@@ -53,8 +53,8 @@
   font-weight: bold;
   padding: 0.25rem 0.7rem;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--color-pink), var(--color-purple));
-  color: var(--color-bg-light);
+  background: linear-gradient(90deg, var(--color-cta), var(--color-secondary));
+  color: var(--color-on-accent);
   width: fit-content;
 }
 
@@ -76,19 +76,19 @@
   padding: 0.7rem 1.5rem;
   font-size: 1.05rem;
   font-weight: bold;
-  background: linear-gradient(90deg, var(--color-pink), var(--color-purple));
-  border: 2px solid var(--color-black);
-  box-shadow: 0 3px 0 var(--color-black);
+  background: linear-gradient(90deg, var(--color-cta), var(--color-secondary));
+  border: 2px solid var(--color-border);
+  box-shadow: 0 3px 0 var(--color-border);
 }
 
 .tool-cta:hover {
-  background: linear-gradient(90deg, var(--color-pink), var(--color-purple));
+  background: linear-gradient(90deg, var(--color-cta), var(--color-secondary));
   filter: brightness(1.08);
   transform: translateY(-1px);
 }
 
 .tool-cta:active {
-  box-shadow: 0 1px 0 var(--color-black);
+  box-shadow: 0 1px 0 var(--color-border);
   transform: translateY(2px);
 }
 
@@ -122,15 +122,15 @@
   height: 14rem;
   object-fit: cover;
   border-radius: 12px;
-  border: 2px solid var(--color-black);
-  box-shadow: 0 4px 14px var(--color-boxshadow);
+  border: 2px solid var(--color-border);
+  box-shadow: 0 4px 14px var(--color-shadow);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .tool-preview-trigger:hover .tool-preview-image,
 .tool-preview-trigger:focus-visible .tool-preview-image {
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px var(--color-boxshadow);
+  box-shadow: 0 6px 18px var(--color-shadow);
 }
 
 .tool-lightbox {
@@ -141,7 +141,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: rgba(18, 14, 14, 0.88);
+  background: color-mix(in srgb, var(--color-text) 88%, transparent);
 }
 
 .tool-lightbox[hidden] {
@@ -153,8 +153,8 @@
   max-width: 90vw;
   max-height: 85vh;
   border-radius: 12px;
-  border: 2px solid var(--color-bg-light);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  border: 2px solid var(--color-on-accent);
+  box-shadow: 0 8px 32px var(--color-shadow-strong);
 }
 
 .tool-lightbox-close {
@@ -164,16 +164,16 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 999px;
-  border: 2px solid var(--color-bg-light);
-  background: var(--color-black);
-  color: var(--color-bg-light);
+  border: 2px solid var(--color-on-accent);
+  background: var(--color-text);
+  color: var(--color-on-accent);
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
 }
 
 .tool-lightbox-close:hover {
-  background: var(--color-pink);
+  background: var(--color-cta);
 }
 
 body.tool-lightbox-open {

@@ -35,17 +35,17 @@
   width: 2.75rem;
   height: 2.75rem;
   padding: 0;
-  background-color: white;
-  border: 1px solid var(--color-black);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
   border-radius: 50%;
-  color: var(--color-black);
+  color: var(--color-text);
   cursor: pointer;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
+  box-shadow: 0 2px 8px var(--color-shadow);
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .toc-open-button:hover {
-  box-shadow: 0 4px 12px var(--color-boxshadow);
+  box-shadow: 0 4px 12px var(--color-shadow);
   transform: translateY(-1px);
 }
 
@@ -132,12 +132,12 @@
   width: 3rem;
   height: 3rem;
   padding: 0;
-  background-color: white;
-  border: 1px solid var(--color-black);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
   border-radius: 50%;
-  color: var(--color-black);
+  color: var(--color-text);
   cursor: pointer;
-  box-shadow: 0 2px 8px var(--color-boxshadow);
+  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 .toc-title-button .toc-open-icon {
@@ -166,7 +166,7 @@
 .toc-modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(18, 14, 14, 0.88);
+  background: color-mix(in srgb, var(--color-text) 88%, transparent);
 }
 
 .toc-modal-panel {
@@ -177,10 +177,10 @@
   overflow-y: auto;
   box-sizing: border-box;
   padding: 1.5rem;
-  background-color: var(--color-bg-light);
-  border: 2px solid var(--color-bg-light);
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-bg);
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px var(--color-shadow-strong);
 }
 
 .toc-modal-close {
@@ -190,16 +190,16 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 999px;
-  border: 2px solid var(--color-bg-light);
-  background: var(--color-black);
-  color: var(--color-bg-light);
+  border: 2px solid var(--color-on-accent);
+  background: var(--color-text);
+  color: var(--color-on-accent);
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
 }
 
 .toc-modal-close:hover {
-  background: var(--color-pink);
+  background: var(--color-cta);
 }
 
 .toc-modal-title {
@@ -208,7 +208,7 @@
   font-weight: bold;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
 }
 
 .toc-modal-list {
@@ -226,7 +226,7 @@
 }
 
 .toc-modal-list a {
-  color: var(--color-black);
+  color: var(--color-text);
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: border-color 0.15s ease, color 0.15s ease;
@@ -236,12 +236,12 @@
   content: "→";
   display: inline-block;
   margin-right: 0.4rem;
-  color: var(--accent-color, var(--color-turq));
+  color: var(--accent-color, var(--color-accent));
 }
 
 .toc-modal-list a:hover {
-  color: var(--color-black-hover);
-  border-bottom-color: var(--accent-color, var(--color-black-hover));
+  color: var(--color-text-muted);
+  border-bottom-color: var(--accent-color, var(--color-text-muted));
 }
 
 body.toc-modal-open {
@@ -265,11 +265,11 @@ body.toc-modal-open {
   overflow-y: auto;
   box-sizing: border-box;
   padding: 1.25rem;
-  background-color: var(--color-bg-light);
-  border: 2px solid var(--color-black);
-  border-left: 6px solid var(--accent-color, var(--color-black));
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-left: 6px solid var(--accent-color, var(--color-border));
   border-radius: 12px;
-  box-shadow: 0 4px 16px var(--color-boxshadow);
+  box-shadow: 0 4px 16px var(--color-shadow);
 }
 
 .toc-overlay-panel[hidden] {
@@ -290,26 +290,26 @@ body.toc-modal-open {
   font-weight: bold;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
 }
 
 .toc-overlay-close {
   flex: 0 0 auto;
   padding: 0.1rem 0.5rem;
   background: none;
-  border: 1px solid var(--color-black-hover);
+  border: 1px solid var(--color-text-muted);
   border-radius: 8px;
   font-family: inherit;
   font-size: 1.1rem;
   line-height: 1.4;
-  color: var(--color-black-hover);
+  color: var(--color-text-muted);
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .toc-overlay-close:hover {
-  color: var(--color-black);
-  border-color: var(--color-black);
+  color: var(--color-text);
+  border-color: var(--color-text);
 }
 
 .toc-overlay-list {
@@ -327,7 +327,7 @@ body.toc-modal-open {
 }
 
 .toc-overlay-list a {
-  color: var(--color-black);
+  color: var(--color-text);
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: border-color 0.15s ease, color 0.15s ease;
@@ -337,10 +337,10 @@ body.toc-modal-open {
   content: "→";
   display: inline-block;
   margin-right: 0.4rem;
-  color: var(--accent-color, var(--color-turq));
+  color: var(--accent-color, var(--color-accent));
 }
 
 .toc-overlay-list a:hover {
-  color: var(--color-black-hover);
-  border-bottom-color: var(--accent-color, var(--color-black-hover));
+  color: var(--color-text-muted);
+  border-bottom-color: var(--accent-color, var(--color-text-muted));
 }

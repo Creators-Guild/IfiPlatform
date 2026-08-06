@@ -43,12 +43,12 @@ clipped area instead of the true collapsed width. */
 }
 
 .sidemenu .sidemenu-option {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--color-border);
     width: 100%;
 }
 
 .sidemenu-item a {
-    color: var(--color-black);
+    color: var(--color-text);
     text-decoration: none;
     font-size: large;
 }
@@ -99,7 +99,7 @@ risk of it firing on a hover device. */
 .sidemenu.is-open {
     width: 250px;
     padding: 1rem;
-    border-right: 1px solid #ddd;
+    border-right: 1px solid color-mix(in srgb, var(--color-border) 15%, transparent);
 }
 
 .sidemenu.is-open .sidemenu-item {
@@ -127,7 +127,7 @@ off. Touch devices rely purely on the JS-driven class above. */
     .sidemenu:hover {
         width: 250px;
         padding: 1rem;
-        border-right: 1px solid #ddd;
+        border-right: 1px solid color-mix(in srgb, var(--color-border) 15%, transparent);
     }
 
     .sidemenu:hover .sidemenu-item {
@@ -160,7 +160,7 @@ off. Touch devices rely purely on the JS-driven class above. */
     font-size: 1.25rem;
     line-height: 1;
     cursor: pointer;
-    color: var(--color-black);
+    color: var(--color-text);
 }
 
 .sidemenu.is-open .sidemenu-close {
@@ -249,7 +249,7 @@ the JS's hover-capability check. */
         width: 56px;
         padding: 0.5rem;
         z-index: 100;
-        background-color: var(--color-turq-hover);
+        background-color: var(--color-accent-hover);
     }
 
     .sidemenu.is-open {
