@@ -241,11 +241,13 @@
   }
 }
 
+/* border-radius comes from inline style (box_border_radius, an editor-chosen
+rem number) rather than being fixed here -- see article_image_block.html /
+article_page.html's hero image figure. */
 .image-figure--boxed {
   padding: 1rem;
   background-color: var(--box-bg, var(--color-bg-light));
   border: 2px solid var(--color-black);
-  border-radius: 12px;
   box-shadow: 0 2px 8px var(--color-boxshadow);
 }
 
@@ -255,12 +257,108 @@
   color: var(--color-bg-light);
 }
 
+/* the "box" body block -- background/border color and border-radius come
+from inline style (--box-bg/--box-border-color custom properties + a
+direct border-radius, set in article_body_blocks.html since they're
+editor-chosen colors/numbers, not a fixed set of steps). flow-root so the
+box's background/border properly wraps floated content (e.g. a left/right
+-aligned image) inside it, same reasoning as .article-page. */
+.content-box {
+  display: flow-root;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  background-color: var(--box-bg, var(--color-bg-light));
+  border: 2px solid var(--box-border-color, var(--color-black));
+  box-shadow: 0 2px 8px var(--color-boxshadow);
+}
+
+.content-box > :first-child {
+  margin-top: 0;
+}
+
+.content-box > :last-child {
+  margin-bottom: 0;
+}
+
+/* floated (see article_models.py's "float" field help text for why this is
+the actual mechanism for "surrounding text reclaims space once past a
+shorter box" -- same technique as .hero-image--left/right, just on the box
+instead of an image). Width comes from inline style (float_width, an
+editor-chosen %). */
+.content-box--float-left {
+  float: left;
+  margin: 0 1.5rem 1rem 0;
+}
+
+.content-box--float-right {
+  float: right;
+  margin: 0 0 1rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .content-box--float-left,
+  .content-box--float-right {
+    float: none;
+    width: 100% !important;
+    margin: 0 0 1.5rem;
+  }
+}
+
+/* styled text block: alignment */
+.prose--align-left {
+  text-align: left;
+}
+
+.prose--align-center {
+  text-align: center;
+}
+
+.prose--align-right {
+  text-align: right;
+}
+
+/* styled text block: letter size */
+.prose--size-small {
+  font-size: 0.875rem;
+}
+
+.prose--size-medium {
+  font-size: 1rem;
+}
+
+.prose--size-large {
+  font-size: 1.15rem;
+}
+
+.prose--size-larger {
+  font-size: 1.35rem;
+}
+
+/* styled text block: side padding is a free-form rem number now (editor
+picks the exact value), set via inline style -- clamp(0rem, Nrem, 20vw) in
+the template scales it down automatically on narrow screens instead of a
+fixed set of mobile-override classes, since there's no longer a fixed set
+of steps to override. */
+
 .multi-col-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
-  align-items: start;
   margin: 1.5rem 0;
+}
+
+/* vertical alignment of columns -- gap and side padding are inline styles
+(free-form rem numbers from the block, see article_page.html) rather than
+classes here, same reasoning as the styled text padding above. */
+.multi-col-grid--align-top {
+  align-items: flex-start;
+}
+
+.multi-col-grid--align-center {
+  align-items: center;
+}
+
+.multi-col-grid--align-bottom {
+  align-items: flex-end;
 }
 
 .multi-col-item {
@@ -269,6 +367,29 @@
 
 .multi-col-item :first-child {
   margin-top: 0;
+}
+
+/* a cell that absorbed float column(s) (see grouped_columns() in
+article_tags.py) -- flow-root, not flex, since float has no effect on a
+flex item; this div is itself a normal flex item in .multi-col-grid, but
+establishes its own block formatting context for the float(s) and main
+text nested inside it. The main column's content renders as direct
+children here (no extra wrapping box), so it's just normal block content
+wrapping around whichever inner float(s) come before it in the HTML, same
+mechanism as .hero-image-figure / .content-box, just scoped to this one
+lane instead of the whole row. */
+.multi-col-item--flow {
+  display: flow-root;
+}
+
+.multi-col-inner-float--left {
+  float: left;
+  margin: 0 1.5rem 1rem 0;
+}
+
+.multi-col-inner-float--right {
+  float: right;
+  margin: 0 0 1rem 1.5rem;
 }
 
 .column-title {
@@ -288,5 +409,12 @@
 
   .multi-col-item {
     flex-basis: auto !important;
+  }
+
+  .multi-col-inner-float--left,
+  .multi-col-inner-float--right {
+    float: none;
+    width: 100% !important;
+    margin: 0 0 1.5rem;
   }
 }

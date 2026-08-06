@@ -1,6 +1,6 @@
 """Models for Wagtail-managed information articles: categories, index and article pages."""
 
-from django.core.validators import RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -16,6 +16,17 @@ HEX_COLOR_VALIDATOR = RegexValidator(
     r"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
     "Enter a valid hex color code, e.g. #ff8800 or #f80.",
 )
+
+# shared fixed palette + custom-hex-fallback pattern, used anywhere a block
+# needs a background/border color (image boxes, the box block).
+COLOR_CHOICES = [
+    ("bg-light", "Light"),
+    ("turq", "Turquoise"),
+    ("pink", "Pink"),
+    ("purple", "Purple"),
+    ("black", "Black"),
+    ("custom", "Custom (hex code)"),
+]
 
 
 def _get_translation_progress(page):
@@ -110,14 +121,7 @@ def article_image_block():
             (
                 "box_color",
                 blocks.ChoiceBlock(
-                    choices=[
-                        ("bg-light", "Light"),
-                        ("turq", "Turquoise"),
-                        ("pink", "Pink"),
-                        ("purple", "Purple"),
-                        ("black", "Black"),
-                        ("custom", "Custom (hex code)"),
-                    ],
+                    choices=COLOR_CHOICES,
                     default="bg-light",
                     required=False,
                     help_text="Box background color (only applies when 'boxed' is enabled).",
@@ -131,8 +135,309 @@ def article_image_block():
                     help_text="Hex code, e.g. #ff8800. Only used when color is set to 'Custom'.",
                 ),
             ),
+            (
+                "box_border_radius",
+                blocks.FloatBlock(
+                    min_value=0,
+                    max_value=5,
+                    default=0.75,
+                    help_text="Box corner rounding, in rem (0 = square corners). Only applies when 'boxed' is enabled.",
+                ),
+            ),
         ],
         icon="image",
+    )
+
+
+def article_styled_text_block():
+    """A rich text block with layout options (alignment, letter size, side
+    padding). Kept as its own block type rather than added to the existing
+    plain 'paragraph' block -- that one's value is just a bare RichText
+    string, and changing its shape to a struct would need a data migration
+    to convert every existing paragraph across every article. This way
+    existing content is untouched; editors opt into the new block going
+    forward."""
+    return blocks.StructBlock(
+        [
+            ("text", blocks.RichTextBlock()),
+            (
+                "alignment",
+                blocks.ChoiceBlock(
+                    choices=[
+                        ("left", "Left"),
+                        ("center", "Center"),
+                        ("right", "Right"),
+                    ],
+                    default="left",
+                ),
+            ),
+            (
+                "letter_size",
+                blocks.ChoiceBlock(
+                    choices=[
+                        ("small", "Small"),
+                        ("medium", "Medium"),
+                        ("large", "Large"),
+                        ("larger", "Larger"),
+                    ],
+                    default="medium",
+                ),
+            ),
+            (
+                "side_padding",
+                blocks.FloatBlock(
+                    min_value=0,
+                    max_value=20,
+                    default=1,
+                    help_text="Left/right padding, in rem (0 = none).",
+                ),
+            ),
+        ],
+        icon="pilcrow",
+        label="Styled Text",
+    )
+
+
+def _body_content_blocks():
+    """The block types available at the top level of an article body --
+    factored out so the 'box' block below can offer the exact same set
+    inside itself (any of the *other* blocks, per its own docstring),
+    without a box being nestable inside another box. Returns fresh block
+    instances each call, same reason article_image_block() and
+    article_styled_text_block() are functions rather than shared instances:
+    Wagtail block instances carry per-use bookkeeping and aren't safe to
+    reuse across multiple StreamField/StreamBlock definitions."""
+    return [
+        (
+            "heading",
+            blocks.StructBlock(
+                [
+                    ("text", blocks.CharBlock()),
+                    (
+                        "level",
+                        blocks.ChoiceBlock(
+                            choices=[("h2", "H2"), ("h3", "H3")], default="h2"
+                        ),
+                    ),
+                ]
+            ),
+        ),
+        ("paragraph", blocks.RichTextBlock(icon="pilcrow")),
+        ("styled_text", article_styled_text_block()),
+        (
+            "multi_column",
+            blocks.StructBlock(
+                [
+                    (
+                        "columns",
+                        blocks.ListBlock(
+                            blocks.StructBlock(
+                                [
+                                    ("title", blocks.CharBlock(required=False)),
+                                    (
+                                        "content",
+                                        blocks.StreamBlock(
+                                            [
+                                                ("text", blocks.RichTextBlock()),
+                                                (
+                                                    "styled_text",
+                                                    article_styled_text_block(),
+                                                ),
+                                                ("image", article_image_block()),
+                                            ],
+                                            required=False,
+                                        ),
+                                    ),
+                                    (
+                                        "width",
+                                        blocks.IntegerBlock(
+                                            min_value=1,
+                                            max_value=10,
+                                            default=1,
+                                            help_text=(
+                                                "Relative width vs. the "
+                                                "other columns (e.g. 2 is "
+                                                "twice as wide as 1). Only "
+                                                "used while this column "
+                                                "isn't set to flow around "
+                                                "the previous one below."
+                                            ),
+                                        ),
+                                    ),
+                                    (
+                                        "wrap",
+                                        blocks.BooleanBlock(
+                                            required=False,
+                                            default=False,
+                                            label="Let text flow around this, instead of its own column",
+                                            help_text=(
+                                                "Off (default): this column gets its "
+                                                "own side-by-side lane, like the others. "
+                                                "On: nests this column, like the hero "
+                                                "image, INSIDE the lane of the nearest "
+                                                "column above it that ISN'T set to flow "
+                                                "-- that column's text wraps around it "
+                                                "and reclaims the full lane width again "
+                                                "once past it, rather than the two "
+                                                "sitting in separate lanes side by side. "
+                                                "Turning this on for two columns in a "
+                                                "row nests both into the same lane, one "
+                                                "on each side (see 'From which side' "
+                                                "below)."
+                                            ),
+                                        ),
+                                    ),
+                                    (
+                                        "wrap_side",
+                                        blocks.ChoiceBlock(
+                                            choices=[("left", "Left"), ("right", "Right")],
+                                            default="right",
+                                            label="From which side",
+                                            help_text=(
+                                                "Which side the other text should flow "
+                                                "in from -- e.g. 'Right' means the text "
+                                                "wraps around this column from the "
+                                                "right, so this column itself sits on "
+                                                "the left. Only used while 'Let text "
+                                                "flow around this' above is turned on."
+                                            ),
+                                        ),
+                                    ),
+                                    (
+                                        "wrap_width",
+                                        blocks.FloatBlock(
+                                            min_value=10,
+                                            max_value=100,
+                                            default=40,
+                                            label="Width",
+                                            help_text="Width as a % of the lane it's nested in. Only used while 'Let text flow around this' above is turned on.",
+                                        ),
+                                    ),
+                                ]
+                            ),
+                            min_num=1,
+                            max_num=4,
+                            label="Column",
+                        ),
+                    ),
+                    (
+                        "column_alignment",
+                        blocks.ChoiceBlock(
+                            choices=[
+                                ("top", "Top"),
+                                ("center", "Center"),
+                                ("bottom", "Bottom"),
+                            ],
+                            default="top",
+                            help_text=(
+                                "Only matters if columns end up different heights "
+                                "(more text, a bigger letter size, or an image in "
+                                "one but not another). Decides where the shorter "
+                                "column's empty space goes: below it (Top), split "
+                                "above and below (Center), or above it (Bottom)."
+                            ),
+                        ),
+                    ),
+                    (
+                        "gap",
+                        blocks.FloatBlock(
+                            min_value=0,
+                            max_value=10,
+                            default=2,
+                            help_text="Space between columns, in rem.",
+                        ),
+                    ),
+                    (
+                        "side_padding",
+                        blocks.FloatBlock(
+                            min_value=0,
+                            max_value=20,
+                            default=1,
+                            help_text="Left/right padding around the whole multi-column block, in rem (0 = none).",
+                        ),
+                    ),
+                ],
+                icon="placeholder",
+                label="Multi-column Text",
+            ),
+        ),
+        ("image", article_image_block()),
+    ]
+
+
+def article_box_block():
+    """A container with its own background color, border color and corner
+    radius, holding any of the other body block types (but not another
+    box, to avoid unbounded nesting -- see _body_content_blocks())."""
+    return blocks.StructBlock(
+        [
+            (
+                "background_color",
+                blocks.ChoiceBlock(choices=COLOR_CHOICES, default="bg-light"),
+            ),
+            (
+                "background_custom_color",
+                blocks.CharBlock(
+                    required=False,
+                    validators=[HEX_COLOR_VALIDATOR],
+                    help_text="Hex code, e.g. #ff8800. Only used when background color is set to 'Custom'.",
+                ),
+            ),
+            (
+                "border_color",
+                blocks.ChoiceBlock(choices=COLOR_CHOICES, default="black"),
+            ),
+            (
+                "border_custom_color",
+                blocks.CharBlock(
+                    required=False,
+                    validators=[HEX_COLOR_VALIDATOR],
+                    help_text="Hex code, e.g. #ff8800. Only used when border color is set to 'Custom'.",
+                ),
+            ),
+            (
+                "border_radius",
+                blocks.FloatBlock(
+                    min_value=0,
+                    max_value=5,
+                    default=0.75,
+                    help_text="Corner rounding, in rem (0 = square corners).",
+                ),
+            ),
+            (
+                "float",
+                blocks.ChoiceBlock(
+                    choices=[
+                        ("none", "None (full width)"),
+                        ("left", "Left"),
+                        ("right", "Right"),
+                    ],
+                    default="none",
+                    help_text=(
+                        "Floating the box (like the hero image) lets the article's "
+                        "surrounding paragraphs wrap around it and reclaim the full "
+                        "width again once they've scrolled past it -- no separate "
+                        "'columns' needed for that, ordinary paragraphs do it "
+                        "automatically. 'None' makes it a full-width block instead."
+                    ),
+                ),
+            ),
+            (
+                "float_width",
+                blocks.FloatBlock(
+                    min_value=10,
+                    max_value=100,
+                    default=40,
+                    help_text="Width as a % of the article's content width. Only applies when floated.",
+                ),
+            ),
+            (
+                "content",
+                blocks.StreamBlock(_body_content_blocks(), required=False),
+            ),
+        ],
+        icon="placeholder",
+        label="Box",
     )
 
 
@@ -237,6 +542,11 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         validators=[HEX_COLOR_VALIDATOR],
         help_text="Hex code, e.g. #ff8800. Only used when color is set to 'Custom'.",
     )
+    hero_image_box_border_radius = models.FloatField(
+        default=0.75,
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+        help_text="Box corner rounding, in rem (0 = square corners). Only applies when 'boxed' is enabled.",
+    )
     # metadata
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
@@ -253,70 +563,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
 
     # allows for mutiple sections of one of these types:
     body = StreamField(
-        [
-            # allows for indented headings
-            (
-                "heading",
-                blocks.StructBlock(
-                    [
-                        ("text", blocks.CharBlock()),
-                        (
-                            "level",
-                            blocks.ChoiceBlock(
-                                choices=[("h2", "H2"), ("h3", "H3")], default="h2"
-                            ),
-                        ),
-                    ]
-                ),
-            ),
-            ("paragraph", blocks.RichTextBlock(icon="pilcrow")),
-            (
-                "multi_column",
-                blocks.StructBlock(
-                    [
-                        (
-                            "columns",
-                            blocks.ListBlock(
-                                blocks.StructBlock(
-                                    [
-                                        ("title", blocks.CharBlock(required=False)),
-                                        (
-                                            "content",
-                                            blocks.StreamBlock(
-                                                [
-                                                    ("text", blocks.RichTextBlock()),
-                                                    ("image", article_image_block()),
-                                                ],
-                                                required=False,
-                                            ),
-                                        ),
-                                        (
-                                            "width",
-                                            blocks.IntegerBlock(
-                                                min_value=1,
-                                                max_value=10,
-                                                default=1,
-                                                help_text=(
-                                                    "Relative width vs. the "
-                                                    "other columns (e.g. 2 is "
-                                                    "twice as wide as 1)."
-                                                ),
-                                            ),
-                                        ),
-                                    ]
-                                ),
-                                min_num=1,
-                                max_num=4,
-                                label="Column",
-                            ),
-                        ),
-                    ],
-                    icon="placeholder",
-                    label="Multi-column Text",
-                ),
-            ),
-            ("image", article_image_block()),
-        ],
+        _body_content_blocks() + [("box", article_box_block())],
         use_json_field=True,
     )
 
@@ -330,6 +577,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         FieldPanel("hero_image_boxed"),
         FieldPanel("hero_image_box_color"),
         FieldPanel("hero_image_box_custom_color"),
+        FieldPanel("hero_image_box_border_radius"),
         FieldPanel("author"),
         FieldPanel("published_date"),
         FieldPanel("show_in_newsbar"),

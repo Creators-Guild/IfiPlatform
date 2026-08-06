@@ -37,7 +37,7 @@
         {% if page.hero_image %}
             {% image page.hero_image width-1200 as hero %}
             <figure class="hero-image-figure hero-image--{{ page.hero_image_position }} hero-image--size-{{ page.hero_image_size }}{% if page.hero_image_boxed %} image-figure--boxed box-color--{{ page.hero_image_box_color }}{% endif %}"
-                {% if page.hero_image_boxed %}style="--box-bg: {% if page.hero_image_box_color == 'custom' %}{{ page.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.hero_image_box_color }}){% endif %}"{% endif %}>
+                {% if page.hero_image_boxed %}style="--box-bg: {% if page.hero_image_box_color == 'custom' %}{{ page.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.hero_image_box_color }}){% endif %}; border-radius: {{ page.hero_image_box_border_radius }}rem;"{% endif %}>
                 <img class="hero-image" src="{{ hero.url }}" alt="{{ page.hero_image_alt|default:page.hero_image.title }}">
                 {% if page.hero_image_alt or page.hero_image_caption %}
                     <figcaption>
@@ -69,38 +69,7 @@
         </nav>
         {% endif %}
         <article>
-            {% for block in page.body %}
-            {% if block.block_type == "heading" %}
-                {% if block.value.level == "h3" %}
-                    <h3 id="{{ block.value.text|slugify }}">{{ block.value.text }}</h3>
-                {% else %}
-                    <h2 id="{{ block.value.text|slugify }}">{{ block.value.text }}</h2>
-                {% endif %}
-
-            {% elif block.block_type == "paragraph" %}
-                <div class="prose">{{ block.value }}</div>
-
-            {% elif block.block_type == "multi_column" %}
-                <div class="multi-col-grid">
-                    {% for column in block.value.columns %}
-                        <div class="multi-col-item" style="flex: {{ column.width }} 1 0;">
-                            {% if column.title %}<h3 class="column-title">{{ column.title }}</h3>{% endif %}
-                            {% for sub in column.content %}
-                                {% if sub.block_type == "text" %}
-                                    <div class="prose">{{ sub.value }}</div>
-                                {% elif sub.block_type == "image" %}
-                                    {% include "info_articles/partials/article_image_block.html" with image_value=sub.value %}
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                </div>
-
-            {% elif block.block_type == "image" %}
-                {% include "info_articles/partials/article_image_block.html" with image_value=block.value %}
-            {% endif %}
-
-            {% endfor %}
+            {% include "info_articles/partials/article_body_blocks.html" with blocks=page.body %}
         </article>
         </div>
     </div>
