@@ -3,24 +3,94 @@
     height: 100%;
 }
 
-/* dont grow, shrink, 
+/* dont grow, shrink,
 but width is the actual width of object.
 Sidemenu hover mdoifer will still enlarge menu */
 .home-layout .sidemenu_container {
     flex: 0 0 auto;
+    /* the colored rail background lives here, not on .sidemenu itself --
+    this container stretches (default align-items:stretch on the flex row
+    above) to the full scrollable page height, while .sidemenu is sticky
+    and sized to just its own content. That split is what lets the color
+    fill the whole rail top-to-bottom without the sticky menu itself
+    needing to be page-height (which caused it to get squeezed/pushed near
+    the footer -- see sidemenu.css). Width tracks .sidemenu automatically
+    since it's flex-basis:auto around that single child. */
+    background-color: var(--color-accent-hover);
 }
 
 .home-layout .maincontent {
     flex: 1;
+    /* flex items default to min-width:auto (not 0), which stops them
+       shrinking below their content's natural min size. sidemenu_container
+       is flex-shrink:0 and grows further on hover, so maincontent is the
+       one that's supposed to give up the width -- without this it can't
+       shrink past its content's own minimum, and the whole .home-layout
+       row overflows the viewport instead. */
+    min-width: 0;
     display: flex;
     flex-direction: column;
     padding: 1rem 2rem;
 }
 
 .home-layout .maincontent .top {
-    flex: 1;
+    flex: 0 0 auto;
 }
 
-.home-layout .maincontent .newsbar_container {
+/* Suggested News / Suggested Info Articles: a plain 50/50 row. Each half is
+a self-contained column (heading + card grid); the grid inside picks its
+own card count for whatever width its half actually is (see
+newsbar_layout.css). Neither column's width depends on the other's content,
+so there's no shrink negotiation between them and nothing for one side to
+"steal" from the other. */
+.home-layout .maincontent .suggestions-row {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.home-layout .maincontent .suggestions-row > .newsbar_container,
+.home-layout .maincontent .suggestions-row > .articlesbar_container {
     flex: 1;
+    min-width: 0;
+}
+
+/* once there's not even room for one full-size card per column side by side,
+stack the two sections (news on top) and cap each to 4 visible cards */
+@media (max-width: 45rem) {
+    .home-layout .maincontent .suggestions-row {
+        flex-direction: column;
+        /* align-items:flex-start (base rule) sizes cross-axis items to their
+           own content instead of stretching -- irrelevant while cross-axis
+           was vertical, but now that flex-direction is column, cross-axis is
+           horizontal, so it would shrink-wrap each column instead of letting
+           it fill the row's width. */
+        align-items: stretch;
+    }
+
+    .home-layout .maincontent .suggestions-row > .newsbar_container,
+    .home-layout .maincontent .suggestions-row > .articlesbar_container {
+        flex: 0 0 auto;
+    }
+
+    .home-layout .maincontent .suggestions-row .articlecard:nth-child(n + 5) {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .home-layout .maincontent {
+        padding: 0.75rem 0.75rem;
+    }
+
+    /* locked to the collapsed width, regardless of .sidemenu's own current
+    width -- on a phone, an expanded (200px) .sidemenu is meant to overlay
+    .maincontent rather than push it aside (see sidemenu.css). Since this
+    container's width no longer tracks its child, .sidemenu just visually
+    spills out past this box's boundary (default overflow:visible) instead
+    of growing it. */
+    .home-layout .sidemenu_container {
+        width: 56px;
+    }
 }

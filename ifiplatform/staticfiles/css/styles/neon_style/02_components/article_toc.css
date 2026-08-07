@@ -1,0 +1,346 @@
+/* ToC is now an icon button that opens an overlay dialog, rather than a
+   floated in-flow box. It lives in a gutter reserved out of .article-page's
+   OWN left padding (not the sidebar's space, not the text's) -- .toc-open-
+   -sticky is pulled back into that gutter with a negative margin equal to
+   the padding, so it can never land on top of either regardless of the
+   sidemenu's current (collapsible/hover-expanding) width. Sticky, not
+   fixed, so its horizontal position always tracks the article column
+   itself instead of a hardcoded viewport offset. */
+.article-page--has-toc {
+  padding-left: 3.5rem;
+}
+
+.toc-open-sticky {
+  position: sticky;
+  top: 1.5rem;
+  height: 0;
+  margin-left: -3.5rem;
+  width: 3.5rem;
+  z-index: 40;
+}
+
+/* being .toc-open-sticky's next sibling means the first real content
+   block (heading/paragraph/etc.) is no longer .article's own first child,
+   so its top margin can no longer collapse up through .article into the
+   gap below .article-meta -- reset it here so that gap stays just
+   .article-meta's own margin, instead of adding both. */
+.toc-open-sticky + * {
+  margin-top: 0;
+}
+
+.toc-open-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--color-shadow);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.toc-open-button:hover {
+  box-shadow: 0 4px 12px var(--color-shadow);
+  transform: translateY(-1px);
+}
+
+.toc-open-icon {
+  width: 1.3rem;
+  height: 1.3rem;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 640px) {
+  .article-page--has-toc {
+    padding-left: 2.75rem;
+  }
+
+  .toc-open-sticky {
+    margin-left: -2.75rem;
+    width: 2.75rem;
+  }
+
+  .toc-open-button {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .toc-open-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+/* below this, the floating icon is replaced by .toc-title-button next to
+   the h1 (opening .toc-modal, a full-screen dialog) instead, so it'd be
+   redundant here. Comes after the 640px block above so its padding-left:0
+   wins at these narrower widths, where both media queries match. */
+@media (max-width: 480px) {
+  .article-page--has-toc {
+    padding-left: 0;
+  }
+
+  .toc-open-sticky {
+    display: none;
+  }
+}
+
+/* zero-height + position:sticky, same trick as .toc-open-sticky above --
+   .article-page is tall (it wraps the whole article), so this can keep
+   sticking all the way down the page. Being .article-page's first child
+   (before h1) means the button renders at the top-right corner of the
+   content area, right where the title starts. */
+.toc-title-sticky {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .toc-title-sticky {
+    display: block;
+    position: sticky;
+    top: 1rem;
+    height: 0;
+    z-index: 40;
+    /* h1 has its own (browser-default) margin-top, which .toc-title-sticky
+       doesn't -- without matching it here, the floated button starts flush
+       with the top of .article-page while the title text starts lower,
+       leaving the button floating above the title instead of beside it. */
+    margin-top: 1rem;
+  }
+
+  .toc-title-sticky + h1 {
+    margin-top: 1rem;
+  }
+}
+
+.toc-title-button {
+  /* absolute, not float -- float makes the h1 text reflow around it
+     (shrinking/rewrapping the title to avoid it), which is the opposite of
+     what's wanted here: it should just sit on top of the title, ignored by
+     its layout entirely, overlapping is fine. */
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.toc-title-button .toc-open-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+/* mobile "contents" dialog -- unlike .toc-overlay-panel below, this one
+   does use a backdrop + centered layout (same pattern as .tool-lightbox in
+   tool_page.css), since a small screen doesn't have room to anchor a
+   popover next to anything sensible. */
+.toc-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.toc-modal[hidden] {
+  display: none;
+}
+
+.toc-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-text) 88%, transparent);
+}
+
+.toc-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: min(90vw, 22rem);
+  max-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 1.5rem;
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-bg);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px var(--color-shadow-strong);
+}
+
+.toc-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  border: 2px solid var(--color-on-accent);
+  background: var(--color-text);
+  color: var(--color-on-accent);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.toc-modal-close:hover {
+  background: var(--color-cta);
+}
+
+.toc-modal-title {
+  margin: 0 2.5rem 0.75rem 0;
+  font-size: 0.9rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.toc-modal-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc-modal-list li {
+  margin: 0.3rem 0;
+}
+
+.toc-modal-list li.toc-h3 {
+  margin-left: 1.25rem;
+}
+
+.toc-modal-list a {
+  color: var(--color-text);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.toc-modal-list a::before {
+  content: "→";
+  display: inline-block;
+  margin-right: 0.4rem;
+  color: var(--accent-color, var(--color-accent));
+}
+
+.toc-modal-list a:hover {
+  color: var(--color-text-muted);
+  border-bottom-color: var(--accent-color, var(--color-text-muted));
+}
+
+body.toc-modal-open {
+  overflow: hidden;
+}
+
+/* the panel is a plain popover anchored to .toc-open-sticky (positioned via
+   that ancestor, since position:sticky establishes a containing block for
+   absolutely-positioned descendants same as position:relative) -- no
+   backdrop, so the rest of the page stays fully visible and interactable;
+   table_of_content.js closes it on an outside click / Escape / choosing a
+   link instead. */
+.toc-overlay-panel {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 0.75rem);
+  z-index: 50;
+  width: min(85vw, 20rem);
+  max-width: calc(100vw - 5rem);
+  max-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 1.25rem;
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-left: 6px solid var(--accent-color, var(--color-border));
+  border-radius: 12px;
+  box-shadow: 0 4px 16px var(--color-shadow);
+}
+
+.toc-overlay-panel[hidden] {
+  display: none;
+}
+
+.toc-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+}
+
+.toc-overlay-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.toc-overlay-close {
+  flex: 0 0 auto;
+  padding: 0.1rem 0.5rem;
+  background: none;
+  border: 1px solid var(--color-text-muted);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.toc-overlay-close:hover {
+  color: var(--color-text);
+  border-color: var(--color-text);
+}
+
+.toc-overlay-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc-overlay-list li {
+  margin: 0.3rem 0;
+}
+
+.toc-overlay-list li.toc-h3 {
+  margin-left: 1.25rem;
+}
+
+.toc-overlay-list a {
+  color: var(--color-text);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.toc-overlay-list a::before {
+  content: "→";
+  display: inline-block;
+  margin-right: 0.4rem;
+  color: var(--accent-color, var(--color-accent));
+}
+
+.toc-overlay-list a:hover {
+  color: var(--color-text-muted);
+  border-bottom-color: var(--accent-color, var(--color-text-muted));
+}
