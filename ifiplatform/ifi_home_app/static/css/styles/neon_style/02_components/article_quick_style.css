@@ -1,14 +1,53 @@
+/* editor mode toggle -- always visible for anyone with can_edit_style
+permission, regardless of the toggle's own on/off state (it's the one
+control that has to stay reachable to turn everything else back on).
+position:sticky, not fixed: it starts in normal flow at the top of
+.article-page's own content (so it never overlaps the site's header bar,
+which is outside .article-page entirely), then stays put once scrolled to
+top:1rem -- same sticky-within-content-column trick already used by
+.toc-open-sticky/.toc-title-sticky in article_toc.css. margin-left:auto
+pushes it to the right edge of the content column while staying a normal
+block box (sticky only pins the top offset here, not left/right, so this
+stays right-aligned even once stuck). */
+.editor-mode-toggle {
+  position: sticky;
+  top: 1rem;
+  z-index: 40;
+  display: block;
+  width: fit-content;
+  margin-left: auto;
+  margin-bottom: 0.75rem;
+  padding: 0.4rem 0.8rem;
+  border: 2px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.editor-mode-toggle.is-on {
+  border-color: var(--color-border);
+  color: var(--color-secondary);
+}
+
 /* On-page quick style panel (padding/alignment/font size), editors only --
 see article_quick_style_panel.html. Fixed so it stays reachable regardless
 of scroll position, and z-index above everything else in the article
 (toc overlay, lightboxes, etc.) since it's a global editing tool, not part
-of the article's own content. */
+of the article's own content. Hidden by default -- editor_mode_toggle.js
+puts .editor-mode-on on <body> once the toggle is switched on, this and
+every other piece of editing UI key off that same class. Bottom-LEFT, not
+right -- Wagtail's own userbar (the bird icon) defaults to bottom-right,
+so right would put them on top of each other. */
 .quick-style-panel {
+  display: none;
   position: fixed;
   bottom: 1.5rem;
-  right: 1.5rem;
+  left: 1.5rem;
   z-index: 2000;
-  display: flex;
   flex-direction: column;
   gap: 0.75rem;
   width: 16rem;
@@ -20,10 +59,52 @@ of the article's own content. */
   font-size: 0.85rem;
 }
 
+body.editor-mode-on .quick-style-panel {
+  display: flex;
+}
+
+/* minimized: keep just the header row (title + toggle) visible so the
+panel can be tucked out of the way of whatever content it's covering
+(e.g. the hero image) without leaving editor mode entirely -- see
+article_quick_style.js. */
+.quick-style-panel.is-minimized {
+  gap: 0;
+}
+
+.quick-style-panel.is-minimized .quick-style-panel-body {
+  display: none;
+}
+
+.quick-style-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.quick-style-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .quick-style-panel-title {
   margin: 0;
   font-weight: bold;
   color: var(--color-secondary);
+}
+
+.quick-style-minimize {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1;
+  cursor: pointer;
 }
 
 .quick-style-field {

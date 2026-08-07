@@ -14,6 +14,16 @@ ifi_api_urlpatterns = [
         article_views.save_quick_style,
         name="article_quick_style",
     ),
+    path(
+        "api/articles/<int:page_id>/block-style/",
+        article_views.save_block_style,
+        name="article_block_style",
+    ),
+    path(
+        "api/articles/<int:page_id>/header-style/",
+        article_views.save_header_style,
+        name="article_header_style",
+    ),
 ]
 
 ifi_article_urlpatterns = [

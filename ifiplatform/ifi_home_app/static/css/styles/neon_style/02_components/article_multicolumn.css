@@ -1,7 +1,15 @@
 .multi-col-grid {
   display: flex;
   flex-wrap: wrap;
+  clear: both;
   margin: 1.5rem 0;
+}
+
+/* the reverse direction of the clear above: a top-level image block right
+after a multi-column, if floated, should stack cleanly below it too rather
+than rising up next to its last row. */
+.multi-col-grid + .body-image-figure {
+  clear: both;
 }
 
 /* vertical alignment of columns -- gap and side padding are inline styles
@@ -21,6 +29,22 @@ classes here, same reasoning as the styled text padding above. */
 
 .multi-col-item {
   min-width: 0;
+}
+
+/* an image floated left/right inside a narrow flex column doesn't wrap
+cleanly with that column's own text the way it does in the full-width
+article body -- it can render wider than the column itself and spill out
+next to it instead. Images and multi-column layout should never float
+together: force any image inside a column to stack as a plain block, same
+treatment already used for body-image--left/right at the mobile breakpoint,
+just applied here unconditionally regardless of screen size. Deliberately
+NOT touching width/max-width here -- those are inline styles now (see
+article_image_block.html's width_rem), which always win over anything set
+here regardless of selector specificity, so there's nothing to fight over. */
+.multi-col-item .body-image--left,
+.multi-col-item .body-image--right {
+  float: none;
+  margin: 1rem 0;
 }
 
 .multi-col-item :first-child {

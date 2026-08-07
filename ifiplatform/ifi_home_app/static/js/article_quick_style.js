@@ -11,6 +11,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const fontSizeValue = document.getElementById("quick-style-font-size-value");
   const alignmentGroup = document.getElementById("quick-style-alignment");
   const statusEl = document.getElementById("quick-style-status");
+  const minimizeButton = document.getElementById("quick-style-minimize");
+  const MINIMIZED_KEY = "ifiQuickStyleMinimized";
+
+  const applyMinimized = (isMinimized) => {
+    panel.classList.toggle("is-minimized", isMinimized);
+    minimizeButton.setAttribute("aria-expanded", String(!isMinimized));
+    minimizeButton.textContent = isMinimized ? "+" : "−";
+  };
+
+  applyMinimized(localStorage.getItem(MINIMIZED_KEY) === "true");
+
+  minimizeButton.addEventListener("click", () => {
+    const isMinimized = !panel.classList.contains("is-minimized");
+    localStorage.setItem(MINIMIZED_KEY, String(isMinimized));
+    applyMinimized(isMinimized);
+  });
 
   // live preview only -- writes straight to the same CSS custom properties
   // the server-rendered inline style set on page load, no network round trip.

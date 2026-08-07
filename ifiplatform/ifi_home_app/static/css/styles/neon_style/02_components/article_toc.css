@@ -93,8 +93,9 @@
 /* zero-height + position:sticky, same trick as .toc-open-sticky above --
    .article-page is tall (it wraps the whole article), so this can keep
    sticking all the way down the page. Being .article-page's first child
-   (before h1) means the button renders at the top-right corner of the
-   content area, right where the title starts. */
+   (before .article-header, which wraps h1/meta/intro) means the button
+   renders at the top-right corner of the content area, right where the
+   title starts. */
 .toc-title-sticky {
   display: none;
 }
@@ -113,7 +114,7 @@
     margin-top: 1rem;
   }
 
-  .toc-title-sticky + h1 {
+  .toc-title-sticky + .article-header {
     margin-top: 1rem;
   }
 }

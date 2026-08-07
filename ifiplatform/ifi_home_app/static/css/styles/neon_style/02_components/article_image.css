@@ -87,21 +87,16 @@
   }
 }
 
-/* body images: size (max-width) */
+/* body images: width is a free-form rem number now (editor picks the exact
+value via width_rem), set via inline style in article_image_block.html --
+width, not max-width, since a floated width:auto figure's shrink-to-fit
+sizing falls back to the <img>'s own intrinsic resolution when nothing else
+anchors it, so max-width alone can only ever shrink an image, never enlarge
+it past the source file's natural size. max-width:100% comes along inline
+too, as a safety net so it still can't overflow a narrow container (e.g. a
+multi-column item). */
 .body-image-figure {
   margin: 1rem 0;
-}
-
-.body-image--small {
-  max-width: 12rem;
-}
-
-.body-image--medium {
-  max-width: 20rem;
-}
-
-.body-image--large {
-  max-width: 100%;
 }
 
 /* body images: alignment (float / position) */
