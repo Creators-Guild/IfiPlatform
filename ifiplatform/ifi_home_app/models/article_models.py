@@ -553,6 +553,16 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         ),
     )
 
+    content_font_size = models.FloatField(
+        default=1,
+        help_text=(
+            "Default font size for the title, meta, intro and body, in rem "
+            "(title scales proportionally, since it's sized relative to "
+            "this). Per-block font size (styled text) overrides this "
+            "individually."
+        ),
+    )
+
     # allows for mutiple sections of one of these types:
     body = StreamField(
         _body_content_blocks() + [("box", article_box_block())],
@@ -577,6 +587,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         FieldPanel("show_on_homepage"),
         FieldPanel("content_side_padding"),
         FieldPanel("content_alignment"),
+        FieldPanel("content_font_size"),
         FieldPanel("body"),
     ]
 
@@ -591,6 +602,16 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         return self.get_parent().specific
 
     @property
+    def style_target(self):
+        """The ArticlePage that quick-style edits should actually be saved
+        to. Alias pages (e.g. an untranslated locale mirroring another
+        locale's page) can't take their own revisions -- Wagtail raises if
+        you try (they're an exact, auto-synced copy of their source), so
+        edits have to go to the source instead, which Wagtail then
+        propagates back to this alias automatically on publish."""
+        return self.alias_of.specific if self.alias_of_id else self
+
+    @property
     def toc_entries(self):
         """(level, text) pairs for the table of contents -- see
         _iter_toc_entries() for what counts (top-level headings, headings
@@ -602,6 +623,15 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         """True if there's at least one table-of-contents entry, i.e.
         something for it to actually link to."""
         return bool(self.toc_entries)
+
+    def get_context(self, request, *args, **kwargs):
+        """Add can_edit_style: whether the visitor can use the on-page quick
+        style panel (padding/alignment/font size) -- same permission check
+        the save endpoint itself enforces (see article_views.py), so the
+        panel only ever appears for someone who could actually save it."""
+        context = super().get_context(request, *args, **kwargs)
+        context["can_edit_style"] = self.style_target.permissions_for_user(request.user).can_edit()
+        return context
 
 
 # Model for article category to list articles within category

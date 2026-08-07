@@ -1,0 +1,41 @@
+{% load i18n l10n %}
+{% comment %}
+On-page "quick style" panel: lets someone with edit rights on this exact
+ArticlePage (see can_edit_style in article_models.py's get_context()) tweak
+content_side_padding/content_alignment/content_font_size directly on the
+live page, with an instant preview (article_quick_style.js writes the CSS
+custom properties on .article-page as you interact) and a Save button that
+publishes it for real via article_views.save_quick_style. Anyone without
+edit rights on this page never gets this block rendered at all -- the save
+endpoint enforces the same permission check independently, so this is UX,
+not the security boundary.
+{% endcomment %}
+<form class="quick-style-panel" id="quick-style-panel"
+      data-quick-style-url="{% url 'article_quick_style' page.id %}">
+    {% csrf_token %}
+    <p class="quick-style-panel-title">{% trans "Quick style (editors only)" %}</p>
+
+    <label class="quick-style-field">
+        <span>{% trans "Side padding" %} (<span id="quick-style-padding-value">{{ page.content_side_padding|unlocalize }}</span>rem)</span>
+        <input type="range" id="quick-style-padding" min="0" max="20" step="0.25" value="{{ page.content_side_padding|unlocalize }}">
+    </label>
+
+    <div class="quick-style-field">
+        <span>{% trans "Alignment" %}</span>
+        <div class="quick-style-align-buttons" id="quick-style-alignment" data-value="{{ page.content_alignment }}">
+            <button type="button" data-align="left" class="{% if page.content_alignment == 'left' %}active{% endif %}">{% trans "Left" %}</button>
+            <button type="button" data-align="center" class="{% if page.content_alignment == 'center' %}active{% endif %}">{% trans "Center" %}</button>
+            <button type="button" data-align="right" class="{% if page.content_alignment == 'right' %}active{% endif %}">{% trans "Right" %}</button>
+        </div>
+    </div>
+
+    <label class="quick-style-field">
+        <span>{% trans "Font size" %} (<span id="quick-style-font-size-value">{{ page.content_font_size|unlocalize }}</span>rem)</span>
+        <input type="range" id="quick-style-font-size" min="0.5" max="3" step="0.05" value="{{ page.content_font_size|unlocalize }}">
+    </label>
+
+    <div class="quick-style-actions">
+        <button type="submit" id="quick-style-save">{% trans "Save & publish" %}</button>
+        <span class="quick-style-status" id="quick-style-status" aria-live="polite"></span>
+    </div>
+</form>

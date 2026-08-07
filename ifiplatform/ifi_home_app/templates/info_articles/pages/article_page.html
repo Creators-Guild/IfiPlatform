@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_prose.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_multicolumn.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
+    {% if can_edit_style %}
+        <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_quick_style.css' %}">
+    {% endif %}
 {% endblock extra_head %}
 
 {% block sidemenu %}
@@ -22,7 +25,10 @@
 
 {% block maincontent %}
     {% include "info_articles/partials/article_breadcrumbs.html" %}
-    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="--accent-color: var(--color-{{ page.category.color }}); --content-side-padding: {{ page.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.content_alignment }};">
+    {% if can_edit_style %}
+        {% include "info_articles/partials/article_quick_style_panel.html" %}
+    {% endif %}
+    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="--accent-color: var(--color-{{ page.category.color }}); --content-side-padding: {{ page.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.content_alignment }}; --content-font-size: {{ page.content_font_size|unlocalize }}rem;">
         {% if page.has_headings %}
             {% comment %}
             mobile only (see article_toc.css) -- wider viewports keep the separate floating "contents" icon next to the article body instead.
@@ -127,4 +133,7 @@
         </article>
     </div>
     <script src="{% static 'js/table_of_content.js' %}" defer></script>
+    {% if can_edit_style %}
+        <script src="{% static 'js/article_quick_style.js' %}" defer></script>
+    {% endif %}
 {% endblock maincontent %}

@@ -12,6 +12,12 @@
   (styled_text/image/multi_column) set text-align explicitly on themselves,
   which always wins over this inherited value regardless of specificity. */
   text-align: var(--content-alignment, left);
+  /* editor-controlled default font size (ArticlePage.content_font_size,
+  --content-font-size set inline here) -- font-size is inherited too, so
+  this scales title/meta/intro/body together. h1 has no font-size of its
+  own set anywhere in this codebase (browser default, ~2em), so it scales
+  proportionally along with everything else rather than staying fixed. */
+  font-size: var(--content-font-size, 1rem);
 }
 
 /* .article-meta is a flex container -- flex items ignore inherited
@@ -49,6 +55,7 @@ configured. */
 @media (max-width: 480px) {
   .article-page {
     text-align: left;
+    font-size: 1rem;
   }
 
   .article-page > .article-meta {
