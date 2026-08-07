@@ -55,87 +55,98 @@ with (registerSaveHandler).
     sub-column, as its own "column" pseudo-type, box fields only). The
     on-page replacement for the old Wagtail 'box' block (see
     BLOCK_STYLE_DEFAULTS["box"]/_effective_box_style() in article_models.py).
-    box_padding/box_margin only show once the box itself is enabled --
-    article_block_style.js toggles them via #block-style-box-enabled's own
-    change event, separately from the block-type-based field visibility
-    every other field here uses.
+    The checkbox enables box styling itself; the chevron next to it is a
+    separate, independent expand/collapse for the fields below (wired in
+    article_block_style.js) -- collapsing it doesn't touch box_enabled, it
+    just tucks the details away once you're done adjusting them. Background,
+    border and spacing (padding/margin) each get their own visually-boxed
+    subsection so it's obvious at a glance which fields belong to which --
+    see .block-style-box-subsection in article_block_style.css.
     {% endcomment %}
-    <label class="block-style-field block-style-toggle" data-style-field="box_enabled">
+    <div class="block-style-field block-style-toggle block-style-box-header" data-style-field="box_enabled">
         <input type="checkbox" id="block-style-box-enabled">
         <span>{% trans "Box" %}</span>
-    </label>
-
-    {% comment %}
-    Each group's last swatch is a plain hex text input, not a fixed-color
-    button -- typing a valid hex both picks it (article_block_style.js
-    selects "custom" for the group, same as clicking any other swatch) and
-    colors the input's own background to match, with an automatically
-    black/white text color so the hex itself stays readable against
-    whatever's been typed. Bigger than the other swatches so that text
-    actually fits. Right next to it, a small rainbow-swatch <label>
-    wrapping its own real <input type="color"> -- labels associated with a
-    color input open its native browser/OS picker on click even though the
-    input itself stays visually hidden, no JS needed for that part; picking
-    one there fills the same hex swatch/preview, same as typing.
-    {% endcomment %}
-    <div class="block-style-field block-style-box-field" data-style-field="box_bg_color">
-        <span>{% trans "Background color" %}</span>
-        <div class="block-style-color-buttons" id="block-style-box-bg-color" data-value="">
-            <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
-            <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
-            <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
-            <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
-            <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
-            <div class="color-swatch-custom-group">
-                <input type="text" class="color-swatch color-swatch--custom" id="block-style-box-bg-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
-                <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
-                    <input type="color" id="block-style-box-bg-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
-                </label>
-            </div>
-        </div>
+        <button type="button" id="block-style-box-collapse-toggle" class="block-style-box-collapse-toggle" aria-expanded="true" aria-label="{% trans 'Expand or collapse box options' %}">&#9662;</button>
     </div>
 
-    <label class="block-style-field block-style-box-field block-style-toggle" data-style-field="box_border_visible">
-        <input type="checkbox" id="block-style-box-border-visible">
-        <span>{% trans "Show border" %}</span>
-    </label>
-
-    <label class="block-style-field block-style-box-field" data-style-field="box_border_width">
-        <span>{% trans "Border thickness" %} (<span id="block-style-box-border-width-value"></span>rem)</span>
-        <input type="range" id="block-style-box-border-width" min="0" max="1" step="0.025">
-    </label>
-
-    <div class="block-style-field block-style-box-field" data-style-field="box_border_color">
-        <span>{% trans "Border color" %}</span>
-        <div class="block-style-color-buttons" id="block-style-box-border-color" data-value="">
-            <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
-            <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
-            <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
-            <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
-            <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
-            <div class="color-swatch-custom-group">
-                <input type="text" class="color-swatch color-swatch--custom" id="block-style-box-border-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
-                <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
-                    <input type="color" id="block-style-box-border-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
-                </label>
+    <div class="block-style-box-fields" id="block-style-box-fields">
+        {% comment %}
+        The custom swatch is a plain hex text input, not a fixed-color
+        button -- typing a valid hex both picks it (article_block_style.js
+        selects "custom" for the group, same as clicking any other swatch)
+        and colors the input's own background to match, with an
+        automatically black/white text color so the hex itself stays
+        readable against whatever's been typed. Right next to it, a small
+        rainbow-swatch <label> wrapping its own real <input type="color">
+        -- labels associated with a color input open its native browser/OS
+        picker on click even though the input itself stays visually
+        hidden, no JS needed for that part; picking one there fills the
+        same hex swatch/preview, same as typing. Clicking anywhere in
+        their shared outer box (article_block_style.js) selects "custom"
+        on the first click without immediately focusing the hex field or
+        opening the picker, same as clicking any other swatch does.
+        {% endcomment %}
+        <div class="block-style-field block-style-box-field block-style-box-subsection" data-style-field="box_bg_color">
+            <p class="block-style-box-subsection-title">{% trans "Background" %}</p>
+            <div class="block-style-color-buttons" id="block-style-box-bg-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-box-bg-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-box-bg-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
             </div>
         </div>
+
+        <div class="block-style-field block-style-box-field block-style-box-subsection" data-style-field="box_border_visible">
+            <p class="block-style-box-subsection-title">{% trans "Border" %}</p>
+            <label class="block-style-toggle">
+                <input type="checkbox" id="block-style-box-border-visible">
+                <span>{% trans "Show border" %}</span>
+            </label>
+            <label class="block-style-field block-style-box-field" data-style-field="box_border_width">
+                <span>{% trans "Thickness" %} (<span id="block-style-box-border-width-value"></span>rem)</span>
+                <input type="range" id="block-style-box-border-width" min="0" max="1" step="0.025">
+            </label>
+            <div class="block-style-field block-style-box-field" data-style-field="box_border_color">
+                <span>{% trans "Color" %}</span>
+                <div class="block-style-color-buttons" id="block-style-box-border-color" data-value="">
+                    <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                    <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                    <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                    <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                    <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                    <div class="color-swatch-custom-group">
+                        <input type="text" class="color-swatch color-swatch--custom" id="block-style-box-border-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                        <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                            <input type="color" id="block-style-box-border-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <label class="block-style-field block-style-box-field" data-style-field="box_radius">
+                <span>{% trans "Corner radius" %} (<span id="block-style-box-radius-value"></span>rem)</span>
+                <input type="range" id="block-style-box-radius" min="0" max="5" step="0.05">
+            </label>
+        </div>
+
+        <div class="block-style-field block-style-box-field block-style-box-subsection" data-style-field="box_padding">
+            <p class="block-style-box-subsection-title">{% trans "Spacing" %}</p>
+            <label class="block-style-field block-style-box-field" data-style-field="box_padding">
+                <span>{% trans "Padding inside box" %} (<span id="block-style-box-padding-value"></span>rem)</span>
+                <input type="range" id="block-style-box-padding" min="0" max="6" step="0.25">
+            </label>
+            <label class="block-style-field block-style-box-field" data-style-field="box_margin">
+                <span>{% trans "Margin outside box" %} (<span id="block-style-box-margin-value"></span>rem)</span>
+                <input type="range" id="block-style-box-margin" min="0" max="6" step="0.25">
+            </label>
+        </div>
     </div>
-
-    <label class="block-style-field block-style-box-field" data-style-field="box_radius">
-        <span>{% trans "Corner radius" %} (<span id="block-style-box-radius-value"></span>rem)</span>
-        <input type="range" id="block-style-box-radius" min="0" max="5" step="0.05">
-    </label>
-
-    <label class="block-style-field block-style-box-field" data-style-field="box_padding">
-        <span>{% trans "Padding inside box" %} (<span id="block-style-box-padding-value"></span>rem)</span>
-        <input type="range" id="block-style-box-padding" min="0" max="6" step="0.25">
-    </label>
-
-    <label class="block-style-field block-style-box-field" data-style-field="box_margin">
-        <span>{% trans "Margin outside box" %} (<span id="block-style-box-margin-value"></span>rem)</span>
-        <input type="range" id="block-style-box-margin" min="0" max="6" step="0.25">
-    </label>
 
     {% comment %}
     Up to 4 sliders (multi_column's own max_num) -- one per column, kept as

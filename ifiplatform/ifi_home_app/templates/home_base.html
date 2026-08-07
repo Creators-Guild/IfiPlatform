@@ -12,7 +12,13 @@
         <div class="sidemenu_container">
             {% block sidemenu %}{% endblock sidemenu %}
         </div>
-        <div class="maincontent">
+        {% comment %}
+        maincontent_style is empty by default -- pages that want to style
+        this shared wrapper itself (e.g. article_page.html's own-page
+        background color) override just this block, without needing their
+        own copy of the surrounding maincontent/home-layout structure.
+        {% endcomment %}
+        <div class="maincontent" style="{% block maincontent_style %}{% endblock maincontent_style %}">
             {% block maincontent %}{% endblock maincontent %}
         </div>
     </div>

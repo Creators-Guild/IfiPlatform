@@ -113,6 +113,16 @@ article_quick_style.js. */
   gap: 0.3rem;
 }
 
+/* the background color field is the first one here that's ever
+conditionally hidden (see quick-style-bg-color-field, toggled by the
+"Background color" checkbox) -- without this, the class rule above's own
+"display: flex" outranks the [hidden] attribute's default "display: none"
+(same specificity tier, and author CSS always beats the UA stylesheet
+regardless), so the field would stay visible. */
+.quick-style-field[hidden] {
+  display: none;
+}
+
 .quick-style-field input[type="range"] {
   width: 100%;
 }

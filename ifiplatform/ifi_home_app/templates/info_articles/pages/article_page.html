@@ -25,6 +25,15 @@
     {% include "info_articles/partials/article_sidemenu.html" %}
 {% endblock sidemenu %}
 
+{% comment %}
+content_bg_enabled/content_bg_color/content_bg_custom_color paint the
+shared .maincontent wrapper itself (home_base.html), not just .article-page
+-- .maincontent also covers the site's own left/right padding around the
+content column, which .article-page's own background wouldn't reach,
+leaving a visible strip of the site's default background there instead.
+{% endcomment %}
+{% block maincontent_style %}{% if page.content_bg_enabled %}background-color: {% if page.content_bg_color == "custom" %}{{ page.content_bg_custom_color|default:"var(--color-bg-light)" }}{% else %}var(--color-{{ page.content_bg_color }}){% endif %};{% endif %}{% endblock %}
+
 {% block maincontent %}
     {% include "info_articles/partials/article_breadcrumbs.html" %}
     {% if can_edit_style %}
@@ -33,7 +42,7 @@
         {% include "info_articles/partials/article_unsaved_changes_modal.html" %}
         {% include "info_articles/partials/article_save_bar.html" %}
     {% endif %}
-    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="--accent-color: var(--color-{{ page.category.color }}); --content-side-padding: {{ page.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.content_alignment }}; --content-font-size: {{ page.content_font_size|unlocalize }}rem;">
+    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="--accent-color: var(--color-{{ page.category.color }}); --content-side-padding: {{ page.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.content_alignment }}; --content-font-size: {{ page.content_font_size|unlocalize }}rem; --toc-icon-size: {{ page.toc_icon_size|unlocalize }}rem;">
         {% if can_edit_style %}
             {% include "info_articles/partials/article_editor_mode_toggle.html" %}
         {% endif %}

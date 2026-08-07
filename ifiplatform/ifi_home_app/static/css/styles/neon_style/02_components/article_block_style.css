@@ -276,10 +276,84 @@ even while the input itself stays visually hidden (see
   box-shadow: 0 0 0 2px var(--color-accent);
 }
 
+/* for the custom swatch specifically, the "active" ring belongs on the
+outer group box (framing both the hex chip and the picker button as one
+control, see .color-swatch-custom-group above) rather than just the hex
+chip on its own -- overrides the generic rule above back to a plain border
+on the chip itself, and puts the same ring on the group instead via
+:has(), driven by that same .active class the chip already gets from
+article_block_style.js (no extra JS needed). */
+.color-swatch--custom.active {
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+.color-swatch-custom-group:has(.color-swatch--custom.active) {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
 .block-style-toggle {
   flex-direction: row;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* the "Box" checkbox row doubles as a header for the collapsible section
+below it -- the chevron button is pushed to the far right of that same row
+via margin-left: auto. */
+.block-style-box-header {
+  position: relative;
+}
+
+.block-style-box-collapse-toggle {
+  margin-left: auto;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-text);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+/* collapsed state points the chevron sideways, same "closed" convention as
+a native <details> triangle. Expand/collapse itself is a plain [hidden]
+toggle on #block-style-box-fields (see article_block_style.js) -- entirely
+independent of whether the box itself is enabled. */
+.block-style-box-collapse-toggle[aria-expanded="false"] {
+  transform: rotate(-90deg);
+}
+
+.block-style-box-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.block-style-box-fields[hidden] {
+  display: none;
+}
+
+/* frames one group of related box fields (background, border, spacing) as
+its own visually distinct card, so it's obvious at a glance which controls
+belong together instead of them all blending into one long list. */
+.block-style-box-subsection {
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-light);
+}
+
+.block-style-box-subsection-title {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
 }
 
 .block-style-mini-panel-actions {

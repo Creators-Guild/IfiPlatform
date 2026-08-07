@@ -44,9 +44,11 @@ BLOCK_STYLE_FIELDS = {
 
 @require_POST
 def save_quick_style(request, page_id):
-    """Save content_side_padding/content_alignment/content_font_size for one
-    ArticlePage and publish immediately -- this panel is a quick style tweak,
-    not the full editor, so there's no separate draft step."""
+    """Save content_side_padding/content_alignment/content_font_size/
+    content_bg_enabled/content_bg_color/content_bg_custom_color/
+    toc_icon_size for one ArticlePage and publish immediately -- this panel
+    is a quick style tweak, not the full editor, so there's no separate
+    draft step."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.permissions_for_user(request.user).can_edit():
@@ -57,15 +59,32 @@ def save_quick_style(request, page_id):
         side_padding = float(data["content_side_padding"])
         alignment = data["content_alignment"]
         font_size = float(data["content_font_size"])
+        bg_enabled = bool(data["content_bg_enabled"])
+        bg_color = data["content_bg_color"]
+        bg_custom_color = data.get("content_bg_custom_color") or ""
+        toc_icon_size = float(data["toc_icon_size"])
     except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
     if alignment not in dict(ArticlePage.CONTENT_ALIGNMENT_CHOICES):
         return JsonResponse({"error": "Invalid alignment."}, status=400)
 
+    if bg_color not in dict(COLOR_CHOICES):
+        return JsonResponse({"error": "Invalid content_bg_color."}, status=400)
+
+    if bg_custom_color:
+        try:
+            HEX_COLOR_VALIDATOR(bg_custom_color)
+        except ValidationError:
+            return JsonResponse({"error": "Invalid content_bg_custom_color."}, status=400)
+
     page.content_side_padding = side_padding
     page.content_alignment = alignment
     page.content_font_size = font_size
+    page.content_bg_enabled = bg_enabled
+    page.content_bg_color = bg_color
+    page.content_bg_custom_color = bg_custom_color
+    page.toc_icon_size = toc_icon_size
     revision = page.save_revision(user=request.user)
     revision.publish(user=request.user)
 

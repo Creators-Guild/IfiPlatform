@@ -77,7 +77,7 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
              data-column-count="{{ block.value.columns|length }}"
              data-column-weights="{% for w in style.column_weights %}{{ w|unlocalize }}{% if not forloop.last %},{% endif %}{% endfor %}"
              {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
-             style="gap: {{ style.gap|unlocalize }}rem; {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">
+             style="gap: {{ style.gap|unlocalize }}rem; {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding keep_display=True %}">
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             {% for bound_column in block.value.columns.bound_blocks %}
                 {% with column=bound_column.value column_style=block_styles|lookup:bound_column.id %}

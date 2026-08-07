@@ -1,7 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
   const panel = document.getElementById("quick-style-panel");
   const articlePage = document.querySelector(".article-page");
-  if (!panel || !articlePage) {
+  // shared site-wide wrapper (home_base.html), not article-specific --
+  // background color paints this one instead of .article-page itself, so
+  // it also covers the site's own left/right padding around the content
+  // column (see article_page.html's maincontent_style block).
+  const mainContent = document.querySelector(".maincontent");
+  if (!panel || !articlePage || !mainContent) {
     return;
   }
 
@@ -10,6 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const fontSizeInput = document.getElementById("quick-style-font-size");
   const fontSizeValue = document.getElementById("quick-style-font-size-value");
   const alignmentGroup = document.getElementById("quick-style-alignment");
+  const bgEnabledInput = document.getElementById("quick-style-bg-enabled");
+  const bgColorField = document.getElementById("quick-style-bg-color-field");
+  const bgColorGroup = document.getElementById("quick-style-bg-color");
+  const bgCustomColorInput = document.getElementById("quick-style-bg-custom-color");
+  const bgPickerInput = document.getElementById("quick-style-bg-picker");
+  const tocIconSizeInput = document.getElementById("quick-style-toc-icon-size");
+  const tocIconSizeValue = document.getElementById("quick-style-toc-icon-size-value");
   const statusEl = document.getElementById("quick-style-status");
   const minimizeButton = document.getElementById("quick-style-minimize");
   const MINIMIZED_KEY = "ifiQuickStyleMinimized";
@@ -42,6 +54,16 @@ document.addEventListener("DOMContentLoaded", () => {
     window.ifiUnsavedChanges.markDirty("quickStyle");
   });
 
+  // the ToC icon and its own button circle scale together (article_toc.css's
+  // .toc-open-icon/.toc-open-button both key off this one variable), plus
+  // the gutter reserved for it so a bigger button doesn't get clipped
+  // against/overlap the article text next to it.
+  tocIconSizeInput.addEventListener("input", () => {
+    articlePage.style.setProperty("--toc-icon-size", `${tocIconSizeInput.value}rem`);
+    tocIconSizeValue.textContent = tocIconSizeInput.value;
+    window.ifiUnsavedChanges.markDirty("quickStyle");
+  });
+
   alignmentGroup.querySelectorAll("button").forEach((button) => {
     button.addEventListener("click", () => {
       const align = button.dataset.align;
@@ -52,6 +74,111 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       window.ifiUnsavedChanges.markDirty("quickStyle");
     });
+  });
+
+  // background color -- same swatch-row + hex-chip-with-picker-button
+  // control as the per-block box styling panel (article_block_style.js),
+  // just for the whole article body's own background. Reimplemented here
+  // rather than shared, same as the alignment buttons above already are --
+  // this panel edits one fixed ArticlePage's own fields directly (server-
+  // rendered initial values), not whichever block a trigger last opened.
+  const applyBgColor = () => {
+    if (!bgEnabledInput.checked) {
+      mainContent.style.backgroundColor = "";
+      return;
+    }
+    const color = bgColorGroup.dataset.value;
+    mainContent.style.backgroundColor =
+      color === "custom" ? bgCustomColorInput.value || "var(--color-bg-light)" : `var(--color-${color})`;
+  };
+
+  const normalizeHex = (value) => {
+    const match = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec((value || "").trim());
+    if (!match) {
+      return null;
+    }
+    let hex = match[1];
+    if (hex.length === 3) {
+      hex = hex
+        .split("")
+        .map((c) => c + c)
+        .join("");
+    }
+    return `#${hex.toLowerCase()}`;
+  };
+
+  const contrastTextColor = (hex) => {
+    const int = parseInt(hex.slice(1), 16);
+    const r = (int >> 16) & 255;
+    const g = (int >> 8) & 255;
+    const b = int & 255;
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.6 ? "#000000" : "#ffffff";
+  };
+
+  const setCustomSwatch = (hex) => {
+    bgCustomColorInput.value = hex || "";
+    if (hex) {
+      bgCustomColorInput.style.backgroundColor = hex;
+      bgCustomColorInput.style.color = contrastTextColor(hex);
+    } else {
+      bgCustomColorInput.style.backgroundColor = "";
+      bgCustomColorInput.style.color = "";
+    }
+    bgPickerInput.value = hex || "#ffffff";
+  };
+
+  const selectBgSwatch = (swatch) => {
+    bgColorGroup.dataset.value = swatch.dataset.color;
+    bgColorGroup.querySelectorAll(".color-swatch").forEach((s) => {
+      s.classList.toggle("active", s === swatch);
+    });
+    applyBgColor();
+    window.ifiUnsavedChanges.markDirty("quickStyle");
+  };
+
+  bgColorGroup.querySelectorAll("button.color-swatch").forEach((button) => {
+    button.addEventListener("click", () => selectBgSwatch(button));
+  });
+
+  // same "outer box is the button" first-click behavior as the per-block
+  // box panel's own custom swatch -- while custom isn't the active choice,
+  // the whole hex-chip+picker box just selects it on the first click
+  // (reapplying whatever hex was already there) instead of immediately
+  // focusing the text field or opening the picker.
+  const customGroupEl = bgCustomColorInput.closest(".color-swatch-custom-group");
+  customGroupEl.addEventListener("mousedown", (event) => {
+    if (bgColorGroup.dataset.value === "custom") {
+      return;
+    }
+    event.preventDefault();
+  });
+  customGroupEl.addEventListener("click", (event) => {
+    if (bgColorGroup.dataset.value === "custom") {
+      return;
+    }
+    event.preventDefault();
+    selectBgSwatch(bgCustomColorInput);
+  });
+
+  bgCustomColorInput.addEventListener("input", () => {
+    const hex = normalizeHex(bgCustomColorInput.value);
+    if (!hex) {
+      return;
+    }
+    setCustomSwatch(hex);
+    selectBgSwatch(bgCustomColorInput);
+  });
+
+  bgPickerInput.addEventListener("input", () => {
+    setCustomSwatch(bgPickerInput.value);
+    selectBgSwatch(bgCustomColorInput);
+  });
+
+  bgEnabledInput.addEventListener("change", () => {
+    bgColorField.hidden = !bgEnabledInput.checked;
+    applyBgColor();
+    window.ifiUnsavedChanges.markDirty("quickStyle");
   });
 
   // sets each field to its default and replays the same input/click each
@@ -75,6 +202,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (defaultAlignButton) {
       defaultAlignButton.click();
     }
+
+    setCustomSwatch(null);
+    const defaultBgButton = bgColorGroup.querySelector(
+      `button[data-color="${panel.dataset.defaultBgColor}"]`
+    );
+    if (defaultBgButton) {
+      defaultBgButton.click();
+    }
+    bgEnabledInput.checked = false;
+    bgEnabledInput.dispatchEvent(new Event("change"));
+
+    tocIconSizeInput.value = panel.dataset.defaultTocIconSize;
+    tocIconSizeInput.dispatchEvent(new Event("input"));
   });
 
   // returns a Promise<{ok, error}> -- this panel has no Save button of its
@@ -99,6 +239,10 @@ document.addEventListener("DOMContentLoaded", () => {
         content_side_padding: paddingInput.value,
         content_alignment: alignmentGroup.dataset.value,
         content_font_size: fontSizeInput.value,
+        content_bg_enabled: bgEnabledInput.checked,
+        content_bg_color: bgColorGroup.dataset.value,
+        content_bg_custom_color: bgCustomColorInput.value,
+        toc_icon_size: tocIconSizeInput.value,
       }),
     })
       .then((response) =>

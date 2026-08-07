@@ -202,6 +202,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.getElementById("block-style-mini-panel-status");
 
   const boxEnabledInput = document.getElementById("block-style-box-enabled");
+  const boxCollapseToggle = document.getElementById("block-style-box-collapse-toggle");
+  const boxFieldsWrapper = document.getElementById("block-style-box-fields");
   const boxBgColorGroup = document.getElementById("block-style-box-bg-color");
   const boxBgCustomColorInput = document.getElementById("block-style-box-bg-custom-color");
   const boxBgPickerInput = document.getElementById("block-style-box-bg-picker");
@@ -386,7 +388,17 @@ document.addEventListener("DOMContentLoaded", () => {
     currentBlockEl.style.padding = `${boxPaddingInput.value}rem`;
     currentBlockEl.style.marginTop = `${boxMarginInput.value}rem`;
     currentBlockEl.style.marginBottom = `${boxMarginInput.value}rem`;
-    currentBlockEl.style.display = "flow-root";
+    // multi_column's own grid wrapper needs to stay "display: flex" (set in
+    // article_multicolumn.css) for its columns to lay out side by side --
+    // "flow-root" would silently replace that outright (same property,
+    // same element) and collapse them into a single stacked column. Every
+    // other box-capable element is a plain block box to begin with, where
+    // flow-root is purely additive float containment, so only this one
+    // type needs to skip it (see _block_box_style.html's keep_display,
+    // same reasoning for the server-rendered version of this).
+    if (targetTypeInput.value !== "multi_column") {
+      currentBlockEl.style.display = "flow-root";
+    }
     currentBlockEl.style.borderRadius = `${boxRadiusInput.value}rem`;
     currentBlockEl.style.boxShadow = "0 2px 8px var(--color-shadow)";
     const bgColor = boxBgColorGroup.dataset.value;
@@ -532,6 +544,36 @@ document.addEventListener("DOMContentLoaded", () => {
     [boxBgCustomColorInput, boxBgPickerInput, boxBgColorGroup, "boxBgColor", "boxBgCustomColor"],
     [boxBorderCustomColorInput, boxBorderPickerInput, boxBorderColorGroup, "boxBorderColor", "boxBorderCustomColor"],
   ].forEach(([hexInput, pickerInput, group, groupDatasetKey, customDatasetKey]) => {
+    // custom isn't active yet -- a plain click always immediately focuses a
+    // text input (or, for the picker label, forwards straight into opening
+    // the native color dialog), with no "just select it" step in between
+    // the way clicking any of the five fixed swatches has. So: while custom
+    // isn't the group's active choice, the whole outer box (the hex chip,
+    // the picker button, and the gap/border between them -- see
+    // .color-swatch-custom-group in article_block_style.css) acts as one
+    // big "select custom" button on its *first* click, same as clicking a
+    // fixed swatch reapplies its own color, and blocks whichever default
+    // action that click would otherwise have triggered. Once custom *is*
+    // active, clicks go back to behaving normally -- type in the hex field,
+    // or open the picker. Two listeners, not one, because a text input
+    // grabs focus on mousedown (before "click" even fires), while a
+    // <label>'s default forwarding to its color input happens on "click" --
+    // an input's focus can only be blocked by catching the earlier event.
+    const customGroupEl = hexInput.closest(".color-swatch-custom-group");
+    customGroupEl.addEventListener("mousedown", (event) => {
+      if (!currentBlockEl || group.dataset.value === "custom") {
+        return;
+      }
+      event.preventDefault();
+    });
+    customGroupEl.addEventListener("click", (event) => {
+      if (!currentBlockEl || group.dataset.value === "custom") {
+        return;
+      }
+      event.preventDefault();
+      selectSwatch(group, hexInput, groupDatasetKey);
+    });
+
     hexInput.addEventListener("input", () => {
       const hex = normalizeHex(hexInput.value);
       if (!currentBlockEl || !hex) {
@@ -564,6 +606,17 @@ document.addEventListener("DOMContentLoaded", () => {
     applyBoxStyle();
     positionTextTriggers();
     recordPendingEdit();
+  });
+
+  // independent of box_enabled -- purely whether the detail fields below
+  // are showing right now, not whether box styling itself is on. Not reset
+  // when switching to a different block's panel, so collapsing it once
+  // keeps it collapsed for whatever you open next too.
+  boxCollapseToggle.addEventListener("click", (event) => {
+    event.preventDefault();
+    const expanded = boxCollapseToggle.getAttribute("aria-expanded") === "true";
+    boxCollapseToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
+    boxFieldsWrapper.hidden = expanded;
   });
 
   boxBorderVisibleInput.addEventListener("change", () => {

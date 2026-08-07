@@ -633,6 +633,32 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         ),
     )
 
+    content_bg_enabled = models.BooleanField(
+        default=False,
+        help_text="Override the article body's default background color.",
+    )
+    content_bg_color = models.CharField(
+        max_length=20,
+        choices=COLOR_CHOICES,
+        default="bg-light",
+        help_text="Background color (only applies when the override above is enabled).",
+    )
+    content_bg_custom_color = models.CharField(
+        max_length=7,
+        blank=True,
+        validators=[HEX_COLOR_VALIDATOR],
+        help_text="Hex code, e.g. #ff8800. Only used when color is set to 'Custom'.",
+    )
+
+    toc_icon_size = models.FloatField(
+        default=1.3,
+        help_text=(
+            "Size of the table-of-contents icon (the circular \"contents\" "
+            "button next to the title), in rem. The button's own circle "
+            "grows and shrinks along with it."
+        ),
+    )
+
     # allows for mutiple sections of one of these types:
     body = StreamField(
         _body_content_blocks(),
@@ -640,7 +666,8 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
     )
 
     # Deliberately no FieldPanel for the styling fields (content_side_padding/
-    # content_alignment/content_font_size, title_alignment/title_font_size,
+    # content_alignment/content_font_size/content_bg_enabled/content_bg_color/
+    # content_bg_custom_color/toc_icon_size, title_alignment/title_font_size,
     # intro_alignment/intro_font_size, meta_alignment/meta_font_size,
     # header_side_padding, hero_image_position/hero_image_width_rem/
     # hero_image_side_padding) -- those fields still exist and still store

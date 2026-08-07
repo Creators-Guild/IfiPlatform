@@ -5,17 +5,20 @@
    the padding, so it can never land on top of either regardless of the
    sidemenu's current (collapsible/hover-expanding) width. Sticky, not
    fixed, so its horizontal position always tracks the article column
-   itself instead of a hardcoded viewport offset. */
+   itself instead of a hardcoded viewport offset. The gutter itself scales
+   with --toc-icon-size (same variable .toc-open-button/.toc-open-icon use
+   below) so a bigger button never gets clipped against/overlapping the
+   article text next to it. */
 .article-page--has-toc {
-  padding-left: 3.5rem;
+  padding-left: calc(var(--toc-icon-size, 1.3rem) + 2.2rem);
 }
 
 .toc-open-sticky {
   position: sticky;
   top: 1.5rem;
   height: 0;
-  margin-left: -3.5rem;
-  width: 3.5rem;
+  margin-left: calc(-1 * (var(--toc-icon-size, 1.3rem) + 2.2rem));
+  width: calc(var(--toc-icon-size, 1.3rem) + 2.2rem);
   z-index: 40;
 }
 
@@ -28,12 +31,17 @@
   margin-top: 0;
 }
 
+/* size is editor-controlled (ArticlePage.toc_icon_size, --toc-icon-size set
+inline on .article-page -- see article_page.html/article_quick_style.js) --
+the circle grows with the icon (same 1.45rem ring around it either way,
+matching the original fixed 2.75rem circle around a 1.3rem icon), not
+independently. */
 .toc-open-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: calc(var(--toc-icon-size, 1.3rem) + 1.45rem);
+  height: calc(var(--toc-icon-size, 1.3rem) + 1.45rem);
   padding: 0;
   background-color: var(--color-white);
   border: 1px solid var(--color-border);
@@ -50,8 +58,8 @@
 }
 
 .toc-open-icon {
-  width: 1.3rem;
-  height: 1.3rem;
+  width: var(--toc-icon-size, 1.3rem);
+  height: var(--toc-icon-size, 1.3rem);
   flex: 0 0 auto;
 }
 
