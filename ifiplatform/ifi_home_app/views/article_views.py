@@ -5,17 +5,40 @@ article_models.py."""
 
 import json
 
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
-from ifi_home_app.models.article_models import ArticleBlockStyle, ArticlePage
+from ifi_home_app.models.article_models import (
+    COLOR_CHOICES,
+    HEX_COLOR_VALIDATOR,
+    ArticleBlockStyle,
+    ArticlePage,
+)
+
+# box styling (see BLOCK_STYLE_DEFAULTS["box"]/_effective_box_style() in
+# article_models.py) is available on every block type below, plus "column"
+# -- a multi_column sub-column, which has no style of its own besides box.
+BOX_FIELDS = {
+    "box_enabled",
+    "box_border_width",
+    "box_border_color",
+    "box_border_custom_color",
+    "box_border_visible",
+    "box_radius",
+    "box_bg_color",
+    "box_bg_custom_color",
+    "box_padding",
+    "box_margin",
+}
 
 BLOCK_STYLE_FIELDS = {
-    "heading": {"side_padding", "alignment", "font_size"},
-    "styled_text": {"side_padding", "alignment", "font_size"},
-    "image": {"alignment", "width_rem", "side_padding"},
-    "multi_column": {"side_padding", "gap", "column_weights"},
+    "heading": {"side_padding", "alignment", "font_size"} | BOX_FIELDS,
+    "styled_text": {"side_padding", "alignment", "font_size"} | BOX_FIELDS,
+    "image": {"alignment", "width_rem", "side_padding"} | BOX_FIELDS,
+    "multi_column": {"side_padding", "gap", "column_weights"} | BOX_FIELDS,
+    "column": set(BOX_FIELDS),
 }
 
 
@@ -83,6 +106,14 @@ def save_block_style(request, page_id):
             defaults["gap"] = float(data["gap"])
         if "column_weights" in allowed_fields and data.get("column_weights") is not None:
             defaults["column_weights"] = [float(w) for w in data["column_weights"]]
+        if "box_border_width" in allowed_fields and data.get("box_border_width") is not None:
+            defaults["box_border_width"] = float(data["box_border_width"])
+        if "box_radius" in allowed_fields and data.get("box_radius") is not None:
+            defaults["box_radius"] = float(data["box_radius"])
+        if "box_padding" in allowed_fields and data.get("box_padding") is not None:
+            defaults["box_padding"] = float(data["box_padding"])
+        if "box_margin" in allowed_fields and data.get("box_margin") is not None:
+            defaults["box_margin"] = float(data["box_margin"])
     except (TypeError, ValueError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
@@ -91,6 +122,29 @@ def save_block_style(request, page_id):
         if alignment not in dict(ArticlePage.CONTENT_ALIGNMENT_CHOICES):
             return JsonResponse({"error": "Invalid alignment."}, status=400)
         defaults["alignment"] = alignment
+
+    if "box_enabled" in allowed_fields and data.get("box_enabled") is not None:
+        defaults["box_enabled"] = bool(data["box_enabled"])
+    if "box_border_visible" in allowed_fields and data.get("box_border_visible") is not None:
+        defaults["box_border_visible"] = bool(data["box_border_visible"])
+
+    for color_field, custom_field in (
+        ("box_border_color", "box_border_custom_color"),
+        ("box_bg_color", "box_bg_custom_color"),
+    ):
+        if color_field in allowed_fields and data.get(color_field) is not None:
+            color = data[color_field]
+            if color not in dict(COLOR_CHOICES):
+                return JsonResponse({"error": f"Invalid {color_field}."}, status=400)
+            defaults[color_field] = color
+        if custom_field in allowed_fields and data.get(custom_field) is not None:
+            custom_color = data[custom_field]
+            if custom_color:
+                try:
+                    HEX_COLOR_VALIDATOR(custom_color)
+                except ValidationError:
+                    return JsonResponse({"error": f"Invalid {custom_field}."}, status=400)
+            defaults[custom_field] = custom_color
 
     ArticleBlockStyle.objects.update_or_create(
         article=page, block_id=block_id, defaults=defaults

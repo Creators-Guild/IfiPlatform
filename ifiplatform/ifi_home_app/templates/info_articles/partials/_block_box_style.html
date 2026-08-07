@@ -1,0 +1,15 @@
+{% load l10n %}{% comment %}
+Inline CSS declarations for one block/column's box styling -- included into
+the middle of that element's own style="..." attribute. `box` is a
+_effective_box_style() dict (see article_models.py); `side_padding` is that
+block's own side-padding value (None for a multi_column sub-column, which
+has no side padding of its own).
+
+When the box is off, this only sets padding-left/right from the block's own
+side_padding (top/bottom stay at 0) -- same as before box styling existed.
+When it's on, box.padding takes over as the padding on all four sides
+instead (the box's border needs to sit *around* the content, not just
+beside it), and border/background/radius/margin are added on top. This
+means side_padding's own visual effect is superseded while the box is on,
+not stacked with it -- editors adjust box.padding instead in that case.
+{% endcomment %}{% if box.enabled %}padding: {{ box.padding|unlocalize }}rem; margin-top: {{ box.margin|unlocalize }}rem; margin-bottom: {{ box.margin|unlocalize }}rem; background-color: {% if box.bg_color == "custom" %}{{ box.bg_custom_color|default:"var(--color-bg-light)" }}{% else %}var(--color-{{ box.bg_color }}){% endif %}; border-radius: {{ box.radius|unlocalize }}rem; box-shadow: 0 2px 8px var(--color-shadow); display: flow-root;{% if box.border_visible %} border: {{ box.border_width|unlocalize }}rem solid {% if box.border_color == "custom" %}{{ box.border_custom_color|default:"var(--color-black)" }}{% else %}var(--color-{{ box.border_color }}){% endif %};{% endif %}{% else %}padding-left: {{ side_padding|default_if_none:0|unlocalize }}rem; padding-right: {{ side_padding|default_if_none:0|unlocalize }}rem;{% endif %}

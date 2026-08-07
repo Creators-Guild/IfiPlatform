@@ -76,29 +76,18 @@ class TranslationWarningMixin:
 
 
 def article_image_block():
-    """A single image with layout/caption/box options, shared by the top-level
-    'image' block and the image option inside multi-column text."""
+    """A single image with an optional caption, shared by the top-level
+    'image' block and the image option inside multi-column text. Layout
+    and box styling (alignment/width/side padding/border/background) are
+    deliberately not part of this block at all -- they live only in
+    ArticleBlockStyle, edited on-page via editor mode
+    (article_block_style.js), with BLOCK_STYLE_DEFAULTS as the fallback
+    when no override exists yet (see _effective_block_styles() and
+    _effective_box_style()). Wagtail's job here is just the image itself
+    and its caption, not how it looks on the page."""
     return blocks.StructBlock(
         [
             ("image", ImageChooserBlock()),
-            (
-                "alignment",
-                blocks.ChoiceBlock(
-                    choices=[
-                        ("left", "Left"),
-                        ("center", "Center"),
-                        ("right", "Right"),
-                    ],
-                    default="center",
-                ),
-            ),
-            (
-                "width_rem",
-                blocks.FloatBlock(
-                    default=20,
-                    help_text="Width, in rem.",
-                ),
-            ),
             (
                 "alt_text",
                 blocks.CharBlock(
@@ -107,88 +96,30 @@ def article_image_block():
                 ),
             ),
             ("caption", blocks.CharBlock(required=False)),
-            (
-                "boxed",
-                blocks.BooleanBlock(
-                    required=False,
-                    default=False,
-                    help_text="Draw a border/box around the image, title and description.",
-                ),
-            ),
-            (
-                "box_color",
-                blocks.ChoiceBlock(
-                    choices=COLOR_CHOICES,
-                    default="bg-light",
-                    required=False,
-                    help_text="Box background color (only applies when 'boxed' is enabled).",
-                ),
-            ),
-            (
-                "box_custom_color",
-                blocks.CharBlock(
-                    required=False,
-                    validators=[HEX_COLOR_VALIDATOR],
-                    help_text="Hex code, e.g. #ff8800. Only used when color is set to 'Custom'.",
-                ),
-            ),
-            (
-                "box_border_radius",
-                blocks.FloatBlock(
-                    min_value=0,
-                    max_value=5,
-                    default=0.75,
-                    help_text="Box corner rounding, in rem (0 = square corners). Only applies when 'boxed' is enabled.",
-                ),
-            ),
-            (
-                "side_padding",
-                blocks.FloatBlock(
-                    default=0,
-                    help_text="Left/right padding, in rem (0 = none).",
-                ),
-            ),
         ],
         icon="image",
     )
 
 
 def article_styled_text_block():
-    """A rich text block with layout options (alignment, letter size, side
-    padding). Kept as its own block type rather than added to the existing
-    plain 'paragraph' block -- that one's value is just a bare RichText
-    string, and changing its shape to a struct would need a data migration
-    to convert every existing paragraph across every article. This way
-    existing content is untouched; editors opt into the new block going
+    """A rich text block, structurally just a wrapper around the text with
+    no fields of its own beyond that -- kept as its own block type (rather
+    than added to the existing plain 'paragraph' block, whose value is just
+    a bare RichText string) purely as the *signal* that this particular
+    paragraph opts into per-block on-page styling: article_body_blocks.html
+    only gives styled_text blocks the "Edit block style" trigger, alignment/
+    font-size/side-padding come from ArticleBlockStyle (edited via editor
+    mode, article_block_style.js), with BLOCK_STYLE_DEFAULTS as the
+    fallback when no override exists yet -- see _effective_block_styles().
+    A plain 'paragraph' just inherits the article's own global style
+    instead, with no per-block override available. Changing 'paragraph'
+    itself to carry this distinction would need a data migration to
+    convert every existing paragraph across every article; this way
+    existing content is untouched, editors opt into the new block going
     forward."""
     return blocks.StructBlock(
         [
             ("text", blocks.RichTextBlock()),
-            (
-                "alignment",
-                blocks.ChoiceBlock(
-                    choices=[
-                        ("left", "Left"),
-                        ("center", "Center"),
-                        ("right", "Right"),
-                    ],
-                    default="left",
-                ),
-            ),
-            (
-                "font_size",
-                blocks.FloatBlock(
-                    default=1,
-                    help_text="Font size, in rem.",
-                ),
-            ),
-            (
-                "side_padding",
-                blocks.FloatBlock(
-                    default=1,
-                    help_text="Left/right padding, in rem (0 = none).",
-                ),
-            ),
         ],
         icon="pilcrow",
         label="Styled Text",
@@ -231,31 +162,6 @@ def _body_content_blocks():
                             ),
                         ),
                     ),
-                    (
-                        "alignment",
-                        blocks.ChoiceBlock(
-                            choices=[
-                                ("left", "Left"),
-                                ("center", "Center"),
-                                ("right", "Right"),
-                            ],
-                            default="left",
-                        ),
-                    ),
-                    (
-                        "font_size",
-                        blocks.FloatBlock(
-                            default=1.5,
-                            help_text="Font size, in rem.",
-                        ),
-                    ),
-                    (
-                        "side_padding",
-                        blocks.FloatBlock(
-                            default=0,
-                            help_text="Left/right padding, in rem (0 = none).",
-                        ),
-                    ),
                 ]
             ),
         ),
@@ -263,6 +169,14 @@ def _body_content_blocks():
         ("styled_text", article_styled_text_block()),
         (
             "multi_column",
+            # Each column's own relative weight, the gap between columns, and
+            # the block's own side padding all live only in ArticleBlockStyle
+            # (edited on-page via editor mode, article_block_style.js), with
+            # BLOCK_STYLE_DEFAULTS as the fallback when no override exists yet
+            # -- see _effective_block_styles(). column_alignment stays here
+            # since it's a structural/layout choice (vertical positioning,
+            # a different axis entirely from left/right weighting) with no
+            # on-page equivalent -- moving it out would make it uneditable.
             blocks.StructBlock(
                 [
                     (
@@ -283,21 +197,6 @@ def _body_content_blocks():
                                                 ("image", article_image_block()),
                                             ],
                                             required=False,
-                                        ),
-                                    ),
-                                    (
-                                        "width",
-                                        blocks.IntegerBlock(
-                                            min_value=1,
-                                            max_value=10,
-                                            default=1,
-                                            label="Column weight",
-                                            help_text=(
-                                                "How much space this column takes relative "
-                                                "to the other columns -- not a literal width, "
-                                                "just a ratio between them (e.g. weight 2 next "
-                                                "to weight 1 makes this column twice as wide)."
-                                            ),
                                         ),
                                     ),
                                 ]
@@ -325,22 +224,6 @@ def _body_content_blocks():
                             ),
                         ),
                     ),
-                    (
-                        "gap",
-                        blocks.FloatBlock(
-                            min_value=0,
-                            max_value=10,
-                            default=2,
-                            help_text="Space between columns, in rem.",
-                        ),
-                    ),
-                    (
-                        "side_padding",
-                        blocks.FloatBlock(
-                            default=1,
-                            help_text="Left/right padding around the whole multi-column block, in rem (0 = none).",
-                        ),
-                    ),
                 ],
                 icon="placeholder",
                 label="Multi-column Text",
@@ -350,93 +233,14 @@ def _body_content_blocks():
     ]
 
 
-def article_box_block():
-    """A container with its own background color, border color and corner
-    radius, holding any of the other body block types (but not another
-    box, to avoid unbounded nesting -- see _body_content_blocks())."""
-    return blocks.StructBlock(
-        [
-            (
-                "background_color",
-                blocks.ChoiceBlock(choices=COLOR_CHOICES, default="bg-light"),
-            ),
-            (
-                "background_custom_color",
-                blocks.CharBlock(
-                    required=False,
-                    validators=[HEX_COLOR_VALIDATOR],
-                    help_text="Hex code, e.g. #ff8800. Only used when background color is set to 'Custom'.",
-                ),
-            ),
-            (
-                "border_color",
-                blocks.ChoiceBlock(choices=COLOR_CHOICES, default="black"),
-            ),
-            (
-                "border_custom_color",
-                blocks.CharBlock(
-                    required=False,
-                    validators=[HEX_COLOR_VALIDATOR],
-                    help_text="Hex code, e.g. #ff8800. Only used when border color is set to 'Custom'.",
-                ),
-            ),
-            (
-                "border_radius",
-                blocks.FloatBlock(
-                    min_value=0,
-                    max_value=5,
-                    default=0.75,
-                    help_text="Corner rounding, in rem (0 = square corners).",
-                ),
-            ),
-            (
-                "float",
-                blocks.ChoiceBlock(
-                    choices=[
-                        ("none", "None (full width)"),
-                        ("left", "Left"),
-                        ("right", "Right"),
-                    ],
-                    default="none",
-                    help_text=(
-                        "Floating the box (like the hero image) lets the article's "
-                        "surrounding paragraphs wrap around it and reclaim the full "
-                        "width again once they've scrolled past it -- no separate "
-                        "'columns' needed for that, ordinary paragraphs do it "
-                        "automatically. 'None' makes it a full-width block instead."
-                    ),
-                ),
-            ),
-            (
-                "float_width",
-                blocks.FloatBlock(
-                    min_value=10,
-                    max_value=100,
-                    default=40,
-                    help_text="Width as a % of the article's content width. Only applies when floated.",
-                ),
-            ),
-            (
-                "content",
-                blocks.StreamBlock(_body_content_blocks(), required=False),
-            ),
-        ],
-        icon="placeholder",
-        label="Box",
-    )
-
-
 def _iter_toc_entries(body_stream):
-    """Recursively walks a body StreamValue (or a box's own nested content
-    StreamValue, which holds the same block types) yielding (level, text)
-    pairs for anything the table of contents should link to: top-level
-    headings, headings nested inside a box, and multi_column column titles
-    (treated as h3s, since they're a smaller heading-like label rather than
-    a real 'heading' block -- see article_body_blocks.html, which gives
-    both an id built the same way (slugify(text)), so these pairs line up
-    with the actual anchors on the page. Box content can't itself contain
-    another box (see _body_content_blocks()), so this can't recurse
-    forever."""
+    """Recursively walks a body StreamValue yielding (level, text) pairs for
+    anything the table of contents should link to: top-level headings, and
+    multi_column column titles (treated as h3s, since they're a smaller
+    heading-like label rather than a real 'heading' block -- see
+    article_body_blocks.html, which gives both an id built the same way
+    (slugify(text)), so these pairs line up with the actual anchors on the
+    page."""
     for block in body_stream:
         if block.block_type == "heading":
             yield block.value["level"], block.value["text"]
@@ -444,115 +248,21 @@ def _iter_toc_entries(body_stream):
             for column in block.value["columns"]:
                 if column.get("title"):
                     yield "h3", column["title"]
-        elif block.block_type == "box":
-            yield from _iter_toc_entries(block.value["content"])
 
 
-def _effective_block_styles(body_stream, overrides_by_block_id):
-    """Recursively walks a body StreamValue (or a box's/column's own nested
-    content, same block types) yielding {block_id: {...}} for every
-    heading/styled_text/image/multi_column block, each block's own
-    StreamField value merged with any ArticleBlockStyle override for it
-    (override wins where set, otherwise the block's own stored value). Kept
-    as plain dicts rather than touching block.value.font_size etc. directly
-    in templates, so the "was this overridden by the on-page panel" logic
-    lives in one place. Same recursion shape as _iter_toc_entries -- box
-    content can't itself contain another box, so this can't recurse
-    forever."""
-    styles = {}
-    for block in body_stream:
-        block_id = str(block.id)
-        override = overrides_by_block_id.get(block_id)
-        if block.block_type == "heading":
-            styles[block_id] = {
-                "font_size": (
-                    override.font_size
-                    if override and override.font_size is not None
-                    else block.value["font_size"]
-                ),
-                "side_padding": (
-                    override.side_padding
-                    if override and override.side_padding is not None
-                    else block.value["side_padding"]
-                ),
-                "alignment": (
-                    override.alignment
-                    if override and override.alignment
-                    else block.value["alignment"]
-                ),
-            }
-        elif block.block_type == "styled_text":
-            styles[block_id] = {
-                "font_size": (
-                    override.font_size
-                    if override and override.font_size is not None
-                    else block.value["font_size"]
-                ),
-                "side_padding": (
-                    override.side_padding
-                    if override and override.side_padding is not None
-                    else block.value["side_padding"]
-                ),
-                "alignment": (
-                    override.alignment
-                    if override and override.alignment
-                    else block.value["alignment"]
-                ),
-            }
-        elif block.block_type == "image":
-            styles[block_id] = {
-                "alignment": (
-                    override.alignment
-                    if override and override.alignment
-                    else block.value["alignment"]
-                ),
-                "width_rem": (
-                    override.width_rem
-                    if override and override.width_rem is not None
-                    else block.value["width_rem"]
-                ),
-                "side_padding": (
-                    override.side_padding
-                    if override and override.side_padding is not None
-                    else block.value["side_padding"]
-                ),
-            }
-        elif block.block_type == "multi_column":
-            own_weights = [column["width"] for column in block.value["columns"]]
-            override_weights = override.column_weights if override else None
-            styles[block_id] = {
-                "side_padding": (
-                    override.side_padding
-                    if override and override.side_padding is not None
-                    else block.value["side_padding"]
-                ),
-                "gap": (
-                    override.gap
-                    if override and override.gap is not None
-                    else block.value["gap"]
-                ),
-                "column_weights": (
-                    override_weights
-                    if override_weights and len(override_weights) == len(own_weights)
-                    else own_weights
-                ),
-            }
-            for column in block.value["columns"]:
-                styles.update(_effective_block_styles(column["content"], overrides_by_block_id))
-        elif block.block_type == "box":
-            styles.update(_effective_block_styles(block.value["content"], overrides_by_block_id))
-    return styles
-
-
-# Default values for each on-page-editable field, per block type -- powers
-# the "Reset to default" button in the on-page block style panel
-# (article_block_style.js, via ArticlePage.get_context()). Kept in sync by
-# hand with each field's own default= elsewhere in this file
-# (article_styled_text_block(), article_image_block(), the multi_column
-# StructBlock's own fields, and ArticlePage's title_font_size/hero_image_*
-# etc.) -- there's no single shared source, since some of these are
-# StreamField block defaults and some are plain Django model field
-# defaults, two different mechanisms.
+# Default values for each on-page-editable style field, per block type --
+# the *sole* source of these values for heading/styled_text/image/
+# multi_column blocks, since none of them carry style fields of their own
+# any more (see article_image_block()/article_styled_text_block()/
+# _body_content_blocks()'s own docstrings for why: styling lives only in
+# ArticleBlockStyle, edited on-page via editor mode). Used as the fallback
+# in _effective_block_styles() below whenever a block has no
+# ArticleBlockStyle override yet, and to power the "Reset to default"
+# button in the on-page block style panel (article_block_style.js, via
+# ArticlePage.get_context()). article_header/hero_image are the exception
+# -- those are plain ArticlePage fields (title_font_size, hero_image_
+# position, etc.), which still carry their own real default= and aren't
+# read from here for rendering, only for the reset button.
 BLOCK_STYLE_DEFAULTS = {
     "heading": {"alignment": "left", "font_size": 1.5, "side_padding": 0},
     "styled_text": {"side_padding": 1, "alignment": "left", "font_size": 1},
@@ -568,7 +278,165 @@ BLOCK_STYLE_DEFAULTS = {
         "meta_font_size": 0.9,
     },
     "hero_image": {"alignment": "right", "width_rem": 18, "side_padding": 0},
+    # box styling is available on every body block (heading/styled_text/
+    # image/multi_column) and independently on each multi_column sub-column
+    # (keyed by that column's own stable id -- see _effective_block_styles())
+    # -- the on-page replacement for the old Wagtail 'box' block, which
+    # wrapped a group of blocks in one shared container instead. That
+    # grouping capability is gone (each block/column now gets its own
+    # independent box), a deliberate tradeoff for keeping box styling
+    # entirely out of Wagtail. "padding" is the space between the box's
+    # border and its own content; "margin" is the space between the box and
+    # whatever comes before/after it on the page.
+    "box": {
+        "enabled": False,
+        "border_width": 0.125,
+        "border_color": "black",
+        "border_custom_color": "",
+        "border_visible": True,
+        "radius": 0.75,
+        "bg_color": "bg-light",
+        "bg_custom_color": "",
+        "padding": 1,
+        "margin": 0,
+    },
 }
+
+
+def _effective_box_style(override):
+    """The effective box style (border/background/radius/padding/margin)
+    for one block/column: its ArticleBlockStyle override where set, falling
+    back field-by-field to BLOCK_STYLE_DEFAULTS['box'] otherwise. Shared by
+    every block type in _effective_block_styles() below (and by each
+    multi_column sub-column), since box styling works identically
+    everywhere it's offered."""
+    defaults = BLOCK_STYLE_DEFAULTS["box"]
+    return {
+        "enabled": (
+            override.box_enabled if override and override.box_enabled is not None else defaults["enabled"]
+        ),
+        "border_width": (
+            override.box_border_width
+            if override and override.box_border_width is not None
+            else defaults["border_width"]
+        ),
+        "border_color": (
+            override.box_border_color
+            if override and override.box_border_color
+            else defaults["border_color"]
+        ),
+        "border_custom_color": (
+            override.box_border_custom_color
+            if override and override.box_border_custom_color
+            else defaults["border_custom_color"]
+        ),
+        "border_visible": (
+            override.box_border_visible
+            if override and override.box_border_visible is not None
+            else defaults["border_visible"]
+        ),
+        "radius": (
+            override.box_radius if override and override.box_radius is not None else defaults["radius"]
+        ),
+        "bg_color": (
+            override.box_bg_color if override and override.box_bg_color else defaults["bg_color"]
+        ),
+        "bg_custom_color": (
+            override.box_bg_custom_color
+            if override and override.box_bg_custom_color
+            else defaults["bg_custom_color"]
+        ),
+        "padding": (
+            override.box_padding if override and override.box_padding is not None else defaults["padding"]
+        ),
+        "margin": (
+            override.box_margin if override and override.box_margin is not None else defaults["margin"]
+        ),
+    }
+
+
+def _effective_block_styles(body_stream, overrides_by_block_id):
+    """Recursively walks a body StreamValue (or a column's own nested
+    content, same block types) yielding {block_id: {...}} for every
+    heading/styled_text/image/multi_column block: any ArticleBlockStyle
+    override for it, falling back to BLOCK_STYLE_DEFAULTS where there's no
+    override (these blocks carry no style fields of their own to fall back
+    to instead -- see BLOCK_STYLE_DEFAULTS' own docstring above), plus a
+    'box' entry from _effective_box_style() on every one of them. Each
+    multi_column's own sub-columns also get their own entry, keyed by that
+    column's own stable id (a ListBlock item id, same idea as a top-level
+    block's own id -- see ListValue.bound_blocks in Wagtail), containing
+    only 'box' (columns have no other style of their own). Kept as plain
+    dicts rather than touching block.value.font_size etc. directly in
+    templates, so the "was this overridden by the on-page panel" logic
+    lives in one place. Same recursion shape as _iter_toc_entries."""
+    styles = {}
+    for block in body_stream:
+        block_id = str(block.id)
+        override = overrides_by_block_id.get(block_id)
+        if block.block_type in ("heading", "styled_text"):
+            defaults = BLOCK_STYLE_DEFAULTS[block.block_type]
+            styles[block_id] = {
+                "font_size": (
+                    override.font_size
+                    if override and override.font_size is not None
+                    else defaults["font_size"]
+                ),
+                "side_padding": (
+                    override.side_padding
+                    if override and override.side_padding is not None
+                    else defaults["side_padding"]
+                ),
+                "alignment": (
+                    override.alignment if override and override.alignment else defaults["alignment"]
+                ),
+                "box": _effective_box_style(override),
+            }
+        elif block.block_type == "image":
+            defaults = BLOCK_STYLE_DEFAULTS["image"]
+            styles[block_id] = {
+                "alignment": (
+                    override.alignment if override and override.alignment else defaults["alignment"]
+                ),
+                "width_rem": (
+                    override.width_rem
+                    if override and override.width_rem is not None
+                    else defaults["width_rem"]
+                ),
+                "side_padding": (
+                    override.side_padding
+                    if override and override.side_padding is not None
+                    else defaults["side_padding"]
+                ),
+                "box": _effective_box_style(override),
+            }
+        elif block.block_type == "multi_column":
+            defaults = BLOCK_STYLE_DEFAULTS["multi_column"]
+            own_weights = [defaults["column_weight"]] * len(block.value["columns"])
+            override_weights = override.column_weights if override else None
+            styles[block_id] = {
+                "side_padding": (
+                    override.side_padding
+                    if override and override.side_padding is not None
+                    else defaults["side_padding"]
+                ),
+                "gap": override.gap if override and override.gap is not None else defaults["gap"],
+                "column_weights": (
+                    override_weights
+                    if override_weights and len(override_weights) == len(own_weights)
+                    else own_weights
+                ),
+                "box": _effective_box_style(override),
+            }
+            for bound_column in block.value["columns"].bound_blocks:
+                column_id = str(bound_column.id)
+                styles[column_id] = {
+                    "box": _effective_box_style(overrides_by_block_id.get(column_id)),
+                }
+                styles.update(
+                    _effective_block_styles(bound_column.value["content"], overrides_by_block_id)
+                )
+    return styles
 
 
 def _split_categories_by_season(categories):
@@ -682,10 +550,6 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
     )
     published_date = models.DateField(null=True, blank=True)
-    show_in_newsbar = models.BooleanField(
-        default=True,
-        help_text="Whether this article can be suggested in the homepage newsbar (only relevant for news articles).",
-    )
     show_on_homepage = models.BooleanField(
         default=True,
         help_text="Whether this article can be suggested on the homepage (newsbar/articles bar).",
@@ -771,16 +635,23 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
 
     # allows for mutiple sections of one of these types:
     body = StreamField(
-        _body_content_blocks() + [("box", article_box_block())],
+        _body_content_blocks(),
         use_json_field=True,
     )
 
+    # Deliberately no FieldPanel for the styling fields (content_side_padding/
+    # content_alignment/content_font_size, title_alignment/title_font_size,
+    # intro_alignment/intro_font_size, meta_alignment/meta_font_size,
+    # header_side_padding, hero_image_position/hero_image_width_rem/
+    # hero_image_side_padding) -- those fields still exist and still store
+    # real values (used whenever there's no more specific value set), but
+    # they're edited on-page via editor mode (article_block_style.js /
+    # article_quick_style.js), not in Wagtail. Wagtail's job here is
+    # structure and content; editing the same value from both places would
+    # be confusing, since the on-page save always wins in the end anyway.
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
         FieldPanel("hero_image"),
-        FieldPanel("hero_image_position"),
-        FieldPanel("hero_image_width_rem"),
-        FieldPanel("hero_image_side_padding"),
         FieldPanel("hero_image_title"),
         FieldPanel("hero_image_alt"),
         FieldPanel("hero_image_caption"),
@@ -790,18 +661,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         FieldPanel("hero_image_box_border_radius"),
         FieldPanel("author"),
         FieldPanel("published_date"),
-        FieldPanel("show_in_newsbar"),
         FieldPanel("show_on_homepage"),
-        FieldPanel("content_side_padding"),
-        FieldPanel("content_alignment"),
-        FieldPanel("content_font_size"),
-        FieldPanel("title_alignment"),
-        FieldPanel("title_font_size"),
-        FieldPanel("intro_alignment"),
-        FieldPanel("intro_font_size"),
-        FieldPanel("meta_alignment"),
-        FieldPanel("meta_font_size"),
-        FieldPanel("header_side_padding"),
         FieldPanel("body"),
     ]
 
@@ -828,8 +688,8 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
     @property
     def toc_entries(self):
         """(level, text) pairs for the table of contents -- see
-        _iter_toc_entries() for what counts (top-level headings, headings
-        nested in a box, multi_column column titles)."""
+        _iter_toc_entries() for what counts (top-level headings, multi_column
+        column titles)."""
         return list(_iter_toc_entries(self.body))
 
     @property
@@ -858,11 +718,12 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
 
 class ArticleBlockStyle(models.Model):
     """A per-block style override (alignment/padding/font-size/gap/column
-    weights) for one styled_text/image/multi_column block inside an
-    ArticlePage's body,
+    weights/box) for one styled_text/image/multi_column block -- or one
+    multi_column sub-column, keyed by that column's own id (box fields
+    only, see _effective_block_styles()) -- inside an ArticlePage's body,
     saved by the on-page block style panel. Deliberately NOT part of the
     StreamField itself -- editing StreamField JSON in place means locating
-    a block by id inside potentially-nested content (a column, a box) and
+    a block by id inside potentially-nested content (e.g. a column) and
     going through Wagtail's revision/publish machinery for what's really
     just a styling tweak, which also hit real sharp edges (alias pages
     can't take their own revisions, see ArticlePage.style_target). A plain
@@ -896,6 +757,25 @@ class ArticleBlockStyle(models.Model):
             "or removed in Wagtail after this override was saved."
         ),
     )
+
+    # box styling -- see BLOCK_STYLE_DEFAULTS["box"]/_effective_box_style()
+    # in article_models.py. Available on every block type above, and (box
+    # fields only) on each multi_column sub-column via its own row keyed by
+    # the column's own id.
+    box_enabled = models.BooleanField(null=True, blank=True)
+    box_border_width = models.FloatField(null=True, blank=True)
+    box_border_color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
+    box_border_custom_color = models.CharField(
+        max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
+    )
+    box_border_visible = models.BooleanField(null=True, blank=True)
+    box_radius = models.FloatField(null=True, blank=True)
+    box_bg_color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
+    box_bg_custom_color = models.CharField(
+        max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
+    )
+    box_padding = models.FloatField(null=True, blank=True)
+    box_margin = models.FloatField(null=True, blank=True)
 
     class Meta:
         constraints = [

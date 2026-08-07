@@ -1,11 +1,11 @@
 {% load i18n l10n static wagtailcore_tags wagtailimages_tags article_extras %}
 {% comment %}
 Renders a list of article body blocks (heading/paragraph/styled_text/
-multi_column/image/box). Shared by the top-level article body and the
-"box" block's own content, since a box can hold any of the same block
-types -- this include is called recursively for that (box content can't
-itself contain another box, so there's a guaranteed termination point,
-see article_models.py's _body_content_blocks()).
+multi_column/image). Every block type except plain paragraph carries an
+optional "box" style (border/background/radius/padding/margin, see
+BLOCK_STYLE_DEFAULTS["box"]/_effective_box_style() in article_models.py) --
+the on-page replacement for the old Wagtail 'box' block, edited via the
+same block-style-trigger/panel as everything else.
 
 Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=<a StreamValue or list of blocks> %}
 {% endcomment %}
@@ -21,31 +21,35 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
         about the four is identical.
         {% endcomment %}
         {% if block.value.level == "h3" %}
-            <h3 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if can_edit_style %} editable-block{% endif %}"
+            <h3 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                 {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
-                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"{% endif %}
-                style="font-size: {{ style.font_size|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">{{ block.value.text }}
+                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
+                {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
+                style="font-size: {{ style.font_size|unlocalize }}rem; {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             </h3>
         {% elif block.value.level == "h4" %}
-            <h4 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if can_edit_style %} editable-block{% endif %}"
+            <h4 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                 {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
-                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"{% endif %}
-                style="font-size: {{ style.font_size|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">{{ block.value.text }}
+                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
+                {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
+                style="font-size: {{ style.font_size|unlocalize }}rem; {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             </h4>
         {% elif block.value.level == "h5" %}
-            <h5 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if can_edit_style %} editable-block{% endif %}"
+            <h5 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                 {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
-                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"{% endif %}
-                style="font-size: {{ style.font_size|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">{{ block.value.text }}
+                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
+                {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
+                style="font-size: {{ style.font_size|unlocalize }}rem; {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             </h5>
         {% else %}
-            <h2 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if can_edit_style %} editable-block{% endif %}"
+            <h2 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                 {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
-                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"{% endif %}
-                style="font-size: {{ style.font_size|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">{{ block.value.text }}
+                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
+                {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
+                style="font-size: {{ style.font_size|unlocalize }}rem; {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             </h2>
         {% endif %}
@@ -56,29 +60,36 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
 
     {% elif block.block_type == "styled_text" %}
         {% with style=block_styles|lookup:block.id %}
-        <div class="prose prose--align-{{ style.alignment }}{% if can_edit_style %} editable-block{% endif %}"
+        <div class="prose prose--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
              {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="styled_text"
-             data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}" data-alignment="{{ style.alignment }}"{% endif %}
-             style="font-size: {{ style.font_size|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">{{ block.value.text }}
+             data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}" data-alignment="{{ style.alignment }}"
+             {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
+             style="font-size: {{ style.font_size|unlocalize }}rem; {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
         </div>
         {% endwith %}
 
     {% elif block.block_type == "multi_column" %}
         {% with style=block_styles|lookup:block.id %}
-        <div class="multi-col-grid multi-col-grid--align-{{ block.value.column_alignment }}{% if can_edit_style %} editable-block{% endif %}"
+        <div class="multi-col-grid multi-col-grid--align-{{ block.value.column_alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
              {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="multi_column"
              data-side-padding="{{ style.side_padding|unlocalize }}" data-gap="{{ style.gap|unlocalize }}"
              data-column-count="{{ block.value.columns|length }}"
-             data-column-weights="{% for w in style.column_weights %}{{ w|unlocalize }}{% if not forloop.last %},{% endif %}{% endfor %}"{% endif %}
-             style="gap: {{ style.gap|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">
+             data-column-weights="{% for w in style.column_weights %}{{ w|unlocalize }}{% if not forloop.last %},{% endif %}{% endfor %}"
+             {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
+             style="gap: {{ style.gap|unlocalize }}rem; {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
-            {% for column in block.value.columns %}
-                <div class="multi-col-item"{% if can_edit_style %} data-col-index="{{ forloop.counter0 }}"{% endif %}
-                     style="flex: {{ style.column_weights|index:forloop.counter0|unlocalize }} 1 0;">
+            {% for bound_column in block.value.columns.bound_blocks %}
+                {% with column=bound_column.value column_style=block_styles|lookup:bound_column.id %}
+                <div class="multi-col-item{% if column_style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
+                     {% if can_edit_style %}data-col-index="{{ forloop.counter0 }}" data-block-id="{{ bound_column.id }}" data-block-type="column"
+                     {% include "info_articles/partials/_block_box_data_attrs.html" with box=column_style.box %}{% endif %}
+                     style="flex: {{ style.column_weights|index:forloop.counter0|unlocalize }} 1 0; {% include "info_articles/partials/_block_box_style.html" with box=column_style.box side_padding=None %}">
+                    {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
                     {% if column.title %}<h3 class="column-title" id="{{ column.title|slugify }}">{{ column.title }}</h3>{% endif %}
                     {% include "info_articles/partials/article_column_content.html" with content=column.content %}
                 </div>
+                {% endwith %}
             {% endfor %}
         </div>
         {% endwith %}
@@ -86,13 +97,5 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
     {% elif block.block_type == "image" %}
         {% include "info_articles/partials/article_image_block.html" with image_value=block.value block_id=block.id %}
 
-    {% elif block.block_type == "box" %}
-        <div class="content-box{% if block.value.float != 'none' %} content-box--float-{{ block.value.float }}{% endif %}"
-             style="--box-bg: {% if block.value.background_color == 'custom' %}{{ block.value.background_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ block.value.background_color }}){% endif %};
-                    --box-border-color: {% if block.value.border_color == 'custom' %}{{ block.value.border_custom_color|default:'var(--color-black)' }}{% else %}var(--color-{{ block.value.border_color }}){% endif %};
-                    border-radius: {{ block.value.border_radius|unlocalize }}rem;
-                    {% if block.value.float != 'none' %}width: {{ block.value.float_width|unlocalize }}%;{% endif %}">
-            {% include "info_articles/partials/article_body_blocks.html" with blocks=block.value.content %}
-        </div>
     {% endif %}
 {% endfor %}

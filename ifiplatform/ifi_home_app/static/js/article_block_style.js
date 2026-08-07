@@ -25,6 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // at runtime in openPanelFor() based on the block actually being
     // edited (data-column-count).
     multi_column: ["side_padding", "gap"],
+    // a multi_column sub-column -- not a block type of its own in the
+    // StreamField, just a ListBlock item id (see article_models.py's
+    // _effective_block_styles()) with no style but box (below).
+    column: [],
     // not a StreamField block -- the title/intro/meta group above the body,
     // wrapped together so they share one trigger (see article_page.html's
     // .article-header). Saved separately via save_header_style, plain
@@ -50,6 +54,31 @@ document.addEventListener("DOMContentLoaded", () => {
     image: { alignment: { prefix: "body-image--", values: ["left", "center", "right"] } },
     hero_image: { alignment: { prefix: "hero-image--", values: ["left", "center", "right"] } },
   };
+
+  // box styling (border/background/radius/padding/margin) is available on
+  // every one of these -- appended to FIELDS_BY_TYPE at runtime (see
+  // openPanelFor/buildSaveRequest below) rather than listed per type above,
+  // since it's the same fixed set everywhere it applies. Deliberately not
+  // offered on article_header/hero_image -- those are plain ArticlePage
+  // fields, not part of the per-block override table box styling lives in.
+  const BOX_CAPABLE_TYPES = new Set(["heading", "styled_text", "image", "multi_column", "column"]);
+  // box_bg_custom_color/box_border_custom_color aren't listed separately --
+  // they're not their own panel field, just the value of the "Custom" hex
+  // swatch inside box_bg_color/box_border_color (see the mini panel
+  // template).
+  const BOX_FIELD_NAMES = [
+    "box_enabled",
+    "box_bg_color",
+    "box_border_visible",
+    "box_border_width",
+    "box_border_color",
+    "box_radius",
+    "box_padding",
+    "box_margin",
+  ];
+  // every box field except box_enabled itself -- hidden until the box is
+  // turned on (see updateBoxFieldVisibility()).
+  const BOX_ONLY_FIELDS = BOX_FIELD_NAMES.slice(1);
 
   // Any full-width text block (.prose, headings, the title/intro/meta
   // header) sitting beside a floated image doesn't shrink its own box to
@@ -172,6 +201,23 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   const statusEl = document.getElementById("block-style-mini-panel-status");
 
+  const boxEnabledInput = document.getElementById("block-style-box-enabled");
+  const boxBgColorGroup = document.getElementById("block-style-box-bg-color");
+  const boxBgCustomColorInput = document.getElementById("block-style-box-bg-custom-color");
+  const boxBgPickerInput = document.getElementById("block-style-box-bg-picker");
+  const boxBorderVisibleInput = document.getElementById("block-style-box-border-visible");
+  const boxBorderWidthInput = document.getElementById("block-style-box-border-width");
+  const boxBorderWidthValue = document.getElementById("block-style-box-border-width-value");
+  const boxBorderColorGroup = document.getElementById("block-style-box-border-color");
+  const boxBorderCustomColorInput = document.getElementById("block-style-box-border-custom-color");
+  const boxBorderPickerInput = document.getElementById("block-style-box-border-picker");
+  const boxRadiusInput = document.getElementById("block-style-box-radius");
+  const boxRadiusValue = document.getElementById("block-style-box-radius-value");
+  const boxPaddingInput = document.getElementById("block-style-box-padding");
+  const boxPaddingValue = document.getElementById("block-style-box-padding-value");
+  const boxMarginInput = document.getElementById("block-style-box-margin");
+  const boxMarginValue = document.getElementById("block-style-box-margin-value");
+
   let currentBlockEl = null;
   let currentTrigger = null;
 
@@ -241,6 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .slice(0, columnCount)
         .map((input) => parseFloat(input.value));
     }
+    const boxCapable = BOX_CAPABLE_TYPES.has(blockType);
     return {
       url: panel.dataset.saveUrl,
       payload: {
@@ -252,6 +299,16 @@ document.addEventListener("DOMContentLoaded", () => {
         width_rem: visibleFields.includes("width_rem") ? widthInput.value : null,
         gap: visibleFields.includes("gap") ? gapInput.value : null,
         column_weights: columnWeights,
+        box_enabled: boxCapable ? boxEnabledInput.checked : null,
+        box_bg_color: boxCapable ? boxBgColorGroup.dataset.value : null,
+        box_bg_custom_color: boxCapable ? boxBgCustomColorInput.value : null,
+        box_border_visible: boxCapable ? boxBorderVisibleInput.checked : null,
+        box_border_width: boxCapable ? boxBorderWidthInput.value : null,
+        box_border_color: boxCapable ? boxBorderColorGroup.dataset.value : null,
+        box_border_custom_color: boxCapable ? boxBorderCustomColorInput.value : null,
+        box_radius: boxCapable ? boxRadiusInput.value : null,
+        box_padding: boxCapable ? boxPaddingInput.value : null,
+        box_margin: boxCapable ? boxMarginInput.value : null,
       },
     };
   };
@@ -299,6 +356,242 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   };
+
+  // live-preview mirror of _block_box_style.html's own logic: while the box
+  // is off, padding-left/right come from the block's own side_padding (see
+  // paddingInput's own listener below) and nothing else here applies. While
+  // it's on, box.padding takes over as the padding on all four sides
+  // instead (a box's border needs to sit *around* the content, not just
+  // beside it) -- side_padding's own visual effect is superseded, not
+  // stacked with it, same tradeoff as the server-rendered version.
+  const applyBoxStyle = () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    const enabled = boxEnabledInput.checked;
+    currentBlockEl.classList.toggle("block-box", enabled);
+    if (!enabled) {
+      currentBlockEl.style.padding = "";
+      currentBlockEl.style.marginTop = "";
+      currentBlockEl.style.marginBottom = "";
+      currentBlockEl.style.backgroundColor = "";
+      currentBlockEl.style.borderRadius = "";
+      currentBlockEl.style.boxShadow = "";
+      currentBlockEl.style.border = "";
+      currentBlockEl.style.display = "";
+      currentBlockEl.style.paddingLeft = `${paddingInput.value}rem`;
+      currentBlockEl.style.paddingRight = `${paddingInput.value}rem`;
+      return;
+    }
+    currentBlockEl.style.padding = `${boxPaddingInput.value}rem`;
+    currentBlockEl.style.marginTop = `${boxMarginInput.value}rem`;
+    currentBlockEl.style.marginBottom = `${boxMarginInput.value}rem`;
+    currentBlockEl.style.display = "flow-root";
+    currentBlockEl.style.borderRadius = `${boxRadiusInput.value}rem`;
+    currentBlockEl.style.boxShadow = "0 2px 8px var(--color-shadow)";
+    const bgColor = boxBgColorGroup.dataset.value;
+    currentBlockEl.style.backgroundColor =
+      bgColor === "custom"
+        ? boxBgCustomColorInput.value || "var(--color-bg-light)"
+        : `var(--color-${bgColor})`;
+    if (boxBorderVisibleInput.checked) {
+      const borderColor = boxBorderColorGroup.dataset.value;
+      const resolvedBorderColor =
+        borderColor === "custom"
+          ? boxBorderCustomColorInput.value || "var(--color-black)"
+          : `var(--color-${borderColor})`;
+      currentBlockEl.style.border = `${boxBorderWidthInput.value}rem solid ${resolvedBorderColor}`;
+    } else {
+      currentBlockEl.style.border = "";
+    }
+  };
+
+  // toggles which box-related fields are showing: everything but the
+  // "Box" checkbox itself stays hidden until it's on, the border width/
+  // color only show while the border itself is visible, and side_padding
+  // (superseded once the box is on, see applyBoxStyle above) hides in
+  // favor of box_padding.
+  const updateBoxFieldVisibility = () => {
+    if (!BOX_CAPABLE_TYPES.has(targetTypeInput.value)) {
+      return;
+    }
+    const enabled = boxEnabledInput.checked;
+    BOX_ONLY_FIELDS.forEach((name) => {
+      const field = panel.querySelector(`[data-style-field="${name}"]`);
+      if (field) {
+        field.hidden = !enabled;
+      }
+    });
+    const borderWidthField = panel.querySelector('[data-style-field="box_border_width"]');
+    if (borderWidthField) {
+      borderWidthField.hidden = !enabled || !boxBorderVisibleInput.checked;
+    }
+    const borderColorField = panel.querySelector('[data-style-field="box_border_color"]');
+    if (borderColorField) {
+      borderColorField.hidden = !enabled || !boxBorderVisibleInput.checked;
+    }
+    const sidePaddingField = panel.querySelector('[data-style-field="side_padding"]');
+    if (sidePaddingField && FIELDS_BY_TYPE[targetTypeInput.value].includes("side_padding")) {
+      sidePaddingField.hidden = enabled;
+    }
+  };
+
+  // #rgb -> #rrggbb, lowercased; null if `value` isn't valid hex at all.
+  const normalizeHex = (value) => {
+    const match = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec((value || "").trim());
+    if (!match) {
+      return null;
+    }
+    let hex = match[1];
+    if (hex.length === 3) {
+      hex = hex
+        .split("")
+        .map((c) => c + c)
+        .join("");
+    }
+    return `#${hex.toLowerCase()}`;
+  };
+
+  // black or white, whichever reads better on top of `hex` -- so the hex
+  // text inside the custom swatch itself (see article_block_style.css)
+  // stays legible regardless of how light or dark the picked color is.
+  // Standard relative-luminance threshold, not exact WCAG contrast math --
+  // good enough for picking between exactly two options.
+  const contrastTextColor = (hex) => {
+    const int = parseInt(hex.slice(1), 16);
+    const r = (int >> 16) & 255;
+    const g = (int >> 8) & 255;
+    const b = int & 255;
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.6 ? "#000000" : "#ffffff";
+  };
+
+  // sets the custom hex swatch's own value + live color preview together
+  // (and its paired color-wheel picker button's own value, so opening it
+  // starts from whatever's currently picked rather than always white) --
+  // shared by openPanelFor (restoring a saved value), the reset button, and
+  // the input's own live-typing handler below.
+  const setCustomSwatch = (input, hex, pickerInput) => {
+    input.value = hex || "";
+    if (hex) {
+      input.style.backgroundColor = hex;
+      input.style.color = contrastTextColor(hex);
+    } else {
+      input.style.backgroundColor = "";
+      input.style.color = "";
+    }
+    if (pickerInput) {
+      pickerInput.value = hex || "#ffffff";
+    }
+  };
+
+  // every box control below writes back to currentBlockEl.dataset (not
+  // just the panel's own controls + live CSS via applyBoxStyle) -- same
+  // reasoning as every other field's own handler (e.g. wireButtonGroup's
+  // currentBlockEl.dataset[field] = value): without it, the *element*
+  // never actually remembers the edit, only its current on-screen look
+  // does, so reopening this same block's panel later in the same page
+  // load (openPanelFor reads blockEl.dataset.box*) would show it as
+  // unchanged even though the live preview clearly isn't.
+  // shared by both the five fixed-color buttons and the "Custom" hex
+  // swatch -- whichever one just changed becomes the group's active
+  // choice, every other swatch in the group loses its own active state.
+  const selectSwatch = (group, swatch, datasetKey) => {
+    if (!currentBlockEl) {
+      return;
+    }
+    group.dataset.value = swatch.dataset.color;
+    currentBlockEl.dataset[datasetKey] = swatch.dataset.color;
+    group.querySelectorAll(".color-swatch").forEach((s) => {
+      s.classList.toggle("active", s === swatch);
+    });
+    updateBoxFieldVisibility();
+    applyBoxStyle();
+    recordPendingEdit();
+  };
+
+  const wireColorGroup = (group, datasetKey) => {
+    group.querySelectorAll("button.color-swatch").forEach((button) => {
+      button.addEventListener("click", () => selectSwatch(group, button, datasetKey));
+    });
+  };
+  wireColorGroup(boxBgColorGroup, "boxBgColor");
+  wireColorGroup(boxBorderColorGroup, "boxBorderColor");
+
+  // the "Custom" swatch is a plain hex text input (see the mini panel
+  // template) -- typing a valid hex both selects "custom" for the group
+  // (same as clicking any other swatch) and colors the input's own
+  // background/text to preview it right there, recording the actual
+  // picked hex (box_bg_custom_color/box_border_custom_color) alongside the
+  // group's color *choice* ("custom"). The color-wheel picker button next
+  // to it (a real, visually-hidden <input type="color">, see the mini
+  // panel template) feeds the exact same hex swatch -- picking a color
+  // there fires "input" just like typing does, just from a different
+  // source.
+  [
+    [boxBgCustomColorInput, boxBgPickerInput, boxBgColorGroup, "boxBgColor", "boxBgCustomColor"],
+    [boxBorderCustomColorInput, boxBorderPickerInput, boxBorderColorGroup, "boxBorderColor", "boxBorderCustomColor"],
+  ].forEach(([hexInput, pickerInput, group, groupDatasetKey, customDatasetKey]) => {
+    hexInput.addEventListener("input", () => {
+      const hex = normalizeHex(hexInput.value);
+      if (!currentBlockEl || !hex) {
+        // still typing a partial/invalid value -- wait for it to resolve
+        // to something valid rather than fighting the user's cursor with a
+        // premature style change.
+        return;
+      }
+      setCustomSwatch(hexInput, hex, pickerInput);
+      currentBlockEl.dataset[customDatasetKey] = hex;
+      selectSwatch(group, hexInput, groupDatasetKey);
+    });
+
+    pickerInput.addEventListener("input", () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      setCustomSwatch(hexInput, pickerInput.value, pickerInput);
+      currentBlockEl.dataset[customDatasetKey] = pickerInput.value;
+      selectSwatch(group, hexInput, groupDatasetKey);
+    });
+  });
+
+  boxEnabledInput.addEventListener("change", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset.boxEnabled = boxEnabledInput.checked ? "true" : "false";
+    updateBoxFieldVisibility();
+    applyBoxStyle();
+    positionTextTriggers();
+    recordPendingEdit();
+  });
+
+  boxBorderVisibleInput.addEventListener("change", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset.boxBorderVisible = boxBorderVisibleInput.checked ? "true" : "false";
+    updateBoxFieldVisibility();
+    applyBoxStyle();
+    recordPendingEdit();
+  });
+
+  [
+    [boxBorderWidthInput, boxBorderWidthValue, "boxBorderWidth"],
+    [boxRadiusInput, boxRadiusValue, "boxRadius"],
+    [boxPaddingInput, boxPaddingValue, "boxPadding"],
+    [boxMarginInput, boxMarginValue, "boxMargin"],
+  ].forEach(([input, valueEl, datasetKey]) => {
+    input.addEventListener("input", () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      currentBlockEl.dataset[datasetKey] = input.value;
+      valueEl.textContent = input.value;
+      applyBoxStyle();
+      recordPendingEdit();
+    });
+  });
 
   // article_header's three alignment groups aren't class-based (h1/.intro/
   // .article-meta each read their own CSS custom property, see
@@ -379,6 +672,10 @@ document.addEventListener("DOMContentLoaded", () => {
         Array.from({ length: columnCount }, (_, i) => `column_weight_${i}`)
       );
     }
+    const boxCapable = BOX_CAPABLE_TYPES.has(blockType);
+    if (boxCapable) {
+      visibleFields = visibleFields.concat(BOX_FIELD_NAMES);
+    }
 
     panel.querySelectorAll("[data-style-field]").forEach((field) => {
       field.hidden = !visibleFields.includes(field.dataset.styleField);
@@ -392,6 +689,29 @@ document.addEventListener("DOMContentLoaded", () => {
     if (visibleFields.includes("side_padding")) {
       paddingInput.value = blockEl.dataset.sidePadding;
       paddingValue.textContent = blockEl.dataset.sidePadding;
+    }
+    if (boxCapable) {
+      boxEnabledInput.checked = blockEl.dataset.boxEnabled === "true";
+      boxBgColorGroup.dataset.value = blockEl.dataset.boxBgColor;
+      boxBgColorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+        b.classList.toggle("active", b.dataset.color === blockEl.dataset.boxBgColor);
+      });
+      setCustomSwatch(boxBgCustomColorInput, blockEl.dataset.boxBgCustomColor, boxBgPickerInput);
+      boxBorderVisibleInput.checked = blockEl.dataset.boxBorderVisible === "true";
+      boxBorderWidthInput.value = blockEl.dataset.boxBorderWidth;
+      boxBorderWidthValue.textContent = blockEl.dataset.boxBorderWidth;
+      boxBorderColorGroup.dataset.value = blockEl.dataset.boxBorderColor;
+      boxBorderColorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+        b.classList.toggle("active", b.dataset.color === blockEl.dataset.boxBorderColor);
+      });
+      setCustomSwatch(boxBorderCustomColorInput, blockEl.dataset.boxBorderCustomColor, boxBorderPickerInput);
+      boxRadiusInput.value = blockEl.dataset.boxRadius;
+      boxRadiusValue.textContent = blockEl.dataset.boxRadius;
+      boxPaddingInput.value = blockEl.dataset.boxPadding;
+      boxPaddingValue.textContent = blockEl.dataset.boxPadding;
+      boxMarginInput.value = blockEl.dataset.boxMargin;
+      boxMarginValue.textContent = blockEl.dataset.boxMargin;
+      updateBoxFieldVisibility();
     }
     if (visibleFields.includes("font_size")) {
       fontSizeInput.value = blockEl.dataset.fontSize;
@@ -503,7 +823,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // margin does that while padding on a width:auto block wouldn't.
     if (targetTypeInput.value === "article_header") {
       currentBlockEl.style.setProperty("--header-side-padding", `${paddingInput.value}rem`);
-    } else {
+    } else if (!BOX_CAPABLE_TYPES.has(targetTypeInput.value) || !boxEnabledInput.checked) {
+      // while the box is on, box.padding governs all four sides instead
+      // (see applyBoxStyle) -- side_padding's own value is still recorded
+      // below so it's ready to reapply if the box gets turned off again,
+      // just not shown live while superseded.
       currentBlockEl.style.paddingLeft = `${paddingInput.value}rem`;
       currentBlockEl.style.paddingRight = `${paddingInput.value}rem`;
     }
@@ -689,36 +1013,76 @@ document.addEventListener("DOMContentLoaded", () => {
       button.click();
     }
   };
+  const applyColorGroup = (group, value) => {
+    if (value === undefined || !group) {
+      return;
+    }
+    const button = group.querySelector(`button[data-color="${value}"]`);
+    if (button) {
+      button.click();
+    }
+  };
+  const applyToggle = (input, value) => {
+    if (value === undefined || !input) {
+      return;
+    }
+    input.checked = value;
+    input.dispatchEvent(new Event("change"));
+  };
   resetButton.addEventListener("click", () => {
     const blockType = targetTypeInput.value;
     const defaults = BLOCK_STYLE_DEFAULTS[blockType];
-    if (!blockType || !defaults) {
+    // "column" (a multi_column sub-column) has no BLOCK_STYLE_DEFAULTS
+    // entry of its own -- it has no style besides box, reset below.
+    const boxCapable = BOX_CAPABLE_TYPES.has(blockType);
+    if (!blockType || (!defaults && !boxCapable)) {
       return;
     }
     if (!window.confirm("Reset this block's style to its default values? Unsaved changes to it will be lost.")) {
       return;
     }
 
-    applySlider(paddingInput, defaults.side_padding);
-    applyButtonGroup(alignmentGroup, defaults.alignment);
-    applySlider(fontSizeInput, defaults.font_size);
-    applySlider(widthInput, defaults.width_rem);
-    applySlider(gapInput, defaults.gap);
+    if (defaults) {
+      applySlider(paddingInput, defaults.side_padding);
+      applyButtonGroup(alignmentGroup, defaults.alignment);
+      applySlider(fontSizeInput, defaults.font_size);
+      applySlider(widthInput, defaults.width_rem);
+      applySlider(gapInput, defaults.gap);
 
-    if (blockType === "multi_column" && defaults.column_weight !== undefined) {
-      const blockEl =
-        currentBlockEl || document.querySelector(`[data-block-id="${CSS.escape(targetIdInput.value)}"]`);
-      const columnCount = parseInt(blockEl ? blockEl.dataset.columnCount : "0", 10) || 0;
-      for (let i = 0; i < columnCount; i++) {
-        applySlider(columnWeightInputs[i], defaults.column_weight);
+      if (blockType === "multi_column" && defaults.column_weight !== undefined) {
+        const blockEl =
+          currentBlockEl || document.querySelector(`[data-block-id="${CSS.escape(targetIdInput.value)}"]`);
+        const columnCount = parseInt(blockEl ? blockEl.dataset.columnCount : "0", 10) || 0;
+        for (let i = 0; i < columnCount; i++) {
+          applySlider(columnWeightInputs[i], defaults.column_weight);
+        }
       }
+
+      applyButtonGroup(titleAlignmentGroup, defaults.title_alignment);
+      applySlider(titleFontSizeInput, defaults.title_font_size);
+      applyButtonGroup(introAlignmentGroup, defaults.intro_alignment);
+      applySlider(introFontSizeInput, defaults.intro_font_size);
+      applyButtonGroup(metaAlignmentGroup, defaults.meta_alignment);
+      applySlider(metaFontSizeInput, defaults.meta_font_size);
     }
 
-    applyButtonGroup(titleAlignmentGroup, defaults.title_alignment);
-    applySlider(titleFontSizeInput, defaults.title_font_size);
-    applyButtonGroup(introAlignmentGroup, defaults.intro_alignment);
-    applySlider(introFontSizeInput, defaults.intro_font_size);
-    applyButtonGroup(metaAlignmentGroup, defaults.meta_alignment);
-    applySlider(metaFontSizeInput, defaults.meta_font_size);
+    if (boxCapable) {
+      const boxDefaults = BLOCK_STYLE_DEFAULTS.box;
+      if (boxDefaults) {
+        applyColorGroup(boxBgColorGroup, boxDefaults.bg_color);
+        setCustomSwatch(boxBgCustomColorInput, boxDefaults.bg_custom_color, boxBgPickerInput);
+        applyColorGroup(boxBorderColorGroup, boxDefaults.border_color);
+        setCustomSwatch(boxBorderCustomColorInput, boxDefaults.border_custom_color, boxBorderPickerInput);
+        applySlider(boxBorderWidthInput, boxDefaults.border_width);
+        applySlider(boxRadiusInput, boxDefaults.radius);
+        applySlider(boxPaddingInput, boxDefaults.padding);
+        applySlider(boxMarginInput, boxDefaults.margin);
+        applyToggle(boxBorderVisibleInput, boxDefaults.border_visible);
+        // applied last: its own change handler re-derives box field
+        // visibility from every other box field's current value, so it
+        // needs to run after they've all already been reset above.
+        applyToggle(boxEnabledInput, boxDefaults.enabled);
+      }
+    }
   });
 });
