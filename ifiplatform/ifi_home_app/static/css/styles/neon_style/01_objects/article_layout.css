@@ -41,28 +41,44 @@ box is positioned by its *containing block's* text-align, not its own. */
 
 .article-header > .intro {
   text-align: var(--intro-alignment, left);
+  /* editor-controlled (ArticlePage.intro_font_size, --intro-font-size set
+  on .article-header) -- independent from --content-font-size, same split
+  as the alignment properties above. */
+  font-size: var(--intro-font-size, 1rem);
 }
 
 /* .article-meta is a flex container -- flex items ignore inherited
 text-align for their own positioning, so the row needs its own explicit
 justify-content instead. "left"/"center"/"right" are valid justify-content
 keywords too (CSS Box Alignment), so the same custom property value works
-here unchanged. */
+here unchanged. Scoped to .article-header > .article-meta rather than
+touching .article-meta itself (article_meta.css) -- that class is shared
+by other page types (union/tool pages) that don't have this per-article
+override. */
 .article-header > .article-meta {
   justify-content: var(--meta-alignment, left);
+  /* editor-controlled (ArticlePage.meta_font_size, --meta-font-size set on
+  .article-header) -- fallback matches article_meta.css's own plain
+  default (0.9rem), so an article with no override renders identically to
+  before this became overridable. */
+  font-size: var(--meta-font-size, 0.9rem);
 }
 
-/* editor-controlled whole-article side padding (ArticlePage.content_side_padding,
---content-side-padding set inline on .article-page) -- applied to the
-title/meta/intro wrapper as one unit and to the body separately, rather
-than on .article-page itself, so the hero image figure stays unaffected
-and keeps its own edge-to-edge position. Margin, not padding: h1's
-border-bottom (the accent underline) is part of its border box, and
-padding on a width:auto block only shrinks the content area inside a
-fixed-width border box, leaving the border behind at the un-indented edge
--- margin moves the whole box, border included, so the underline stays
-lined up with the now-indented text above it. */
-.article-page > .article-header,
+/* editor-controlled side padding, applied to the title/meta/intro wrapper
+and the body separately (each its own custom property/control -- same
+split as the alignment properties above) rather than on .article-page
+itself, so the hero image figure stays unaffected and keeps its own
+edge-to-edge position. Margin, not padding: h1's border-bottom (the accent
+underline) is part of its border box, and padding on a width:auto block
+only shrinks the content area inside a fixed-width border box, leaving the
+border behind at the un-indented edge -- margin moves the whole box,
+border included, so the underline stays lined up with the now-indented
+text above it. */
+.article-page > .article-header {
+  margin-left: var(--header-side-padding, 0);
+  margin-right: var(--header-side-padding, 0);
+}
+
 .article-page > article {
   margin-left: var(--content-side-padding, 0);
   margin-right: var(--content-side-padding, 0);

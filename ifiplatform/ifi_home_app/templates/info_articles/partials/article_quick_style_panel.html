@@ -4,14 +4,17 @@ On-page "quick style" panel: lets someone with edit rights on this exact
 ArticlePage (see can_edit_style in article_models.py's get_context()) tweak
 content_side_padding/content_alignment/content_font_size directly on the
 live page, with an instant preview (article_quick_style.js writes the CSS
-custom properties on .article-page as you interact) and a Save button that
-publishes it for real via article_views.save_quick_style. Anyone without
-edit rights on this page never gets this block rendered at all -- the save
-endpoint enforces the same permission check independently, so this is UX,
-not the security boundary.
+custom properties on .article-page as you interact). No Save button of its
+own -- saving happens via the global floating save bar
+(article_save_bar.html), which this panel's save() registers itself with
+(registerSaveHandler), publishing for real via article_views.save_quick_style.
+Anyone without edit rights on this page never gets this block rendered at
+all -- the save endpoint enforces the same permission check independently,
+so this is UX, not the security boundary.
 {% endcomment %}
 <form class="quick-style-panel" id="quick-style-panel"
-      data-quick-style-url="{% url 'article_quick_style' page.id %}">
+      data-quick-style-url="{% url 'article_quick_style' page.id %}"
+      data-default-padding="0" data-default-alignment="left" data-default-font-size="1">
     {% csrf_token %}
     <div class="quick-style-panel-header">
         <p class="quick-style-panel-title">{% trans "Global style (editors only)" %}</p>
@@ -40,7 +43,7 @@ not the security boundary.
         </label>
 
         <div class="quick-style-actions">
-            <button type="submit" id="quick-style-save">{% trans "Save & publish" %}</button>
+            <button type="button" id="quick-style-reset" class="quick-style-reset">{% trans "Reset to default" %}</button>
             <span class="quick-style-status" id="quick-style-status" aria-live="polite"></span>
         </div>
     </div>

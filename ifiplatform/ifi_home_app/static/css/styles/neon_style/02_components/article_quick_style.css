@@ -140,22 +140,22 @@ article_quick_style.js. */
 
 .quick-style-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.6rem;
 }
 
-.quick-style-actions button {
+.quick-style-reset {
   padding: 0.4rem 0.9rem;
-  border: 2px solid var(--color-cta-border);
+  border: 2px solid var(--color-border);
   border-radius: 6px;
-  background: var(--color-cta);
-  color: var(--color-white);
-  font-weight: bold;
+  background: var(--color-bg);
+  color: var(--color-text);
   cursor: pointer;
 }
 
-.quick-style-actions button:hover {
-  background: var(--color-cta-hover);
+.quick-style-reset:hover {
+  background: var(--color-accent);
 }
 
 .quick-style-status {

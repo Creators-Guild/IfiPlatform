@@ -141,6 +141,13 @@ def article_image_block():
                     help_text="Box corner rounding, in rem (0 = square corners). Only applies when 'boxed' is enabled.",
                 ),
             ),
+            (
+                "side_padding",
+                blocks.FloatBlock(
+                    default=0,
+                    help_text="Left/right padding, in rem (0 = none).",
+                ),
+            ),
         ],
         icon="image",
     )
@@ -206,7 +213,47 @@ def _body_content_blocks():
                     (
                         "level",
                         blocks.ChoiceBlock(
-                            choices=[("h2", "H2"), ("h3", "H3")], default="h2"
+                            choices=[
+                                ("h2", "Level 1"),
+                                ("h3", "Level 2"),
+                                ("h4", "Level 3"),
+                                ("h5", "Level 4"),
+                            ],
+                            default="h2",
+                            label="Subsection level",
+                            help_text=(
+                                "How deep this heading nests in the article's "
+                                "structure -- drives both its size and its "
+                                "indentation in the table of contents. Stored as "
+                                "an HTML heading tag (h2-h5) under the hood, but "
+                                "shown here as a plain nesting depth since the "
+                                "actual tag doesn't matter to editors."
+                            ),
+                        ),
+                    ),
+                    (
+                        "alignment",
+                        blocks.ChoiceBlock(
+                            choices=[
+                                ("left", "Left"),
+                                ("center", "Center"),
+                                ("right", "Right"),
+                            ],
+                            default="left",
+                        ),
+                    ),
+                    (
+                        "font_size",
+                        blocks.FloatBlock(
+                            default=1.5,
+                            help_text="Font size, in rem.",
+                        ),
+                    ),
+                    (
+                        "side_padding",
+                        blocks.FloatBlock(
+                            default=0,
+                            help_text="Left/right padding, in rem (0 = none).",
                         ),
                     ),
                 ]
@@ -244,9 +291,12 @@ def _body_content_blocks():
                                             min_value=1,
                                             max_value=10,
                                             default=1,
+                                            label="Column weight",
                                             help_text=(
-                                                "Relative width vs. the other columns "
-                                                "(e.g. 2 is twice as wide as 1)."
+                                                "How much space this column takes relative "
+                                                "to the other columns -- not a literal width, "
+                                                "just a ratio between them (e.g. weight 2 next "
+                                                "to weight 1 makes this column twice as wide)."
                                             ),
                                         ),
                                     ),
@@ -401,18 +451,37 @@ def _iter_toc_entries(body_stream):
 def _effective_block_styles(body_stream, overrides_by_block_id):
     """Recursively walks a body StreamValue (or a box's/column's own nested
     content, same block types) yielding {block_id: {...}} for every
-    styled_text/image/multi_column block, each block's own StreamField value
-    merged with any ArticleBlockStyle override for it (override wins where
-    set, otherwise the block's own stored value). Kept as plain dicts rather
-    than touching block.value.font_size etc. directly in templates, so the
-    "was this overridden by the on-page panel" logic lives in one place.
-    Same recursion shape as _iter_toc_entries -- box content can't itself
-    contain another box, so this can't recurse forever."""
+    heading/styled_text/image/multi_column block, each block's own
+    StreamField value merged with any ArticleBlockStyle override for it
+    (override wins where set, otherwise the block's own stored value). Kept
+    as plain dicts rather than touching block.value.font_size etc. directly
+    in templates, so the "was this overridden by the on-page panel" logic
+    lives in one place. Same recursion shape as _iter_toc_entries -- box
+    content can't itself contain another box, so this can't recurse
+    forever."""
     styles = {}
     for block in body_stream:
         block_id = str(block.id)
         override = overrides_by_block_id.get(block_id)
-        if block.block_type == "styled_text":
+        if block.block_type == "heading":
+            styles[block_id] = {
+                "font_size": (
+                    override.font_size
+                    if override and override.font_size is not None
+                    else block.value["font_size"]
+                ),
+                "side_padding": (
+                    override.side_padding
+                    if override and override.side_padding is not None
+                    else block.value["side_padding"]
+                ),
+                "alignment": (
+                    override.alignment
+                    if override and override.alignment
+                    else block.value["alignment"]
+                ),
+            }
+        elif block.block_type == "styled_text":
             styles[block_id] = {
                 "font_size": (
                     override.font_size
@@ -442,13 +511,30 @@ def _effective_block_styles(body_stream, overrides_by_block_id):
                     if override and override.width_rem is not None
                     else block.value["width_rem"]
                 ),
+                "side_padding": (
+                    override.side_padding
+                    if override and override.side_padding is not None
+                    else block.value["side_padding"]
+                ),
             }
         elif block.block_type == "multi_column":
+            own_weights = [column["width"] for column in block.value["columns"]]
+            override_weights = override.column_weights if override else None
             styles[block_id] = {
                 "side_padding": (
                     override.side_padding
                     if override and override.side_padding is not None
                     else block.value["side_padding"]
+                ),
+                "gap": (
+                    override.gap
+                    if override and override.gap is not None
+                    else block.value["gap"]
+                ),
+                "column_weights": (
+                    override_weights
+                    if override_weights and len(override_weights) == len(own_weights)
+                    else own_weights
                 ),
             }
             for column in block.value["columns"]:
@@ -456,6 +542,33 @@ def _effective_block_styles(body_stream, overrides_by_block_id):
         elif block.block_type == "box":
             styles.update(_effective_block_styles(block.value["content"], overrides_by_block_id))
     return styles
+
+
+# Default values for each on-page-editable field, per block type -- powers
+# the "Reset to default" button in the on-page block style panel
+# (article_block_style.js, via ArticlePage.get_context()). Kept in sync by
+# hand with each field's own default= elsewhere in this file
+# (article_styled_text_block(), article_image_block(), the multi_column
+# StructBlock's own fields, and ArticlePage's title_font_size/hero_image_*
+# etc.) -- there's no single shared source, since some of these are
+# StreamField block defaults and some are plain Django model field
+# defaults, two different mechanisms.
+BLOCK_STYLE_DEFAULTS = {
+    "heading": {"alignment": "left", "font_size": 1.5, "side_padding": 0},
+    "styled_text": {"side_padding": 1, "alignment": "left", "font_size": 1},
+    "image": {"alignment": "center", "width_rem": 20, "side_padding": 0},
+    "multi_column": {"side_padding": 1, "gap": 2, "column_weight": 1},
+    "article_header": {
+        "side_padding": 0,
+        "title_alignment": "left",
+        "title_font_size": 2,
+        "intro_alignment": "left",
+        "intro_font_size": 1,
+        "meta_alignment": "left",
+        "meta_font_size": 0.9,
+    },
+    "hero_image": {"alignment": "right", "width_rem": 18, "side_padding": 0},
+}
 
 
 def _split_categories_by_season(categories):
@@ -513,18 +626,13 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         choices=HERO_POSITION_CHOICES,
         default="right",
     )
-
-    HERO_SIZE_CHOICES = [
-        ("small", "Small"),
-        ("medium", "Medium"),
-        ("large", "Large"),
-        ("full", "Full width"),
-    ]
-
-    hero_image_size = models.CharField(
-        max_length=20,
-        choices=HERO_SIZE_CHOICES,
-        default="medium",
+    hero_image_width_rem = models.FloatField(
+        default=18,
+        help_text="Width, in rem.",
+    )
+    hero_image_side_padding = models.FloatField(
+        default=0,
+        help_text="Left/right padding, in rem (0 = none).",
     )
 
     hero_image_title = models.CharField(
@@ -619,11 +727,19 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         default="left",
         help_text="Alignment for the article title.",
     )
+    title_font_size = models.FloatField(
+        default=2,
+        help_text="Font size for the article title, in rem. Independent from the body's own font size.",
+    )
     intro_alignment = models.CharField(
         max_length=20,
         choices=TITLE_ALIGNMENT_CHOICES,
         default="left",
         help_text="Alignment for the intro paragraph.",
+    )
+    intro_font_size = models.FloatField(
+        default=1,
+        help_text="Font size for the intro paragraph, in rem. Independent from the body's own font size.",
     )
     meta_alignment = models.CharField(
         max_length=20,
@@ -631,14 +747,25 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         default="left",
         help_text="Alignment for the byline/date meta row.",
     )
+    meta_font_size = models.FloatField(
+        default=0.9,
+        help_text="Font size for the byline/date meta row, in rem. Independent from the body's own font size.",
+    )
+
+    header_side_padding = models.FloatField(
+        default=0,
+        help_text=(
+            "Left/right padding around the title/meta/intro block, in rem "
+            "(0 = none). Independent from the body's own side padding."
+        ),
+    )
 
     content_font_size = models.FloatField(
         default=1,
         help_text=(
-            "Default font size for the title, meta, intro and body, in rem "
-            "(title scales proportionally, since it's sized relative to "
-            "this). Per-block font size (styled text) overrides this "
-            "individually."
+            "Default font size for the body, in rem. Title, intro and meta "
+            "have their own separate font size controls. Per-block font "
+            "size (styled text) overrides this individually."
         ),
     )
 
@@ -652,7 +779,8 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         FieldPanel("intro"),
         FieldPanel("hero_image"),
         FieldPanel("hero_image_position"),
-        FieldPanel("hero_image_size"),
+        FieldPanel("hero_image_width_rem"),
+        FieldPanel("hero_image_side_padding"),
         FieldPanel("hero_image_title"),
         FieldPanel("hero_image_alt"),
         FieldPanel("hero_image_caption"),
@@ -668,8 +796,12 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         FieldPanel("content_alignment"),
         FieldPanel("content_font_size"),
         FieldPanel("title_alignment"),
+        FieldPanel("title_font_size"),
         FieldPanel("intro_alignment"),
+        FieldPanel("intro_font_size"),
         FieldPanel("meta_alignment"),
+        FieldPanel("meta_font_size"),
+        FieldPanel("header_side_padding"),
         FieldPanel("body"),
     ]
 
@@ -709,21 +841,25 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
     def get_context(self, request, *args, **kwargs):
         """Add can_edit_style (whether the visitor can use the on-page style
         panels -- same permission check the save endpoints enforce, see
-        article_views.py) and block_styles (per-block effective
+        article_views.py), block_styles (per-block effective
         alignment/padding/font-size, StreamField value merged with any
-        ArticleBlockStyle override -- see _effective_block_styles())."""
+        ArticleBlockStyle override -- see _effective_block_styles()), and
+        block_style_defaults (see BLOCK_STYLE_DEFAULTS -- powers the "Reset
+        to default" button in that same panel)."""
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.style_target.permissions_for_user(request.user).can_edit()
         overrides_by_block_id = {
             style.block_id: style for style in self.style_target.block_styles.all()
         }
         context["block_styles"] = _effective_block_styles(self.body, overrides_by_block_id)
+        context["block_style_defaults"] = BLOCK_STYLE_DEFAULTS
         return context
 
 
 class ArticleBlockStyle(models.Model):
-    """A per-block style override (alignment/padding/font-size) for one
-    styled_text/image/multi_column block inside an ArticlePage's body,
+    """A per-block style override (alignment/padding/font-size/gap/column
+    weights) for one styled_text/image/multi_column block inside an
+    ArticlePage's body,
     saved by the on-page block style panel. Deliberately NOT part of the
     StreamField itself -- editing StreamField JSON in place means locating
     a block by id inside potentially-nested content (a column, a box) and
@@ -748,6 +884,18 @@ class ArticleBlockStyle(models.Model):
     )
     font_size = models.FloatField(null=True, blank=True)
     width_rem = models.FloatField(null=True, blank=True)
+    gap = models.FloatField(null=True, blank=True)
+    column_weights = models.JSONField(
+        null=True,
+        blank=True,
+        help_text=(
+            "multi_column only: one relative weight per column, same order "
+            "as the block's own columns. Ignored (falls back to the "
+            "block's own per-column weights) if its length no longer "
+            "matches the current column count -- e.g. a column was added "
+            "or removed in Wagtail after this override was saved."
+        ),
+    )
 
     class Meta:
         constraints = [

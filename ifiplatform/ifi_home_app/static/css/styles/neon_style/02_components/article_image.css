@@ -46,6 +46,11 @@
   border-radius: 12px;
 }
 
+/* hero image: width is a free-form rem number (editor picks it via
+width_rem, same on-page editor as body images -- see article_page.html),
+set via inline style rather than a class here, same reasoning as the body
+image note below. */
+
 /* hero image: alignment (float / position) */
 .hero-image--right {
   float: right;
@@ -59,23 +64,6 @@
 
 .hero-image--center {
   margin: 0 auto 1.5rem;
-}
-
-/* hero image: size (max-width) */
-.hero-image--size-small {
-  max-width: 12rem;
-}
-
-.hero-image--size-medium {
-  max-width: 18rem;
-}
-
-.hero-image--size-large {
-  max-width: 30rem;
-}
-
-.hero-image--size-full {
-  max-width: 100%;
 }
 
 @media (max-width: 640px) {

@@ -11,11 +11,45 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
 {% endcomment %}
 {% for block in blocks %}
     {% if block.block_type == "heading" %}
+        {% with style=block_styles|lookup:block.id %}
+        {% comment %}
+        block.value.level is one of h2-h5 (see article_models.py's heading
+        block -- shown in Wagtail as "Level 1"-"Level 4" rather than the raw
+        tag name, but still stored/rendered as the tag itself). Django
+        templates can't use a variable as a tag name, hence the repeated
+        block per level rather than one `<{{ level }}>` -- everything else
+        about the four is identical.
+        {% endcomment %}
         {% if block.value.level == "h3" %}
-            <h3 id="{{ block.value.text|slugify }}">{{ block.value.text }}</h3>
+            <h3 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if can_edit_style %} editable-block{% endif %}"
+                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
+                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"{% endif %}
+                style="font-size: {{ style.font_size|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">{{ block.value.text }}
+                {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+            </h3>
+        {% elif block.value.level == "h4" %}
+            <h4 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if can_edit_style %} editable-block{% endif %}"
+                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
+                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"{% endif %}
+                style="font-size: {{ style.font_size|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">{{ block.value.text }}
+                {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+            </h4>
+        {% elif block.value.level == "h5" %}
+            <h5 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if can_edit_style %} editable-block{% endif %}"
+                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
+                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"{% endif %}
+                style="font-size: {{ style.font_size|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">{{ block.value.text }}
+                {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+            </h5>
         {% else %}
-            <h2 id="{{ block.value.text|slugify }}">{{ block.value.text }}</h2>
+            <h2 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if can_edit_style %} editable-block{% endif %}"
+                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
+                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"{% endif %}
+                style="font-size: {{ style.font_size|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">{{ block.value.text }}
+                {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+            </h2>
         {% endif %}
+        {% endwith %}
 
     {% elif block.block_type == "paragraph" %}
         <div class="prose">{{ block.value }}</div>
@@ -34,11 +68,14 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
         {% with style=block_styles|lookup:block.id %}
         <div class="multi-col-grid multi-col-grid--align-{{ block.value.column_alignment }}{% if can_edit_style %} editable-block{% endif %}"
              {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="multi_column"
-             data-side-padding="{{ style.side_padding|unlocalize }}"{% endif %}
-             style="gap: {{ block.value.gap|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">
+             data-side-padding="{{ style.side_padding|unlocalize }}" data-gap="{{ style.gap|unlocalize }}"
+             data-column-count="{{ block.value.columns|length }}"
+             data-column-weights="{% for w in style.column_weights %}{{ w|unlocalize }}{% if not forloop.last %},{% endif %}{% endfor %}"{% endif %}
+             style="gap: {{ style.gap|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             {% for column in block.value.columns %}
-                <div class="multi-col-item" style="flex: {{ column.width }} 1 0;">
+                <div class="multi-col-item"{% if can_edit_style %} data-col-index="{{ forloop.counter0 }}"{% endif %}
+                     style="flex: {{ style.column_weights|index:forloop.counter0|unlocalize }} 1 0;">
                     {% if column.title %}<h3 class="column-title" id="{{ column.title|slugify }}">{{ column.title }}</h3>{% endif %}
                     {% include "info_articles/partials/article_column_content.html" with content=column.content %}
                 </div>

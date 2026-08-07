@@ -1,0 +1,198 @@
+/* same backdrop+centered-panel pattern as .toc-modal (article_toc.css) --
+higher z-index than the editor panels (block-style: 2010) since this can
+pop up while one of them is open. */
+.unsaved-changes-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.unsaved-changes-modal[hidden] {
+  display: none;
+}
+
+.unsaved-changes-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-text) 88%, transparent);
+}
+
+.unsaved-changes-panel {
+  position: relative;
+  z-index: 1;
+  width: min(90vw, 24rem);
+  box-sizing: border-box;
+  padding: 1.5rem;
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px var(--color-shadow-strong);
+}
+
+.unsaved-changes-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--color-secondary);
+}
+
+.unsaved-changes-message {
+  margin: 0 0 1.25rem;
+  color: var(--color-text);
+}
+
+.unsaved-changes-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.unsaved-changes-actions button {
+  flex: 1 1 auto;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.unsaved-changes-actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.unsaved-changes-save {
+  border: 2px solid var(--color-cta-border);
+  background: var(--color-cta);
+  color: var(--color-white);
+}
+
+.unsaved-changes-save:hover:not(:disabled) {
+  background: var(--color-cta-hover);
+}
+
+.unsaved-changes-discard {
+  border: 2px solid var(--color-danger);
+  background: var(--color-bg);
+  color: var(--color-danger);
+}
+
+.unsaved-changes-discard:hover:not(:disabled) {
+  background: var(--color-danger);
+  color: var(--color-white);
+}
+
+.unsaved-changes-cancel {
+  border: 2px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.unsaved-changes-cancel:hover {
+  background: var(--color-accent);
+}
+
+.unsaved-changes-status {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.unsaved-changes-status.is-error {
+  color: var(--color-error);
+}
+
+/* floating "unsaved changes" bar, bottom-center -- next to the quick-style
+panel (bottom-left, see article_quick_style.css) but its own separate
+control, reachable the whole time you're mid-edit rather than only when
+you try to navigate away (that's what the modal above is for). z-index
+above the quick-style panel (2000) so it's never hidden behind it, below
+the block-style mini panel (2010) and the modal (3000) since those are
+meant to take priority when open. */
+.save-bar {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2001;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1rem;
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 999px;
+  box-shadow: 0 4px 16px var(--color-shadow-strong);
+  font-size: 0.85rem;
+}
+
+.save-bar[hidden] {
+  display: none;
+}
+
+.save-bar-label {
+  font-weight: bold;
+  color: var(--color-secondary);
+  white-space: nowrap;
+}
+
+.save-bar button {
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.save-bar button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.save-bar-save {
+  border: 2px solid var(--color-cta-border);
+  background: var(--color-cta);
+  color: var(--color-white);
+}
+
+.save-bar-save:hover:not(:disabled) {
+  background: var(--color-cta-hover);
+}
+
+.save-bar-discard {
+  border: 2px solid var(--color-danger);
+  background: var(--color-bg);
+  color: var(--color-danger);
+}
+
+.save-bar-discard:hover:not(:disabled) {
+  background: var(--color-danger);
+  color: var(--color-white);
+}
+
+.save-bar-status {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.save-bar-status.is-error {
+  color: var(--color-error);
+  white-space: normal;
+}
+
+@media (max-width: 480px) {
+  /* the quick-style panel takes over the whole bottom edge on mobile (see
+  article_quick_style.css) -- move up out of its way rather than overlap. */
+  .save-bar {
+    bottom: 6rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    transform: none;
+    justify-content: center;
+  }
+}

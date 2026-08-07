@@ -226,6 +226,14 @@
   margin-left: 1.25rem;
 }
 
+.toc-modal-list li.toc-h4 {
+  margin-left: 2.5rem;
+}
+
+.toc-modal-list li.toc-h5 {
+  margin-left: 3.75rem;
+}
+
 .toc-modal-list a {
   color: var(--color-text);
   text-decoration: none;
@@ -325,6 +333,14 @@ body.toc-modal-open {
 
 .toc-overlay-list li.toc-h3 {
   margin-left: 1.25rem;
+}
+
+.toc-overlay-list li.toc-h4 {
+  margin-left: 2.5rem;
+}
+
+.toc-overlay-list li.toc-h5 {
+  margin-left: 3.75rem;
 }
 
 .toc-overlay-list a {

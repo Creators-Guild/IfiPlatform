@@ -15,3 +15,20 @@
 numbers (editor picks the exact value), applied directly via inline style
 with no min/max clamp -- it's on the editor to pick a sane value for their
 screen. */
+
+/* heading blocks (h2/h3 in the article body): same alignment/font-size/
+side-padding editing as styled_text above, and font-size/side-padding are
+applied the same way (inline style, see article_body_blocks.html) -- but
+alignment needs its own class family here since headings don't share
+prose's own classes. */
+.heading--align-left {
+  text-align: left;
+}
+
+.heading--align-center {
+  text-align: center;
+}
+
+.heading--align-right {
+  text-align: right;
+}

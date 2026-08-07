@@ -33,11 +33,13 @@ document.addEventListener("DOMContentLoaded", () => {
   paddingInput.addEventListener("input", () => {
     articlePage.style.setProperty("--content-side-padding", `${paddingInput.value}rem`);
     paddingValue.textContent = paddingInput.value;
+    window.ifiUnsavedChanges.markDirty("quickStyle");
   });
 
   fontSizeInput.addEventListener("input", () => {
     articlePage.style.setProperty("--content-font-size", `${fontSizeInput.value}rem`);
     fontSizeValue.textContent = fontSizeInput.value;
+    window.ifiUnsavedChanges.markDirty("quickStyle");
   });
 
   alignmentGroup.querySelectorAll("button").forEach((button) => {
@@ -48,17 +50,46 @@ document.addEventListener("DOMContentLoaded", () => {
       alignmentGroup.querySelectorAll("button").forEach((b) => {
         b.classList.toggle("active", b === button);
       });
+      window.ifiUnsavedChanges.markDirty("quickStyle");
     });
   });
 
-  panel.addEventListener("submit", (event) => {
-    event.preventDefault();
+  // sets each field to its default and replays the same input/click each
+  // one already listens for, rather than duplicating what those listeners
+  // do -- same trick as article_block_style.js's own reset button.
+  const resetButton = document.getElementById("quick-style-reset");
+  resetButton.addEventListener("click", () => {
+    if (!window.confirm("Reset the global style to its default values? Unsaved changes will be lost.")) {
+      return;
+    }
+
+    paddingInput.value = panel.dataset.defaultPadding;
+    paddingInput.dispatchEvent(new Event("input"));
+
+    fontSizeInput.value = panel.dataset.defaultFontSize;
+    fontSizeInput.dispatchEvent(new Event("input"));
+
+    const defaultAlignButton = alignmentGroup.querySelector(
+      `button[data-align="${panel.dataset.defaultAlignment}"]`
+    );
+    if (defaultAlignButton) {
+      defaultAlignButton.click();
+    }
+  });
+
+  // returns a Promise<{ok, error}> -- this panel has no Save button of its
+  // own, so the only way this ever runs is via registerSaveHandler below,
+  // called by the global save bar/unsaved-changes modal (article_unsaved_
+  // changes.js). The error string travels with the result so those can show
+  // what actually went wrong even though this panel might not be visible
+  // at the time.
+  const save = () => {
     statusEl.textContent = "Saving...";
     statusEl.classList.remove("is-error");
 
     const csrfToken = panel.querySelector("[name=csrfmiddlewaretoken]").value;
 
-    fetch(panel.dataset.quickStyleUrl, {
+    return fetch(panel.dataset.quickStyleUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -76,14 +107,23 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(({ ok, data }) => {
         if (ok) {
           statusEl.textContent = "Saved";
-        } else {
-          statusEl.textContent = data.error || "Failed to save.";
-          statusEl.classList.add("is-error");
+          window.ifiUnsavedChanges.markClean("quickStyle");
+          return { ok: true };
         }
+        const error = data.error || "Failed to save global style.";
+        statusEl.textContent = error;
+        statusEl.classList.add("is-error");
+        return { ok: false, error };
       })
       .catch(() => {
-        statusEl.textContent = "Failed to save.";
+        const error = "Failed to save global style (network error).";
+        statusEl.textContent = error;
         statusEl.classList.add("is-error");
+        return { ok: false, error };
       });
-  });
+  };
+
+  // no Save button of its own -- registered here so the global floating
+  // save bar (article_save_bar.html) can trigger it instead.
+  window.ifiUnsavedChanges.registerSaveHandler(save);
 });

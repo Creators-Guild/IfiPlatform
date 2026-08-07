@@ -8,6 +8,20 @@ content-heavy article doesn't end up covered in icons. */
   position: relative;
 }
 
+/* a floated image's own box only covers the image itself, but a *later*
+full-width block (a heading, a paragraph, .prose) that visually wraps
+around it still occupies that same screen region for hit-testing purposes,
+even where nothing of it actually renders. Both are position:relative
+(from .editable-block above) with no z-index of their own, so plain DOM
+order decides which one wins there -- and DOM order puts body content
+after the image, so it was winning, silently swallowing clicks meant for
+the image's own trigger underneath it. An explicit z-index here settles
+that regardless of DOM order. */
+.hero-image-figure.editable-block,
+.body-image-figure.editable-block {
+  z-index: 5;
+}
+
 /* temporary highlight so it's clear exactly which block a trigger/panel
 belongs to -- same hover/focus/open conditions as the trigger icon itself
 (see below), plus .is-editing (set by article_block_style.js) so the
@@ -48,6 +62,11 @@ body.editor-mode-on .block-style-trigger.is-open {
   opacity: 1;
 }
 
+/* fixed, with its top/left recalculated on every scroll/resize while open
+(see article_block_style.js) -- it should track the trigger icon that
+opened it. Plain viewport coordinates here, recomputed live, instead of
+trying to make position:absolute's containing-block math carry it along
+on its own. */
 .block-style-mini-panel {
   position: fixed;
   z-index: 2010;
@@ -67,10 +86,36 @@ body.editor-mode-on .block-style-trigger.is-open {
   display: none;
 }
 
+.block-style-mini-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
 .block-style-mini-panel-title {
   margin: 0;
   font-weight: bold;
   color: var(--color-secondary);
+}
+
+.block-style-close {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--color-secondary);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.block-style-close:hover {
+  background: var(--color-cta);
+  color: var(--color-white);
 }
 
 .block-style-field {
@@ -110,22 +155,22 @@ body.editor-mode-on .block-style-trigger.is-open {
 
 .block-style-mini-panel-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
 }
 
-.block-style-mini-panel-actions button[type="submit"] {
+.block-style-reset {
   padding: 0.35rem 0.8rem;
-  border: 2px solid var(--color-cta-border);
+  border: 2px solid var(--color-border);
   border-radius: 6px;
-  background: var(--color-cta);
-  color: var(--color-white);
-  font-weight: bold;
+  background: var(--color-bg);
+  color: var(--color-text);
   cursor: pointer;
 }
 
-.block-style-mini-panel-actions button[type="submit"]:hover {
-  background: var(--color-cta-hover);
+.block-style-reset:hover {
+  background: var(--color-accent);
 }
 
 .block-style-mini-panel-status {

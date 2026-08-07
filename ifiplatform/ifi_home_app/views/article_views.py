@@ -12,9 +12,10 @@ from django.views.decorators.http import require_POST
 from ifi_home_app.models.article_models import ArticleBlockStyle, ArticlePage
 
 BLOCK_STYLE_FIELDS = {
+    "heading": {"side_padding", "alignment", "font_size"},
     "styled_text": {"side_padding", "alignment", "font_size"},
-    "image": {"alignment", "width_rem"},
-    "multi_column": {"side_padding"},
+    "image": {"alignment", "width_rem", "side_padding"},
+    "multi_column": {"side_padding", "gap", "column_weights"},
 }
 
 
@@ -78,6 +79,10 @@ def save_block_style(request, page_id):
             defaults["font_size"] = float(data["font_size"])
         if "width_rem" in allowed_fields and data.get("width_rem") is not None:
             defaults["width_rem"] = float(data["width_rem"])
+        if "gap" in allowed_fields and data.get("gap") is not None:
+            defaults["gap"] = float(data["gap"])
+        if "column_weights" in allowed_fields and data.get("column_weights") is not None:
+            defaults["column_weights"] = [float(w) for w in data["column_weights"]]
     except (TypeError, ValueError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
@@ -96,9 +101,10 @@ def save_block_style(request, page_id):
 
 @require_POST
 def save_header_style(request, page_id):
-    """Save title_alignment/intro_alignment/meta_alignment for one
-    ArticlePage and publish immediately. Unlike save_block_style, these are
-    plain ArticlePage fields (not StreamField content), so this is the same
+    """Save title_alignment/intro_alignment/meta_alignment/header_side_padding/
+    title_font_size/intro_font_size/meta_font_size for one ArticlePage and
+    publish immediately. Unlike save_block_style, these are plain ArticlePage
+    fields (not StreamField content), so this is the same
     save_revision()+publish() pattern as save_quick_style -- no
     ArticleBlockStyle side table involved."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
@@ -111,7 +117,11 @@ def save_header_style(request, page_id):
         title_alignment = data["title_alignment"]
         intro_alignment = data["intro_alignment"]
         meta_alignment = data["meta_alignment"]
-    except (KeyError, TypeError, json.JSONDecodeError):
+        header_side_padding = float(data["header_side_padding"])
+        title_font_size = float(data["title_font_size"])
+        intro_font_size = float(data["intro_font_size"])
+        meta_font_size = float(data["meta_font_size"])
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
     valid_alignments = dict(ArticlePage.CONTENT_ALIGNMENT_CHOICES)
@@ -122,6 +132,42 @@ def save_header_style(request, page_id):
     page.title_alignment = title_alignment
     page.intro_alignment = intro_alignment
     page.meta_alignment = meta_alignment
+    page.header_side_padding = header_side_padding
+    page.title_font_size = title_font_size
+    page.intro_font_size = intro_font_size
+    page.meta_font_size = meta_font_size
+    revision = page.save_revision(user=request.user)
+    revision.publish(user=request.user)
+
+    return JsonResponse({"ok": True})
+
+
+@require_POST
+def save_hero_image_style(request, page_id):
+    """Save hero_image_position/hero_image_width_rem/hero_image_side_padding
+    for one ArticlePage and publish immediately. Same pattern as
+    save_header_style -- plain ArticlePage fields, not StreamField content,
+    since the hero image is a single fixed slot on the page rather than a
+    body block."""
+    page = get_object_or_404(ArticlePage, pk=page_id).style_target
+
+    if not page.permissions_for_user(request.user).can_edit():
+        return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
+
+    try:
+        data = json.loads(request.body)
+        alignment = data["alignment"]
+        width_rem = float(data["width_rem"])
+        side_padding = float(data["side_padding"])
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+        return JsonResponse({"error": "Invalid data."}, status=400)
+
+    if alignment not in dict(ArticlePage.HERO_POSITION_CHOICES):
+        return JsonResponse({"error": "Invalid alignment."}, status=400)
+
+    page.hero_image_position = alignment
+    page.hero_image_width_rem = width_rem
+    page.hero_image_side_padding = side_padding
     revision = page.save_revision(user=request.user)
     revision.publish(user=request.user)
 

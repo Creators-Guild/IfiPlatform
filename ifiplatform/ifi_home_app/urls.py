@@ -24,6 +24,11 @@ ifi_api_urlpatterns = [
         article_views.save_header_style,
         name="article_header_style",
     ),
+    path(
+        "api/articles/<int:page_id>/hero-image-style/",
+        article_views.save_hero_image_style,
+        name="article_hero_image_style",
+    ),
 ]
 
 ifi_article_urlpatterns = [
