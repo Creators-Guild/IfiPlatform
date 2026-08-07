@@ -3,4 +3,63 @@
    height wraps around them instead of collapsing past their bottom edge. */
 .article-page {
   display: flow-root;
+  /* editor-controlled default alignment (ArticlePage.content_alignment,
+  --content-alignment set inline here) -- text-align is inherited, so this
+  alone covers plain headings/paragraphs everywhere inside .article-page,
+  AND repositions h1 itself even though h1 is display:inline-block (an
+  inline-block's own box is positioned by its *containing block's*
+  text-align, not its own). Blocks with their own alignment option
+  (styled_text/image/multi_column) set text-align explicitly on themselves,
+  which always wins over this inherited value regardless of specificity. */
+  text-align: var(--content-alignment, left);
+}
+
+/* .article-meta is a flex container -- flex items ignore inherited
+text-align for their own positioning, so the row needs its own explicit
+justify-content instead. "left"/"center"/"right" are valid justify-content
+keywords too (CSS Box Alignment), so the same custom property value works
+here unchanged. */
+.article-page > .article-meta {
+  justify-content: var(--content-alignment, left);
+}
+
+/* editor-controlled whole-article side padding (ArticlePage.content_side_padding,
+--content-side-padding set inline on .article-page) -- applied individually to
+title/meta/intro/body rather than on .article-page itself, so the hero image
+figure stays unaffected and keeps its own edge-to-edge position. Margin, not
+padding: h1's border-bottom (the accent underline) is part of its border box,
+and padding on a width:auto block only shrinks the content area inside a
+fixed-width border box, leaving the border behind at the un-indented edge --
+margin moves the whole box, border included, so the underline stays lined up
+with the now-indented text above it. */
+.article-page > h1,
+.article-page > .article-meta,
+.article-page > .intro,
+.article-page > article {
+  margin-left: var(--content-side-padding, 0);
+  margin-right: var(--content-side-padding, 0);
+}
+
+/* editor-set side padding/alignment are ignored below this (same "phone"
+breakpoint used throughout the rest of the site) -- a large padding or
+centered/right alignment picked for a wide desktop column can eat the whole
+screen or read badly once the column is already this narrow, so mobile
+always gets the plain left-aligned, unpadded default regardless of what's
+configured. */
+@media (max-width: 480px) {
+  .article-page {
+    text-align: left;
+  }
+
+  .article-page > .article-meta {
+    justify-content: flex-start;
+  }
+
+  .article-page > h1,
+  .article-page > .article-meta,
+  .article-page > .intro,
+  .article-page > article {
+    margin-left: 0;
+    margin-right: 0;
+  }
 }

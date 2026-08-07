@@ -1,5 +1,5 @@
 {% extends "home_base.html" %}
-{% load i18n static wagtailcore_tags wagtailimages_tags %}
+{% load i18n l10n static wagtailcore_tags wagtailimages_tags %}
 
 {% block title %}{{ page.title }}{% endblock %}
 
@@ -22,7 +22,7 @@
 
 {% block maincontent %}
     {% include "info_articles/partials/article_breadcrumbs.html" %}
-    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="--accent-color: var(--color-{{ page.category.color }})">
+    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="--accent-color: var(--color-{{ page.category.color }}); --content-side-padding: {{ page.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.content_alignment }};">
         {% if page.has_headings %}
             {% comment %}
             mobile only (see article_toc.css) -- wider viewports keep the separate floating "contents" icon next to the article body instead.
@@ -76,10 +76,14 @@
             </div>
         {% endif %}
 
+        {% if page.intro %}
+            <div class="intro">{{ page.intro|richtext }}</div>
+        {% endif %}
+
         {% if page.hero_image %}
             {% image page.hero_image width-1200 as hero %}
             <figure class="hero-image-figure hero-image--{{ page.hero_image_position }} hero-image--size-{{ page.hero_image_size }}{% if page.hero_image_boxed %} image-figure--boxed box-color--{{ page.hero_image_box_color }}{% endif %}"
-                {% if page.hero_image_boxed %}style="--box-bg: {% if page.hero_image_box_color == 'custom' %}{{ page.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.hero_image_box_color }}){% endif %}; border-radius: {{ page.hero_image_box_border_radius }}rem;"{% endif %}>
+                {% if page.hero_image_boxed %}style="--box-bg: {% if page.hero_image_box_color == 'custom' %}{{ page.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.hero_image_box_color }}){% endif %}; border-radius: {{ page.hero_image_box_border_radius|unlocalize }}rem;"{% endif %}>
                 <img class="hero-image" src="{{ hero.url }}" alt="{{ page.hero_image_alt|default:page.hero_image.title }}">
                 {% if page.hero_image_title or page.hero_image_caption %}
                     <figcaption>

@@ -172,22 +172,15 @@ def article_styled_text_block():
                 ),
             ),
             (
-                "letter_size",
-                blocks.ChoiceBlock(
-                    choices=[
-                        ("small", "Small"),
-                        ("medium", "Medium"),
-                        ("large", "Large"),
-                        ("larger", "Larger"),
-                    ],
-                    default="medium",
+                "font_size",
+                blocks.FloatBlock(
+                    default=1,
+                    help_text="Font size, in rem.",
                 ),
             ),
             (
                 "side_padding",
                 blocks.FloatBlock(
-                    min_value=0,
-                    max_value=20,
                     default=1,
                     help_text="Left/right padding, in rem (0 = none).",
                 ),
@@ -297,8 +290,6 @@ def _body_content_blocks():
                     (
                         "side_padding",
                         blocks.FloatBlock(
-                            min_value=0,
-                            max_value=20,
                             default=1,
                             help_text="Left/right padding around the whole multi-column block, in rem (0 = none).",
                         ),
@@ -444,7 +435,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
 
     template = "info_articles/pages/article_page.html"  # custom path
 
-    intro = models.CharField(max_length=250, blank=True)
+    intro = RichTextField(blank=True)
     # featured image
     hero_image = models.ForeignKey(
         "wagtailimages.Image",
@@ -535,6 +526,33 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         help_text="Whether this article can be suggested on the homepage (newsbar/articles bar).",
     )
 
+    content_side_padding = models.FloatField(
+        default=0,
+        help_text=(
+            "Left/right padding around the whole article body, in rem (0 = "
+            "none). Applies on top of the site's own layout padding, and "
+            "stacks with any per-block side padding inside it."
+        ),
+    )
+
+    CONTENT_ALIGNMENT_CHOICES = [
+        ("left", "Left"),
+        ("center", "Center"),
+        ("right", "Right"),
+    ]
+
+    content_alignment = models.CharField(
+        max_length=20,
+        choices=CONTENT_ALIGNMENT_CHOICES,
+        default="left",
+        help_text=(
+            "Default alignment for the title, meta, intro and any plain "
+            "heading/paragraph content. Blocks with their own alignment "
+            "option (styled text, images, multi-column) override this "
+            "individually."
+        ),
+    )
+
     # allows for mutiple sections of one of these types:
     body = StreamField(
         _body_content_blocks() + [("box", article_box_block())],
@@ -557,6 +575,8 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         FieldPanel("published_date"),
         FieldPanel("show_in_newsbar"),
         FieldPanel("show_on_homepage"),
+        FieldPanel("content_side_padding"),
+        FieldPanel("content_alignment"),
         FieldPanel("body"),
     ]
 

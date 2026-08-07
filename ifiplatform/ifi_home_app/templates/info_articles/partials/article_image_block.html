@@ -1,7 +1,7 @@
-{% load wagtailimages_tags %}
+{% load l10n wagtailimages_tags %}
 {% image image_value.image width-800 as img %}
 <figure class="body-image-figure body-image--{{ image_value.alignment }} body-image--{{ image_value.size }}{% if image_value.boxed %} image-figure--boxed box-color--{{ image_value.box_color }}{% endif %}"
-    {% if image_value.boxed %}style="--box-bg: {% if image_value.box_color == 'custom' %}{{ image_value.box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ image_value.box_color }}){% endif %}; border-radius: {{ image_value.box_border_radius }}rem;"{% endif %}>
+    {% if image_value.boxed %}style="--box-bg: {% if image_value.box_color == 'custom' %}{{ image_value.box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ image_value.box_color }}){% endif %}; border-radius: {{ image_value.box_border_radius|unlocalize }}rem;"{% endif %}>
     <img class="body-image" src="{{ img.url }}" alt="{{ image_value.alt_text|default:image_value.image.title }}">
     {% if image_value.alt_text or image_value.caption %}
         <figcaption>
