@@ -209,7 +209,7 @@ if os.environ.get("EMAIL_HOST"):
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@ifiplatform.no")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@ifiplatfform.no")
 
 # File-based so the cache is shared across gunicorn worker processes --
 # the default LocMemCache is per-process, so e.g. Wagtail's site-root-paths
