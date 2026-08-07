@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static wagtailuserbar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,6 +11,7 @@
     {% block extra_head %}<!-- addtional css here -->{% endblock extra_head %}
 </head>
 <body>
+    {% wagtailuserbar %}
     <div class="page-layout">
         <div class= "topheader-content">
             {% include "partials/select_language.html" %}

@@ -1,7 +1,10 @@
-{% load wagtailimages_tags %}
+{% load i18n l10n wagtailimages_tags article_extras %}
 {% image image_value.image width-800 as img %}
-<figure class="body-image-figure body-image--{{ image_value.alignment }} body-image--{{ image_value.size }}{% if image_value.boxed %} image-figure--boxed box-color--{{ image_value.box_color }}{% endif %}"
-    {% if image_value.boxed %}style="--box-bg: {% if image_value.box_color == 'custom' %}{{ image_value.box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ image_value.box_color }}){% endif %}; border-radius: {{ image_value.box_border_radius }}rem;"{% endif %}>
+{% with style=block_styles|lookup:block_id %}
+<figure class="body-image-figure body-image--{{ style.alignment }}{% if image_value.boxed %} image-figure--boxed box-color--{{ image_value.box_color }}{% endif %}{% if can_edit_style %} editable-block{% endif %}"
+    {% if can_edit_style %}data-block-id="{{ block_id }}" data-block-type="image" data-alignment="{{ style.alignment }}" data-width-rem="{{ style.width_rem|unlocalize }}"{% endif %}
+    style="width: {{ style.width_rem|unlocalize }}rem; max-width: 100%;{% if image_value.boxed %} --box-bg: {% if image_value.box_color == 'custom' %}{{ image_value.box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ image_value.box_color }}){% endif %}; border-radius: {{ image_value.box_border_radius|unlocalize }}rem;{% endif %}">
+    {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
     <img class="body-image" src="{{ img.url }}" alt="{{ image_value.alt_text|default:image_value.image.title }}">
     {% if image_value.alt_text or image_value.caption %}
         <figcaption>
@@ -10,3 +13,4 @@
         </figcaption>
     {% endif %}
 </figure>
+{% endwith %}

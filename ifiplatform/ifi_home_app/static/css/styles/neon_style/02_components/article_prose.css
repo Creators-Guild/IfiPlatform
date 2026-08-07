@@ -11,25 +11,7 @@
   text-align: right;
 }
 
-/* styled text block: letter size */
-.prose--size-small {
-  font-size: 0.875rem;
-}
-
-.prose--size-medium {
-  font-size: 1rem;
-}
-
-.prose--size-large {
-  font-size: 1.15rem;
-}
-
-.prose--size-larger {
-  font-size: 1.35rem;
-}
-
-/* styled text block: side padding is a free-form rem number now (editor
-picks the exact value), set via inline style -- clamp(0rem, Nrem, 20vw) in
-the template scales it down automatically on narrow screens instead of a
-fixed set of mobile-override classes, since there's no longer a fixed set
-of steps to override. */
+/* styled text block: font size and side padding are both free-form rem
+numbers (editor picks the exact value), applied directly via inline style
+with no min/max clamp -- it's on the editor to pick a sane value for their
+screen. */

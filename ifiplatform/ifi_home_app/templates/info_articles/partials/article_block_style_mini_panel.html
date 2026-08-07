@@ -1,0 +1,71 @@
+{% load i18n %}
+{% comment %}
+Single shared mini panel opened by any block's "..." trigger (see
+article_block_style.js). Not per-block -- one panel, repositioned next to
+whichever trigger was clicked, with the fields that don't apply to that
+block type hidden (JS toggles [hidden] based on the block's data-block-type).
+{% endcomment %}
+<form class="block-style-mini-panel" id="block-style-mini-panel" hidden
+      data-save-url="{% url 'article_block_style' page.id %}"
+      data-header-save-url="{% url 'article_header_style' page.id %}">
+    {% csrf_token %}
+    <input type="hidden" id="block-style-target-id" name="block_id">
+    <input type="hidden" id="block-style-target-type" name="block_type">
+    <p class="block-style-mini-panel-title">{% trans "Block style" %}</p>
+
+    <label class="block-style-field" data-style-field="side_padding">
+        <span>{% trans "Side padding" %} (<span id="block-style-padding-value"></span>rem)</span>
+        <input type="range" id="block-style-padding" min="0" max="20" step="0.25">
+    </label>
+
+    <div class="block-style-field" data-style-field="alignment">
+        <span>{% trans "Alignment" %}</span>
+        <div class="block-style-align-buttons" id="block-style-alignment" data-value="">
+            <button type="button" data-align="left">{% trans "Left" %}</button>
+            <button type="button" data-align="center">{% trans "Center" %}</button>
+            <button type="button" data-align="right">{% trans "Right" %}</button>
+        </div>
+    </div>
+
+    <label class="block-style-field" data-style-field="font_size">
+        <span>{% trans "Font size" %} (<span id="block-style-font-size-value"></span>rem)</span>
+        <input type="range" id="block-style-font-size" min="0.5" max="3" step="0.05">
+    </label>
+
+    <label class="block-style-field" data-style-field="width_rem">
+        <span>{% trans "Width" %} (<span id="block-style-width-value"></span>rem)</span>
+        <input type="range" id="block-style-width" min="4" max="60" step="0.5">
+    </label>
+
+    <div class="block-style-field" data-style-field="title_alignment">
+        <span>{% trans "Title alignment" %}</span>
+        <div class="block-style-align-buttons" id="block-style-title-alignment" data-value="">
+            <button type="button" data-align="left">{% trans "Left" %}</button>
+            <button type="button" data-align="center">{% trans "Center" %}</button>
+            <button type="button" data-align="right">{% trans "Right" %}</button>
+        </div>
+    </div>
+
+    <div class="block-style-field" data-style-field="meta_alignment">
+        <span>{% trans "Meta alignment" %}</span>
+        <div class="block-style-align-buttons" id="block-style-meta-alignment" data-value="">
+            <button type="button" data-align="left">{% trans "Left" %}</button>
+            <button type="button" data-align="center">{% trans "Center" %}</button>
+            <button type="button" data-align="right">{% trans "Right" %}</button>
+        </div>
+    </div>
+
+    <div class="block-style-field" data-style-field="intro_alignment">
+        <span>{% trans "Intro alignment" %}</span>
+        <div class="block-style-align-buttons" id="block-style-intro-alignment" data-value="">
+            <button type="button" data-align="left">{% trans "Left" %}</button>
+            <button type="button" data-align="center">{% trans "Center" %}</button>
+            <button type="button" data-align="right">{% trans "Right" %}</button>
+        </div>
+    </div>
+
+    <div class="block-style-mini-panel-actions">
+        <button type="submit">{% trans "Save" %}</button>
+        <span class="block-style-mini-panel-status" id="block-style-mini-panel-status" aria-live="polite"></span>
+    </div>
+</form>

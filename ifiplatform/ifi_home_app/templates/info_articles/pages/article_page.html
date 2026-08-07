@@ -1,5 +1,5 @@
 {% extends "home_base.html" %}
-{% load i18n static wagtailcore_tags wagtailimages_tags %}
+{% load i18n l10n static wagtailcore_tags wagtailimages_tags %}
 
 {% block title %}{{ page.title }}{% endblock %}
 
@@ -14,6 +14,10 @@
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_prose.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_multicolumn.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
+    {% if can_edit_style %}
+        <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_quick_style.css' %}">
+        <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_block_style.css' %}">
+    {% endif %}
 {% endblock extra_head %}
 
 {% block sidemenu %}
@@ -22,7 +26,14 @@
 
 {% block maincontent %}
     {% include "info_articles/partials/article_breadcrumbs.html" %}
-    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="--accent-color: var(--color-{{ page.category.color }})">
+    {% if can_edit_style %}
+        {% include "info_articles/partials/article_quick_style_panel.html" %}
+        {% include "info_articles/partials/article_block_style_mini_panel.html" %}
+    {% endif %}
+    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="--accent-color: var(--color-{{ page.category.color }}); --content-side-padding: {{ page.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.content_alignment }}; --content-font-size: {{ page.content_font_size|unlocalize }}rem;">
+        {% if can_edit_style %}
+            {% include "info_articles/partials/article_editor_mode_toggle.html" %}
+        {% endif %}
         {% if page.has_headings %}
             {% comment %}
             mobile only (see article_toc.css) -- wider viewports keep the separate floating "contents" icon next to the article body instead.
@@ -44,7 +55,33 @@
             </div>
         {% endif %}
 
-        <h1>{{ page.title }}</h1>
+        <div class="article-header{% if can_edit_style %} editable-block{% endif %}"
+             {% if can_edit_style %}data-block-id="article-header" data-block-type="article_header"
+             data-title-alignment="{{ page.title_alignment }}" data-intro-alignment="{{ page.intro_alignment }}" data-meta-alignment="{{ page.meta_alignment }}"{% endif %}
+             style="--title-alignment: {{ page.title_alignment }}; --intro-alignment: {{ page.intro_alignment }}; --meta-alignment: {{ page.meta_alignment }};">
+            {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+
+            <h1>{{ page.title }}</h1>
+
+            {% if page.author or page.published_date or page.last_published_at or needs_translation %}
+                <div class="article-meta">
+                    {% if page.author %}
+                        <span class="article-meta-item">{% trans "By" %} {{ page.author.get_full_name|default:page.author.username }}</span>
+                    {% endif %}
+                    {% if page.published_date %}
+                        <span class="article-meta-item">{% trans "Published" %} {{ page.published_date }}</span>
+                    {% endif %}
+                    {% if page.last_published_at %}
+                        <span class="article-meta-item">{% trans "Last edited" %} {{ page.last_published_at|date }}</span>
+                    {% endif %}
+                    {% include "info_articles/partials/translation_warning.html" %}
+                </div>
+            {% endif %}
+
+            {% if page.intro %}
+                <div class="intro">{{ page.intro|richtext }}</div>
+            {% endif %}
+        </div>
 
         {% if page.has_headings %}
             <div class="toc-modal" id="toc-modal" role="dialog" aria-modal="true" aria-labelledby="toc-modal-title" hidden>
@@ -61,25 +98,10 @@
             </div>
         {% endif %}
 
-        {% if page.author or page.published_date or page.last_published_at or needs_translation %}
-            <div class="article-meta">
-                {% if page.author %}
-                    <span class="article-meta-item">{% trans "By" %} {{ page.author.get_full_name|default:page.author.username }}</span>
-                {% endif %}
-                {% if page.published_date %}
-                    <span class="article-meta-item">{% trans "Published" %} {{ page.published_date }}</span>
-                {% endif %}
-                {% if page.last_published_at %}
-                    <span class="article-meta-item">{% trans "Last edited" %} {{ page.last_published_at|date }}</span>
-                {% endif %}
-                {% include "info_articles/partials/translation_warning.html" %}
-            </div>
-        {% endif %}
-
         {% if page.hero_image %}
             {% image page.hero_image width-1200 as hero %}
             <figure class="hero-image-figure hero-image--{{ page.hero_image_position }} hero-image--size-{{ page.hero_image_size }}{% if page.hero_image_boxed %} image-figure--boxed box-color--{{ page.hero_image_box_color }}{% endif %}"
-                {% if page.hero_image_boxed %}style="--box-bg: {% if page.hero_image_box_color == 'custom' %}{{ page.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.hero_image_box_color }}){% endif %}; border-radius: {{ page.hero_image_box_border_radius }}rem;"{% endif %}>
+                {% if page.hero_image_boxed %}style="--box-bg: {% if page.hero_image_box_color == 'custom' %}{{ page.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.hero_image_box_color }}){% endif %}; border-radius: {{ page.hero_image_box_border_radius|unlocalize }}rem;"{% endif %}>
                 <img class="hero-image" src="{{ hero.url }}" alt="{{ page.hero_image_alt|default:page.hero_image.title }}">
                 {% if page.hero_image_title or page.hero_image_caption %}
                     <figcaption>
@@ -123,4 +145,9 @@
         </article>
     </div>
     <script src="{% static 'js/table_of_content.js' %}" defer></script>
+    {% if can_edit_style %}
+        <script src="{% static 'js/article_editor_mode.js' %}" defer></script>
+        <script src="{% static 'js/article_quick_style.js' %}" defer></script>
+        <script src="{% static 'js/article_block_style.js' %}" defer></script>
+    {% endif %}
 {% endblock maincontent %}

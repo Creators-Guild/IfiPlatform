@@ -1,0 +1,138 @@
+/* Per-block style trigger (the small "..." icon on styled_text/image/
+multi_column blocks) and the mini panel it opens -- see
+article_block_style.js. Only meaningful once editor mode is on; the trigger
+itself stays hidden (not display:none, so it can still be found/measured by
+JS) until then, and only appears on hover/focus of its own block so a
+content-heavy article doesn't end up covered in icons. */
+.editable-block {
+  position: relative;
+}
+
+/* temporary highlight so it's clear exactly which block a trigger/panel
+belongs to -- same hover/focus/open conditions as the trigger icon itself
+(see below), plus .is-editing (set by article_block_style.js) so the
+highlight stays while its mini panel is open even after the mouse has
+moved onto the panel itself, away from the block. outline, not border --
+doesn't affect layout/box size, so nothing shifts when it appears. */
+body.editor-mode-on .editable-block:hover,
+body.editor-mode-on .editable-block:focus-within,
+body.editor-mode-on .editable-block.is-editing {
+  outline: 2px dashed var(--color-secondary);
+  outline-offset: 3px;
+}
+
+.block-style-trigger {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  z-index: 10;
+  visibility: hidden;
+  opacity: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--color-secondary);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: opacity 0.1s ease;
+}
+
+body.editor-mode-on .editable-block:hover > .block-style-trigger,
+body.editor-mode-on .editable-block:focus-within > .block-style-trigger,
+body.editor-mode-on .block-style-trigger.is-open {
+  visibility: visible;
+  opacity: 1;
+}
+
+.block-style-mini-panel {
+  position: fixed;
+  z-index: 2010;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 14rem;
+  padding: 0.85rem 1rem;
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px var(--color-shadow-strong);
+  font-size: 0.8rem;
+}
+
+.block-style-mini-panel[hidden] {
+  display: none;
+}
+
+.block-style-mini-panel-title {
+  margin: 0;
+  font-weight: bold;
+  color: var(--color-secondary);
+}
+
+.block-style-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.block-style-field[hidden] {
+  display: none;
+}
+
+.block-style-field input[type="range"] {
+  width: 100%;
+}
+
+.block-style-align-buttons {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.block-style-align-buttons button {
+  flex: 1;
+  padding: 0.25rem 0;
+  border: 2px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.block-style-align-buttons button.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.block-style-mini-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.block-style-mini-panel-actions button[type="submit"] {
+  padding: 0.35rem 0.8rem;
+  border: 2px solid var(--color-cta-border);
+  border-radius: 6px;
+  background: var(--color-cta);
+  color: var(--color-white);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.block-style-mini-panel-actions button[type="submit"]:hover {
+  background: var(--color-cta-hover);
+}
+
+.block-style-mini-panel-status {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.block-style-mini-panel-status.is-error {
+  color: var(--color-error);
+}

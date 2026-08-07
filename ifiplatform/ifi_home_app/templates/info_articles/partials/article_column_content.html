@@ -1,4 +1,4 @@
-{% load wagtailimages_tags %}
+{% load i18n l10n wagtailimages_tags article_extras %}
 {% comment %}
 Renders a multi-column column's content stream (text/styled_text/image).
 Shared by both multi_column rendering modes in article_body_blocks.html
@@ -11,9 +11,15 @@ Usage: {% include "info_articles/partials/article_column_content.html" with cont
     {% if sub.block_type == "text" %}
         <div class="prose">{{ sub.value }}</div>
     {% elif sub.block_type == "styled_text" %}
-        <div class="prose prose--align-{{ sub.value.alignment }} prose--size-{{ sub.value.letter_size }}"
-             style="padding-left: clamp(0rem, {{ sub.value.side_padding }}rem, 20vw); padding-right: clamp(0rem, {{ sub.value.side_padding }}rem, 20vw);">{{ sub.value.text }}</div>
+        {% with style=block_styles|lookup:sub.id %}
+        <div class="prose prose--align-{{ style.alignment }}{% if can_edit_style %} editable-block{% endif %}"
+             {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="styled_text"
+             data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}" data-alignment="{{ style.alignment }}"{% endif %}
+             style="font-size: {{ style.font_size|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">{{ sub.value.text }}
+            {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+        </div>
+        {% endwith %}
     {% elif sub.block_type == "image" %}
-        {% include "info_articles/partials/article_image_block.html" with image_value=sub.value %}
+        {% include "info_articles/partials/article_image_block.html" with image_value=sub.value block_id=sub.id %}
     {% endif %}
 {% endfor %}

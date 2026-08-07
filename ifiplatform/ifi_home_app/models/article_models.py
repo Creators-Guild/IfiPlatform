@@ -29,6 +29,7 @@ COLOR_CHOICES = [
 ]
 
 
+
 def _get_translation_progress(page):
     """Returns (total, translated) string-segment counts for the wagtail-localize
     Translation of `page` into its own locale, or None if there's no such record
@@ -92,14 +93,10 @@ def article_image_block():
                 ),
             ),
             (
-                "size",
-                blocks.ChoiceBlock(
-                    choices=[
-                        ("small", "Small"),
-                        ("medium", "Medium"),
-                        ("large", "Large"),
-                    ],
-                    default="medium",
+                "width_rem",
+                blocks.FloatBlock(
+                    default=20,
+                    help_text="Width, in rem.",
                 ),
             ),
             (
@@ -172,22 +169,15 @@ def article_styled_text_block():
                 ),
             ),
             (
-                "letter_size",
-                blocks.ChoiceBlock(
-                    choices=[
-                        ("small", "Small"),
-                        ("medium", "Medium"),
-                        ("large", "Large"),
-                        ("larger", "Larger"),
-                    ],
-                    default="medium",
+                "font_size",
+                blocks.FloatBlock(
+                    default=1,
+                    help_text="Font size, in rem.",
                 ),
             ),
             (
                 "side_padding",
                 blocks.FloatBlock(
-                    min_value=0,
-                    max_value=20,
                     default=1,
                     help_text="Left/right padding, in rem (0 = none).",
                 ),
@@ -297,8 +287,6 @@ def _body_content_blocks():
                     (
                         "side_padding",
                         blocks.FloatBlock(
-                            min_value=0,
-                            max_value=20,
                             default=1,
                             help_text="Left/right padding around the whole multi-column block, in rem (0 = none).",
                         ),
@@ -410,6 +398,66 @@ def _iter_toc_entries(body_stream):
             yield from _iter_toc_entries(block.value["content"])
 
 
+def _effective_block_styles(body_stream, overrides_by_block_id):
+    """Recursively walks a body StreamValue (or a box's/column's own nested
+    content, same block types) yielding {block_id: {...}} for every
+    styled_text/image/multi_column block, each block's own StreamField value
+    merged with any ArticleBlockStyle override for it (override wins where
+    set, otherwise the block's own stored value). Kept as plain dicts rather
+    than touching block.value.font_size etc. directly in templates, so the
+    "was this overridden by the on-page panel" logic lives in one place.
+    Same recursion shape as _iter_toc_entries -- box content can't itself
+    contain another box, so this can't recurse forever."""
+    styles = {}
+    for block in body_stream:
+        block_id = str(block.id)
+        override = overrides_by_block_id.get(block_id)
+        if block.block_type == "styled_text":
+            styles[block_id] = {
+                "font_size": (
+                    override.font_size
+                    if override and override.font_size is not None
+                    else block.value["font_size"]
+                ),
+                "side_padding": (
+                    override.side_padding
+                    if override and override.side_padding is not None
+                    else block.value["side_padding"]
+                ),
+                "alignment": (
+                    override.alignment
+                    if override and override.alignment
+                    else block.value["alignment"]
+                ),
+            }
+        elif block.block_type == "image":
+            styles[block_id] = {
+                "alignment": (
+                    override.alignment
+                    if override and override.alignment
+                    else block.value["alignment"]
+                ),
+                "width_rem": (
+                    override.width_rem
+                    if override and override.width_rem is not None
+                    else block.value["width_rem"]
+                ),
+            }
+        elif block.block_type == "multi_column":
+            styles[block_id] = {
+                "side_padding": (
+                    override.side_padding
+                    if override and override.side_padding is not None
+                    else block.value["side_padding"]
+                ),
+            }
+            for column in block.value["columns"]:
+                styles.update(_effective_block_styles(column["content"], overrides_by_block_id))
+        elif block.block_type == "box":
+            styles.update(_effective_block_styles(block.value["content"], overrides_by_block_id))
+    return styles
+
+
 def _split_categories_by_season(categories):
     """Split live categories into (main, seasonal) lists, seasonal filtered to currently-active ones."""
     main = [c for c in categories if not c.is_seasonal]
@@ -444,7 +492,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
 
     template = "info_articles/pages/article_page.html"  # custom path
 
-    intro = models.CharField(max_length=250, blank=True)
+    intro = RichTextField(blank=True)
     # featured image
     hero_image = models.ForeignKey(
         "wagtailimages.Image",
@@ -535,6 +583,65 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         help_text="Whether this article can be suggested on the homepage (newsbar/articles bar).",
     )
 
+    content_side_padding = models.FloatField(
+        default=0,
+        help_text=(
+            "Left/right padding around the whole article body, in rem (0 = "
+            "none). Applies on top of the site's own layout padding, and "
+            "stacks with any per-block side padding inside it."
+        ),
+    )
+
+    CONTENT_ALIGNMENT_CHOICES = [
+        ("left", "Left"),
+        ("center", "Center"),
+        ("right", "Right"),
+    ]
+
+    content_alignment = models.CharField(
+        max_length=20,
+        choices=CONTENT_ALIGNMENT_CHOICES,
+        default="left",
+        help_text=(
+            "Default alignment for any plain heading/paragraph content in "
+            "the article body. Blocks with their own alignment option "
+            "(styled text, images, multi-column) override this "
+            "individually -- as does the title/intro/meta block above the "
+            "body, which has its own separate alignment controls."
+        ),
+    )
+
+    TITLE_ALIGNMENT_CHOICES = CONTENT_ALIGNMENT_CHOICES
+
+    title_alignment = models.CharField(
+        max_length=20,
+        choices=TITLE_ALIGNMENT_CHOICES,
+        default="left",
+        help_text="Alignment for the article title.",
+    )
+    intro_alignment = models.CharField(
+        max_length=20,
+        choices=TITLE_ALIGNMENT_CHOICES,
+        default="left",
+        help_text="Alignment for the intro paragraph.",
+    )
+    meta_alignment = models.CharField(
+        max_length=20,
+        choices=TITLE_ALIGNMENT_CHOICES,
+        default="left",
+        help_text="Alignment for the byline/date meta row.",
+    )
+
+    content_font_size = models.FloatField(
+        default=1,
+        help_text=(
+            "Default font size for the title, meta, intro and body, in rem "
+            "(title scales proportionally, since it's sized relative to "
+            "this). Per-block font size (styled text) overrides this "
+            "individually."
+        ),
+    )
+
     # allows for mutiple sections of one of these types:
     body = StreamField(
         _body_content_blocks() + [("box", article_box_block())],
@@ -557,6 +664,12 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         FieldPanel("published_date"),
         FieldPanel("show_in_newsbar"),
         FieldPanel("show_on_homepage"),
+        FieldPanel("content_side_padding"),
+        FieldPanel("content_alignment"),
+        FieldPanel("content_font_size"),
+        FieldPanel("title_alignment"),
+        FieldPanel("intro_alignment"),
+        FieldPanel("meta_alignment"),
         FieldPanel("body"),
     ]
 
@@ -571,6 +684,16 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         return self.get_parent().specific
 
     @property
+    def style_target(self):
+        """The ArticlePage that quick-style edits should actually be saved
+        to. Alias pages (e.g. an untranslated locale mirroring another
+        locale's page) can't take their own revisions -- Wagtail raises if
+        you try (they're an exact, auto-synced copy of their source), so
+        edits have to go to the source instead, which Wagtail then
+        propagates back to this alias automatically on publish."""
+        return self.alias_of.specific if self.alias_of_id else self
+
+    @property
     def toc_entries(self):
         """(level, text) pairs for the table of contents -- see
         _iter_toc_entries() for what counts (top-level headings, headings
@@ -582,6 +705,56 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         """True if there's at least one table-of-contents entry, i.e.
         something for it to actually link to."""
         return bool(self.toc_entries)
+
+    def get_context(self, request, *args, **kwargs):
+        """Add can_edit_style (whether the visitor can use the on-page style
+        panels -- same permission check the save endpoints enforce, see
+        article_views.py) and block_styles (per-block effective
+        alignment/padding/font-size, StreamField value merged with any
+        ArticleBlockStyle override -- see _effective_block_styles())."""
+        context = super().get_context(request, *args, **kwargs)
+        context["can_edit_style"] = self.style_target.permissions_for_user(request.user).can_edit()
+        overrides_by_block_id = {
+            style.block_id: style for style in self.style_target.block_styles.all()
+        }
+        context["block_styles"] = _effective_block_styles(self.body, overrides_by_block_id)
+        return context
+
+
+class ArticleBlockStyle(models.Model):
+    """A per-block style override (alignment/padding/font-size) for one
+    styled_text/image/multi_column block inside an ArticlePage's body,
+    saved by the on-page block style panel. Deliberately NOT part of the
+    StreamField itself -- editing StreamField JSON in place means locating
+    a block by id inside potentially-nested content (a column, a box) and
+    going through Wagtail's revision/publish machinery for what's really
+    just a styling tweak, which also hit real sharp edges (alias pages
+    can't take their own revisions, see ArticlePage.style_target). A plain
+    side table keyed by block id sidesteps all of that: no revision, no
+    publish, no StreamField parsing, just an upsert. The tradeoff is it's a
+    second source of truth -- if a block is deleted and different content
+    recreated in its place, that new block gets a new id and simply won't
+    match any existing override (harmless: it just renders with its own
+    stored defaults, same as never having been styled)."""
+
+    article = models.ForeignKey(
+        "ArticlePage", on_delete=models.CASCADE, related_name="block_styles"
+    )
+    block_id = models.CharField(max_length=36)
+
+    side_padding = models.FloatField(null=True, blank=True)
+    alignment = models.CharField(
+        max_length=20, choices=ArticlePage.CONTENT_ALIGNMENT_CHOICES, blank=True
+    )
+    font_size = models.FloatField(null=True, blank=True)
+    width_rem = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["article", "block_id"], name="unique_article_block_style"
+            )
+        ]
 
 
 # Model for article category to list articles within category
