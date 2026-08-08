@@ -2,16 +2,21 @@
 {% comment %}
 On-page "quick style" panel: lets someone with edit rights on this exact
 ArticlePage (see can_edit_style in article_models.py's get_context()) tweak
-content_side_padding/content_alignment/content_font_size directly on the
-live page, with an instant preview (article_quick_style.js writes the CSS
-custom properties on .article-page as you interact) and a Save button that
-publishes it for real via article_views.save_quick_style. Anyone without
-edit rights on this page never gets this block rendered at all -- the save
-endpoint enforces the same permission check independently, so this is UX,
-not the security boundary.
+content_side_padding/content_alignment/content_font_size/content_bg_enabled/
+content_bg_color/content_bg_custom_color directly on the live page, with an
+instant preview (article_quick_style.js writes the CSS custom
+properties/background on .article-page as you interact). No Save button of
+its own -- saving happens via the global floating save bar
+(article_save_bar.html), which this panel's save() registers itself with
+(registerSaveHandler), publishing for real via article_views.save_quick_style.
+Anyone without edit rights on this page never gets this block rendered at
+all -- the save endpoint enforces the same permission check independently,
+so this is UX, not the security boundary.
 {% endcomment %}
 <form class="quick-style-panel" id="quick-style-panel"
-      data-quick-style-url="{% url 'article_quick_style' page.id %}">
+      data-quick-style-url="{% url 'article_quick_style' page.id %}"
+      data-default-padding="0" data-default-alignment="left" data-default-font-size="1"
+      data-default-bg-color="bg-light">
     {% csrf_token %}
     <div class="quick-style-panel-header">
         <p class="quick-style-panel-title">{% trans "Global style (editors only)" %}</p>
@@ -39,8 +44,39 @@ not the security boundary.
             <input type="range" id="quick-style-font-size" min="0.5" max="3" step="0.05" value="{{ page.content_font_size|unlocalize }}">
         </label>
 
+        {% comment %}
+        Reuses the .color-swatch/.color-swatch-custom-group/.color-swatch-
+        picker classes from article_block_style.css (already loaded
+        whenever this panel is, both gated on the same can_edit_style) --
+        same swatch-row + hex-chip-with-picker-button control as the
+        per-block box styling panel, just for the whole article body's own
+        background instead of one block's box. Values render server-side
+        here (page.content_bg_*) rather than via data-* attributes, since
+        this panel edits one fixed ArticlePage, not whichever block was
+        last clicked.
+        {% endcomment %}
+        <label class="quick-style-field block-style-toggle">
+            <input type="checkbox" id="quick-style-bg-enabled" {% if page.content_bg_enabled %}checked{% endif %}>
+            <span>{% trans "Background color" %}</span>
+        </label>
+        <div class="quick-style-field" id="quick-style-bg-color-field" {% if not page.content_bg_enabled %}hidden{% endif %}>
+            <div class="block-style-color-buttons" id="quick-style-bg-color" data-value="{{ page.content_bg_color }}">
+                <button type="button" class="color-swatch color-swatch--bg-light{% if page.content_bg_color == 'bg-light' %} active{% endif %}" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq{% if page.content_bg_color == 'turq' %} active{% endif %}" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink{% if page.content_bg_color == 'pink' %} active{% endif %}" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple{% if page.content_bg_color == 'purple' %} active{% endif %}" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black{% if page.content_bg_color == 'black' %} active{% endif %}" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom{% if page.content_bg_color == 'custom' %} active{% endif %}" id="quick-style-bg-custom-color" data-color="custom" placeholder="#hex" maxlength="7" value="{{ page.content_bg_custom_color }}" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="quick-style-bg-picker" class="color-swatch-picker-input" tabindex="-1" value="{{ page.content_bg_custom_color|default:'#ffffff' }}">
+                    </label>
+                </div>
+            </div>
+        </div>
+
         <div class="quick-style-actions">
-            <button type="submit" id="quick-style-save">{% trans "Save & publish" %}</button>
+            <button type="button" id="quick-style-reset" class="quick-style-reset">{% trans "Reset to default" %}</button>
             <span class="quick-style-status" id="quick-style-status" aria-live="polite"></span>
         </div>
     </div>

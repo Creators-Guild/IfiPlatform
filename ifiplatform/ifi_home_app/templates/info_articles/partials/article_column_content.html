@@ -12,14 +12,24 @@ Usage: {% include "info_articles/partials/article_column_content.html" with cont
         <div class="prose">{{ sub.value }}</div>
     {% elif sub.block_type == "styled_text" %}
         {% with style=block_styles|lookup:sub.id %}
-        <div class="prose prose--align-{{ style.alignment }}{% if can_edit_style %} editable-block{% endif %}"
+        <div class="prose prose--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
              {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="styled_text"
-             data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}" data-alignment="{{ style.alignment }}"{% endif %}
-             style="font-size: {{ style.font_size|unlocalize }}rem; padding-left: {{ style.side_padding|unlocalize }}rem; padding-right: {{ style.side_padding|unlocalize }}rem;">{{ sub.value.text }}
+             data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}" data-alignment="{{ style.alignment }}"
+             data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
+             {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
+             style="font-size: {{ style.font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ sub.value.text }}
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
         </div>
         {% endwith %}
     {% elif sub.block_type == "image" %}
         {% include "info_articles/partials/article_image_block.html" with image_value=sub.value block_id=sub.id %}
+    {% elif sub.block_type == "article_card" %}
+        {% with chosen=sub.value.article %}
+        {% if chosen %}
+        <div class="body-article-card">
+            {% include "info_articles/partials/article_card.html" with article=chosen.specific %}
+        </div>
+        {% endif %}
+        {% endwith %}
     {% endif %}
 {% endfor %}

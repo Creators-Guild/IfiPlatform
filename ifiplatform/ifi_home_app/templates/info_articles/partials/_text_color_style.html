@@ -1,0 +1,9 @@
+{% comment %}
+Inline "color: ...;" declaration for one block's text color -- included
+into the middle of that element's own style="..." attribute, alongside
+font-size. `color` is a _effective_heading_style() dict's own text_color/
+text_custom_color pair (see article_models.py). Applies independent of
+whether that block's box is on -- unlike box's own background/border/etc,
+text color isn't part of _block_box_style.html at all. Left out entirely
+when blank (the default) so the page's normal text color just applies.
+{% endcomment %}{% if text_color %}color: {% if text_color == "custom" %}{{ text_custom_color|default:"inherit" }}{% else %}var(--color-{{ text_color }}){% endif %};{% endif %}

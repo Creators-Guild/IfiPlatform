@@ -13,3 +13,16 @@ def lookup(dictionary, key):
     if dictionary is None:
         return None
     return dictionary.get(str(key))
+
+
+@register.filter
+def index(sequence, position):
+    """sequence[position] for templates -- same reasoning as lookup() above,
+    but for a list (a multi_column block's per-column weight, indexed by
+    each column's own loop position)."""
+    if sequence is None:
+        return None
+    try:
+        return sequence[position]
+    except IndexError:
+        return None

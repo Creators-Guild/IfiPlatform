@@ -72,3 +72,12 @@
   border-bottom: 4px solid var(--accent-color, var(--color-border));
   padding-bottom: 0.4rem;
 }
+
+/* editor-controlled title font size (ArticlePage.title_font_size,
+--title-font-size set on .article-header, see article_page.html) --
+independent from --content-font-size (the fallback here, ~2em/2rem, is
+just the plain browser h1 default at content_font_size's own default of
+1rem, matching the size before this became an explicit override). */
+.article-page h1 {
+  font-size: var(--title-font-size, 2rem);
+}

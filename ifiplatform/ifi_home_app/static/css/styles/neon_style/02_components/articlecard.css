@@ -51,3 +51,11 @@
   overflow: hidden;
   margin: 0;
 }
+
+/* an article_card block placed directly in an article body (not inside a
+multi_column column, which already constrains its own width) -- caps it to
+a sensible card width instead of stretching .articlecard's own
+display:block to the full prose column. */
+.body-article-card {
+  max-width: 22rem;
+}
