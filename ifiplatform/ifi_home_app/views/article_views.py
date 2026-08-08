@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
+from wagtail.models import Locale
 
 from ifi_home_app.models.article_models import (
     COLOR_CHOICES,
@@ -326,17 +327,41 @@ def save_toc_icon_style(request, page_id):
     return JsonResponse({"ok": True})
 
 
+def _translation_to_sync(nb_page):
+    """The real (independently-authored) en translation of nb_page, if one
+    exists -- an *alias* translation doesn't need any of this, Wagtail
+    already keeps those in sync with their source automatically on both
+    publish and unpublish (see PublishPageRevisionAction/UnpublishPageAction
+    in wagtail's own source). Only called with nb_page already resolved to
+    the nb locale (see ArticlePage.publish_target), so this only ever needs
+    to look one direction: nb -> en."""
+    if nb_page.locale.language_code != ArticlePage.SOURCE_LANGUAGE_CODE:
+        return None
+    en_locale = Locale.objects.exclude(
+        language_code=ArticlePage.SOURCE_LANGUAGE_CODE
+    ).first()
+    if en_locale is None:
+        return None
+    translation = nb_page.get_translation_or_none(en_locale)
+    if translation is None or translation.alias_of_id:
+        return None
+    return translation
+
+
 @require_POST
 def publish_page(request, page_id):
     """Publish the latest draft revision of one ArticlePage -- lets an
     editor push a page live (or push pending draft edits live) straight
     from its own front-end URL/global style panel, instead of going
-    through the Wagtail admin. Requires can_publish specifically, stricter
-    than the can_edit_style/can_edit every other endpoint in this file
-    checks -- Wagtail keeps edit and publish as separate permissions (see
-    ArticlePage.get_context()'s can_publish_page, which gates whether the
-    Publish button even renders)."""
-    page = get_object_or_404(ArticlePage, pk=page_id).style_target
+    through the Wagtail admin. Always acts on the nb ("OG") copy
+    regardless of which locale you're actually looking at (see
+    ArticlePage.publish_target), then publishes the en translation's own
+    latest revision too if one exists, so the two don't drift apart --
+    nb is the source of truth, en always follows it. Requires can_publish
+    on that nb copy specifically, stricter than the can_edit_style/can_edit
+    every other endpoint in this file checks (see ArticlePage.get_context()'s
+    can_publish_page, which gates whether the Publish button even renders)."""
+    page = get_object_or_404(ArticlePage, pk=page_id).publish_target
 
     if not page.permissions_for_user(request.user).can_publish():
         return JsonResponse({"error": "You don't have permission to publish this page."}, status=403)
@@ -346,5 +371,42 @@ def publish_page(request, page_id):
         return JsonResponse({"error": "This page has no draft to publish."}, status=400)
 
     revision.publish(user=request.user)
+
+    translation = _translation_to_sync(page)
+    if translation is not None:
+        translation_revision = translation.get_latest_revision()
+        if translation_revision is not None:
+            # skip_permission_checks -- the editor's own permission was
+            # already verified above, against the nb copy specifically
+            # (see can_publish_page's own docstring for why); this is a
+            # system-triggered side effect of that action, not a
+            # separate action of its own the editor needs permission for.
+            translation_revision.publish(user=request.user, skip_permission_checks=True)
+
+    return JsonResponse({"ok": True})
+
+
+@require_POST
+def unpublish_page(request, page_id):
+    """Unpublish one ArticlePage -- same nb-first, sync-en-after pattern as
+    publish_page above, and the same reasoning for why can_unpublish is
+    checked on the nb copy specifically (see ArticlePage.get_context()'s
+    can_unpublish_page)."""
+    page = get_object_or_404(ArticlePage, pk=page_id).publish_target
+
+    if not page.permissions_for_user(request.user).can_unpublish():
+        return JsonResponse({"error": "You don't have permission to unpublish this page."}, status=403)
+
+    page.unpublish(user=request.user)
+
+    translation = _translation_to_sync(page)
+    if translation is not None and translation.live:
+        # Page.unpublish() has no skip_permission_checks of its own (unlike
+        # Revision.publish() above) -- omitting user here is what actually
+        # skips the internal permission check (see UnpublishAction.check()
+        # in wagtail/actions/unpublish.py: it only checks when self.user is
+        # set), same "already verified against nb, this is just a synced
+        # side effect" reasoning as the publish side.
+        translation.unpublish(log_action=True)
 
     return JsonResponse({"ok": True})

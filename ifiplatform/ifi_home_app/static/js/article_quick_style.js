@@ -23,23 +23,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.getElementById("quick-style-status");
   const minimizeButton = document.getElementById("quick-style-minimize");
   const publishButton = document.getElementById("quick-style-publish-button");
+  const unpublishButton = document.getElementById("quick-style-unpublish-button");
   const MINIMIZED_KEY = "ifiQuickStyleMinimized";
 
-  // Not a style field -- publishes immediately on click rather than going
-  // through the dirty-tracking/save-bar flow the rest of this panel uses,
-  // since there's nothing to "preview" here (it either publishes the
-  // latest draft or it doesn't). Reloads on success so the badge, save-bar
-  // dirty state, and any newly-published content all reflect reality
-  // rather than trying to patch each of those by hand.
-  if (publishButton) {
-    publishButton.addEventListener("click", () => {
-      if (!window.confirm("Publish the latest changes to this page?")) {
+  // Shared by the Publish/Unpublish buttons below -- neither is a style
+  // field, so they act immediately on click rather than going through the
+  // dirty-tracking/save-bar flow the rest of this panel uses (there's
+  // nothing to "preview" here). Both always act on the nb ("OG") copy of
+  // this article and sync the en translation to match, regardless of
+  // which locale you're actually looking at (see ArticlePage.publish_
+  // target/article_views.publish_page/unpublish_page) -- reloads on
+  // success so the badge, save-bar dirty state, and any newly-(un)
+  // published content all reflect reality rather than trying to patch
+  // each of those by hand.
+  const runPublishAction = (button, url, confirmMessage, busyLabel, idleLabel) => {
+    button.addEventListener("click", () => {
+      if (!window.confirm(confirmMessage)) {
         return;
       }
       const csrfToken = panel.querySelector("[name=csrfmiddlewaretoken]").value;
-      publishButton.disabled = true;
-      publishButton.textContent = "Publishing...";
-      fetch(panel.dataset.publishUrl, {
+      button.disabled = true;
+      button.textContent = busyLabel;
+      fetch(url, {
         method: "POST",
         headers: { "X-CSRFToken": csrfToken },
       })
@@ -49,17 +54,57 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.reload();
             return;
           }
-          window.alert(data.error || "Failed to publish.");
-          publishButton.disabled = false;
-          publishButton.textContent = "Publish";
+          window.alert(data.error || `Failed to ${idleLabel.toLowerCase()}.`);
+          button.disabled = false;
+          button.textContent = idleLabel;
         })
         .catch(() => {
-          window.alert("Failed to publish (network error).");
-          publishButton.disabled = false;
-          publishButton.textContent = "Publish";
+          window.alert(`Failed to ${idleLabel.toLowerCase()} (network error).`);
+          button.disabled = false;
+          button.textContent = idleLabel;
         });
     });
+  };
+
+  if (publishButton) {
+    runPublishAction(
+      publishButton,
+      panel.dataset.publishUrl,
+      "Publish the latest changes to this page? This also publishes the Norwegian version if you're editing the English translation.",
+      "Publishing...",
+      "Publish"
+    );
   }
+
+  if (unpublishButton) {
+    runPublishAction(
+      unpublishButton,
+      panel.dataset.unpublishUrl,
+      "Unpublish this page? This takes the Norwegian version off the live site (and the English translation along with it), regardless of which one you're editing.",
+      "Unpublishing...",
+      "Unpublish"
+    );
+  }
+
+  // Publish/Style are each their own collapsible section now -- same
+  // generic [data-controls] wiring as article_block_style.js's own copy
+  // (see that file's comment for why this is one generic loop rather than
+  // per-section JS: data-controls points each toggle at its own fields
+  // wrapper's id, so adding another section here needs no matching code).
+  // Not shared/imported from that file since the two panels' DOMContent-
+  // Loaded handlers are otherwise independent and this is only a few lines.
+  panel.querySelectorAll("[data-controls]").forEach((toggle) => {
+    const wrapper = document.getElementById(toggle.dataset.controls);
+    if (!wrapper) {
+      return;
+    }
+    toggle.addEventListener("click", (event) => {
+      event.preventDefault();
+      const expanded = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", expanded ? "false" : "true");
+      wrapper.hidden = expanded;
+    });
+  });
 
   const applyMinimized = (isMinimized) => {
     panel.classList.toggle("is-minimized", isMinimized);

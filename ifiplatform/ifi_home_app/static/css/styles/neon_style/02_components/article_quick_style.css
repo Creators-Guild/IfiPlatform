@@ -177,16 +177,21 @@ regardless), so the field would stay visible. */
   color: var(--color-error);
 }
 
-/* this page's own published state, plus a Publish button when there's
-something to publish -- see ArticlePage.get_context()'s page_is_live/
-page_has_unpublished_changes/can_publish_page and article_views.
-publish_page. Not a style field, so it doesn't use .quick-style-field's
+/* this page's own published state, plus Publish/Unpublish buttons -- see
+ArticlePage.get_context()'s page_is_live/page_has_unpublished_changes/
+can_publish_page/can_unpublish_page and article_views.publish_page/
+unpublish_page. Not a style field, so it doesn't use .quick-style-field's
 column layout. */
 .quick-style-status-row {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
+}
+
+.quick-style-status-actions {
+  display: flex;
+  gap: 0.4rem;
 }
 
 .quick-style-status-badge {
@@ -230,7 +235,51 @@ column layout. */
   cursor: default;
 }
 
+.quick-style-unpublish-button {
+  padding: 0.3rem 0.8rem;
+  border: 2px solid var(--color-error);
+  border-radius: 6px;
+  background: var(--color-bg);
+  color: var(--color-error);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.quick-style-unpublish-button:hover {
+  background: var(--color-error);
+  color: var(--color-on-accent);
+}
+
+.quick-style-unpublish-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* big, hard-to-miss draft marker on the article itself -- see
+article_page.html: only page_is_live gates this at all, so it can afford
+to be this loud (only an editor with a reason to be looking at a draft
+ever sees it, see ArticlePage.route()). The small badge in this panel
+above stays around too since it's needed for the Publish/Unpublish
+buttons regardless, but is easy to miss on its own (panel minimized,
+scrolled past) -- this is the "impossible to miss" version. */
+.article-draft-banner {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: var(--color-error);
+  color: var(--color-on-accent);
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 480px) {
+  .article-draft-banner {
+    font-size: 1rem;
+  }
+
   .quick-style-panel {
     left: 0.75rem;
     right: 0.75rem;

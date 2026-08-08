@@ -29,11 +29,14 @@ Block ids are preserved throughout (both operations spread
 **child_block), so existing ArticleBlockStyle rows keep matching their
 block after this runs.
 
-Revision.content (page-history snapshots) doesn't have this problem --
-it's a plain JSONField holding a raw dict, not itself a StreamField, so
-reading/writing revision.content never goes through StreamField.to_python
-unless something explicitly reconstructs a model instance from it (which
-this migration doesn't do); ORM access is safe there and is used as-is.
+Revision.content (page-history snapshots) doesn't have the to_python
+silent-drop problem the live body does -- it's a plain JSONField holding a
+raw dict, not itself a StreamField, so reading/writing revision.content
+never goes through StreamField.to_python unless something explicitly
+reconstructs a model instance from it (which this migration doesn't do);
+ORM access is safe there. It has its own two gotchas instead though (wrong
+content_type field, and its 'body' entry being a JSON *string* rather than
+an already-parsed list) -- see _rewrite_revisions()'s own docstring.
 """
 import json
 
@@ -86,6 +89,26 @@ def _rewrite_article_bodies(schema_editor, streamfield, op_list):
 
 
 def _rewrite_revisions(apps, streamfield, op_list):
+    """Rewrites the 'body' snapshot inside every ArticlePage Revision's
+    content dict. Two things here are easy to get wrong (both were wrong
+    in the first version of this migration, caught afterwards -- see
+    0090_fix_revision_content_type_and_body_shape.py, which repairs any
+    database this buggy version already ran against):
+
+    1. Revision.base_content_type is always the *base* class
+       ("wagtailcore.page"), never the specific subclass -- filtering on
+       it against ArticlePage's own ContentType matches nothing. The field
+       that actually holds the specific subclass is plain content_type.
+
+    2. Revision.content is a generic JSONField holding a dict of {field
+       name: value}, but StreamField's own entry within that dict is
+       serialized as a JSON *string* (matching how a StreamField's
+       value_to_string() has always worked, independent of the live
+       column's own native-JSON storage via use_json_field=True) -- not
+       already-parsed list/dict the way the live ArticlePage.body column
+       is. Needs an explicit json.loads()/json.dumps() round trip that
+       the live-body path (_rewrite_article_bodies above) doesn't.
+    """
     Revision = apps.get_model("wagtailcore", "Revision")
     ContentType = apps.get_model("contenttypes", "ContentType")
     article_ct = ContentType.objects.filter(
@@ -93,11 +116,17 @@ def _rewrite_revisions(apps, streamfield, op_list):
     ).first()
     if article_ct is None:
         return
-    for revision in Revision.objects.filter(base_content_type=article_ct):
+    for revision in Revision.objects.filter(content_type=article_ct).iterator():
         content = revision.content
-        if not isinstance(content, dict) or not content.get("body"):
+        if not isinstance(content, dict):
             continue
-        content["body"] = _transform(content["body"], streamfield, op_list)
+        body = content.get("body")
+        if not body or not isinstance(body, str):
+            continue
+        raw = json.loads(body)
+        if not raw:
+            continue
+        content["body"] = json.dumps(_transform(raw, streamfield, op_list))
         revision.content = content
         revision.save(update_fields=["content"])
 

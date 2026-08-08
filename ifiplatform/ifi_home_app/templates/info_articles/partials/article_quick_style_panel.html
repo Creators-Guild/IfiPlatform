@@ -1,102 +1,146 @@
 {% load i18n l10n %}
 {% comment %}
-On-page "quick style" panel: lets someone with edit rights on this exact
-ArticlePage (see can_edit_style in article_models.py's get_context()) tweak
-content_side_padding/content_alignment/content_font_size/content_bg_enabled/
-content_bg_color/content_bg_custom_color directly on the live page, with an
-instant preview (article_quick_style.js writes the CSS custom
-properties/background on .article-page as you interact). No Save button of
-its own -- saving happens via the global floating save bar
+On-page "global editor" panel (still id/class "quick-style-panel" and
+"quick-style-*" throughout -- renamed on-screen only, a rename of every
+id here would be a much bigger diff for no real benefit): lets someone
+with edit rights on this exact ArticlePage (see can_edit_style in
+article_models.py's get_context()) publish/unpublish it (see the Publish
+section below) and tweak content_side_padding/content_alignment/
+content_font_size/content_bg_enabled/content_bg_color/content_bg_custom_color
+directly on the live page (see the Style section below), with an instant
+preview for the latter (article_quick_style.js writes the CSS custom
+properties/background on .article-page as you interact). Style has no
+Save button of its own -- saving happens via the global floating save bar
 (article_save_bar.html), which this panel's save() registers itself with
-(registerSaveHandler), publishing for real via article_views.save_quick_style.
+(registerSaveHandler), publishing for real via article_views.save_quick_style
+-- Publish/Unpublish act immediately instead, see their own comment below.
 Anyone without edit rights on this page never gets this block rendered at
-all -- the save endpoint enforces the same permission check independently,
-so this is UX, not the security boundary.
+all -- the save/publish/unpublish endpoints each enforce the same
+permission checks independently, so this is UX, not the security boundary.
 {% endcomment %}
 <form class="quick-style-panel" id="quick-style-panel"
       data-quick-style-url="{% url 'article_quick_style' page.id %}"
       data-publish-url="{% url 'article_publish' page.id %}"
+      data-unpublish-url="{% url 'article_unpublish' page.id %}"
       data-default-padding="0" data-default-alignment="left" data-default-font-size="1"
       data-default-bg-color="bg-light">
     {% csrf_token %}
     <div class="quick-style-panel-header">
-        <p class="quick-style-panel-title">{% trans "Global style (editors only)" %}</p>
+        <p class="quick-style-panel-title">{% trans "Global editor (editors only)" %}</p>
         <button type="button" id="quick-style-minimize" class="quick-style-minimize"
                 aria-label="{% trans 'Minimize' %}" aria-expanded="true">&#8722;</button>
     </div>
 
     <div class="quick-style-panel-body" id="quick-style-panel-body">
         {% comment %}
-        This page's own published state -- not a style field, so it's not
-        part of the dirty-tracking/save-bar flow the fields below use.
-        Publish button only renders at all if can_publish_page (stricter
-        than can_edit_style -- see ArticlePage.get_context()), and only
-        shows up when there's actually something to publish.
+        Two collapsible sections, same markup/mechanism as the block-style
+        mini panel's own (block-style-box-collapse-toggle/block-style-box-
+        fields, generic [data-controls] wiring reused as-is in
+        article_quick_style.js -- see that file's own comment) rather than
+        duplicating that CSS/JS here. Publish starts expanded (the more
+        likely reason you opened this panel at all); Style starts
+        collapsed, matching the block-style panel's own default-closed
+        convention.
         {% endcomment %}
-        <div class="quick-style-field quick-style-status-row">
-            <span class="quick-style-status-badge{% if not page_is_live %} quick-style-status-badge--draft{% elif page_has_unpublished_changes %} quick-style-status-badge--pending{% else %} quick-style-status-badge--live{% endif %}">
-                {% if not page_is_live %}{% trans "Draft" %}{% elif page_has_unpublished_changes %}{% trans "Published (changes pending)" %}{% else %}{% trans "Published" %}{% endif %}
-            </span>
-            {% if can_publish_page and page_has_pending_publish %}
-                <button type="button" id="quick-style-publish-button" class="quick-style-publish-button">
-                    {% trans "Publish" %}
-                </button>
-            {% endif %}
+
+        <div class="block-style-field block-style-caption-header">
+            <p class="block-style-box-subsection-title">{% trans "Publish" %}</p>
+            <button type="button" class="block-style-box-collapse-toggle" data-controls="quick-style-publish-fields" aria-expanded="true" aria-label="{% trans 'Expand or collapse publish options' %}">&#9662;</button>
         </div>
-
-        <label class="quick-style-field">
-            <span>{% trans "Side padding" %} (<span id="quick-style-padding-value">{{ page.content_side_padding|unlocalize }}</span>rem)</span>
-            <input type="range" id="quick-style-padding" min="0" max="20" step="0.25" value="{{ page.content_side_padding|unlocalize }}">
-        </label>
-
-        <div class="quick-style-field">
-            <span>{% trans "Alignment" %}</span>
-            <div class="quick-style-align-buttons" id="quick-style-alignment" data-value="{{ page.content_alignment }}">
-                <button type="button" data-align="left" class="{% if page.content_alignment == 'left' %}active{% endif %}">{% trans "Left" %}</button>
-                <button type="button" data-align="center" class="{% if page.content_alignment == 'center' %}active{% endif %}">{% trans "Center" %}</button>
-                <button type="button" data-align="right" class="{% if page.content_alignment == 'right' %}active{% endif %}">{% trans "Right" %}</button>
+        <div class="block-style-box-fields" id="quick-style-publish-fields">
+            {% comment %}
+            This page's own published state -- not a style field, so it's
+            not part of the dirty-tracking/save-bar flow the fields below
+            use. Publish/Unpublish always act on the nb ("OG") copy
+            regardless of which locale you're looking at, then sync the en
+            translation to match (see ArticlePage.publish_target/
+            article_views.publish_page/unpublish_page) --
+            can_publish_page/can_unpublish_page already check permission
+            against that nb copy, not this one, so they're the only gate
+            these two buttons need (see ArticlePage.get_context()).
+            Publish only shows up when there's actually something to
+            publish; Unpublish only when the nb copy is actually live
+            (can_unpublish_page is False otherwise -- Wagtail's own
+            can_unpublish() requires it).
+            {% endcomment %}
+            <div class="quick-style-field quick-style-status-row">
+                <span class="quick-style-status-badge{% if not page_is_live %} quick-style-status-badge--draft{% elif page_has_unpublished_changes %} quick-style-status-badge--pending{% else %} quick-style-status-badge--live{% endif %}">
+                    {% if not page_is_live %}{% trans "Draft" %}{% elif page_has_unpublished_changes %}{% trans "Published (changes pending)" %}{% else %}{% trans "Published" %}{% endif %}
+                </span>
+                <span class="quick-style-status-actions">
+                    {% if can_publish_page and page_has_pending_publish %}
+                        <button type="button" id="quick-style-publish-button" class="quick-style-publish-button">
+                            {% trans "Publish" %}
+                        </button>
+                    {% endif %}
+                    {% if can_unpublish_page %}
+                        <button type="button" id="quick-style-unpublish-button" class="quick-style-unpublish-button">
+                            {% trans "Unpublish" %}
+                        </button>
+                    {% endif %}
+                </span>
             </div>
         </div>
 
-        <label class="quick-style-field">
-            <span>{% trans "Font size" %} (<span id="quick-style-font-size-value">{{ page.content_font_size|unlocalize }}</span>rem)</span>
-            <input type="range" id="quick-style-font-size" min="0.5" max="3" step="0.05" value="{{ page.content_font_size|unlocalize }}">
-        </label>
+        <div class="block-style-field block-style-caption-header">
+            <p class="block-style-box-subsection-title">{% trans "Style" %}</p>
+            <button type="button" class="block-style-box-collapse-toggle" data-controls="quick-style-style-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse style options' %}">&#9662;</button>
+        </div>
+        <div class="block-style-box-fields" id="quick-style-style-fields" hidden>
+            <label class="quick-style-field">
+                <span>{% trans "Side padding" %} (<span id="quick-style-padding-value">{{ page.content_side_padding|unlocalize }}</span>rem)</span>
+                <input type="range" id="quick-style-padding" min="0" max="20" step="0.25" value="{{ page.content_side_padding|unlocalize }}">
+            </label>
 
-        {% comment %}
-        Reuses the .color-swatch/.color-swatch-custom-group/.color-swatch-
-        picker classes from article_block_style.css (already loaded
-        whenever this panel is, both gated on the same can_edit_style) --
-        same swatch-row + hex-chip-with-picker-button control as the
-        per-block box styling panel, just for the whole article body's own
-        background instead of one block's box. Values render server-side
-        here (page.content_bg_*) rather than via data-* attributes, since
-        this panel edits one fixed ArticlePage, not whichever block was
-        last clicked.
-        {% endcomment %}
-        <label class="quick-style-field block-style-toggle">
-            <input type="checkbox" id="quick-style-bg-enabled" {% if page.content_bg_enabled %}checked{% endif %}>
-            <span>{% trans "Background color" %}</span>
-        </label>
-        <div class="quick-style-field" id="quick-style-bg-color-field" {% if not page.content_bg_enabled %}hidden{% endif %}>
-            <div class="block-style-color-buttons" id="quick-style-bg-color" data-value="{{ page.content_bg_color }}">
-                <button type="button" class="color-swatch color-swatch--bg-light{% if page.content_bg_color == 'bg-light' %} active{% endif %}" data-color="bg-light">{% trans "Light" %}</button>
-                <button type="button" class="color-swatch color-swatch--turq{% if page.content_bg_color == 'turq' %} active{% endif %}" data-color="turq">{% trans "Turquoise" %}</button>
-                <button type="button" class="color-swatch color-swatch--pink{% if page.content_bg_color == 'pink' %} active{% endif %}" data-color="pink">{% trans "Pink" %}</button>
-                <button type="button" class="color-swatch color-swatch--purple{% if page.content_bg_color == 'purple' %} active{% endif %}" data-color="purple">{% trans "Purple" %}</button>
-                <button type="button" class="color-swatch color-swatch--black{% if page.content_bg_color == 'black' %} active{% endif %}" data-color="black">{% trans "Black" %}</button>
-                <div class="color-swatch-custom-group">
-                    <input type="text" class="color-swatch color-swatch--custom{% if page.content_bg_color == 'custom' %} active{% endif %}" id="quick-style-bg-custom-color" data-color="custom" placeholder="#hex" maxlength="7" value="{{ page.content_bg_custom_color }}" aria-label="{% trans 'Custom hex color' %}">
-                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
-                        <input type="color" id="quick-style-bg-picker" class="color-swatch-picker-input" tabindex="-1" value="{{ page.content_bg_custom_color|default:'#ffffff' }}">
-                    </label>
+            <div class="quick-style-field">
+                <span>{% trans "Alignment" %}</span>
+                <div class="quick-style-align-buttons" id="quick-style-alignment" data-value="{{ page.content_alignment }}">
+                    <button type="button" data-align="left" class="{% if page.content_alignment == 'left' %}active{% endif %}">{% trans "Left" %}</button>
+                    <button type="button" data-align="center" class="{% if page.content_alignment == 'center' %}active{% endif %}">{% trans "Center" %}</button>
+                    <button type="button" data-align="right" class="{% if page.content_alignment == 'right' %}active{% endif %}">{% trans "Right" %}</button>
                 </div>
             </div>
-        </div>
 
-        <div class="quick-style-actions">
-            <button type="button" id="quick-style-reset" class="quick-style-reset">{% trans "Reset to default" %}</button>
-            <span class="quick-style-status" id="quick-style-status" aria-live="polite"></span>
+            <label class="quick-style-field">
+                <span>{% trans "Font size" %} (<span id="quick-style-font-size-value">{{ page.content_font_size|unlocalize }}</span>rem)</span>
+                <input type="range" id="quick-style-font-size" min="0.5" max="3" step="0.05" value="{{ page.content_font_size|unlocalize }}">
+            </label>
+
+            {% comment %}
+            Reuses the .color-swatch/.color-swatch-custom-group/.color-swatch-
+            picker classes from article_block_style.css (already loaded
+            whenever this panel is, both gated on the same can_edit_style) --
+            same swatch-row + hex-chip-with-picker-button control as the
+            per-block box styling panel, just for the whole article body's own
+            background instead of one block's box. Values render server-side
+            here (page.content_bg_*) rather than via data-* attributes, since
+            this panel edits one fixed ArticlePage, not whichever block was
+            last clicked.
+            {% endcomment %}
+            <label class="quick-style-field block-style-toggle">
+                <input type="checkbox" id="quick-style-bg-enabled" {% if page.content_bg_enabled %}checked{% endif %}>
+                <span>{% trans "Background color" %}</span>
+            </label>
+            <div class="quick-style-field" id="quick-style-bg-color-field" {% if not page.content_bg_enabled %}hidden{% endif %}>
+                <div class="block-style-color-buttons" id="quick-style-bg-color" data-value="{{ page.content_bg_color }}">
+                    <button type="button" class="color-swatch color-swatch--bg-light{% if page.content_bg_color == 'bg-light' %} active{% endif %}" data-color="bg-light">{% trans "Light" %}</button>
+                    <button type="button" class="color-swatch color-swatch--turq{% if page.content_bg_color == 'turq' %} active{% endif %}" data-color="turq">{% trans "Turquoise" %}</button>
+                    <button type="button" class="color-swatch color-swatch--pink{% if page.content_bg_color == 'pink' %} active{% endif %}" data-color="pink">{% trans "Pink" %}</button>
+                    <button type="button" class="color-swatch color-swatch--purple{% if page.content_bg_color == 'purple' %} active{% endif %}" data-color="purple">{% trans "Purple" %}</button>
+                    <button type="button" class="color-swatch color-swatch--black{% if page.content_bg_color == 'black' %} active{% endif %}" data-color="black">{% trans "Black" %}</button>
+                    <div class="color-swatch-custom-group">
+                        <input type="text" class="color-swatch color-swatch--custom{% if page.content_bg_color == 'custom' %} active{% endif %}" id="quick-style-bg-custom-color" data-color="custom" placeholder="#hex" maxlength="7" value="{{ page.content_bg_custom_color }}" aria-label="{% trans 'Custom hex color' %}">
+                        <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                            <input type="color" id="quick-style-bg-picker" class="color-swatch-picker-input" tabindex="-1" value="{{ page.content_bg_custom_color|default:'#ffffff' }}">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-style-actions">
+                <button type="button" id="quick-style-reset" class="quick-style-reset">{% trans "Reset to default" %}</button>
+                <span class="quick-style-status" id="quick-style-status" aria-live="polite"></span>
+            </div>
         </div>
     </div>
 </form>

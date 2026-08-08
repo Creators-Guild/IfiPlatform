@@ -12,6 +12,13 @@ homepage/newsbar/category listings, never sets it at all, and must keep
 the image's normal locked-ratio look), drops the image's fixed 8:5 aspect
 ratio so an explicit card height (see the block-style panel's "Height")
 can size the image directly instead, via .articlecard--unlocked-ratio.
+
+The "Draft" badge below only ever has anything to show for CategoryPage/
+ArticleIndexPage's own listings (see their get_context() in article_
+models.py) -- those include draft articles in the queryset at all only
+for editors, so a non-editor visitor never receives a draft article here
+to render a badge for in the first place; not a permission check of its
+own.
 {% endcomment %}
 {% with category=article.category %}
 <a class="articlecard{% if category.category_section == "info_articles" %} articlecard--category{% endif %}{% if list_style %} articlecard--list{% endif %}{% if fixed_ratio == False %} articlecard--unlocked-ratio{% endif %}"
@@ -24,6 +31,7 @@ can size the image directly instead, via .articlecard--unlocked-ratio.
         <!-- simple placeholder if no image -->
         <img src="{% static 'images/news/IfiBygg.jpg' %}" alt="{{ article.title }}">
     {% endif %}
+    {% if not article.live %}<span class="articlecard-draft-badge">{% trans "Draft" %}</span>{% endif %}
     <h3>{{ article.title }}</h3>
     {% if article.author or article.published_date %}
         <div class="articlecard-meta">
