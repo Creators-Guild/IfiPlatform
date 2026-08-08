@@ -101,28 +101,29 @@ def article_image_block():
     )
 
 
-def article_styled_text_block():
+def article_paragraph_block():
     """A rich text block, structurally just a wrapper around the text with
-    no fields of its own beyond that -- kept as its own block type (rather
-    than added to the existing plain 'paragraph' block, whose value is just
-    a bare RichText string) purely as the *signal* that this particular
-    paragraph opts into per-block on-page styling: article_body_blocks.html
-    only gives styled_text blocks the "Edit block style" trigger, alignment/
-    font-size/side-padding come from ArticleBlockStyle (edited via editor
-    mode, article_block_style.js), with BLOCK_STYLE_DEFAULTS as the
-    fallback when no override exists yet -- see _effective_block_styles().
-    A plain 'paragraph' just inherits the article's own global style
-    instead, with no per-block override available. Changing 'paragraph'
-    itself to carry this distinction would need a data migration to
-    convert every existing paragraph across every article; this way
-    existing content is untouched, editors opt into the new block going
-    forward."""
+    no fields of its own beyond that -- a StructBlock (rather than a bare
+    RichTextBlock) purely so it has somewhere to hang the "Edit block
+    style" trigger: article_body_blocks.html/article_column_content.html
+    give every paragraph on-page alignment/font-size/side-padding controls,
+    sourced from ArticleBlockStyle (edited via editor mode, article_block_
+    style.js), with BLOCK_STYLE_DEFAULTS as the fallback when no override
+    exists yet -- see _effective_block_styles(). Used identically at the
+    top level and inside a multi_column column's content (see
+    _body_content_blocks()) -- previously two separate block types existed
+    ('paragraph' as a bare unstyled RichTextBlock, 'styled_text'/'text' as
+    this same opt-in StructBlock) so that adding styling didn't require a
+    data migration; they were later merged back into one 'paragraph' once
+    every paragraph got the same on-page styling (see the migration that
+    converts old bare-string paragraph values into this struct shape and
+    renames old styled_text/text blocks to 'paragraph')."""
     return blocks.StructBlock(
         [
             ("text", blocks.RichTextBlock()),
         ],
         icon="pilcrow",
-        label="Styled Text",
+        label="Paragraph",
     )
 
 
@@ -133,7 +134,7 @@ def article_card_block():
     reusing the exact same article_card.html partial as the homepage/
     newsbar/article-index card grids rather than duplicating that markup.
     A function (not a shared instance) for the same reason article_image_
-    block()/article_styled_text_block() are: Wagtail block instances carry
+    block()/article_paragraph_block() are: Wagtail block instances carry
     per-use bookkeeping and aren't safe to reuse across multiple StreamField/
     StreamBlock definitions (this is used at both the top level and inside
     multi_column's column content)."""
@@ -153,13 +154,81 @@ def article_card_block():
     )
 
 
+def category_card_block():
+    """Embeds a CategoryPage as the same small accent-colored tile used on
+    the article index/category listing pages (see category_card.css) --
+    same reasoning/pattern as article_card_block() above, reusing
+    info_articles/partials/category_card.html rather than duplicating that
+    markup a fourth time (it's currently inlined directly in both
+    article_index_page.html and article_category_page.html)."""
+    return blocks.StructBlock(
+        [
+            (
+                "category",
+                blocks.PageChooserBlock(
+                    page_type="ifi_home_app.CategoryPage",
+                    required=True,
+                    help_text="The category to link to.",
+                ),
+            ),
+        ],
+        icon="tag",
+        label="Category Card",
+    )
+
+
+def union_card_block():
+    """Embeds a UnionPage as the same round-logo card used on a student
+    union category's own listing page (see union_card.css) -- same
+    reasoning/pattern as article_card_block() above, reusing
+    info_articles/partials/union_card.html rather than duplicating that
+    markup (currently only inlined in studentunion_category_page.html)."""
+    return blocks.StructBlock(
+        [
+            (
+                "union",
+                blocks.PageChooserBlock(
+                    page_type="ifi_home_app.UnionPage",
+                    required=True,
+                    help_text="The student union to link to.",
+                ),
+            ),
+        ],
+        icon="group",
+        label="Student Union Card",
+    )
+
+
+def tool_card_block():
+    """Embeds a ToolPage as the same image+maker card used on the article
+    index/category listing pages (see tool_card.css) -- same reasoning/
+    pattern as article_card_block() above, reusing info_articles/partials/
+    tool_card.html rather than duplicating that markup a third time (it's
+    currently inlined in both article_index_page.html and
+    article_category_page.html)."""
+    return blocks.StructBlock(
+        [
+            (
+                "tool",
+                blocks.PageChooserBlock(
+                    page_type="ifi_home_app.ToolPage",
+                    required=True,
+                    help_text="The tool to link to.",
+                ),
+            ),
+        ],
+        icon="cog",
+        label="Tool Card",
+    )
+
+
 def _body_content_blocks():
     """The block types available at the top level of an article body --
     factored out so the 'box' block below can offer the exact same set
     inside itself (any of the *other* blocks, per its own docstring),
     without a box being nestable inside another box. Returns fresh block
     instances each call, same reason article_image_block() and
-    article_styled_text_block() are functions rather than shared instances:
+    article_paragraph_block() are functions rather than shared instances:
     Wagtail block instances carry per-use bookkeeping and aren't safe to
     reuse across multiple StreamField/StreamBlock definitions."""
     return [
@@ -192,8 +261,7 @@ def _body_content_blocks():
                 ]
             ),
         ),
-        ("paragraph", blocks.RichTextBlock(icon="pilcrow")),
-        ("styled_text", article_styled_text_block()),
+        ("paragraph", article_paragraph_block()),
         (
             "multi_column",
             # Each column's own relative weight, the gap between columns, and
@@ -216,13 +284,15 @@ def _body_content_blocks():
                                         "content",
                                         blocks.StreamBlock(
                                             [
-                                                ("text", blocks.RichTextBlock()),
                                                 (
-                                                    "styled_text",
-                                                    article_styled_text_block(),
+                                                    "paragraph",
+                                                    article_paragraph_block(),
                                                 ),
                                                 ("image", article_image_block()),
                                                 ("article_card", article_card_block()),
+                                                ("category_card", category_card_block()),
+                                                ("union_card", union_card_block()),
+                                                ("tool_card", tool_card_block()),
                                             ],
                                             required=False,
                                         ),
@@ -259,6 +329,9 @@ def _body_content_blocks():
         ),
         ("image", article_image_block()),
         ("article_card", article_card_block()),
+        ("category_card", category_card_block()),
+        ("union_card", union_card_block()),
+        ("tool_card", tool_card_block()),
     ]
 
 
@@ -280,9 +353,9 @@ def _iter_toc_entries(body_stream):
 
 
 # Default values for each on-page-editable style field, per block type --
-# the *sole* source of these values for heading/styled_text/image/
+# the *sole* source of these values for heading/paragraph/image/
 # multi_column blocks, since none of them carry style fields of their own
-# any more (see article_image_block()/article_styled_text_block()/
+# any more (see article_image_block()/article_paragraph_block()/
 # _body_content_blocks()'s own docstrings for why: styling lives only in
 # ArticleBlockStyle, edited on-page via editor mode). Used as the fallback
 # in _effective_block_styles() below whenever a block has no
@@ -302,7 +375,7 @@ BLOCK_STYLE_DEFAULTS = {
         "text_color": "",
         "text_custom_color": "",
     },
-    "styled_text": {
+    "paragraph": {
         "side_padding": 1,
         "alignment": "left",
         "font_size": 1,
@@ -317,6 +390,15 @@ BLOCK_STYLE_DEFAULTS = {
     # font-weight:bold stays a fixed CSS rule, not editable here).
     "image_title": {"alignment": "center", "font_size": 0.85, "side_padding": 0, "text_color": "", "text_custom_color": ""},
     "image_caption_body": {"alignment": "center", "font_size": 0.85, "side_padding": 0, "text_color": "", "text_custom_color": ""},
+    # article/category/union/tool cards -- width/height only (they're a
+    # fixed-design card, not built from editable text/box parts like
+    # everything else here; height 0 means auto, see ArticleBlockStyle.
+    # height_rem's own docstring), plus, for article_card only,
+    # list_style/fixed_ratio (see ArticleBlockStyle's own docstrings).
+    "article_card": {"width_rem": 22, "height_rem": 0, "list_style": False, "fixed_ratio": True},
+    "category_card": {"width_rem": 18, "height_rem": 0},
+    "union_card": {"width_rem": 18, "height_rem": 0},
+    "tool_card": {"width_rem": 20, "height_rem": 0},
     "multi_column": {"side_padding": 1, "gap": 2, "column_weight": 1},
     "article_header": {
         "side_padding": 0,
@@ -331,7 +413,7 @@ BLOCK_STYLE_DEFAULTS = {
     # not a StreamField block or per-block override -- there's only ever one
     # table-of-contents icon on the page (ArticlePage.toc_icon_size).
     "toc_icon": {"toc_icon_size": 1.3},
-    # box styling is available on every body block (heading/styled_text/
+    # box styling is available on every body block (heading/paragraph/
     # image/multi_column) and independently on each multi_column sub-column
     # (keyed by that column's own stable id -- see _effective_block_styles())
     # -- the on-page replacement for the old Wagtail 'box' block, which
@@ -446,7 +528,7 @@ def _effective_heading_style(override, defaults):
 def _effective_block_styles(body_stream, overrides_by_block_id):
     """Recursively walks a body StreamValue (or a column's own nested
     content, same block types) yielding {block_id: {...}} for every
-    heading/styled_text/image/multi_column block: any ArticleBlockStyle
+    heading/paragraph/image/multi_column block: any ArticleBlockStyle
     override for it, falling back to BLOCK_STYLE_DEFAULTS where there's no
     override (these blocks carry no style fields of their own to fall back
     to instead -- see BLOCK_STYLE_DEFAULTS' own docstring above), plus a
@@ -462,7 +544,7 @@ def _effective_block_styles(body_stream, overrides_by_block_id):
     for block in body_stream:
         block_id = str(block.id)
         override = overrides_by_block_id.get(block_id)
-        if block.block_type in ("heading", "styled_text"):
+        if block.block_type in ("heading", "paragraph"):
             styles[block_id] = _effective_heading_style(override, BLOCK_STYLE_DEFAULTS[block.block_type])
         elif block.block_type == "image":
             defaults = BLOCK_STYLE_DEFAULTS["image"]
@@ -511,6 +593,24 @@ def _effective_block_styles(body_stream, overrides_by_block_id):
             styles[caption_text_id] = _effective_heading_style(
                 overrides_by_block_id.get(caption_text_id), BLOCK_STYLE_DEFAULTS["image_caption_body"]
             )
+        elif block.block_type in ("article_card", "category_card", "union_card", "tool_card"):
+            defaults = BLOCK_STYLE_DEFAULTS[block.block_type]
+            card_style = {
+                "width_rem": (
+                    override.width_rem if override and override.width_rem is not None else defaults["width_rem"]
+                ),
+                "height_rem": (
+                    override.height_rem if override and override.height_rem is not None else defaults["height_rem"]
+                ),
+            }
+            if block.block_type == "article_card":
+                card_style["list_style"] = (
+                    override.list_style if override and override.list_style is not None else defaults["list_style"]
+                )
+                card_style["fixed_ratio"] = (
+                    override.fixed_ratio if override and override.fixed_ratio is not None else defaults["fixed_ratio"]
+                )
+            styles[block_id] = card_style
         elif block.block_type == "multi_column":
             defaults = BLOCK_STYLE_DEFAULTS["multi_column"]
             own_weights = [defaults["column_weight"]] * len(block.value["columns"])
@@ -889,7 +989,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
 
 class ArticleBlockStyle(models.Model):
     """A per-block style override (alignment/padding/font-size/gap/column
-    weights/box) for one styled_text/image/multi_column block -- or one
+    weights/box) for one paragraph/image/multi_column block -- or one
     multi_column sub-column, keyed by that column's own id (box fields
     only, see _effective_block_styles()) -- inside an ArticlePage's body,
     saved by the on-page block style panel. Deliberately NOT part of the
@@ -957,6 +1057,29 @@ class ArticleBlockStyle(models.Model):
     )
     box_padding = models.FloatField(null=True, blank=True)
     box_margin = models.FloatField(null=True, blank=True)
+
+    # article_card only -- shows it as a compact list row (title + meta,
+    # no image/intro) instead of a full card, same layout that already
+    # applies automatically to the 3rd+ card in a homepage/newsbar card
+    # grid on narrow screens (see .articlecard--list in articlecard.css)
+    # -- this just makes that same look available anywhere, on purpose,
+    # regardless of screen size or position in a grid.
+    list_style = models.BooleanField(null=True, blank=True)
+
+    # article/category/union/tool cards only -- an explicit total card
+    # height (rem), on top of width_rem above. 0/blank means auto (the
+    # card's own natural, content-driven height -- the common case), same
+    # "0 is a real, meaningful value" convention as side_padding/gap
+    # elsewhere, not a sentinel for "no override".
+    height_rem = models.FloatField(null=True, blank=True)
+    # article_card only -- whether its image keeps its normal fixed 8:5
+    # aspect ratio (scaling with width_rem) or not. Defaults to True (the
+    # existing look, unaffected by height_rem) everywhere it isn't
+    # explicitly turned off, so an editor only needs this once they've
+    # set an explicit height_rem *and* want the image to stop scaling
+    # proportionally with width in order to fill that height instead (see
+    # .articlecard--unlocked-ratio in articlecard.css).
+    fixed_ratio = models.BooleanField(null=True, blank=True)
 
     class Meta:
         constraints = [

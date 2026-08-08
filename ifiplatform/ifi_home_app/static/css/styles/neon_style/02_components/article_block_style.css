@@ -1,4 +1,4 @@
-/* Per-block style trigger (the small "..." icon on styled_text/image/
+/* Per-block style trigger (the small "..." icon on paragraph/image/
 multi_column blocks) and the mini panel it opens -- see
 article_block_style.js. Only meaningful once editor mode is on; the trigger
 itself stays hidden (not display:none, so it can still be found/measured by

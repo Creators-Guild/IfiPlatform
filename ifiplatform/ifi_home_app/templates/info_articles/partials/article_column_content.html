@@ -1,6 +1,6 @@
 {% load i18n l10n wagtailimages_tags article_extras %}
 {% comment %}
-Renders a multi-column column's content stream (text/styled_text/image).
+Renders a multi-column column's content stream (paragraph/image/cards).
 Shared by both multi_column rendering modes in article_body_blocks.html
 (side-by-side flex, and float+flow), since a column's own content looks
 the same either way -- only the column's outer wrapper differs.
@@ -8,12 +8,10 @@ the same either way -- only the column's outer wrapper differs.
 Usage: {% include "info_articles/partials/article_column_content.html" with content=<a column's content StreamValue> %}
 {% endcomment %}
 {% for sub in content %}
-    {% if sub.block_type == "text" %}
-        <div class="prose">{{ sub.value }}</div>
-    {% elif sub.block_type == "styled_text" %}
+    {% if sub.block_type == "paragraph" %}
         {% with style=block_styles|lookup:sub.id %}
         <div class="prose prose--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
-             {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="styled_text"
+             {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="paragraph"
              data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}" data-alignment="{{ style.alignment }}"
              data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
              {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
@@ -24,10 +22,51 @@ Usage: {% include "info_articles/partials/article_column_content.html" with cont
     {% elif sub.block_type == "image" %}
         {% include "info_articles/partials/article_image_block.html" with image_value=sub.value block_id=sub.id %}
     {% elif sub.block_type == "article_card" %}
-        {% with chosen=sub.value.article %}
+        {% with chosen=sub.value.article style=block_styles|lookup:sub.id %}
         {% if chosen %}
-        <div class="body-article-card">
-            {% include "info_articles/partials/article_card.html" with article=chosen.specific %}
+        <div class="body-article-card{% if can_edit_style %} editable-block{% endif %}"
+             {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="article_card"
+             data-width-rem="{{ style.width_rem|unlocalize }}" data-height-rem="{{ style.height_rem|unlocalize }}"
+             data-list-style="{{ style.list_style|yesno:"true,false" }}" data-fixed-ratio="{{ style.fixed_ratio|yesno:"true,false" }}"{% endif %}
+             style="width: {{ style.width_rem|unlocalize }}rem; max-width: 100%;{% if style.height_rem %} height: {{ style.height_rem|unlocalize }}rem; overflow: hidden;{% endif %}">
+            {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+            {% include "info_articles/partials/article_card.html" with article=chosen.specific list_style=style.list_style fixed_ratio=style.fixed_ratio %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    {% elif sub.block_type == "category_card" %}
+        {% with chosen=sub.value.category style=block_styles|lookup:sub.id %}
+        {% if chosen %}
+        <div class="body-category-card{% if can_edit_style %} editable-block{% endif %}"
+             {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="category_card"
+             data-width-rem="{{ style.width_rem|unlocalize }}" data-height-rem="{{ style.height_rem|unlocalize }}"{% endif %}
+             style="width: {{ style.width_rem|unlocalize }}rem; max-width: 100%;{% if style.height_rem %} height: {{ style.height_rem|unlocalize }}rem; overflow: hidden;{% endif %}">
+            {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+            {% include "info_articles/partials/category_card.html" with category=chosen.specific %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    {% elif sub.block_type == "union_card" %}
+        {% with chosen=sub.value.union style=block_styles|lookup:sub.id %}
+        {% if chosen %}
+        <div class="body-union-card{% if can_edit_style %} editable-block{% endif %}"
+             {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="union_card"
+             data-width-rem="{{ style.width_rem|unlocalize }}" data-height-rem="{{ style.height_rem|unlocalize }}"{% endif %}
+             style="width: {{ style.width_rem|unlocalize }}rem; max-width: 100%;{% if style.height_rem %} height: {{ style.height_rem|unlocalize }}rem; overflow: hidden;{% endif %}">
+            {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+            {% include "info_articles/partials/union_card.html" with union=chosen.specific %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    {% elif sub.block_type == "tool_card" %}
+        {% with chosen=sub.value.tool style=block_styles|lookup:sub.id %}
+        {% if chosen %}
+        <div class="body-tool-card{% if can_edit_style %} editable-block{% endif %}"
+             {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="tool_card"
+             data-width-rem="{{ style.width_rem|unlocalize }}" data-height-rem="{{ style.height_rem|unlocalize }}"{% endif %}
+             style="width: {{ style.width_rem|unlocalize }}rem; max-width: 100%;{% if style.height_rem %} height: {{ style.height_rem|unlocalize }}rem; overflow: hidden;{% endif %}">
+            {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+            {% include "info_articles/partials/tool_card.html" with tool=chosen.specific %}
         </div>
         {% endif %}
         {% endwith %}

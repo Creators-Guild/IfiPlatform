@@ -15,6 +15,17 @@
   display: flex;
   flex-direction: column;
   flex: 0 1 18rem;
+  /* a block-level element's own width already fills its parent by
+  default, but height doesn't -- height:100% only takes effect once its
+  parent (the wrapping .body-tool-card div in article_body_blocks.html)
+  actually has an explicit height of its own (see "Height" in the block-
+  style panel); percentage height against an auto-height parent just
+  resolves back to auto, so this is a no-op until then. box-sizing so
+  100% includes this element's own border (overflow:hidden below already
+  clips content taller than an explicit height, for the unrelated
+  ::before gradient bar reason noted above). */
+  height: 100%;
+  box-sizing: border-box;
   overflow: hidden;
   background-color: var(--color-bg);
   border: 2px solid var(--color-border);
@@ -73,3 +84,10 @@
   font-weight: bold;
   color: var(--color-secondary);
 }
+
+/* a tool_card block's own width is a free-form rem number (editor picks
+it via width_rem), set via inline style in article_body_blocks.html/
+article_column_content.html -- .tool-card's own "flex: 0 1 18rem" only
+means anything as a flex *item* (inside .tool-grid), so standalone it
+needs its own explicit width instead, same pattern as articlecard.css's
+own .body-article-card. */
