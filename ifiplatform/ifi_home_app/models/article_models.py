@@ -3,11 +3,13 @@
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.conf import settings
+from django.http import Http404
 from django.utils import timezone
 from wagtail.models import Locale, Page
 from wagtail.fields import StreamField, RichTextField
 from wagtail.admin.panels import FieldPanel
 from wagtail.images.blocks import ImageChooserBlock
+from wagtail.url_routing import RouteResult
 from wagtail import blocks
 
 # !Wagtail has no views and don't need any!
@@ -662,6 +664,28 @@ def _split_categories_by_season(categories):
     return main, seasonal
 
 
+def _articles_including_drafts_for_editor(queryset, listing_page, user):
+    """`queryset` (an ArticlePage queryset, not yet .live()-filtered) with
+    draft articles included too if `user` can edit `listing_page` (the
+    category/index page the listing lives on) -- otherwise there'd be no
+    way for an editor to even discover/navigate to a draft article's URL
+    at all (see ArticlePage.route(), which already lets an editor view one
+    directly once they have the URL). article_card.html shows a "Draft"
+    badge on anything this includes -- safe to do unconditionally there
+    since a non-editor visitor never receives a draft article to render a
+    badge for in the first place, this is the only gate.
+
+    Permission is checked once against the listing page itself rather
+    than per-article: GroupPagePermission grants are inherited down the
+    tree (see PagePermissionTester.__init__'s own path-prefix matching),
+    so anyone who can edit this listing page can edit every article under
+    it too -- a safe lower bound, not a narrower check than doing it
+    per-article would give."""
+    if listing_page.permissions_for_user(user).can_edit():
+        return queryset
+    return queryset.live()
+
+
 def get_section_index(section):
     """The site's live ArticleIndexPage for `section` ('info_articles' or 'news'),
     in the active locale."""
@@ -918,6 +942,23 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         """The CategoryPage this article lives under."""
         return self.get_parent().specific
 
+    def route(self, request, path_components):
+        """Same as Page.route(), except a draft (not-yet-published) article
+        is still reachable at its normal front-end URL for anyone with edit
+        rights on it -- instead of the plain 404 Page.route() raises for
+        everyone. subpage_types is empty (articles have no children), so
+        path_components is only ever non-empty on its way *through* this
+        page towards some other page, never a request for this page itself
+        -- meaning the not-live branch below is the only case that needs
+        overriding. Uses style_target (not self) for the permission check,
+        same reasoning as can_edit_style in get_context() below: an alias
+        page's own permissions aren't meaningful, only its source's are."""
+        if not path_components and not self.live:
+            if self.style_target.permissions_for_user(request.user).can_edit():
+                return RouteResult(self)
+            raise Http404
+        return super().route(request, path_components)
+
     @property
     def style_target(self):
         """The ArticlePage that quick-style edits should actually be saved
@@ -927,6 +968,33 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         edits have to go to the source instead, which Wagtail then
         propagates back to this alias automatically on publish."""
         return self.alias_of.specific if self.alias_of_id else self
+
+    # the nb tree is the OG/source content that every other locale mirrors
+    # and translates (wagtail_localize) -- see publish_target below.
+    SOURCE_LANGUAGE_CODE = "nb"
+
+    @property
+    def publish_target(self):
+        """The nb-locale copy of this article -- publish/unpublish (see
+        article_views.publish_page/unpublish_page) always acts on this one
+        regardless of which locale you're actually viewing, since nb is
+        the OG tree every other locale mirrors/translates from; the
+        viewed locale's own live-state is then synced to match afterwards
+        (see _sync_translation_live_state() in article_views.py). Resolves
+        aliases first via style_target, same reasoning as everywhere else
+        that uses it -- an alias can't take its own actions at all.
+        Falls back to style_target itself if there's no nb locale, or no
+        nb translation of this specific article (shouldn't normally
+        happen, since nb is where articles are meant to be created)."""
+        target = self.style_target
+        if target.locale.language_code == self.SOURCE_LANGUAGE_CODE:
+            return target
+        nb_locale = Locale.objects.filter(
+            language_code=self.SOURCE_LANGUAGE_CODE
+        ).first()
+        if nb_locale is None:
+            return target
+        return target.get_translation_or_none(nb_locale) or target
 
     @property
     def toc_entries(self):
@@ -948,9 +1016,30 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         alignment/padding/font-size, StreamField value merged with any
         ArticleBlockStyle override -- see _effective_block_styles()), and
         block_style_defaults (see BLOCK_STYLE_DEFAULTS -- powers the "Reset
-        to default" button in that same panel)."""
+        to default" button in that same panel). Also page_is_live/page_has_
+        unpublished_changes (*this* page's own published-state -- i.e.
+        whichever locale you're actually looking at -- shown as a status
+        badge in the global style panel; see route() above for why a
+        not-live page is even reachable here at all) and can_publish_page/
+        can_unpublish_page. Those two check permission on publish_target
+        (the nb copy, not necessarily the page you're looking at -- see
+        that property's own docstring) rather than style_target, since
+        that's the page whose state (and, via sync, the en translation's)
+        actually changes -- an editor without nb-tree permissions
+        shouldn't be able to trigger that just because they can edit the
+        en copy."""
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.style_target.permissions_for_user(request.user).can_edit()
+        context["page_is_live"] = self.live
+        context["page_has_unpublished_changes"] = self.has_unpublished_changes
+        # Django's {% if %} can't parse parenthesized expressions, so the
+        # "is there actually anything to publish" check the template needs
+        # (not live, or live but with a newer unpublished draft on top) is
+        # computed here instead of inline in article_quick_style_panel.html.
+        context["page_has_pending_publish"] = (not self.live) or self.has_unpublished_changes
+        publish_permissions = self.publish_target.permissions_for_user(request.user)
+        context["can_publish_page"] = publish_permissions.can_publish()
+        context["can_unpublish_page"] = publish_permissions.can_unpublish()
         overrides_by_block_id = {
             style.block_id: style for style in self.style_target.block_styles.all()
         }
@@ -1184,12 +1273,10 @@ class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-a
             .live()
             .filter(locale=Locale.get_active())
         )
-        context["articles"] = (
-            ArticlePage.objects.child_of(self)
-            .live()
-            .filter(locale=Locale.get_active())
-            .order_by("-published_date")
-        )
+        articles = ArticlePage.objects.child_of(self).filter(locale=Locale.get_active())
+        context["articles"] = _articles_including_drafts_for_editor(
+            articles, self, request.user
+        ).order_by("-published_date")
         context["tools"] = (
             ToolPage.objects.child_of(self)
             .live()
@@ -1256,12 +1343,12 @@ class ArticleIndexPage(TranslationWarningMixin, Page):  # pylint: disable=too-ma
             .live()
             .filter(locale=Locale.get_active())
         )
-        context["suggested_articles"] = (
-            ArticlePage.objects.descendant_of(self)
-            .live()
-            .filter(locale=Locale.get_active())
-            .order_by("-published_date")[:4]
+        suggested_articles = ArticlePage.objects.descendant_of(self).filter(
+            locale=Locale.get_active()
         )
+        context["suggested_articles"] = _articles_including_drafts_for_editor(
+            suggested_articles, self, request.user
+        ).order_by("-published_date")[:4]
         context["tools"] = (
             ToolPage.objects.child_of(self)
             .live()

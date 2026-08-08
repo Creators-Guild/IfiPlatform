@@ -34,6 +34,16 @@ ifi_api_urlpatterns = [
         article_views.save_toc_icon_style,
         name="article_toc_icon_style",
     ),
+    path(
+        "api/articles/<int:page_id>/publish/",
+        article_views.publish_page,
+        name="article_publish",
+    ),
+    path(
+        "api/articles/<int:page_id>/unpublish/",
+        article_views.unpublish_page,
+        name="article_unpublish",
+    ),
 ]
 
 ifi_article_urlpatterns = [

@@ -39,6 +39,18 @@ leaving a visible strip of the site's default background there instead.
 
 {% block maincontent %}
     {% include "info_articles/partials/article_breadcrumbs.html" %}
+    {% comment %}
+    Big and impossible to miss, unlike the small badge in the global style
+    panel (article_quick_style_panel.html) -- that one's easy to overlook
+    if the panel is minimized/scrolled past. Only page_is_live gates this
+    (not can_edit_style too) since the two are already equivalent here: a
+    draft is only ever reachable at all by someone who can edit it (see
+    ArticlePage.route()) -- anyone else gets a 404 long before this
+    template renders.
+    {% endcomment %}
+    {% if not page_is_live %}
+        <div class="article-draft-banner">{% trans "DRAFT" %} &mdash; {% trans "not visible to the public" %}</div>
+    {% endif %}
     {% if can_edit_style %}
         {% include "info_articles/partials/article_quick_style_panel.html" %}
         {% include "info_articles/partials/article_block_style_mini_panel.html" %}

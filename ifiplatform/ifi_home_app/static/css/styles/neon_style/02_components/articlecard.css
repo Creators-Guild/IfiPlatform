@@ -48,6 +48,21 @@
   white-space: nowrap;
 }
 
+/* editors only ever see this (see article_card.html's own comment) --
+same red used for the "Draft" badge in the global style panel
+(quick-style-status-badge--draft in article_quick_style.css), so a draft
+reads as the same thing wherever it shows up. */
+.articlecard-draft-badge {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: var(--color-on-accent);
+  background: var(--color-error);
+}
+
 .articlecard-meta {
   display: flex;
   flex-wrap: wrap;
@@ -116,6 +131,16 @@ both. */
 
 .articlecard--list .articlecard-intro {
   display: none;
+}
+
+/* the draft badge sits before h3 in the markup, which in the plain card
+layout is fine (block flow, stacks above the title) -- but .articlecard--
+list is a flex row, so left as-is it'd become its own stretched flex item
+instead. Pin it to a small leading chip in front of the title instead. */
+.articlecard--list .articlecard-draft-badge {
+  order: -1;
+  flex: 0 0 auto;
+  margin: 0;
 }
 
 /* editor-picked fixed_ratio=False (article_body_blocks.html's own "Lock
