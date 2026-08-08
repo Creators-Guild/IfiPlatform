@@ -3,11 +3,13 @@
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.conf import settings
+from django.http import Http404
 from django.utils import timezone
 from wagtail.models import Locale, Page
 from wagtail.fields import StreamField, RichTextField
 from wagtail.admin.panels import FieldPanel
 from wagtail.images.blocks import ImageChooserBlock
+from wagtail.url_routing import RouteResult
 from wagtail import blocks
 
 # !Wagtail has no views and don't need any!
@@ -918,6 +920,23 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         """The CategoryPage this article lives under."""
         return self.get_parent().specific
 
+    def route(self, request, path_components):
+        """Same as Page.route(), except a draft (not-yet-published) article
+        is still reachable at its normal front-end URL for anyone with edit
+        rights on it -- instead of the plain 404 Page.route() raises for
+        everyone. subpage_types is empty (articles have no children), so
+        path_components is only ever non-empty on its way *through* this
+        page towards some other page, never a request for this page itself
+        -- meaning the not-live branch below is the only case that needs
+        overriding. Uses style_target (not self) for the permission check,
+        same reasoning as can_edit_style in get_context() below: an alias
+        page's own permissions aren't meaningful, only its source's are."""
+        if not path_components and not self.live:
+            if self.style_target.permissions_for_user(request.user).can_edit():
+                return RouteResult(self)
+            raise Http404
+        return super().route(request, path_components)
+
     @property
     def style_target(self):
         """The ArticlePage that quick-style edits should actually be saved
@@ -948,9 +967,23 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         alignment/padding/font-size, StreamField value merged with any
         ArticleBlockStyle override -- see _effective_block_styles()), and
         block_style_defaults (see BLOCK_STYLE_DEFAULTS -- powers the "Reset
-        to default" button in that same panel)."""
+        to default" button in that same panel). Also page_is_live/page_has_
+        unpublished_changes (this exact page's own published-state, shown
+        as a status badge in the global style panel -- see route() above
+        for why a not-live page is even reachable here at all) and
+        can_publish_page (stricter than can_edit_style -- Wagtail keeps
+        edit and publish as separate permissions, see save_publish in
+        article_views.py)."""
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.style_target.permissions_for_user(request.user).can_edit()
+        context["page_is_live"] = self.live
+        context["page_has_unpublished_changes"] = self.has_unpublished_changes
+        # Django's {% if %} can't parse parenthesized expressions, so the
+        # "is there actually anything to publish" check the template needs
+        # (not live, or live but with a newer unpublished draft on top) is
+        # computed here instead of inline in article_quick_style_panel.html.
+        context["page_has_pending_publish"] = (not self.live) or self.has_unpublished_changes
+        context["can_publish_page"] = self.style_target.permissions_for_user(request.user).can_publish()
         overrides_by_block_id = {
             style.block_id: style for style in self.style_target.block_styles.all()
         }

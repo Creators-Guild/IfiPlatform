@@ -324,3 +324,27 @@ def save_toc_icon_style(request, page_id):
     revision.publish(user=request.user)
 
     return JsonResponse({"ok": True})
+
+
+@require_POST
+def publish_page(request, page_id):
+    """Publish the latest draft revision of one ArticlePage -- lets an
+    editor push a page live (or push pending draft edits live) straight
+    from its own front-end URL/global style panel, instead of going
+    through the Wagtail admin. Requires can_publish specifically, stricter
+    than the can_edit_style/can_edit every other endpoint in this file
+    checks -- Wagtail keeps edit and publish as separate permissions (see
+    ArticlePage.get_context()'s can_publish_page, which gates whether the
+    Publish button even renders)."""
+    page = get_object_or_404(ArticlePage, pk=page_id).style_target
+
+    if not page.permissions_for_user(request.user).can_publish():
+        return JsonResponse({"error": "You don't have permission to publish this page."}, status=403)
+
+    revision = page.get_latest_revision()
+    if revision is None:
+        return JsonResponse({"error": "This page has no draft to publish."}, status=400)
+
+    revision.publish(user=request.user)
+
+    return JsonResponse({"ok": True})

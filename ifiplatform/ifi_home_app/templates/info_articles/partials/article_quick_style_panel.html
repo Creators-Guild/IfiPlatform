@@ -15,6 +15,7 @@ so this is UX, not the security boundary.
 {% endcomment %}
 <form class="quick-style-panel" id="quick-style-panel"
       data-quick-style-url="{% url 'article_quick_style' page.id %}"
+      data-publish-url="{% url 'article_publish' page.id %}"
       data-default-padding="0" data-default-alignment="left" data-default-font-size="1"
       data-default-bg-color="bg-light">
     {% csrf_token %}
@@ -25,6 +26,24 @@ so this is UX, not the security boundary.
     </div>
 
     <div class="quick-style-panel-body" id="quick-style-panel-body">
+        {% comment %}
+        This page's own published state -- not a style field, so it's not
+        part of the dirty-tracking/save-bar flow the fields below use.
+        Publish button only renders at all if can_publish_page (stricter
+        than can_edit_style -- see ArticlePage.get_context()), and only
+        shows up when there's actually something to publish.
+        {% endcomment %}
+        <div class="quick-style-field quick-style-status-row">
+            <span class="quick-style-status-badge{% if not page_is_live %} quick-style-status-badge--draft{% elif page_has_unpublished_changes %} quick-style-status-badge--pending{% else %} quick-style-status-badge--live{% endif %}">
+                {% if not page_is_live %}{% trans "Draft" %}{% elif page_has_unpublished_changes %}{% trans "Published (changes pending)" %}{% else %}{% trans "Published" %}{% endif %}
+            </span>
+            {% if can_publish_page and page_has_pending_publish %}
+                <button type="button" id="quick-style-publish-button" class="quick-style-publish-button">
+                    {% trans "Publish" %}
+                </button>
+            {% endif %}
+        </div>
+
         <label class="quick-style-field">
             <span>{% trans "Side padding" %} (<span id="quick-style-padding-value">{{ page.content_side_padding|unlocalize }}</span>rem)</span>
             <input type="range" id="quick-style-padding" min="0" max="20" step="0.25" value="{{ page.content_side_padding|unlocalize }}">

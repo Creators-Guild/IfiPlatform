@@ -177,6 +177,59 @@ regardless), so the field would stay visible. */
   color: var(--color-error);
 }
 
+/* this page's own published state, plus a Publish button when there's
+something to publish -- see ArticlePage.get_context()'s page_is_live/
+page_has_unpublished_changes/can_publish_page and article_views.
+publish_page. Not a style field, so it doesn't use .quick-style-field's
+column layout. */
+.quick-style-status-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.quick-style-status-badge {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--color-on-accent);
+  background: var(--color-text-muted);
+}
+
+.quick-style-status-badge--draft {
+  background: var(--color-error);
+}
+
+.quick-style-status-badge--pending {
+  background: var(--color-cta);
+}
+
+.quick-style-status-badge--live {
+  background: var(--color-accent);
+}
+
+.quick-style-publish-button {
+  padding: 0.3rem 0.8rem;
+  border: 2px solid var(--color-accent);
+  border-radius: 6px;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.quick-style-publish-button:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.quick-style-publish-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 @media (max-width: 480px) {
   .quick-style-panel {
     left: 0.75rem;

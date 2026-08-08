@@ -22,7 +22,44 @@ document.addEventListener("DOMContentLoaded", () => {
   const bgPickerInput = document.getElementById("quick-style-bg-picker");
   const statusEl = document.getElementById("quick-style-status");
   const minimizeButton = document.getElementById("quick-style-minimize");
+  const publishButton = document.getElementById("quick-style-publish-button");
   const MINIMIZED_KEY = "ifiQuickStyleMinimized";
+
+  // Not a style field -- publishes immediately on click rather than going
+  // through the dirty-tracking/save-bar flow the rest of this panel uses,
+  // since there's nothing to "preview" here (it either publishes the
+  // latest draft or it doesn't). Reloads on success so the badge, save-bar
+  // dirty state, and any newly-published content all reflect reality
+  // rather than trying to patch each of those by hand.
+  if (publishButton) {
+    publishButton.addEventListener("click", () => {
+      if (!window.confirm("Publish the latest changes to this page?")) {
+        return;
+      }
+      const csrfToken = panel.querySelector("[name=csrfmiddlewaretoken]").value;
+      publishButton.disabled = true;
+      publishButton.textContent = "Publishing...";
+      fetch(panel.dataset.publishUrl, {
+        method: "POST",
+        headers: { "X-CSRFToken": csrfToken },
+      })
+        .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+          if (ok) {
+            window.location.reload();
+            return;
+          }
+          window.alert(data.error || "Failed to publish.");
+          publishButton.disabled = false;
+          publishButton.textContent = "Publish";
+        })
+        .catch(() => {
+          window.alert("Failed to publish (network error).");
+          publishButton.disabled = false;
+          publishButton.textContent = "Publish";
+        });
+    });
+  }
 
   const applyMinimized = (isMinimized) => {
     panel.classList.toggle("is-minimized", isMinimized);
