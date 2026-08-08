@@ -33,7 +33,7 @@ DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
 
-
+SITE_ID = 1
 
 # Application definition
 
@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "django.contrib.sitemaps",
     "ifi_home_app.apps.IfiHomeAppConfig",
     "study_app.apps.StudyAppConfig",
     "account_app.apps.AccountAppConfig",
@@ -51,6 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
+    "wagtail.contrib.sitemaps",
     "wagtail.embeds",
     "wagtail.sites",
     "wagtail.users",
