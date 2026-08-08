@@ -1612,6 +1612,10 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
 
     purpose = RichTextField(blank=True, help_text="What the union is about.")
     activities = RichTextField(blank=True, help_text="Activities the union offers.")
+    vedtekter = RichTextField(
+        blank=True,
+        help_text="Optional -- the union's bylaws/statutes, shown on its own page.",
+    )
 
     TYPE_CHOICES = [
         ("general", "Open to everyone"),
@@ -1698,6 +1702,7 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         FieldPanel("union_type"),
         FieldPanel("purpose"),
         FieldPanel("activities"),
+        FieldPanel("vedtekter"),
         FieldPanel("website_url"),
         FieldPanel("social_links"),
         FieldPanel("member_count_sitting"),

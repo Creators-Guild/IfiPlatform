@@ -7,6 +7,17 @@
     <title>
         {% block title %} Ifi Platform {% endblock %}
     </title>
+    {% comment %}
+    ?v=6 on every favicon URL below -- browsers cache favicons unusually
+    aggressively (often ignoring a normal reload/hard-refresh entirely,
+    only refetching once the URL itself changes), so a query-string bump
+    is what actually forces a stale cached icon to update. Bump this
+    number again next time the favicon image itself changes.
+    {% endcomment %}
+    <link rel="icon" href="{% static 'images/favicon.svg' %}?v=6" type="image/svg+xml">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}?v=6" sizes="any">
+    <link rel="icon" href="{% static 'images/favicon-32.png' %}?v=6" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="{% static 'images/favicon-180.png' %}?v=6">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/base.css' %}">
     {% block extra_head %}<!-- addtional css here -->{% endblock extra_head %}
 </head>
