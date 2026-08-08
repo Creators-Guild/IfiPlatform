@@ -6,17 +6,23 @@ id here would be a much bigger diff for no real benefit): lets someone
 with edit rights on this exact ArticlePage (see can_edit_style in
 article_models.py's get_context()) publish/unpublish it (see the Publish
 section below) and tweak content_side_padding/content_alignment/
-content_font_size/content_bg_enabled/content_bg_color/content_bg_custom_color
-directly on the live page (see the Style section below), with an instant
-preview for the latter (article_quick_style.js writes the CSS custom
-properties/background on .article-page as you interact). Style has no
-Save button of its own -- saving happens via the global floating save bar
-(article_save_bar.html), which this panel's save() registers itself with
-(registerSaveHandler), publishing for real via article_views.save_quick_style
--- Publish/Unpublish act immediately instead, see their own comment below.
-Anyone without edit rights on this page never gets this block rendered at
-all -- the save/publish/unpublish endpoints each enforce the same
-permission checks independently, so this is UX, not the security boundary.
+content_font_size_multiplier/content_bg_enabled/content_bg_color/
+content_bg_custom_color directly on the live page (see the Style section
+below), with an instant preview for the latter (article_quick_style.js
+writes the CSS custom properties/background on .article-page, plus
+rescales every font-size-bearing block live, as you interact). Style has
+no Save button of its own -- saving happens via the global floating save
+bar (article_save_bar.html), which this panel's save() registers itself
+with (registerSaveHandler), publishing for real via
+article_views.save_quick_style -- Publish/Unpublish act immediately
+instead, see their own comment below. Alignment is the one field here
+that's destructive to save: it overwrites every alignment-capable
+block's own alignment throughout the article (see save_quick_style's
+apply_alignment_to_blocks), gated by a confirm dialog in
+article_quick_style.js's save(). Anyone without edit rights on this page
+never gets this block rendered at all -- the save/publish/unpublish
+endpoints each enforce the same permission checks independently, so this
+is UX, not the security boundary.
 {% endcomment %}
 <form class="quick-style-panel" id="quick-style-panel"
       data-quick-style-url="{% url 'article_quick_style' page.id %}"
@@ -99,11 +105,21 @@ permission checks independently, so this is UX, not the security boundary.
                     <button type="button" data-align="center" class="{% if page.style.content_alignment == 'center' %}active{% endif %}">{% trans "Center" %}</button>
                     <button type="button" data-align="right" class="{% if page.style.content_alignment == 'right' %}active{% endif %}">{% trans "Right" %}</button>
                 </div>
+                {% comment %}
+                Alignment is the one field here that doesn't just live-
+                preview -- it only overwrites every block's own alignment
+                once actually saved (see save_quick_style's apply_
+                alignment_to_blocks, and this panel's own save() in
+                article_quick_style.js, which warns right before that
+                POST goes out). This is a reminder that clicking a button
+                above alone changes nothing lasting yet -- Save is required.
+                {% endcomment %}
+                <p class="quick-style-field-hint">{% trans "Only applies to blocks once you Save (see the floating save bar)." %}</p>
             </div>
 
             <label class="quick-style-field">
-                <span>{% trans "Font size" %} (<span id="quick-style-font-size-value">{{ page.style.content_font_size|unlocalize }}</span>rem)</span>
-                <input type="range" id="quick-style-font-size" min="0.5" max="3" step="0.05" value="{{ page.style.content_font_size|unlocalize }}">
+                <span>{% trans "Font size multiplier" %} (&times;<span id="quick-style-font-size-value">{{ page.style.content_font_size_multiplier|unlocalize }}</span>)</span>
+                <input type="range" id="quick-style-font-size" min="0.5" max="2" step="0.05" value="{{ page.style.content_font_size_multiplier|unlocalize }}">
             </label>
 
             {% comment %}

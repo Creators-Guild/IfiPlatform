@@ -19,6 +19,7 @@ from ifi_home_app.models.article_models import (
     HEX_COLOR_VALIDATOR,
     ArticleBlockStyle,
     ArticlePage,
+    alignment_capable_block_ids,
 )
 
 # box styling (see BLOCK_STYLE_DEFAULTS["box"]/_effective_box_style() in
@@ -42,10 +43,20 @@ BOX_FIELDS = {
 # font_size is (or, for title/meta/intro, wherever their own box is).
 TEXT_COLOR_FIELDS = {"text_color", "text_custom_color"}
 
+# alignment-capable types only -- see ArticleBlockStyle.
+# exclude_from_global_alignment and save_quick_style's bulk-overwrite.
+EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD = {"exclude_from_global_alignment"}
+
 BLOCK_STYLE_FIELDS = {
-    "heading": {"side_padding", "alignment", "font_size"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
-    "paragraph": {"side_padding", "alignment", "font_size"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
-    "image": {"alignment", "width_rem", "side_padding"} | BOX_FIELDS,
+    "heading": {"side_padding", "alignment", "font_size"}
+    | BOX_FIELDS
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "paragraph": {"side_padding", "alignment", "font_size"}
+    | BOX_FIELDS
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "image": {"alignment", "width_rem", "side_padding"} | BOX_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
     # article/category/union/tool cards -- width/height, plus (article_card
     # only) list_style/fixed_ratio (see ArticleBlockStyle's own docstrings).
     "article_card": {"width_rem", "height_rem", "list_style", "fixed_ratio"},
@@ -60,8 +71,12 @@ BLOCK_STYLE_FIELDS = {
     # the title/caption text's own alignment/font-size/side-padding/color,
     # independent of each other and of the figcaption's own box above --
     # keyed by "<image-block-id>-cap-title"/"-cap-body".
-    "image_title": {"side_padding", "alignment", "font_size"} | TEXT_COLOR_FIELDS,
-    "image_caption_body": {"side_padding", "alignment", "font_size"} | TEXT_COLOR_FIELDS,
+    "image_title": {"side_padding", "alignment", "font_size"}
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "image_caption_body": {"side_padding", "alignment", "font_size"}
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
     "multi_column": {"side_padding", "gap", "column_weights"} | BOX_FIELDS,
     "column": {"side_padding"} | BOX_FIELDS,
     # a multi_column column's own title -- alignment/font-size/text-color
@@ -71,7 +86,7 @@ BLOCK_STYLE_FIELDS = {
     # save request alongside the column's own box fields), keyed by a
     # synthesized "<column-uuid>-title" id (see _effective_block_styles()
     # in article_models.py).
-    "column_title": {"alignment", "font_size"} | TEXT_COLOR_FIELDS,
+    "column_title": {"alignment", "font_size"} | TEXT_COLOR_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
     # title/meta/intro (the article-header group), keyed by fixed pseudo
     # ids ("article-title"/"article-meta"/"article-intro", see
     # ArticlePage.get_context()). Alignment/font-size for these three
@@ -92,13 +107,25 @@ BLOCK_STYLE_FIELDS = {
 
 @require_POST
 def save_quick_style(request, page_id):
-    """Save content_side_padding/content_alignment/content_font_size/
-    content_bg_enabled/content_bg_color/content_bg_custom_color -- a plain
-    upsert onto the page's shared ArticleStyle row (see ArticlePage.style),
-    same pattern as save_block_style. Not Wagtail revision/publish at all
-    any more (ArticleStyle isn't a Page field) -- live immediately, same
-    as it always was, just without the redundant revision this used to
-    create for what's really a styling tweak."""
+    """Save content_side_padding/content_alignment/
+    content_font_size_multiplier/content_bg_enabled/content_bg_color/
+    content_bg_custom_color -- a plain upsert onto the page's shared
+    ArticleStyle row (see ArticlePage.style), same pattern as
+    save_block_style. Not Wagtail revision/publish at all any more
+    (ArticleStyle isn't a Page field) -- live immediately, same as it
+    always was, just without the redundant revision this used to create
+    for what's really a styling tweak.
+
+    apply_alignment_to_blocks (optional, default False) is the one
+    destructive exception: when true (the JS only ever sends this after
+    the editor confirmed a warning dialog, see article_quick_style.js),
+    this ALSO overwrites the `alignment` field on every alignment-capable
+    ArticleBlockStyle row for this article (creating rows that don't exist
+    yet), except any block individually opted out via its own
+    exclude_from_global_alignment flag -- see alignment_capable_block_ids()
+    in article_models.py. content_font_size_multiplier, in contrast, never
+    touches ArticleBlockStyle at all -- it's applied purely at render time
+    (see _effective_heading_style's display_font_size)."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.permissions_for_user(request.user).can_edit():
@@ -108,15 +135,19 @@ def save_quick_style(request, page_id):
         data = json.loads(request.body)
         side_padding = float(data["content_side_padding"])
         alignment = data["content_alignment"]
-        font_size = float(data["content_font_size"])
+        font_size_multiplier = float(data["content_font_size_multiplier"])
         bg_enabled = bool(data["content_bg_enabled"])
         bg_color = data["content_bg_color"]
         bg_custom_color = data.get("content_bg_custom_color") or ""
+        apply_alignment_to_blocks = bool(data.get("apply_alignment_to_blocks"))
     except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
     if alignment not in dict(CONTENT_ALIGNMENT_CHOICES):
         return JsonResponse({"error": "Invalid alignment."}, status=400)
+
+    if not 0.5 <= font_size_multiplier <= 2:
+        return JsonResponse({"error": "Invalid content_font_size_multiplier."}, status=400)
 
     if bg_color not in dict(COLOR_CHOICES):
         return JsonResponse({"error": "Invalid content_bg_color."}, status=400)
@@ -130,11 +161,30 @@ def save_quick_style(request, page_id):
     style = page.style
     style.content_side_padding = side_padding
     style.content_alignment = alignment
-    style.content_font_size = font_size
+    style.content_font_size_multiplier = font_size_multiplier
     style.content_bg_enabled = bg_enabled
     style.content_bg_color = bg_color
     style.content_bg_custom_color = bg_custom_color
     style.save()
+
+    if apply_alignment_to_blocks:
+        excluded_ids = set(
+            ArticleBlockStyle.objects.filter(
+                translation_key=page.translation_key, exclude_from_global_alignment=True
+            ).values_list("block_id", flat=True)
+        )
+        block_ids = [
+            block_id for block_id in alignment_capable_block_ids(page.body) if block_id not in excluded_ids
+        ]
+        ArticleBlockStyle.objects.bulk_create(
+            [
+                ArticleBlockStyle(translation_key=page.translation_key, block_id=block_id, alignment=alignment)
+                for block_id in block_ids
+            ],
+            update_conflicts=True,
+            unique_fields=["translation_key", "block_id"],
+            update_fields=["alignment"],
+        )
 
     return JsonResponse({"ok": True})
 
@@ -200,6 +250,8 @@ def save_block_style(request, page_id):
         defaults["list_style"] = bool(data["list_style"])
     if "fixed_ratio" in allowed_fields and data.get("fixed_ratio") is not None:
         defaults["fixed_ratio"] = bool(data["fixed_ratio"])
+    if "exclude_from_global_alignment" in allowed_fields and data.get("exclude_from_global_alignment") is not None:
+        defaults["exclude_from_global_alignment"] = bool(data["exclude_from_global_alignment"])
 
     for color_field, custom_field in (
         ("box_border_color", "box_border_custom_color"),

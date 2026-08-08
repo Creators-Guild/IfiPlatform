@@ -4,6 +4,17 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // the global font-size multiplier (see article_quick_style.js), read
+  // live off .article-page's own data attribute so per-block font-size
+  // edits in this panel stay visually consistent with whatever multiplier
+  // is currently active (including an unsaved one still being dragged in
+  // the Global editor panel) -- never written here, only read.
+  const articlePageEl = document.querySelector(".article-page");
+  const currentFontSizeMultiplier = () => {
+    const value = parseFloat(articlePageEl && articlePageEl.dataset.fontSizeMultiplier);
+    return Number.isNaN(value) ? 1 : value;
+  };
+
   // {block_type: {field: default_value}} -- see BLOCK_STYLE_DEFAULTS in
   // article_models.py, rendered via json_script in
   // article_block_style_mini_panel.html. Powers the "Reset to default" button.
@@ -40,9 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // center/bottom vertical layout, a different axis entirely), not left/
   // center/right text alignment, so it's deliberately left out here.
   const FIELDS_BY_TYPE = {
-    heading: ["side_padding", "alignment", "font_size", "text_color"],
-    paragraph: ["side_padding", "alignment", "font_size", "text_color"],
-    image: ["alignment", "width_rem", "side_padding"],
+    heading: ["side_padding", "alignment", "exclude_from_global_alignment", "font_size", "text_color"],
+    paragraph: ["side_padding", "alignment", "exclude_from_global_alignment", "font_size", "text_color"],
+    image: ["alignment", "exclude_from_global_alignment", "width_rem", "side_padding"],
     // article/category/union/tool cards -- width/height (a fixed-design
     // card, not built from editable text/box parts like everything else
     // here; height 0 = auto), plus, for article_card only, list_style
@@ -283,6 +294,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const heroBoxRadiusInput = document.getElementById("block-style-hero-box-radius");
   const heroBoxRadiusValue = document.getElementById("block-style-hero-box-radius-value");
   const alignmentGroup = document.getElementById("block-style-alignment");
+  // opts this block (or, for the merged column panel, the column's own
+  // title -- see FIELDS_BY_TYPE.column) out of the Global editor's
+  // Alignment "overwrite all blocks" action -- see ArticleBlockStyle.
+  // exclude_from_global_alignment, save_quick_style's apply_alignment_to_
+  // blocks, and article_quick_style.js's save(). CAPTION_TEXT_GROUPS below
+  // each have their own separate one (excludeInput), since image_title/
+  // image_caption_body are independently alignment-capable blocks of
+  // their own, not the shared "Style" section this one belongs to.
+  const excludeGlobalAlignmentInput = document.getElementById("block-style-exclude-global-alignment");
   const titleAlignmentGroup = document.getElementById("block-style-title-alignment");
   const introAlignmentGroup = document.getElementById("block-style-intro-alignment");
   const metaAlignmentGroup = document.getElementById("block-style-meta-alignment");
@@ -348,6 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
       defaultsKey: "image_title",
       spanSelector: ":scope > .image-title",
       alignmentGroup: document.getElementById("block-style-caption-title-alignment"),
+      excludeInput: document.getElementById("block-style-caption-title-exclude-global-alignment"),
       fontSizeInput: document.getElementById("block-style-caption-title-font-size"),
       fontSizeValue: document.getElementById("block-style-caption-title-font-size-value"),
       paddingInput: document.getElementById("block-style-caption-title-padding"),
@@ -363,6 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
       defaultsKey: "image_caption_body",
       spanSelector: ":scope > .image-caption",
       alignmentGroup: document.getElementById("block-style-caption-body-alignment"),
+      excludeInput: document.getElementById("block-style-caption-body-exclude-global-alignment"),
       fontSizeInput: document.getElementById("block-style-caption-body-font-size"),
       fontSizeValue: document.getElementById("block-style-caption-body-font-size-value"),
       paddingInput: document.getElementById("block-style-caption-body-padding"),
@@ -506,6 +528,9 @@ document.addEventListener("DOMContentLoaded", () => {
         block_type: blockType,
         side_padding: visibleFields.includes("side_padding") ? paddingInput.value : null,
         alignment: visibleFields.includes("alignment") ? alignmentGroup.dataset.value : null,
+        exclude_from_global_alignment: visibleFields.includes("exclude_from_global_alignment")
+          ? excludeGlobalAlignmentInput.checked
+          : null,
         font_size: visibleFields.includes("font_size") ? fontSizeInput.value : null,
         width_rem: visibleFields.includes("width_rem") ? widthInput.value : null,
         height_rem: visibleFields.includes("height_rem") ? heightInput.value : null,
@@ -556,6 +581,7 @@ document.addEventListener("DOMContentLoaded", () => {
           block_id: titleId,
           block_type: "column_title",
           alignment: alignmentGroup.dataset.value,
+          exclude_from_global_alignment: excludeGlobalAlignmentInput.checked,
           font_size: fontSizeInput.value,
           text_color: textColorGroup.dataset.value,
           text_custom_color: textCustomColorInput.value,
@@ -579,6 +605,7 @@ document.addEventListener("DOMContentLoaded", () => {
             block_id: textId,
             block_type: group.blockType,
             alignment: group.alignmentGroup.dataset.value,
+            exclude_from_global_alignment: group.excludeInput.checked,
             font_size: group.fontSizeInput.value,
             side_padding: group.paddingInput.value,
             text_color: group.colorGroup.dataset.value,
@@ -657,6 +684,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // title, not the column) need to shift accordingly.
   const TITLE_DATASET_KEYS = {
     alignment: "titleAlignment",
+    excludeFromGlobalAlignment: "titleExcludeFromGlobalAlignment",
     fontSize: "titleFontSize",
     textColor: "titleTextColor",
     textCustomColor: "titleTextCustomColor",
@@ -1072,13 +1100,23 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    group.excludeInput.addEventListener("change", () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      currentBlockEl.dataset[`${group.datasetPrefix}ExcludeFromGlobalAlignment`] = group.excludeInput.checked
+        ? "true"
+        : "false";
+      recordPendingEdit();
+    });
+
     group.fontSizeInput.addEventListener("input", () => {
       if (!currentBlockEl) {
         return;
       }
       const target = captionTextTargetEl(group);
       if (target) {
-        target.style.fontSize = `${group.fontSizeInput.value}rem`;
+        target.style.fontSize = `${group.fontSizeInput.value * currentFontSizeMultiplier()}rem`;
       }
       currentBlockEl.dataset[`${group.datasetPrefix}FontSize`] = group.fontSizeInput.value;
       group.fontSizeValue.textContent = group.fontSizeInput.value;
@@ -1357,7 +1395,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
     if (blockType === "column" && blockEl.dataset.titleBlockId) {
-      visibleFields = visibleFields.concat(["alignment", "font_size", "text_color"]);
+      visibleFields = visibleFields.concat(["alignment", "exclude_from_global_alignment", "font_size", "text_color"]);
     }
     if (blockType === "image_caption") {
       CAPTION_TEXT_GROUPS.forEach((group) => {
@@ -1365,6 +1403,7 @@ document.addEventListener("DOMContentLoaded", () => {
           visibleFields = visibleFields.concat([
             `${group.styleFieldPrefix}_label`,
             `${group.styleFieldPrefix}_alignment`,
+            `${group.styleFieldPrefix}_exclude_from_global_alignment`,
             `${group.styleFieldPrefix}_font_size`,
             `${group.styleFieldPrefix}_side_padding`,
             `${group.styleFieldPrefix}_text_color`,
@@ -1417,6 +1456,10 @@ document.addEventListener("DOMContentLoaded", () => {
       boxMarginValue.textContent = blockEl.dataset.boxMargin;
       updateBoxFieldVisibility();
     }
+    if (visibleFields.includes("exclude_from_global_alignment")) {
+      excludeGlobalAlignmentInput.checked =
+        blockEl.dataset[styleDatasetKey("excludeFromGlobalAlignment")] === "true";
+    }
     if (visibleFields.includes("font_size")) {
       const fontVal = blockEl.dataset[styleDatasetKey("fontSize")];
       fontSizeInput.value = fontVal;
@@ -1444,6 +1487,7 @@ document.addEventListener("DOMContentLoaded", () => {
         group.alignmentGroup.querySelectorAll("button").forEach((b) => {
           b.classList.toggle("active", b.dataset.align === alignVal);
         });
+        group.excludeInput.checked = blockEl.dataset[`${group.datasetPrefix}ExcludeFromGlobalAlignment`] === "true";
         const fontVal = blockEl.dataset[`${group.datasetPrefix}FontSize`];
         group.fontSizeInput.value = fontVal;
         group.fontSizeValue.textContent = fontVal;
@@ -1633,7 +1677,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const target = targetTypeInput.value === "column" ? columnTitleEl() : currentBlockEl;
     if (target) {
-      target.style.fontSize = `${fontSizeInput.value}rem`;
+      target.style.fontSize = `${fontSizeInput.value * currentFontSizeMultiplier()}rem`;
     }
     currentBlockEl.dataset[styleDatasetKey("fontSize")] = fontSizeInput.value;
     fontSizeValue.textContent = fontSizeInput.value;
@@ -1698,6 +1742,20 @@ document.addEventListener("DOMContentLoaded", () => {
       cardEl.classList.toggle("articlecard--unlocked-ratio", !fixedRatioInput.checked);
     }
     currentBlockEl.dataset.fixedRatio = fixedRatioInput.checked ? "true" : "false";
+    recordPendingEdit();
+  });
+
+  // heading/paragraph/image, and (via styleDatasetKey) a column's own
+  // title -- see ArticleBlockStyle.exclude_from_global_alignment. Purely a
+  // meta-flag, no live-preview visual to update, just the dataset marker
+  // openPanelFor reads back on reopen and recordPendingEdit sends on save.
+  excludeGlobalAlignmentInput.addEventListener("change", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset[styleDatasetKey("excludeFromGlobalAlignment")] = excludeGlobalAlignmentInput.checked
+      ? "true"
+      : "false";
     recordPendingEdit();
   });
 

@@ -148,6 +148,16 @@ regardless), so the field would stay visible. */
   color: var(--color-on-accent);
 }
 
+/* small reminder text under Alignment -- see its own comment in
+article_quick_style_panel.html. Same muted/small look as .quick-style-
+status, kept as its own class since that one's reserved for the live
+Saving/Saved/error text (id-targeted by JS), not a static hint. */
+.quick-style-field-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
 .quick-style-actions {
   display: flex;
   flex-wrap: wrap;

@@ -162,6 +162,18 @@ with (registerSaveHandler).
             </div>
         </div>
 
+        {% comment %}
+        Opts this one block out of the Global editor's Alignment "overwrite
+        all blocks" action (see ArticleBlockStyle.exclude_from_global_
+        alignment, save_quick_style's apply_alignment_to_blocks). Shares
+        the alignment field's own visibility gate above -- only relevant
+        wherever alignment itself is.
+        {% endcomment %}
+        <label class="block-style-field block-style-toggle" data-style-field="exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-exclude-global-alignment">
+            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
+        </label>
+
         <label class="block-style-field" data-style-field="font_size">
             {% comment %}
             Shared by heading/paragraph (where "Font size" describes the
@@ -240,6 +252,11 @@ with (registerSaveHandler).
             </div>
         </div>
 
+        <label class="block-style-field block-style-toggle" data-style-field="caption_title_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-caption-title-exclude-global-alignment">
+            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
+        </label>
+
         <label class="block-style-field" data-style-field="caption_title_font_size">
             <span>{% trans "Font size" %} (<span id="block-style-caption-title-font-size-value"></span>rem)</span>
             <input type="range" id="block-style-caption-title-font-size" min="0.5" max="3" step="0.05">
@@ -282,6 +299,11 @@ with (registerSaveHandler).
                 <button type="button" data-align="right">{% trans "Right" %}</button>
             </div>
         </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="caption_body_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-caption-body-exclude-global-alignment">
+            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
+        </label>
 
         <label class="block-style-field" data-style-field="caption_body_font_size">
             <span>{% trans "Font size" %} (<span id="block-style-caption-body-font-size-value"></span>rem)</span>

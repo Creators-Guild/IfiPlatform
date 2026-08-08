@@ -64,7 +64,7 @@ leaving a visible strip of the site's default background there instead.
     var(--color-) when there's no category to source it from; every
     var(--accent-color, ...) consumer already has its own fallback.
     {% endcomment %}
-    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="{% if page.category %}--accent-color: var(--color-{{ page.category.color }}); {% endif %}--content-side-padding: {{ page.style.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.style.content_alignment }}; --content-font-size: {{ page.style.content_font_size|unlocalize }}rem; --toc-icon-size: {{ page.style.toc_icon_size|unlocalize }}rem;">
+    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" data-font-size-multiplier="{{ page.style.content_font_size_multiplier|unlocalize }}" style="{% if page.category %}--accent-color: var(--color-{{ page.category.color }}); {% endif %}--content-side-padding: {{ page.style.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.style.content_alignment }}; --toc-icon-size: {{ page.style.toc_icon_size|unlocalize }}rem;">
         {% if can_edit_style %}
             {% include "info_articles/partials/article_editor_mode_toggle.html" %}
         {% endif %}

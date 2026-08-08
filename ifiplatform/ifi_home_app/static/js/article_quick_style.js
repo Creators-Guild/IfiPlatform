@@ -26,6 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const unpublishButton = document.getElementById("quick-style-unpublish-button");
   const MINIMIZED_KEY = "ifiQuickStyleMinimized";
 
+  // Alignment is destructive to save (see save() below) -- tracked
+  // separately from the rest of this panel's dirty state so save() only
+  // warns/bulk-overwrites when this specific field actually changed this
+  // session, not on every save of an unrelated field (padding/font-size/
+  // background). Starts at the server-rendered value, updated after each
+  // save that doesn't reload the page (see save()'s own comment).
+  let lastSavedAlignment = alignmentGroup.dataset.value;
+
   // Shared by the Publish/Unpublish buttons below -- neither is a style
   // field, so they act immediately on click rather than going through the
   // dirty-tracking/save-bar flow the rest of this panel uses (there's
@@ -128,8 +136,26 @@ document.addEventListener("DOMContentLoaded", () => {
     window.ifiUnsavedChanges.markDirty("quickStyle");
   });
 
+  // content_font_size_multiplier -- not a CSS length any more (unlike
+  // padding/alignment above), so there's no single CSS var to set. Instead,
+  // rescale every font-size-bearing block currently on the page directly:
+  // [data-font-size] holds each one's own RAW font size (set server-side in
+  // article_body_blocks.html/article_image_block.html, and kept in sync by
+  // article_block_style.js's own font-size listeners) -- multiplying that
+  // by the live slider value and writing straight to style.fontSize mirrors
+  // what the server does at render time (_effective_heading_style's
+  // display_font_size), without a page reload. data-font-size itself is
+  // never touched here, only the visible rendered size -- article_block_
+  // style.js's mini panel always needs the raw value when it reopens.
   fontSizeInput.addEventListener("input", () => {
-    articlePage.style.setProperty("--content-font-size", `${fontSizeInput.value}rem`);
+    const multiplier = parseFloat(fontSizeInput.value) || 1;
+    articlePage.dataset.fontSizeMultiplier = fontSizeInput.value;
+    document.querySelectorAll("[data-font-size]").forEach((el) => {
+      const raw = parseFloat(el.dataset.fontSize);
+      if (!Number.isNaN(raw)) {
+        el.style.fontSize = `${raw * multiplier}rem`;
+      }
+    });
     fontSizeValue.textContent = fontSizeInput.value;
     window.ifiUnsavedChanges.markDirty("quickStyle");
   });
@@ -291,6 +317,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // what actually went wrong even though this panel might not be visible
   // at the time.
   const save = () => {
+    // Alignment is the one destructive field here: saving a changed value
+    // overwrites every alignment-capable block's own alignment throughout
+    // the article (see save_quick_style's apply_alignment_to_blocks in
+    // article_views.py), except any block individually locked via its own
+    // exclude_from_global_alignment checkbox. Only warn/apply when it
+    // actually changed this session (comparing against lastSavedAlignment,
+    // not the block-level dirty flag, which also covers padding/font-size/
+    // background) -- cancelling reverts just the alignment control (replaying
+    // its own click handler) and aborts this whole save, same as every
+    // other field stays unsaved until Save is pressed again.
+    const alignmentChanged = alignmentGroup.dataset.value !== lastSavedAlignment;
+    if (alignmentChanged) {
+      const confirmed = window.confirm(
+        "Changing the global Alignment will overwrite the alignment of every block in this article that has its own alignment (headings, paragraphs, images, image captions, column titles) -- except any block you've individually locked. Continue?"
+      );
+      if (!confirmed) {
+        const revertButton = alignmentGroup.querySelector(`button[data-align="${lastSavedAlignment}"]`);
+        if (revertButton) {
+          revertButton.click();
+        }
+        return Promise.resolve({ ok: false, error: "Alignment change cancelled." });
+      }
+    }
+
     statusEl.textContent = "Saving...";
     statusEl.classList.remove("is-error");
 
@@ -305,10 +355,11 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({
         content_side_padding: paddingInput.value,
         content_alignment: alignmentGroup.dataset.value,
-        content_font_size: fontSizeInput.value,
+        content_font_size_multiplier: fontSizeInput.value,
         content_bg_enabled: bgEnabledInput.checked,
         content_bg_color: bgColorGroup.dataset.value,
         content_bg_custom_color: bgCustomColorInput.value,
+        apply_alignment_to_blocks: alignmentChanged,
       }),
     })
       .then((response) =>
@@ -318,6 +369,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (ok) {
           statusEl.textContent = "Saved";
           window.ifiUnsavedChanges.markClean("quickStyle");
+          if (alignmentChanged) {
+            // every block's alignment class/data-alignment currently on the
+            // page is now stale (overwritten server-side) -- reload rather
+            // than trying to replicate save_quick_style's bulk update in
+            // JS, same pattern runPublishAction already uses on success.
+            window.location.reload();
+            return { ok: true };
+          }
+          lastSavedAlignment = alignmentGroup.dataset.value;
           return { ok: true };
         }
         const error = data.error || "Failed to save global style.";

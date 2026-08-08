@@ -531,17 +531,24 @@ def _effective_box_style(override):
     }
 
 
-def _effective_heading_style(override, defaults):
+def _effective_heading_style(override, defaults, font_size_multiplier=1.0):
     """The effective font_size/side_padding/alignment/box for one heading-
     shaped piece of text: any ArticleBlockStyle override for it, falling
     back field-by-field to `defaults` (BLOCK_STYLE_DEFAULTS['heading'] for
     an actual heading block, but reused as-is for anything else that should
     offer "the same options as a heading" -- currently also a multi_column
-    column's own title, see _effective_block_styles() below)."""
+    column's own title, see _effective_block_styles() below). font_size is
+    this block's own raw value (what the per-block editor shows/edits, see
+    data-font-size in article_body_blocks.html etc.); display_font_size is
+    that raw value scaled by the article's global ArticleStyle.
+    content_font_size_multiplier (see ArticlePage.get_context()) -- what
+    templates actually render as the CSS font-size. Kept as two separate
+    keys so the multiplier never leaks into the raw value the mini panel
+    edits."""
+    raw_font_size = override.font_size if override and override.font_size is not None else defaults["font_size"]
     return {
-        "font_size": (
-            override.font_size if override and override.font_size is not None else defaults["font_size"]
-        ),
+        "font_size": raw_font_size,
+        "display_font_size": raw_font_size * font_size_multiplier,
         "side_padding": (
             override.side_padding
             if override and override.side_padding is not None
@@ -550,6 +557,10 @@ def _effective_heading_style(override, defaults):
         "alignment": (
             override.alignment if override and override.alignment else defaults["alignment"]
         ),
+        # no defaults-dict fallback -- BLOCK_STYLE_DEFAULTS is what a block
+        # with no override looks like, and "not excluded" (False) is
+        # already exactly that state, so there's nothing to fall back to.
+        "exclude_from_global_alignment": bool(override.exclude_from_global_alignment) if override else False,
         "text_color": (
             override.text_color if override and override.text_color else defaults["text_color"]
         ),
@@ -562,7 +573,7 @@ def _effective_heading_style(override, defaults):
     }
 
 
-def _effective_block_styles(body_stream, overrides_by_block_id):
+def _effective_block_styles(body_stream, overrides_by_block_id, font_size_multiplier=1.0):
     """Recursively walks a body StreamValue (or a column's own nested
     content, same block types) yielding {block_id: {...}} for every
     heading/paragraph/image/multi_column block: any ArticleBlockStyle
@@ -576,19 +587,28 @@ def _effective_block_styles(body_stream, overrides_by_block_id):
     only 'box' (columns have no other style of their own). Kept as plain
     dicts rather than touching block.value.font_size etc. directly in
     templates, so the "was this overridden by the on-page panel" logic
-    lives in one place. Same recursion shape as _iter_toc_entries."""
+    lives in one place. Same recursion shape as _iter_toc_entries.
+    font_size_multiplier is the article's global ArticleStyle.
+    content_font_size_multiplier, threaded through to every
+    _effective_heading_style() call (see its own docstring) -- pass 1.0
+    (the default) to get every block's raw, unscaled font_size back, e.g.
+    from alignment_capable_block_ids() below where only the *shape* of the
+    result matters, not the actual sizes."""
     styles = {}
     for block in body_stream:
         block_id = str(block.id)
         override = overrides_by_block_id.get(block_id)
         if block.block_type in ("heading", "paragraph"):
-            styles[block_id] = _effective_heading_style(override, BLOCK_STYLE_DEFAULTS[block.block_type])
+            styles[block_id] = _effective_heading_style(
+                override, BLOCK_STYLE_DEFAULTS[block.block_type], font_size_multiplier
+            )
         elif block.block_type == "image":
             defaults = BLOCK_STYLE_DEFAULTS["image"]
             styles[block_id] = {
                 "alignment": (
                     override.alignment if override and override.alignment else defaults["alignment"]
                 ),
+                "exclude_from_global_alignment": bool(override.exclude_from_global_alignment) if override else False,
                 "width_rem": (
                     override.width_rem
                     if override and override.width_rem is not None
@@ -624,11 +644,15 @@ def _effective_block_styles(body_stream, overrides_by_block_id):
             # figcaption's own box above is the only one that applies).
             title_text_id = f"{block_id}-cap-title"
             styles[title_text_id] = _effective_heading_style(
-                overrides_by_block_id.get(title_text_id), BLOCK_STYLE_DEFAULTS["image_title"]
+                overrides_by_block_id.get(title_text_id),
+                BLOCK_STYLE_DEFAULTS["image_title"],
+                font_size_multiplier,
             )
             caption_text_id = f"{block_id}-cap-body"
             styles[caption_text_id] = _effective_heading_style(
-                overrides_by_block_id.get(caption_text_id), BLOCK_STYLE_DEFAULTS["image_caption_body"]
+                overrides_by_block_id.get(caption_text_id),
+                BLOCK_STYLE_DEFAULTS["image_caption_body"],
+                font_size_multiplier,
             )
         elif block.block_type in ("article_card", "category_card", "union_card", "tool_card"):
             defaults = BLOCK_STYLE_DEFAULTS[block.block_type]
@@ -684,12 +708,28 @@ def _effective_block_styles(body_stream, overrides_by_block_id):
                 # the same ArticleBlockStyle override table.
                 title_id = f"{column_id}-title"
                 styles[title_id] = _effective_heading_style(
-                    overrides_by_block_id.get(title_id), BLOCK_STYLE_DEFAULTS["heading"]
+                    overrides_by_block_id.get(title_id), BLOCK_STYLE_DEFAULTS["heading"], font_size_multiplier
                 )
                 styles.update(
-                    _effective_block_styles(bound_column.value["content"], overrides_by_block_id)
+                    _effective_block_styles(
+                        bound_column.value["content"], overrides_by_block_id, font_size_multiplier
+                    )
                 )
     return styles
+
+
+def alignment_capable_block_ids(body_stream):
+    """Every block_id (including synthesized ones -- an image's own title/
+    caption text, a multi_column column's own title) that has its own
+    'alignment' field -- i.e. every id BLOCK_STYLE_FIELDS in article_views.py
+    considers alignment-capable (heading/paragraph/image/image_title/
+    image_caption_body/column_title). Reuses _effective_block_styles() (with
+    no overrides -- only the *shape* of its output matters here, not any
+    block's current value) instead of walking the StreamField a second
+    time. Used by the global Alignment control's destructive bulk-overwrite,
+    see article_views.save_quick_style."""
+    styles = _effective_block_styles(body_stream, {})
+    return [block_id for block_id, style in styles.items() if "alignment" in style]
 
 
 def _split_categories_by_season(categories):
@@ -943,7 +983,9 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
             style.block_id: style
             for style in ArticleBlockStyle.objects.filter(translation_key=self.translation_key)
         }
-        block_styles = _effective_block_styles(self.body, overrides_by_block_id)
+        block_styles = _effective_block_styles(
+            self.body, overrides_by_block_id, font_size_multiplier=self.style.content_font_size_multiplier
+        )
         # title/meta/intro aren't part of the body StreamField (their
         # alignment/font-size are ArticleStyle fields, see .article-header
         # in article_page.html) so _effective_block_styles() above never
@@ -1048,19 +1090,27 @@ class ArticleStyle(models.Model):
         choices=CONTENT_ALIGNMENT_CHOICES,
         default="left",
         help_text=(
-            "Default alignment for any plain heading/paragraph content in "
-            "the article body. Blocks with their own alignment option "
-            "(styled text, images, multi-column) override this "
-            "individually -- as does the title/intro/meta block above the "
-            "body, which has its own separate alignment controls."
+            "Saving a change to this OVERWRITES the alignment of every "
+            "alignment-capable block in the article body (heading, "
+            "paragraph, image, image captions, column titles) -- see "
+            "save_quick_style's apply_alignment_to_blocks handling and "
+            "alignment_capable_block_ids(). A block can opt out via its own "
+            "'exclude_from_global_alignment' flag on ArticleBlockStyle. "
+            "Does not affect the title/intro/meta block above the body, "
+            "which has its own separate alignment controls."
         ),
     )
-    content_font_size = models.FloatField(
+    content_font_size_multiplier = models.FloatField(
         default=1,
         help_text=(
-            "Default font size for the body, in rem. Title, intro and meta "
-            "have their own separate font size controls. Per-block font "
-            "size (styled text) overrides this individually."
+            "Multiplies the effective font size of every heading/paragraph/"
+            "image-caption/column-title block in the body, on top of each "
+            "block's own font size (1 = no change) -- see "
+            "_effective_heading_style()'s display_font_size. Unlike "
+            "alignment above, this never overwrites any block's own stored "
+            "font_size -- it's a display-time scale, not a per-block "
+            "override. Title, intro and meta have their own separate font "
+            "size controls, unaffected by this."
         ),
     )
     content_bg_enabled = models.BooleanField(
@@ -1167,6 +1217,19 @@ class ArticleBlockStyle(models.Model):
     side_padding = models.FloatField(null=True, blank=True)
     alignment = models.CharField(
         max_length=20, choices=CONTENT_ALIGNMENT_CHOICES, blank=True
+    )
+    exclude_from_global_alignment = models.BooleanField(
+        default=False,
+        help_text=(
+            "Opt this one block out of the Global editor's Alignment "
+            "control -- when set, saving a new global alignment (see "
+            "ArticleStyle.content_alignment) never overwrites this block's "
+            "own alignment above, even though every other alignment-"
+            "capable block in the article does get overwritten. Everything "
+            "else about this block (its own alignment value, font size, "
+            "box, etc.) is unaffected either way -- this only blocks the "
+            "bulk overwrite from touching this one row."
+        ),
     )
     font_size = models.FloatField(null=True, blank=True)
     width_rem = models.FloatField(null=True, blank=True)
