@@ -10,16 +10,50 @@ document.addEventListener("DOMContentLoaded", () => {
   const defaultsScript = document.getElementById("block-style-defaults-data");
   const BLOCK_STYLE_DEFAULTS = defaultsScript ? JSON.parse(defaultsScript.textContent) : {};
 
+  // {block_type: display name} -- shown as the panel's own title (see
+  // openPanelFor below) so it's clear at a glance which kind of block is
+  // currently open, since this one shared panel's fields otherwise look
+  // the same regardless of what's being edited.
+  const BLOCK_TYPE_LABELS = {
+    heading: "Heading",
+    paragraph: "Paragraph",
+    image: "Image",
+    image_caption: "Image title/caption",
+    multi_column: "Multi-column",
+    column: "Column",
+    article_header: "Header",
+    title: "Title",
+    meta: "Meta",
+    intro: "Intro",
+    hero_image: "Hero image",
+    toc_icon: "TOC icon",
+    article_card: "Article card",
+    category_card: "Category card",
+    union_card: "Student union card",
+    tool_card: "Tool card",
+  };
+
   // which fields apply to each block type, and (for alignment) which class
   // prefix + possible values that block's template actually uses to express
-  // it -- styled_text and multi_column both have "alignment"-shaped
+  // it -- paragraph and multi_column both have "alignment"-shaped
   // concepts in the model, but multi_column's is column_alignment (top/
   // center/bottom vertical layout, a different axis entirely), not left/
   // center/right text alignment, so it's deliberately left out here.
   const FIELDS_BY_TYPE = {
     heading: ["side_padding", "alignment", "font_size", "text_color"],
-    styled_text: ["side_padding", "alignment", "font_size", "text_color"],
+    paragraph: ["side_padding", "alignment", "font_size", "text_color"],
     image: ["alignment", "width_rem", "side_padding"],
+    // article/category/union/tool cards -- width/height (a fixed-design
+    // card, not built from editable text/box parts like everything else
+    // here; height 0 = auto), plus, for article_card only, list_style
+    // (compact list row instead of a full card -- see .articlecard--list
+    // in articlecard.css) and fixed_ratio (whether its image keeps its
+    // normal 8:5 ratio or lets "Height" size it directly instead -- see
+    // .articlecard--unlocked-ratio).
+    article_card: ["width_rem", "height_rem", "list_style", "fixed_ratio"],
+    category_card: ["width_rem", "height_rem"],
+    union_card: ["width_rem", "height_rem"],
+    tool_card: ["width_rem", "height_rem"],
     // an image's own title (alt_text)/caption, boxed together as one unit
     // (its own <figcaption>, see article_image_block.html) -- box plus its
     // own side padding, same shape as "column" below.
@@ -81,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   const CLASS_SWAP = {
     heading: { alignment: { prefix: "heading--align-", values: ["left", "center", "right"] } },
-    styled_text: { alignment: { prefix: "prose--align-", values: ["left", "center", "right"] } },
+    paragraph: { alignment: { prefix: "prose--align-", values: ["left", "center", "right"] } },
     image: { alignment: { prefix: "body-image--", values: ["left", "center", "right"] } },
     hero_image: { alignment: { prefix: "hero-image--", values: ["left", "center", "right"] } },
   };
@@ -95,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // fields, not part of the per-block override table box styling lives in.
   const BOX_CAPABLE_TYPES = new Set([
     "heading",
-    "styled_text",
+    "paragraph",
     "image",
     "image_caption",
     "multi_column",
@@ -232,6 +266,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const textColorLabel = document.getElementById("block-style-text-color-label");
   const widthInput = document.getElementById("block-style-width");
   const widthValue = document.getElementById("block-style-width-value");
+  const heightInput = document.getElementById("block-style-height");
+  const heightValue = document.getElementById("block-style-height-value");
+  const listStyleInput = document.getElementById("block-style-list-style");
+  const fixedRatioInput = document.getElementById("block-style-fixed-ratio");
   const alignmentGroup = document.getElementById("block-style-alignment");
   const titleAlignmentGroup = document.getElementById("block-style-title-alignment");
   const introAlignmentGroup = document.getElementById("block-style-intro-alignment");
@@ -254,6 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById(`block-style-column-weight-${i}-value`)
   );
   const statusEl = document.getElementById("block-style-mini-panel-status");
+  const panelTitle = document.getElementById("block-style-mini-panel-title");
 
   const boxEnabledInput = document.getElementById("block-style-box-enabled");
   const boxBgColorGroup = document.getElementById("block-style-box-bg-color");
@@ -452,6 +491,9 @@ document.addEventListener("DOMContentLoaded", () => {
         alignment: visibleFields.includes("alignment") ? alignmentGroup.dataset.value : null,
         font_size: visibleFields.includes("font_size") ? fontSizeInput.value : null,
         width_rem: visibleFields.includes("width_rem") ? widthInput.value : null,
+        height_rem: visibleFields.includes("height_rem") ? heightInput.value : null,
+        list_style: visibleFields.includes("list_style") ? listStyleInput.checked : null,
+        fixed_ratio: visibleFields.includes("fixed_ratio") ? fixedRatioInput.checked : null,
         gap: visibleFields.includes("gap") ? gapInput.value : null,
         column_weights: columnWeights,
         text_color: visibleFields.includes("text_color") ? textColorGroup.dataset.value : null,
@@ -1294,6 +1336,7 @@ document.addEventListener("DOMContentLoaded", () => {
     statusEl.classList.remove("is-error");
     styleLabel.textContent =
       blockType === "column" ? styleLabel.dataset.labelTitle : styleLabel.dataset.labelDefault;
+    panelTitle.textContent = BLOCK_TYPE_LABELS[blockType] || panelTitle.dataset.labelDefault;
 
     if (visibleFields.includes("side_padding")) {
       paddingInput.value = blockEl.dataset.sidePadding;
@@ -1370,6 +1413,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (visibleFields.includes("width_rem")) {
       widthInput.value = blockEl.dataset.widthRem;
       widthValue.textContent = blockEl.dataset.widthRem;
+    }
+    if (visibleFields.includes("height_rem")) {
+      heightInput.value = blockEl.dataset.heightRem;
+      heightValue.textContent = blockEl.dataset.heightRem;
+    }
+    if (visibleFields.includes("list_style")) {
+      listStyleInput.checked = blockEl.dataset.listStyle === "true";
+    }
+    if (visibleFields.includes("fixed_ratio")) {
+      fixedRatioInput.checked = blockEl.dataset.fixedRatio === "true";
     }
     if (visibleFields.includes("gap")) {
       gapInput.value = blockEl.dataset.gap;
@@ -1530,6 +1583,55 @@ document.addEventListener("DOMContentLoaded", () => {
     currentBlockEl.dataset.widthRem = widthInput.value;
     widthValue.textContent = widthInput.value;
     positionTextTriggers();
+    recordPendingEdit();
+  });
+
+  // card blocks only -- 0 means auto (drop the inline height/overflow
+  // entirely, back to the card's own natural content-driven height).
+  heightInput.addEventListener("input", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    const height = parseFloat(heightInput.value);
+    if (height > 0) {
+      currentBlockEl.style.height = `${heightInput.value}rem`;
+      currentBlockEl.style.overflow = "hidden";
+    } else {
+      currentBlockEl.style.height = "";
+      currentBlockEl.style.overflow = "";
+    }
+    currentBlockEl.dataset.heightRem = heightInput.value;
+    heightValue.textContent = heightInput.value;
+    positionTextTriggers();
+    recordPendingEdit();
+  });
+
+  // article_card only -- toggles .articlecard--list on the <a> itself
+  // (currentBlockEl is its wrapping div, see article_body_blocks.html).
+  listStyleInput.addEventListener("change", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    const cardEl = currentBlockEl.querySelector(".articlecard");
+    if (cardEl) {
+      cardEl.classList.toggle("articlecard--list", listStyleInput.checked);
+    }
+    currentBlockEl.dataset.listStyle = listStyleInput.checked ? "true" : "false";
+    recordPendingEdit();
+  });
+
+  // article_card only -- toggles .articlecard--unlocked-ratio (dropping
+  // the image's fixed 8:5 ratio in favor of "Height" above) -- unchecked
+  // means unlocked, since the checkbox itself reads "Lock image ratio".
+  fixedRatioInput.addEventListener("change", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    const cardEl = currentBlockEl.querySelector(".articlecard");
+    if (cardEl) {
+      cardEl.classList.toggle("articlecard--unlocked-ratio", !fixedRatioInput.checked);
+    }
+    currentBlockEl.dataset.fixedRatio = fixedRatioInput.checked ? "true" : "false";
     recordPendingEdit();
   });
 
@@ -1748,6 +1850,13 @@ document.addEventListener("DOMContentLoaded", () => {
       applyButtonGroup(alignmentGroup, defaults.alignment);
       applySlider(fontSizeInput, defaults.font_size);
       applySlider(widthInput, defaults.width_rem);
+      applySlider(heightInput, defaults.height_rem);
+      if (defaults.list_style !== undefined) {
+        applyToggle(listStyleInput, defaults.list_style);
+      }
+      if (defaults.fixed_ratio !== undefined) {
+        applyToggle(fixedRatioInput, defaults.fixed_ratio);
+      }
       applySlider(gapInput, defaults.gap);
       applySlider(tocIconSizeInput, defaults.toc_icon_size);
 

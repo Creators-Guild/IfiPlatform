@@ -5,13 +5,14 @@
   display: flow-root;
   /* editor-controlled default alignment (ArticlePage.content_alignment,
   --content-alignment set inline here) -- text-align is inherited, so this
-  covers plain headings/paragraphs anywhere inside <article> (the body).
-  Title/meta/intro have their own independent alignment instead (see
-  .article-header below) -- they used to inherit this same value, but
-  editors wanted the title and intro alignable separately from each
+  is only a fallback for anything with no alignment control of its own
+  (rare -- most block types set text-align explicitly on themselves, see
+  below). Title/meta/intro have their own independent alignment instead
+  (see .article-header below) -- they used to inherit this same value,
+  but editors wanted the title and intro alignable separately from each
   other, so each got its own control rather than sharing one. Blocks with
-  their own alignment option (styled_text/image/multi_column) still set
-  text-align explicitly on themselves, which always wins over this
+  their own alignment option (heading/paragraph/image/multi_column) still
+  set text-align explicitly on themselves, which always wins over this
   inherited value regardless of specificity. */
   text-align: var(--content-alignment, left);
   /* editor-controlled default font size (ArticlePage.content_font_size,

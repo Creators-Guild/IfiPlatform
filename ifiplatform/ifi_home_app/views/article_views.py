@@ -40,8 +40,14 @@ TEXT_COLOR_FIELDS = {"text_color", "text_custom_color"}
 
 BLOCK_STYLE_FIELDS = {
     "heading": {"side_padding", "alignment", "font_size"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
-    "styled_text": {"side_padding", "alignment", "font_size"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
+    "paragraph": {"side_padding", "alignment", "font_size"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
     "image": {"alignment", "width_rem", "side_padding"} | BOX_FIELDS,
+    # article/category/union/tool cards -- width/height, plus (article_card
+    # only) list_style/fixed_ratio (see ArticleBlockStyle's own docstrings).
+    "article_card": {"width_rem", "height_rem", "list_style", "fixed_ratio"},
+    "category_card": {"width_rem", "height_rem"},
+    "union_card": {"width_rem", "height_rem"},
+    "tool_card": {"width_rem", "height_rem"},
     # an image's own title (alt_text)/caption, boxed together as one unit
     # (its own <figcaption>) independent of the image's own box above --
     # keyed by a synthesized "<image-block-id>-caption" id, same pattern as
@@ -156,6 +162,8 @@ def save_block_style(request, page_id):
             defaults["font_size"] = float(data["font_size"])
         if "width_rem" in allowed_fields and data.get("width_rem") is not None:
             defaults["width_rem"] = float(data["width_rem"])
+        if "height_rem" in allowed_fields and data.get("height_rem") is not None:
+            defaults["height_rem"] = float(data["height_rem"])
         if "gap" in allowed_fields and data.get("gap") is not None:
             defaults["gap"] = float(data["gap"])
         if "column_weights" in allowed_fields and data.get("column_weights") is not None:
@@ -181,6 +189,10 @@ def save_block_style(request, page_id):
         defaults["box_enabled"] = bool(data["box_enabled"])
     if "box_border_visible" in allowed_fields and data.get("box_border_visible") is not None:
         defaults["box_border_visible"] = bool(data["box_border_visible"])
+    if "list_style" in allowed_fields and data.get("list_style") is not None:
+        defaults["list_style"] = bool(data["list_style"])
+    if "fixed_ratio" in allowed_fields and data.get("fixed_ratio") is not None:
+        defaults["fixed_ratio"] = bool(data["fixed_ratio"])
 
     for color_field, custom_field in (
         ("box_border_color", "box_border_custom_color"),

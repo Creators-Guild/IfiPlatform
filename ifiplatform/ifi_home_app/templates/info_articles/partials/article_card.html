@@ -1,6 +1,20 @@
 {% load i18n static wagtailcore_tags wagtailimages_tags %}
+{% comment %}
+list_style/fixed_ratio (both optional, only ever passed by the "Article
+Card" body block -- see article_models.py's ArticleBlockStyle.list_style/
+fixed_ratio) -- list_style renders this as a compact list row (title +
+meta, no image/intro) instead of a full card, see .articlecard--list in
+articlecard.css (the same layout that already applies automatically to the
+3rd+ card in a homepage/newsbar card grid on narrow screens, just available
+on purpose here regardless of screen size). fixed_ratio, when explicitly
+False (not just left unpassed -- every *other* caller of this partial,
+homepage/newsbar/category listings, never sets it at all, and must keep
+the image's normal locked-ratio look), drops the image's fixed 8:5 aspect
+ratio so an explicit card height (see the block-style panel's "Height")
+can size the image directly instead, via .articlecard--unlocked-ratio.
+{% endcomment %}
 {% with category=article.category %}
-<a class="articlecard{% if category.category_section == "info_articles" %} articlecard--category{% endif %}"
+<a class="articlecard{% if category.category_section == "info_articles" %} articlecard--category{% endif %}{% if list_style %} articlecard--list{% endif %}{% if fixed_ratio == False %} articlecard--unlocked-ratio{% endif %}"
    href="{% pageurl article %}"
    {% if category.category_section == "info_articles" %}style="--accent-color: var(--color-{{ category.color }})"{% endif %}>
     {% if article.hero_image %}

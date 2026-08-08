@@ -104,11 +104,11 @@ TRANSLATIONS = {
 
 ARTICLE_BODY = [
     ("heading", {"text": "Om denne testartikkelen", "level": "h2"}),
-    ("paragraph", RichText(
+    ("paragraph", {"text": RichText(
         "<p>Dette er en automatisk generert test-artikkel laget av "
         "seed-scriptet for lokal utvikling. Innholdet er kun til "
         "testformål.</p>"
-    )),
+    )}),
 ]
 
 BOARD_MESSAGE_SPECS = [

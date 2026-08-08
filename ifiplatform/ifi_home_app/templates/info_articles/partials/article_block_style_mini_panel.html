@@ -18,7 +18,13 @@ with (registerSaveHandler).
     <input type="hidden" id="block-style-target-id" name="block_id">
     <input type="hidden" id="block-style-target-type" name="block_type">
     <div class="block-style-mini-panel-header">
-        <p class="block-style-mini-panel-title">{% trans "Block style" %}</p>
+        {% comment %}
+        Swapped to the current block's own name by openPanelFor() (see
+        BLOCK_TYPE_LABELS in article_block_style.js) -- data-label-default
+        holds this fallback text, used only if a block type somehow isn't
+        in that mapping.
+        {% endcomment %}
+        <p class="block-style-mini-panel-title" id="block-style-mini-panel-title" data-label-default="{% trans 'Block style' %}">{% trans "Block style" %}</p>
         <button type="button" id="block-style-close" class="block-style-close" aria-label="{% trans 'Close' %}">&times;</button>
     </div>
 
@@ -29,9 +35,10 @@ with (registerSaveHandler).
     fields are showing right now, independent of whether the section
     itself (or, for Box, the styling it controls) even applies to the
     block currently open. A section's own header only appears at all when
-    at least one of its member fields does (see SECTION_MEMBERS in
-    article_block_style.js) -- same "only if relevant" gating every field
-    already had individually, just extended to the group as a whole.
+    at least one of its own fields is currently visible too (see
+    updateSectionHeaders() in article_block_style.js) -- same "only if
+    relevant" gating every field already had individually, just extended
+    to the group as a whole.
     {% endcomment %}
 
     <div class="block-style-field block-style-caption-header" data-style-field="layout_label">
@@ -48,6 +55,38 @@ with (registerSaveHandler).
         <label class="block-style-field" data-style-field="width_rem">
             <span>{% trans "Width" %} (<span id="block-style-width-value"></span>rem)</span>
             <input type="range" id="block-style-width" min="4" max="60" step="0.5">
+        </label>
+
+        {% comment %}
+        Card blocks only (article/category/union/tool) -- 0 means auto (the
+        card's own natural, content-driven height). See ArticleBlockStyle.
+        height_rem's own docstring.
+        {% endcomment %}
+        <label class="block-style-field" data-style-field="height_rem">
+            <span>{% trans "Height" %} (<span id="block-style-height-value"></span>{% trans "rem, 0 = auto" %})</span>
+            <input type="range" id="block-style-height" min="0" max="40" step="0.5">
+        </label>
+
+        {% comment %}
+        article_card only -- shows it as a compact list row (title + meta,
+        no image/intro) instead of a full card. See .articlecard--list in
+        articlecard.css and ArticleBlockStyle.list_style's own docstring.
+        {% endcomment %}
+        <label class="block-style-field block-style-toggle" data-style-field="list_style">
+            <input type="checkbox" id="block-style-list-style">
+            <span>{% trans "Show as list item" %}</span>
+        </label>
+
+        {% comment %}
+        article_card only -- whether its image keeps its normal fixed 8:5
+        aspect ratio (checked, the default) or drops it so the "Height"
+        field above can size the image directly instead. See
+        .articlecard--unlocked-ratio in articlecard.css and
+        ArticleBlockStyle.fixed_ratio's own docstring.
+        {% endcomment %}
+        <label class="block-style-field block-style-toggle" data-style-field="fixed_ratio">
+            <input type="checkbox" id="block-style-fixed-ratio" checked>
+            <span>{% trans "Lock image ratio" %}</span>
         </label>
 
         <label class="block-style-field" data-style-field="gap">
@@ -92,7 +131,7 @@ with (registerSaveHandler).
 
         <label class="block-style-field" data-style-field="font_size">
             {% comment %}
-            Shared by heading/styled_text (where "Font size" describes the
+            Shared by heading/paragraph (where "Font size" describes the
             block itself) and the merged column panel (where the exact same
             field/input describes the column's *title* instead -- see
             FIELDS_BY_TYPE.column in article_block_style.js). data-label-title
@@ -115,7 +154,7 @@ with (registerSaveHandler).
         <div class="block-style-field" data-style-field="text_color">
             {% comment %}
             Same shared-label pattern as font_size above -- "Text color" for
-            heading/styled_text, "Title color" for the merged column panel
+            heading/paragraph, "Title color" for the merged column panel
             (see FIELDS_BY_TYPE.column in article_block_style.js).
             {% endcomment %}
             <span id="block-style-text-color-label" data-label-default="{% trans 'Text color' %}" data-label-title="{% trans 'Title color' %}">{% trans "Text color" %}</span>
