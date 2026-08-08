@@ -35,7 +35,7 @@ shared .maincontent wrapper itself (home_base.html), not just .article-page
 content column, which .article-page's own background wouldn't reach,
 leaving a visible strip of the site's default background there instead.
 {% endcomment %}
-{% block maincontent_style %}{% if page.content_bg_enabled %}background-color: {% if page.content_bg_color == "custom" %}{{ page.content_bg_custom_color|default:"var(--color-bg-light)" }}{% else %}var(--color-{{ page.content_bg_color }}){% endif %};{% endif %}{% endblock %}
+{% block maincontent_style %}{% if page.style.content_bg_enabled %}background-color: {% if page.style.content_bg_color == "custom" %}{{ page.style.content_bg_custom_color|default:"var(--color-bg-light)" }}{% else %}var(--color-{{ page.style.content_bg_color }}){% endif %};{% endif %}{% endblock %}
 
 {% block maincontent %}
     {% include "info_articles/partials/article_breadcrumbs.html" %}
@@ -57,7 +57,14 @@ leaving a visible strip of the site's default background there instead.
         {% include "info_articles/partials/article_unsaved_changes_modal.html" %}
         {% include "info_articles/partials/article_save_bar.html" %}
     {% endif %}
-    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="--accent-color: var(--color-{{ page.category.color }}); --content-side-padding: {{ page.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.content_alignment }}; --content-font-size: {{ page.content_font_size|unlocalize }}rem; --toc-icon-size: {{ page.toc_icon_size|unlocalize }}rem;">
+    {% comment %}
+    page.category is None for an article created directly under an
+    ArticleIndexPage rather than a CategoryPage (see ArticlePage.category)
+    -- omit --accent-color entirely rather than emit a broken
+    var(--color-) when there's no category to source it from; every
+    var(--accent-color, ...) consumer already has its own fallback.
+    {% endcomment %}
+    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" style="{% if page.category %}--accent-color: var(--color-{{ page.category.color }}); {% endif %}--content-side-padding: {{ page.style.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.style.content_alignment }}; --content-font-size: {{ page.style.content_font_size|unlocalize }}rem; --toc-icon-size: {{ page.style.toc_icon_size|unlocalize }}rem;">
         {% if can_edit_style %}
             {% include "info_articles/partials/article_editor_mode_toggle.html" %}
         {% endif %}
@@ -95,15 +102,15 @@ leaving a visible strip of the site's default background there instead.
         {% with title_style=block_styles|lookup:"article-title" meta_style=block_styles|lookup:"article-meta" intro_style=block_styles|lookup:"article-intro" header_style=block_styles|lookup:"article-header" %}
         <div class="article-header{% if header_style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
              {% if can_edit_style %}data-block-id="article-header" data-block-type="article_header"
-             data-title-alignment="{{ page.title_alignment }}" data-intro-alignment="{{ page.intro_alignment }}" data-meta-alignment="{{ page.meta_alignment }}"
-             data-side-padding="{{ page.header_side_padding|unlocalize }}"
-             data-title-font-size="{{ page.title_font_size|unlocalize }}" data-intro-font-size="{{ page.intro_font_size|unlocalize }}" data-meta-font-size="{{ page.meta_font_size|unlocalize }}"
+             data-title-alignment="{{ page.style.title_alignment }}" data-intro-alignment="{{ page.style.intro_alignment }}" data-meta-alignment="{{ page.style.meta_alignment }}"
+             data-side-padding="{{ page.style.header_side_padding|unlocalize }}"
+             data-title-font-size="{{ page.style.title_font_size|unlocalize }}" data-intro-font-size="{{ page.style.intro_font_size|unlocalize }}" data-meta-font-size="{{ page.style.meta_font_size|unlocalize }}"
              data-title-text-color="{{ title_style.text_color }}" data-title-text-custom-color="{{ title_style.text_custom_color }}"
              data-meta-text-color="{{ meta_style.text_color }}" data-meta-text-custom-color="{{ meta_style.text_custom_color }}"
              data-intro-text-color="{{ intro_style.text_color }}" data-intro-text-custom-color="{{ intro_style.text_custom_color }}"
              {% include "info_articles/partials/_block_box_data_attrs.html" with box=header_style.box %}{% endif %}
-             style="--title-alignment: {{ page.title_alignment }}; --intro-alignment: {{ page.intro_alignment }}; --meta-alignment: {{ page.meta_alignment }}; --header-side-padding: {{ page.header_side_padding|unlocalize }}rem;
-                    --title-font-size: {{ page.title_font_size|unlocalize }}rem; --intro-font-size: {{ page.intro_font_size|unlocalize }}rem; --meta-font-size: {{ page.meta_font_size|unlocalize }}rem;
+             style="--title-alignment: {{ page.style.title_alignment }}; --intro-alignment: {{ page.style.intro_alignment }}; --meta-alignment: {{ page.style.meta_alignment }}; --header-side-padding: {{ page.style.header_side_padding|unlocalize }}rem;
+                    --title-font-size: {{ page.style.title_font_size|unlocalize }}rem; --intro-font-size: {{ page.style.intro_font_size|unlocalize }}rem; --meta-font-size: {{ page.style.meta_font_size|unlocalize }}rem;
                     {% include "info_articles/partials/_block_box_style.html" with box=header_style.box side_padding=None %}">
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
 
@@ -165,11 +172,13 @@ leaving a visible strip of the site's default background there instead.
 
         {% if page.hero_image %}
             {% image page.hero_image width-1200 as hero %}
-            <figure class="hero-image-figure hero-image--{{ page.hero_image_position }}{% if page.hero_image_boxed %} image-figure--boxed box-color--{{ page.hero_image_box_color }}{% endif %}{% if can_edit_style %} editable-block{% endif %}"
+            <figure class="hero-image-figure hero-image--{{ page.style.hero_image_position }}{% if page.style.hero_image_boxed %} image-figure--boxed box-color--{{ page.style.hero_image_box_color }}{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                 {% if can_edit_style %}data-block-id="hero-image" data-block-type="hero_image"
-                data-alignment="{{ page.hero_image_position }}" data-width-rem="{{ page.hero_image_width_rem|unlocalize }}"
-                data-side-padding="{{ page.hero_image_side_padding|unlocalize }}"{% endif %}
-                style="width: {{ page.hero_image_width_rem|unlocalize }}rem; max-width: 100%; padding-left: {{ page.hero_image_side_padding|unlocalize }}rem; padding-right: {{ page.hero_image_side_padding|unlocalize }}rem;{% if page.hero_image_boxed %} --box-bg: {% if page.hero_image_box_color == 'custom' %}{{ page.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.hero_image_box_color }}){% endif %}; border-radius: {{ page.hero_image_box_border_radius|unlocalize }}rem;{% endif %}">
+                data-alignment="{{ page.style.hero_image_position }}" data-width-rem="{{ page.style.hero_image_width_rem|unlocalize }}"
+                data-side-padding="{{ page.style.hero_image_side_padding|unlocalize }}"
+                data-boxed="{{ page.style.hero_image_boxed|yesno:"true,false" }}" data-box-color="{{ page.style.hero_image_box_color }}"
+                data-box-custom-color="{{ page.style.hero_image_box_custom_color }}" data-box-border-radius="{{ page.style.hero_image_box_border_radius|unlocalize }}"{% endif %}
+                style="width: {{ page.style.hero_image_width_rem|unlocalize }}rem; max-width: 100%; padding-left: {{ page.style.hero_image_side_padding|unlocalize }}rem; padding-right: {{ page.style.hero_image_side_padding|unlocalize }}rem;{% if page.style.hero_image_boxed %} --box-bg: {% if page.style.hero_image_box_color == 'custom' %}{{ page.style.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.style.hero_image_box_color }}){% endif %}; border-radius: {{ page.style.hero_image_box_border_radius|unlocalize }}rem;{% endif %}">
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
                 <img class="hero-image" src="{{ hero.url }}" alt="{{ page.hero_image_alt|default:page.hero_image.title }}">
                 {% if page.hero_image_title or page.hero_image_caption %}
@@ -186,7 +195,7 @@ leaving a visible strip of the site's default background there instead.
                 {# desktop/tablet only (see article_toc.css) -- mobile gets a "contents" icon next to the title and a full-screen modal instead #}
                 <div class="toc-open-sticky toc-widget">
                     <div class="toc-icon-editable{% if can_edit_style %} editable-block{% endif %}"
-                         {% if can_edit_style %}data-block-id="toc-icon" data-block-type="toc_icon" data-toc-icon-size="{{ page.toc_icon_size|unlocalize }}"{% endif %}>
+                         {% if can_edit_style %}data-block-id="toc-icon" data-block-type="toc_icon" data-toc-icon-size="{{ page.style.toc_icon_size|unlocalize }}"{% endif %}>
                         <button type="button" class="toc-open-button" id="toc-open-button-desktop"
                                 aria-haspopup="dialog" aria-controls="toc-overlay-desktop" aria-label="{% trans 'Contents' %}"
                                 aria-expanded="false">

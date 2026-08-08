@@ -103,11 +103,15 @@ document.addEventListener("DOMContentLoaded", () => {
       "intro_font_size",
       "intro_text_color",
     ],
-    // same fields as image, and reuses the exact same generic alignment/
-    // width/padding inputs below -- also not a StreamField block though
-    // (hero_image is a set of plain ArticlePage fields, see article_models.py),
-    // so it needs the same special-cased save endpoint as article_header.
-    hero_image: ["alignment", "width_rem", "side_padding"],
+    // alignment/width/side_padding reuse the exact same generic inputs as
+    // "image" -- also not a StreamField block though (hero_image is a set
+    // of ArticleStyle fields, see article_models.py), so it needs the same
+    // special-cased save endpoint as article_header. boxed/box_color/
+    // box_custom_color/box_border_radius have their own small dedicated
+    // controls below (not the generic Box section -- that one saves to a
+    // per-block ArticleBlockStyle row, these save to ArticleStyle instead,
+    // same endpoint as the other three).
+    hero_image: ["alignment", "width_rem", "side_padding", "boxed", "box_color", "box_custom_color", "box_border_radius"],
     // not a StreamField block either -- there's only ever one
     // table-of-contents icon on the page (ArticlePage.toc_icon_size), same
     // special-cased save endpoint as article_header/hero_image.
@@ -270,6 +274,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const heightValue = document.getElementById("block-style-height-value");
   const listStyleInput = document.getElementById("block-style-list-style");
   const fixedRatioInput = document.getElementById("block-style-fixed-ratio");
+  // hero_image only -- see FIELDS_BY_TYPE.hero_image's own comment for why
+  // these are separate from the generic Box section's box*Input refs below.
+  const heroBoxedInput = document.getElementById("block-style-hero-boxed");
+  const heroBoxColorGroup = document.getElementById("block-style-hero-box-color");
+  const heroBoxCustomColorInput = document.getElementById("block-style-hero-box-custom-color");
+  const heroBoxPickerInput = document.getElementById("block-style-hero-box-picker");
+  const heroBoxRadiusInput = document.getElementById("block-style-hero-box-radius");
+  const heroBoxRadiusValue = document.getElementById("block-style-hero-box-radius-value");
   const alignmentGroup = document.getElementById("block-style-alignment");
   const titleAlignmentGroup = document.getElementById("block-style-title-alignment");
   const introAlignmentGroup = document.getElementById("block-style-intro-alignment");
@@ -443,9 +455,10 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
 
-    // hero_image isn't a StreamField block either -- plain ArticlePage
-    // fields (hero_image_position/width_rem/side_padding), same reasoning
-    // as article_header above.
+    // hero_image isn't a StreamField block either -- ArticleStyle fields
+    // (hero_image_position/width_rem/side_padding/boxed/box_color/
+    // box_custom_color/box_border_radius), same reasoning as article_header
+    // above.
     if (blockType === "hero_image") {
       return {
         url: panel.dataset.heroImageSaveUrl,
@@ -453,6 +466,10 @@ document.addEventListener("DOMContentLoaded", () => {
           alignment: alignmentGroup.dataset.value,
           width_rem: widthInput.value,
           side_padding: paddingInput.value,
+          boxed: heroBoxedInput.checked,
+          box_color: heroBoxColorGroup.dataset.value,
+          box_custom_color: heroBoxCustomColorInput.value,
+          box_border_radius: heroBoxRadiusInput.value,
         },
       };
     }
@@ -781,6 +798,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // hero_image only -- draws a border/box around the image, title and
+  // caption. Mirrors article_page.html's own server-rendered version of
+  // this exact logic (--box-bg custom property + border-radius, gated by
+  // .image-figure--boxed -- see article_image.css); box-color--<color> is
+  // separate from --box-bg itself, only used for text contrast when the
+  // box is black (see .box-color--black .image-title in that same file),
+  // so it needs stripping/re-adding as its own step, not just a plain
+  // classList.toggle the way image-figure--boxed itself is.
+  const applyHeroImageBox = () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    Array.from(currentBlockEl.classList)
+      .filter((cls) => cls.startsWith("box-color--"))
+      .forEach((cls) => currentBlockEl.classList.remove(cls));
+    const boxed = heroBoxedInput.checked;
+    currentBlockEl.classList.toggle("image-figure--boxed", boxed);
+    if (!boxed) {
+      currentBlockEl.style.removeProperty("--box-bg");
+      currentBlockEl.style.borderRadius = "";
+      return;
+    }
+    const boxColor = heroBoxColorGroup.dataset.value;
+    currentBlockEl.classList.add(`box-color--${boxColor}`);
+    currentBlockEl.style.setProperty(
+      "--box-bg",
+      boxColor === "custom"
+        ? heroBoxCustomColorInput.value || "var(--color-bg-light)"
+        : `var(--color-${boxColor})`
+    );
+    currentBlockEl.style.borderRadius = `${heroBoxRadiusInput.value}rem`;
+  };
+
   // a collapsible section's own header (see the panel template's "block-
   // style-caption-header" divs -- Layout, Style, Column weights, Title/
   // Intro/Meta) only makes sense to show while at least one real field
@@ -925,6 +975,7 @@ document.addEventListener("DOMContentLoaded", () => {
   wireColorGroup(boxBgColorGroup, "boxBgColor");
   wireColorGroup(boxBorderColorGroup, "boxBorderColor");
   wireColorGroup(textColorGroup, "textColor", applyTextColor);
+  wireColorGroup(heroBoxColorGroup, "boxColor", applyHeroImageBox);
 
   // the "Custom" swatch is a plain hex text input (see the mini panel
   // template) -- typing a valid hex both selects "custom" for the group
@@ -940,6 +991,7 @@ document.addEventListener("DOMContentLoaded", () => {
     [boxBgCustomColorInput, boxBgPickerInput, boxBgColorGroup, "boxBgColor", "boxBgCustomColor"],
     [boxBorderCustomColorInput, boxBorderPickerInput, boxBorderColorGroup, "boxBorderColor", "boxBorderCustomColor"],
     [textCustomColorInput, textPickerInput, textColorGroup, "textColor", "textCustomColor", applyTextColor],
+    [heroBoxCustomColorInput, heroBoxPickerInput, heroBoxColorGroup, "boxColor", "boxCustomColor", applyHeroImageBox],
   ].forEach(([hexInput, pickerInput, group, groupDatasetKey, customDatasetKey, applyFn = applyBoxStyle]) => {
     // custom isn't active yet -- a plain click always immediately focuses a
     // text input (or, for the picker label, forwards straight into opening
@@ -1424,6 +1476,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (visibleFields.includes("fixed_ratio")) {
       fixedRatioInput.checked = blockEl.dataset.fixedRatio === "true";
     }
+    if (visibleFields.includes("boxed")) {
+      heroBoxedInput.checked = blockEl.dataset.boxed === "true";
+    }
+    if (visibleFields.includes("box_color")) {
+      heroBoxColorGroup.dataset.value = blockEl.dataset.boxColor;
+      heroBoxColorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+        b.classList.toggle("active", b.dataset.color === blockEl.dataset.boxColor);
+      });
+      setCustomSwatch(heroBoxCustomColorInput, blockEl.dataset.boxCustomColor, heroBoxPickerInput);
+    }
+    if (visibleFields.includes("box_border_radius")) {
+      heroBoxRadiusInput.value = blockEl.dataset.boxBorderRadius;
+      heroBoxRadiusValue.textContent = blockEl.dataset.boxBorderRadius;
+    }
     if (visibleFields.includes("gap")) {
       gapInput.value = blockEl.dataset.gap;
       gapValue.textContent = blockEl.dataset.gap;
@@ -1632,6 +1698,26 @@ document.addEventListener("DOMContentLoaded", () => {
       cardEl.classList.toggle("articlecard--unlocked-ratio", !fixedRatioInput.checked);
     }
     currentBlockEl.dataset.fixedRatio = fixedRatioInput.checked ? "true" : "false";
+    recordPendingEdit();
+  });
+
+  // hero_image only -- see applyHeroImageBox's own comment.
+  heroBoxedInput.addEventListener("change", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset.boxed = heroBoxedInput.checked ? "true" : "false";
+    applyHeroImageBox();
+    recordPendingEdit();
+  });
+
+  heroBoxRadiusInput.addEventListener("input", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset.boxBorderRadius = heroBoxRadiusInput.value;
+    heroBoxRadiusValue.textContent = heroBoxRadiusInput.value;
+    applyHeroImageBox();
     recordPendingEdit();
   });
 
@@ -1956,6 +2042,16 @@ document.addEventListener("DOMContentLoaded", () => {
         // needs to run after they've all already been reset above.
         applyToggle(boxEnabledInput, boxDefaults.enabled);
       }
+    }
+
+    // hero_image's own box -- separate from the generic box mechanism
+    // above (hero_image isn't in BOX_CAPABLE_TYPES, see applyHeroImageBox's
+    // own comment), so it needs its own reset here.
+    if (blockType === "hero_image" && defaults) {
+      applyToggle(heroBoxedInput, defaults.boxed);
+      applyColorGroup(heroBoxColorGroup, defaults.box_color);
+      setCustomSwatch(heroBoxCustomColorInput, defaults.box_custom_color, heroBoxPickerInput);
+      applySlider(heroBoxRadiusInput, defaults.box_border_radius);
     }
   });
 });

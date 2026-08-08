@@ -5,6 +5,7 @@ from django.db import models
 from django.conf import settings
 from django.http import Http404
 from django.utils import timezone
+from django.utils.functional import cached_property
 from wagtail.models import Locale, Page
 from wagtail.fields import StreamField, RichTextField
 from wagtail.admin.panels import FieldPanel
@@ -29,6 +30,32 @@ COLOR_CHOICES = [
     ("black", "Black"),
     ("custom", "Custom (hex code)"),
 ]
+
+# module-level (not on ArticlePage) since ArticleStyle/ArticleBlockStyle
+# also need these, and neither is a field on ArticlePage itself any more
+# (styling moved out to ArticleStyle -- see that model's own docstring).
+HERO_POSITION_CHOICES = [
+    ("left", "Left"),
+    ("center", "Center"),
+    ("right", "Right"),
+]
+
+BOX_COLOR_CHOICES = [
+    ("bg-light", "Light"),
+    ("turq", "Turquoise"),
+    ("pink", "Pink"),
+    ("purple", "Purple"),
+    ("black", "Black"),
+    ("custom", "Custom (hex code)"),
+]
+
+CONTENT_ALIGNMENT_CHOICES = [
+    ("left", "Left"),
+    ("center", "Center"),
+    ("right", "Right"),
+]
+
+TITLE_ALIGNMENT_CHOICES = CONTENT_ALIGNMENT_CHOICES
 
 
 
@@ -363,8 +390,8 @@ def _iter_toc_entries(body_stream):
 # in _effective_block_styles() below whenever a block has no
 # ArticleBlockStyle override yet, and to power the "Reset to default"
 # button in the on-page block style panel (article_block_style.js, via
-# ArticlePage.get_context()). article_header/hero_image are the exception
-# -- those are plain ArticlePage fields (title_font_size, hero_image_
+# ArticlePage.get_context()). article_header/hero_image/toc_icon are the
+# exception -- those are ArticleStyle fields (title_font_size, hero_image_
 # position, etc.), which still carry their own real default= and aren't
 # read from here for rendering, only for the reset button.
 BLOCK_STYLE_DEFAULTS = {
@@ -411,9 +438,17 @@ BLOCK_STYLE_DEFAULTS = {
         "meta_alignment": "left",
         "meta_font_size": 0.9,
     },
-    "hero_image": {"alignment": "right", "width_rem": 18, "side_padding": 0},
+    "hero_image": {
+        "alignment": "right",
+        "width_rem": 18,
+        "side_padding": 0,
+        "boxed": False,
+        "box_color": "bg-light",
+        "box_custom_color": "",
+        "box_border_radius": 0.75,
+    },
     # not a StreamField block or per-block override -- there's only ever one
-    # table-of-contents icon on the page (ArticlePage.toc_icon_size).
+    # table-of-contents icon on the page (ArticleStyle.toc_icon_size).
     "toc_icon": {"toc_icon_size": 1.3},
     # box styling is available on every body block (heading/paragraph/
     # image/multi_column) and independently on each multi_column sub-column
@@ -714,7 +749,9 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
     template = "info_articles/pages/article_page.html"  # custom path
 
     intro = RichTextField(blank=True)
-    # featured image
+    # featured image -- the chosen Image and its title/alt/caption text are
+    # content; how it's displayed (position/width/padding/box) is styling,
+    # see ArticleStyle below.
     hero_image = models.ForeignKey(
         "wagtailimages.Image",
         null=True,
@@ -722,27 +759,6 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         on_delete=models.SET_NULL,
         related_name="+",
     )
-
-    HERO_POSITION_CHOICES = [
-        ("left", "Left"),
-        ("center", "Center"),
-        ("right", "Right"),
-    ]
-
-    hero_image_position = models.CharField(
-        max_length=20,
-        choices=HERO_POSITION_CHOICES,
-        default="right",
-    )
-    hero_image_width_rem = models.FloatField(
-        default=18,
-        help_text="Width, in rem.",
-    )
-    hero_image_side_padding = models.FloatField(
-        default=0,
-        help_text="Left/right padding, in rem (0 = none).",
-    )
-
     hero_image_title = models.CharField(
         max_length=250,
         blank=True,
@@ -754,37 +770,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         help_text="Accessible description of the image, for screen readers -- not shown visibly. Leave blank to use the image's own title.",
     )
     hero_image_caption = models.CharField(max_length=250, blank=True)
-    hero_image_boxed = models.BooleanField(
-        default=False,
-        help_text="Draw a border/box around the image, title and description.",
-    )
 
-    BOX_COLOR_CHOICES = [
-        ("bg-light", "Light"),
-        ("turq", "Turquoise"),
-        ("pink", "Pink"),
-        ("purple", "Purple"),
-        ("black", "Black"),
-        ("custom", "Custom (hex code)"),
-    ]
-
-    hero_image_box_color = models.CharField(
-        max_length=20,
-        choices=BOX_COLOR_CHOICES,
-        default="bg-light",
-        help_text="Box background color (only applies when 'boxed' is enabled).",
-    )
-    hero_image_box_custom_color = models.CharField(
-        max_length=7,
-        blank=True,
-        validators=[HEX_COLOR_VALIDATOR],
-        help_text="Hex code, e.g. #ff8800. Only used when color is set to 'Custom'.",
-    )
-    hero_image_box_border_radius = models.FloatField(
-        default=0.75,
-        validators=[MinValueValidator(0), MaxValueValidator(5)],
-        help_text="Box corner rounding, in rem (0 = square corners). Only applies when 'boxed' is enabled.",
-    )
     # metadata
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
@@ -795,137 +781,22 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         help_text="Whether this article can be suggested on the homepage (newsbar/articles bar).",
     )
 
-    content_side_padding = models.FloatField(
-        default=0,
-        help_text=(
-            "Left/right padding around the whole article body, in rem (0 = "
-            "none). Applies on top of the site's own layout padding, and "
-            "stacks with any per-block side padding inside it."
-        ),
-    )
-
-    CONTENT_ALIGNMENT_CHOICES = [
-        ("left", "Left"),
-        ("center", "Center"),
-        ("right", "Right"),
-    ]
-
-    content_alignment = models.CharField(
-        max_length=20,
-        choices=CONTENT_ALIGNMENT_CHOICES,
-        default="left",
-        help_text=(
-            "Default alignment for any plain heading/paragraph content in "
-            "the article body. Blocks with their own alignment option "
-            "(styled text, images, multi-column) override this "
-            "individually -- as does the title/intro/meta block above the "
-            "body, which has its own separate alignment controls."
-        ),
-    )
-
-    TITLE_ALIGNMENT_CHOICES = CONTENT_ALIGNMENT_CHOICES
-
-    title_alignment = models.CharField(
-        max_length=20,
-        choices=TITLE_ALIGNMENT_CHOICES,
-        default="left",
-        help_text="Alignment for the article title.",
-    )
-    title_font_size = models.FloatField(
-        default=2,
-        help_text="Font size for the article title, in rem. Independent from the body's own font size.",
-    )
-    intro_alignment = models.CharField(
-        max_length=20,
-        choices=TITLE_ALIGNMENT_CHOICES,
-        default="left",
-        help_text="Alignment for the intro paragraph.",
-    )
-    intro_font_size = models.FloatField(
-        default=1,
-        help_text="Font size for the intro paragraph, in rem. Independent from the body's own font size.",
-    )
-    meta_alignment = models.CharField(
-        max_length=20,
-        choices=TITLE_ALIGNMENT_CHOICES,
-        default="left",
-        help_text="Alignment for the byline/date meta row.",
-    )
-    meta_font_size = models.FloatField(
-        default=0.9,
-        help_text="Font size for the byline/date meta row, in rem. Independent from the body's own font size.",
-    )
-
-    header_side_padding = models.FloatField(
-        default=0,
-        help_text=(
-            "Left/right padding around the title/meta/intro block, in rem "
-            "(0 = none). Independent from the body's own side padding."
-        ),
-    )
-
-    content_font_size = models.FloatField(
-        default=1,
-        help_text=(
-            "Default font size for the body, in rem. Title, intro and meta "
-            "have their own separate font size controls. Per-block font "
-            "size (styled text) overrides this individually."
-        ),
-    )
-
-    content_bg_enabled = models.BooleanField(
-        default=False,
-        help_text="Override the article body's default background color.",
-    )
-    content_bg_color = models.CharField(
-        max_length=20,
-        choices=COLOR_CHOICES,
-        default="bg-light",
-        help_text="Background color (only applies when the override above is enabled).",
-    )
-    content_bg_custom_color = models.CharField(
-        max_length=7,
-        blank=True,
-        validators=[HEX_COLOR_VALIDATOR],
-        help_text="Hex code, e.g. #ff8800. Only used when color is set to 'Custom'.",
-    )
-
-    toc_icon_size = models.FloatField(
-        default=1.3,
-        help_text=(
-            "Size of the table-of-contents icon (the circular \"contents\" "
-            "button next to the title), in rem. The button's own circle "
-            "grows and shrinks along with it."
-        ),
-    )
-
     # allows for mutiple sections of one of these types:
     body = StreamField(
         _body_content_blocks(),
         use_json_field=True,
     )
 
-    # Deliberately no FieldPanel for the styling fields (content_side_padding/
-    # content_alignment/content_font_size/content_bg_enabled/content_bg_color/
-    # content_bg_custom_color/toc_icon_size, title_alignment/title_font_size,
-    # intro_alignment/intro_font_size, meta_alignment/meta_font_size,
-    # header_side_padding, hero_image_position/hero_image_width_rem/
-    # hero_image_side_padding) -- those fields still exist and still store
-    # real values (used whenever there's no more specific value set), but
-    # they're edited on-page via editor mode (article_block_style.js /
-    # article_quick_style.js), not in Wagtail. Wagtail's job here is
-    # structure and content; editing the same value from both places would
-    # be confusing, since the on-page save always wins in the end anyway.
+    # No FieldPanel for any styling at all any more -- it's not a field on
+    # this model, see ArticleStyle below (edited entirely on-page via
+    # editor mode: article_block_style.js/article_quick_style.js). Wagtail's
+    # job here is only ever structure and content.
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
         FieldPanel("hero_image"),
         FieldPanel("hero_image_title"),
         FieldPanel("hero_image_alt"),
         FieldPanel("hero_image_caption"),
-        FieldPanel("hero_image_boxed"),
-        FieldPanel("hero_image_box_color"),
-        FieldPanel("hero_image_box_custom_color"),
-        FieldPanel("hero_image_box_border_radius"),
         FieldPanel("author"),
         FieldPanel("published_date"),
         FieldPanel("show_on_homepage"),
@@ -933,14 +804,31 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
     ]
 
     parent_page_types = [
-        "ifi_home_app.CategoryPage"
-    ]  # only allow creation under an category
+        "ifi_home_app.CategoryPage",
+        "ifi_home_app.ArticleIndexPage",
+    ]  # allowed directly under a category, or directly under a non-hub index -- see can_create_at below
     subpage_types = []  # articles have no children
+
+    @classmethod
+    def can_create_at(cls, parent):
+        """Same as Page.can_create_at(), plus: when the parent is an
+        ArticleIndexPage, only allow it if that index is a real content
+        section, not a purely-structural 'hub' index (e.g. "Artikkler",
+        whose own children are other indexes, not articles) --
+        parent_page_types alone can only gate by page *type*, not field
+        value, so this extra check has to happen here instead."""
+        if not super().can_create_at(parent):
+            return False
+        if isinstance(parent, ArticleIndexPage):
+            return parent.section != "hub"
+        return True
 
     @property
     def category(self):
-        """The CategoryPage this article lives under."""
-        return self.get_parent().specific
+        """The CategoryPage this article lives under, or None if it was
+        created directly under an ArticleIndexPage instead."""
+        parent = self.get_parent().specific
+        return parent if isinstance(parent, CategoryPage) else None
 
     def route(self, request, path_components):
         """Same as Page.route(), except a draft (not-yet-published) article
@@ -968,6 +856,17 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         edits have to go to the source instead, which Wagtail then
         propagates back to this alias automatically on publish."""
         return self.alias_of.specific if self.alias_of_id else self
+
+    @cached_property
+    def style(self):
+        """This article's shared ArticleStyle row -- the same one for
+        every locale translation, see ArticleStyle's own docstring for why
+        (keyed by translation_key, not by this page's own id). Created
+        with defaults on first access if this translation_key doesn't have
+        one yet (e.g. a brand new article, never touched in editor mode).
+        Cached per-instance since templates read this repeatedly (once per
+        style field) across a single render."""
+        return ArticleStyle.objects.get_or_create(translation_key=self.translation_key)[0]
 
     # the nb tree is the OG/source content that every other locale mirrors
     # and translates (wagtail_localize) -- see publish_target below.
@@ -1041,12 +940,14 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         context["can_publish_page"] = publish_permissions.can_publish()
         context["can_unpublish_page"] = publish_permissions.can_unpublish()
         overrides_by_block_id = {
-            style.block_id: style for style in self.style_target.block_styles.all()
+            style.block_id: style
+            for style in ArticleBlockStyle.objects.filter(translation_key=self.translation_key)
         }
         block_styles = _effective_block_styles(self.body, overrides_by_block_id)
-        # title/meta/intro aren't part of the body StreamField (they're
-        # plain ArticlePage fields, see .article-header in article_page.html)
-        # so _effective_block_styles() above never sees them -- box styling
+        # title/meta/intro aren't part of the body StreamField (their
+        # alignment/font-size are ArticleStyle fields, see .article-header
+        # in article_page.html) so _effective_block_styles() above never
+        # sees them -- box styling
         # for each is added the same way as everything else though, via
         # fixed pseudo ids in the same ArticleBlockStyle override table.
         for pseudo_id in ("article-title", "article-meta", "article-intro"):
@@ -1076,27 +977,188 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         return context
 
 
+class ArticleStyle(models.Model):
+    """Whole-article styling -- side padding/alignment/font-size for the
+    body and title/meta/intro, background color, hero image display
+    (position/width/padding/box), and the table-of-contents icon size.
+    Edited on-page via editor mode (article_quick_style.js), same UI
+    pattern as ArticleBlockStyle's per-block overrides just above.
+    Deliberately not part of ArticlePage (or any Page model) and so
+    outside Wagtail's revision/publish system entirely -- styling
+    shouldn't differ between locale translations of "the same" article,
+    only content should.
+
+    Keyed by translation_key, exactly like ArticleBlockStyle (see that
+    model's own docstring for the full reasoning) -- identical across
+    every locale copy of one logical article, so every locale
+    automatically shares one style with no sync code needed at all. See
+    ArticlePage.style for how a page reaches its row (get-or-create,
+    since a translation_key might not have one yet)."""
+
+    translation_key = models.UUIDField(unique=True)
+
+    # hero image display -- hero_image itself (the chosen Image) and its
+    # title/alt/caption text stay on ArticlePage: those are content, not
+    # styling.
+    hero_image_position = models.CharField(
+        max_length=20,
+        choices=HERO_POSITION_CHOICES,
+        default="right",
+    )
+    hero_image_width_rem = models.FloatField(
+        default=18,
+        help_text="Width, in rem.",
+    )
+    hero_image_side_padding = models.FloatField(
+        default=0,
+        help_text="Left/right padding, in rem (0 = none).",
+    )
+    hero_image_boxed = models.BooleanField(
+        default=False,
+        help_text="Draw a border/box around the image, title and description.",
+    )
+    hero_image_box_color = models.CharField(
+        max_length=20,
+        choices=BOX_COLOR_CHOICES,
+        default="bg-light",
+        help_text="Box background color (only applies when 'boxed' is enabled).",
+    )
+    hero_image_box_custom_color = models.CharField(
+        max_length=7,
+        blank=True,
+        validators=[HEX_COLOR_VALIDATOR],
+        help_text="Hex code, e.g. #ff8800. Only used when color is set to 'Custom'.",
+    )
+    hero_image_box_border_radius = models.FloatField(
+        default=0.75,
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+        help_text="Box corner rounding, in rem (0 = square corners). Only applies when 'boxed' is enabled.",
+    )
+
+    content_side_padding = models.FloatField(
+        default=0,
+        help_text=(
+            "Left/right padding around the whole article body, in rem (0 = "
+            "none). Applies on top of the site's own layout padding, and "
+            "stacks with any per-block side padding inside it."
+        ),
+    )
+    content_alignment = models.CharField(
+        max_length=20,
+        choices=CONTENT_ALIGNMENT_CHOICES,
+        default="left",
+        help_text=(
+            "Default alignment for any plain heading/paragraph content in "
+            "the article body. Blocks with their own alignment option "
+            "(styled text, images, multi-column) override this "
+            "individually -- as does the title/intro/meta block above the "
+            "body, which has its own separate alignment controls."
+        ),
+    )
+    content_font_size = models.FloatField(
+        default=1,
+        help_text=(
+            "Default font size for the body, in rem. Title, intro and meta "
+            "have their own separate font size controls. Per-block font "
+            "size (styled text) overrides this individually."
+        ),
+    )
+    content_bg_enabled = models.BooleanField(
+        default=False,
+        help_text="Override the article body's default background color.",
+    )
+    content_bg_color = models.CharField(
+        max_length=20,
+        choices=COLOR_CHOICES,
+        default="bg-light",
+        help_text="Background color (only applies when the override above is enabled).",
+    )
+    content_bg_custom_color = models.CharField(
+        max_length=7,
+        blank=True,
+        validators=[HEX_COLOR_VALIDATOR],
+        help_text="Hex code, e.g. #ff8800. Only used when color is set to 'Custom'.",
+    )
+
+    title_alignment = models.CharField(
+        max_length=20,
+        choices=TITLE_ALIGNMENT_CHOICES,
+        default="left",
+        help_text="Alignment for the article title.",
+    )
+    title_font_size = models.FloatField(
+        default=2,
+        help_text="Font size for the article title, in rem. Independent from the body's own font size.",
+    )
+    intro_alignment = models.CharField(
+        max_length=20,
+        choices=TITLE_ALIGNMENT_CHOICES,
+        default="left",
+        help_text="Alignment for the intro paragraph.",
+    )
+    intro_font_size = models.FloatField(
+        default=1,
+        help_text="Font size for the intro paragraph, in rem. Independent from the body's own font size.",
+    )
+    meta_alignment = models.CharField(
+        max_length=20,
+        choices=TITLE_ALIGNMENT_CHOICES,
+        default="left",
+        help_text="Alignment for the byline/date meta row.",
+    )
+    meta_font_size = models.FloatField(
+        default=0.9,
+        help_text="Font size for the byline/date meta row, in rem. Independent from the body's own font size.",
+    )
+    header_side_padding = models.FloatField(
+        default=0,
+        help_text=(
+            "Left/right padding around the title/meta/intro block, in rem "
+            "(0 = none). Independent from the body's own side padding."
+        ),
+    )
+
+    toc_icon_size = models.FloatField(
+        default=1.3,
+        help_text=(
+            "Size of the table-of-contents icon (the circular \"contents\" "
+            "button next to the title), in rem. The button's own circle "
+            "grows and shrinks along with it."
+        ),
+    )
+
+
 class ArticleBlockStyle(models.Model):
     """A per-block style override (alignment/padding/font-size/gap/column
     weights/box) for one paragraph/image/multi_column block -- or one
     multi_column sub-column, keyed by that column's own id (box fields
-    only, see _effective_block_styles()) -- inside an ArticlePage's body,
+    only, see _effective_block_styles()) -- inside an article's body,
     saved by the on-page block style panel. Deliberately NOT part of the
     StreamField itself -- editing StreamField JSON in place means locating
     a block by id inside potentially-nested content (e.g. a column) and
     going through Wagtail's revision/publish machinery for what's really
-    just a styling tweak, which also hit real sharp edges (alias pages
-    can't take their own revisions, see ArticlePage.style_target). A plain
-    side table keyed by block id sidesteps all of that: no revision, no
-    publish, no StreamField parsing, just an upsert. The tradeoff is it's a
-    second source of truth -- if a block is deleted and different content
-    recreated in its place, that new block gets a new id and simply won't
-    match any existing override (harmless: it just renders with its own
-    stored defaults, same as never having been styled)."""
+    just a styling tweak. A plain side table keyed by block id sidesteps
+    all of that: no revision, no publish, no StreamField parsing, just an
+    upsert. The tradeoff is it's a second source of truth -- if a block is
+    deleted and different content recreated in its place, that new block
+    gets a new id and simply won't match any existing override (harmless:
+    it just renders with its own stored defaults, same as never having
+    been styled).
 
-    article = models.ForeignKey(
-        "ArticlePage", on_delete=models.CASCADE, related_name="block_styles"
-    )
+    Keyed by translation_key (a UUID every Page carries via Wagtail's
+    TranslatableMixin, identical across every locale copy of "the same"
+    page -- confirmed empirically, including for alias pages, not just
+    genuine wagtail_localize translations), not by a specific ArticlePage
+    row -- styling shouldn't differ between locale translations of one
+    article, only content should, and wagtail_localize preserves
+    StreamField block ids across translations, so this and body always
+    stay talking about the same block regardless of which locale is being
+    viewed/edited. See ArticlePage.style_target for how a page resolves
+    to the identity its overrides (this table, and ArticleStyle) are
+    saved against -- alias resolution only, translation_key itself is
+    already locale-independent."""
+
+    translation_key = models.UUIDField()
     # a real block's own UUID (36 chars) in most cases, but a few synthetic
     # ids built from one (e.g. "<column-uuid>-title" for a multi_column
     # column's own title, see _effective_block_styles()) run longer.
@@ -1104,7 +1166,7 @@ class ArticleBlockStyle(models.Model):
 
     side_padding = models.FloatField(null=True, blank=True)
     alignment = models.CharField(
-        max_length=20, choices=ArticlePage.CONTENT_ALIGNMENT_CHOICES, blank=True
+        max_length=20, choices=CONTENT_ALIGNMENT_CHOICES, blank=True
     )
     font_size = models.FloatField(null=True, blank=True)
     width_rem = models.FloatField(null=True, blank=True)
@@ -1173,7 +1235,7 @@ class ArticleBlockStyle(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["article", "block_id"], name="unique_article_block_style"
+                fields=["translation_key", "block_id"], name="unique_article_block_style"
             )
         ]
 
@@ -1323,6 +1385,10 @@ class ArticleIndexPage(TranslationWarningMixin, Page):  # pylint: disable=too-ma
         "ifi_home_app.CategoryPage",
         "ifi_home_app.StudentUnionCategoryPage",
         "ifi_home_app.ToolPage",
+        # allowed here for symmetry with ArticlePage.parent_page_types, but
+        # only actually creatable when this index isn't a "hub" -- see
+        # ArticlePage.can_create_at().
+        "ifi_home_app.ArticlePage",
     ]
 
     # overriding for extra data
