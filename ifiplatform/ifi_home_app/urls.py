@@ -44,6 +44,13 @@ ifi_api_urlpatterns = [
         article_views.unpublish_page,
         name="article_unpublish",
     ),
+    # not article-specific -- CategoryPage/ArticleIndexPage's own title
+    # banner, see BannerStyleMixin/PageBannerStyle in article_models.py.
+    path(
+        "api/pages/<int:page_id>/banner-style/",
+        article_views.save_banner_style,
+        name="page_banner_style",
+    ),
 ]
 
 ifi_article_urlpatterns = [

@@ -228,6 +228,43 @@ def union_card_block():
     )
 
 
+def union_group_block():
+    """One titled group of union cards (see StudentUnionCategoryPage.
+    union_groups) -- factored out into its own function (rather than
+    inlined once, like union_card_block() above) since it's used in two
+    places: standalone, and nested inside a "row" of several groups shown
+    side by side (same StructBlock either way, see info_articles/
+    partials/union_group.html, which renders one of these regardless of
+    which context it came from)."""
+    return blocks.StructBlock(
+        [
+            (
+                "title",
+                blocks.CharBlock(
+                    required=True,
+                    help_text="Group heading, e.g. 'Faglige foreninger'.",
+                ),
+            ),
+            (
+                "general_info",
+                blocks.RichTextBlock(
+                    required=False,
+                    help_text="Optional -- a short paragraph about this group, shown below its title.",
+                ),
+            ),
+            (
+                "unions",
+                blocks.ListBlock(
+                    union_card_block(),
+                    help_text="Student unions in this group.",
+                ),
+            ),
+        ],
+        icon="group",
+        label="Union group",
+    )
+
+
 def tool_card_block():
     """Embeds a ToolPage as the same image+maker card used on the article
     index/category listing pages (see tool_card.css) -- same reasoning/
@@ -1303,13 +1340,70 @@ class ArticleBlockStyle(models.Model):
         ]
 
 
+class PageBannerStyle(models.Model):
+    """Optional decorative banner behind a page's title -- flat background
+    color, a scattered dot pattern (see .title-banner/.title-banner-circle
+    in category_card.css, title_banner.js), title text color, all editor-
+    chosen. Used by CategoryPage and ArticleIndexPage (see BannerStyleMixin
+    below) -- genuinely shared across both since it's keyed by
+    translation_key alone, not scoped to one Page subclass (unlike
+    ArticleStyle, which only ArticlePage uses -- see that model's own
+    docstring for the translation_key/locale-sharing reasoning, identical
+    here). Edited on-page via editor mode (banner_style.js), not a Wagtail
+    FieldPanel -- deliberately outside Wagtail's revision/publish system,
+    same reasoning as ArticleStyle's own docstring.
+
+    Every color field is blank by default rather than defaulting to a
+    fixed hex -- "never explicitly chosen yet" and "explicitly chosen"
+    need to stay distinguishable so the on-page panel's own reset-to-
+    default can tell them apart. Templates apply the actual fallback color
+    at render time (see article_category_page.html/article_index_page.html)."""
+
+    translation_key = models.UUIDField(unique=True)
+
+    show_banner = models.BooleanField(default=False)
+    banner_color = models.CharField(max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR])
+    banner_dot_color = models.CharField(max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR])
+    banner_text_color = models.CharField(max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR])
+
+    # blank falls back to a fixed default (60/14 rem, see |default in
+    # article_category_page.html/article_index_page.html/
+    # studentunion_category_page.html) same as banner_color etc do for
+    # their own hex -- unlike ArticleBlockStyle.width_rem/height_rem,
+    # there's no meaningful "auto" here (the banner isn't a card sized by
+    # its own content, this is deliberately a fixed platform default, not
+    # a sentinel).
+    banner_width_rem = models.FloatField(null=True, blank=True)
+    banner_height_rem = models.FloatField(null=True, blank=True)
+    # title font size inside the banner specifically -- independent of the
+    # plain (bannerless) .category-page h1/.article-index-page h1 font-
+    # size rule in category_card.css, which this overrides via inline
+    # style when set (see article_category_page.html/article_index_page.html).
+    banner_font_size = models.FloatField(null=True, blank=True)
+
+
+class BannerStyleMixin:
+    """Adds .banner_style (get-or-create PageBannerStyle row, keyed by this
+    page's own translation_key -- shared across every locale translation,
+    same reasoning as ArticlePage.style) to any Page subclass that mixes
+    this in. Currently CategoryPage and ArticleIndexPage."""
+
+    @cached_property
+    def banner_style(self):
+        return PageBannerStyle.objects.get_or_create(translation_key=self.translation_key)[0]
+
+
 # Model for article category to list articles within category
-class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+class CategoryPage(BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
     """A category of articles, optionally shown only during a specific date range."""
 
     template = "info_articles/pages/article_category_page.html"
 
     intro = RichTextField(blank=True)
+    general_info = RichTextField(
+        blank=True,
+        help_text="Optional -- a short paragraph of general information about this category, shown below the intro.",
+    )
 
     COLOR_CHOICES = [
         ("turq", "Turquoise"),
@@ -1340,6 +1434,7 @@ class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-a
 
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
+        FieldPanel("general_info"),
         FieldPanel("color"),
         FieldPanel("active_from"),
         FieldPanel("active_until"),
@@ -1383,8 +1478,13 @@ class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-a
         return nearest_index.section if nearest_index else None
 
     def get_context(self, request, *args, **kwargs):
-        """Add this category's live subcategories, union categories and articles to the template context."""
+        """Add this category's live subcategories, union categories and
+        articles to the template context, plus can_edit_style (whether the
+        visitor can use the on-page banner style panel, see
+        BannerStyleMixin/PageBannerStyle -- same permission check
+        save_banner_style itself enforces, article_views.py)."""
         context = super().get_context(request, *args, **kwargs)
+        context["can_edit_style"] = self.permissions_for_user(request.user).can_edit()
         subcategories = (
             CategoryPage.objects.child_of(self)
             .live()
@@ -1412,12 +1512,16 @@ class CategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-a
 
 
 # parent page to list articles categories
-class ArticleIndexPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+class ArticleIndexPage(BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
     """Landing page listing all article categories and suggested articles."""
 
     template = "info_articles/pages/article_index_page.html"  # custom path
 
     intro = RichTextField(blank=True)
+    general_info = RichTextField(
+        blank=True,
+        help_text="Optional -- a short paragraph of general information about this section, shown below the intro.",
+    )
 
     SECTION_CHOICES = [
         ("info_articles", "Info articles"),
@@ -1440,6 +1544,7 @@ class ArticleIndexPage(TranslationWarningMixin, Page):  # pylint: disable=too-ma
 
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
+        FieldPanel("general_info"),
         FieldPanel("section"),
     ]
 
@@ -1457,8 +1562,11 @@ class ArticleIndexPage(TranslationWarningMixin, Page):  # pylint: disable=too-ma
     # overriding for extra data
 
     def get_context(self, request, *args, **kwargs):
-        """Add main/seasonal categories, union categories and suggested articles to the template context."""
+        """Add main/seasonal categories, union categories and suggested
+        articles to the template context, plus can_edit_style (see
+        CategoryPage.get_context()'s own identical addition)."""
         context = super().get_context(request, *args, **kwargs)
+        context["can_edit_style"] = self.permissions_for_user(request.user).can_edit()
         categories = (
             CategoryPage.objects.child_of(self)
             .live()
@@ -1607,23 +1715,77 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
 
 
 # Model for the category listing all student unions
-class StudentUnionCategoryPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+class StudentUnionCategoryPage(BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
     """A category page whose only children are student union pages."""
 
     template = "info_articles/pages/studentunion_category_page.html"
 
     intro = RichTextField(blank=True)
+    general_info = RichTextField(
+        blank=True,
+        help_text="Optional -- a short paragraph of general information about student unions, shown below the intro.",
+    )
+
+    # optional, editor-curated groupings of unions (e.g. "Faglige
+    # foreninger"/"Sosiale foreninger") shown above the automatic "All
+    # unions" listing (see get_context()'s own unions queryset, still
+    # every live child UnionPage regardless of grouping -- a union placed
+    # in a group here isn't removed from that full listing, the two are
+    # independent/additive, not a partition). Reuses union_card_block()
+    # (the same "Student Union Card" block used inside ArticlePage's own
+    # body) for each group's entries rather than a second, parallel way of
+    # picking a UnionPage.
+    union_groups = StreamField(
+        [
+            ("group", union_group_block()),
+            (
+                "row",
+                blocks.StructBlock(
+                    [
+                        (
+                            "title",
+                            blocks.CharBlock(
+                                required=False,
+                                help_text="Optional -- a heading shown above the whole row, e.g. 'Foreninger'.",
+                            ),
+                        ),
+                        (
+                            "groups",
+                            blocks.ListBlock(
+                                union_group_block(),
+                                help_text="Union groups to place side by side in this row.",
+                            ),
+                        ),
+                    ],
+                    icon="grip",
+                    label="Row of union groups",
+                ),
+            ),
+        ],
+        use_json_field=True,
+        blank=True,
+        help_text=(
+            "Optional -- organize unions into titled groups, standalone or "
+            "side by side in a row. Every union also always appears in "
+            "the 'All unions' listing below, regardless of grouping."
+        ),
+    )
 
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
+        FieldPanel("general_info"),
+        FieldPanel("union_groups"),
     ]
 
     parent_page_types = ["ifi_home_app.ArticleIndexPage", "ifi_home_app.CategoryPage"]
     subpage_types = ["ifi_home_app.UnionPage"]
 
     def get_context(self, request, *args, **kwargs):
-        """Add this category's live student unions to the template context."""
+        """Add this category's live student unions to the template
+        context, plus can_edit_style (see CategoryPage.get_context()'s own
+        identical addition)."""
         context = super().get_context(request, *args, **kwargs)
+        context["can_edit_style"] = self.permissions_for_user(request.user).can_edit()
         context["unions"] = (
             UnionPage.objects.child_of(self)
             .live()

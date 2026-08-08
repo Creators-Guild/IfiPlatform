@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from wagtail.models import Locale
+from wagtail.models import Locale, Page
 
 from ifi_home_app.models.article_models import (
     BOX_COLOR_CHOICES,
@@ -19,6 +19,7 @@ from ifi_home_app.models.article_models import (
     HEX_COLOR_VALIDATOR,
     ArticleBlockStyle,
     ArticlePage,
+    PageBannerStyle,
     alignment_capable_block_ids,
 )
 
@@ -483,5 +484,67 @@ def unpublish_page(request, page_id):
         # set), same "already verified against nb, this is just a synced
         # side effect" reasoning as the publish side.
         translation.unpublish(log_action=True)
+
+    return JsonResponse({"ok": True})
+
+
+@require_POST
+def save_banner_style(request, page_id):
+    """Save show_banner/banner_color/banner_dot_color/banner_text_color/
+    banner_width_rem/banner_height_rem/banner_font_size -- a plain upsert
+    onto the page's shared PageBannerStyle row (see BannerStyleMixin.
+    banner_style in article_models.py), same pattern as save_quick_style.
+    Not ArticlePage-specific -- looks up the plain Wagtail Page
+    (translation_key/permissions_for_user are available on any page),
+    since CategoryPage and ArticleIndexPage both use this same endpoint
+    via BannerStyleMixin."""
+    page = get_object_or_404(Page, pk=page_id)
+
+    if not page.permissions_for_user(request.user).can_edit():
+        return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
+
+    try:
+        data = json.loads(request.body)
+        show_banner = bool(data["show_banner"])
+        banner_color = data.get("banner_color") or ""
+        banner_dot_color = data.get("banner_dot_color") or ""
+        banner_text_color = data.get("banner_text_color") or ""
+        # blank/0 both mean "auto" (see PageBannerStyle.banner_width_rem's
+        # own comment) -- None is stored either way here, no real field
+        # to preserve a distinction between them for.
+        width_rem = float(data["banner_width_rem"]) if data.get("banner_width_rem") else None
+        height_rem = float(data["banner_height_rem"]) if data.get("banner_height_rem") else None
+        font_size = float(data["banner_font_size"]) if data.get("banner_font_size") else None
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+        return JsonResponse({"error": "Invalid data."}, status=400)
+
+    for value, field_name in (
+        (banner_color, "banner_color"),
+        (banner_dot_color, "banner_dot_color"),
+        (banner_text_color, "banner_text_color"),
+    ):
+        if value:
+            try:
+                HEX_COLOR_VALIDATOR(value)
+            except ValidationError:
+                return JsonResponse({"error": f"Invalid {field_name}."}, status=400)
+
+    for value, field_name, bounds in (
+        (width_rem, "banner_width_rem", (1, 100)),
+        (height_rem, "banner_height_rem", (1, 60)),
+        (font_size, "banner_font_size", (0.5, 6)),
+    ):
+        if value is not None and not bounds[0] <= value <= bounds[1]:
+            return JsonResponse({"error": f"Invalid {field_name}."}, status=400)
+
+    style = PageBannerStyle.objects.get_or_create(translation_key=page.translation_key)[0]
+    style.show_banner = show_banner
+    style.banner_color = banner_color
+    style.banner_dot_color = banner_dot_color
+    style.banner_text_color = banner_text_color
+    style.banner_width_rem = width_rem
+    style.banner_height_rem = height_rem
+    style.banner_font_size = font_size
+    style.save()
 
     return JsonResponse({"ok": True})
