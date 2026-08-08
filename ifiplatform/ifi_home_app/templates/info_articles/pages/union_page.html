@@ -48,6 +48,11 @@
                     <div class="prose">{{ page.activities|richtext }}</div>
                 {% endif %}
 
+                {% if page.vedtekter %}
+                    <h2>{% trans "Bylaws" %}</h2>
+                    <div class="prose">{{ page.vedtekter|richtext }}</div>
+                {% endif %}
+
                 {% if page.sitting_members %}
                     <h2>{% trans "Sitting Members" %}</h2>
                     <div class="union-member-grid">
