@@ -1,5 +1,5 @@
 {% extends "home_base.html" %}
-{% load i18n l10n static wagtailcore_tags wagtailimages_tags %}
+{% load i18n l10n static wagtailcore_tags wagtailimages_tags article_extras %}
 
 {% block title %}{{ page.title }}{% endblock %}
 
@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_box.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_prose.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_multicolumn.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/articlecard.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
     {% if can_edit_style %}
         <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_quick_style.css' %}">
@@ -67,19 +68,46 @@ leaving a visible strip of the site's default background there instead.
             </div>
         {% endif %}
 
-        <div class="article-header{% if can_edit_style %} editable-block{% endif %}"
+        {% comment %}
+        title_style/meta_style/intro_style are looked up once here (rather
+        than each inside its own element below, as before) so the shared
+        .article-header trigger's own data attributes can expose all three
+        text colors -- title/meta/intro's own individual triggers below
+        still exist for Box, but text color itself now edits from here (see
+        FIELDS_BY_TYPE.article_header/title/meta/intro in
+        article_block_style.js: title/meta/intro no longer list text_color
+        at all, only this shared one does).
+        {% endcomment %}
+        {% with title_style=block_styles|lookup:"article-title" meta_style=block_styles|lookup:"article-meta" intro_style=block_styles|lookup:"article-intro" header_style=block_styles|lookup:"article-header" %}
+        <div class="article-header{% if header_style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
              {% if can_edit_style %}data-block-id="article-header" data-block-type="article_header"
              data-title-alignment="{{ page.title_alignment }}" data-intro-alignment="{{ page.intro_alignment }}" data-meta-alignment="{{ page.meta_alignment }}"
              data-side-padding="{{ page.header_side_padding|unlocalize }}"
-             data-title-font-size="{{ page.title_font_size|unlocalize }}" data-intro-font-size="{{ page.intro_font_size|unlocalize }}" data-meta-font-size="{{ page.meta_font_size|unlocalize }}"{% endif %}
+             data-title-font-size="{{ page.title_font_size|unlocalize }}" data-intro-font-size="{{ page.intro_font_size|unlocalize }}" data-meta-font-size="{{ page.meta_font_size|unlocalize }}"
+             data-title-text-color="{{ title_style.text_color }}" data-title-text-custom-color="{{ title_style.text_custom_color }}"
+             data-meta-text-color="{{ meta_style.text_color }}" data-meta-text-custom-color="{{ meta_style.text_custom_color }}"
+             data-intro-text-color="{{ intro_style.text_color }}" data-intro-text-custom-color="{{ intro_style.text_custom_color }}"
+             {% include "info_articles/partials/_block_box_data_attrs.html" with box=header_style.box %}{% endif %}
              style="--title-alignment: {{ page.title_alignment }}; --intro-alignment: {{ page.intro_alignment }}; --meta-alignment: {{ page.meta_alignment }}; --header-side-padding: {{ page.header_side_padding|unlocalize }}rem;
-                    --title-font-size: {{ page.title_font_size|unlocalize }}rem; --intro-font-size: {{ page.intro_font_size|unlocalize }}rem; --meta-font-size: {{ page.meta_font_size|unlocalize }}rem;">
+                    --title-font-size: {{ page.title_font_size|unlocalize }}rem; --intro-font-size: {{ page.intro_font_size|unlocalize }}rem; --meta-font-size: {{ page.meta_font_size|unlocalize }}rem;
+                    {% include "info_articles/partials/_block_box_style.html" with box=header_style.box side_padding=None %}">
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
 
-            <h1>{{ page.title }}</h1>
+            <h1 class="{% if title_style.box.enabled %}block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
+                {% if can_edit_style %}data-block-id="article-title" data-block-type="title"
+                data-side-padding="{{ title_style.side_padding|unlocalize }}"
+                {% include "info_articles/partials/_block_box_data_attrs.html" with box=title_style.box %}{% endif %}
+                style="{% include "info_articles/partials/_text_color_style.html" with text_color=title_style.text_color text_custom_color=title_style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=title_style.box side_padding=title_style.side_padding %}">{{ page.title }}
+                {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+            </h1>
 
             {% if page.author or page.published_date or page.last_published_at or needs_translation %}
-                <div class="article-meta">
+                <div class="article-meta{% if meta_style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
+                     {% if can_edit_style %}data-block-id="article-meta" data-block-type="meta"
+                     data-side-padding="{{ meta_style.side_padding|unlocalize }}"
+                     {% include "info_articles/partials/_block_box_data_attrs.html" with box=meta_style.box %}{% endif %}
+                     style="{% include "info_articles/partials/_text_color_style.html" with text_color=meta_style.text_color text_custom_color=meta_style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=meta_style.box side_padding=meta_style.side_padding %}">
+                    {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
                     {% if page.author %}
                         <span class="article-meta-item">{% trans "By" %} {{ page.author.get_full_name|default:page.author.username }}</span>
                     {% endif %}
@@ -94,9 +122,17 @@ leaving a visible strip of the site's default background there instead.
             {% endif %}
 
             {% if page.intro %}
-                <div class="intro">{{ page.intro|richtext }}</div>
+                <div class="intro{% if intro_style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
+                     {% if can_edit_style %}data-block-id="article-intro" data-block-type="intro"
+                     data-side-padding="{{ intro_style.side_padding|unlocalize }}"
+                     {% include "info_articles/partials/_block_box_data_attrs.html" with box=intro_style.box %}{% endif %}
+                     style="{% include "info_articles/partials/_text_color_style.html" with text_color=intro_style.text_color text_custom_color=intro_style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=intro_style.box side_padding=intro_style.side_padding %}">
+                    {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
+                    {{ page.intro|richtext }}
+                </div>
             {% endif %}
         </div>
+        {% endwith %}
 
         {% if page.has_headings %}
             <div class="toc-modal" id="toc-modal" role="dialog" aria-modal="true" aria-labelledby="toc-modal-title" hidden>
@@ -135,18 +171,22 @@ leaving a visible strip of the site's default background there instead.
             {% if page.has_headings %}
                 {# desktop/tablet only (see article_toc.css) -- mobile gets a "contents" icon next to the title and a full-screen modal instead #}
                 <div class="toc-open-sticky toc-widget">
-                    <button type="button" class="toc-open-button" id="toc-open-button-desktop"
-                            aria-haspopup="dialog" aria-controls="toc-overlay-desktop" aria-label="{% trans 'Contents' %}"
-                            aria-expanded="false">
-                        <svg class="toc-open-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <circle cx="4" cy="6" r="1.3" fill="currentColor"/>
-                            <path d="M9 6h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="4" cy="12" r="1.3" fill="currentColor"/>
-                            <path d="M9 12h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="4" cy="18" r="1.3" fill="currentColor"/>
-                            <path d="M9 18h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </button>
+                    <div class="toc-icon-editable{% if can_edit_style %} editable-block{% endif %}"
+                         {% if can_edit_style %}data-block-id="toc-icon" data-block-type="toc_icon" data-toc-icon-size="{{ page.toc_icon_size|unlocalize }}"{% endif %}>
+                        <button type="button" class="toc-open-button" id="toc-open-button-desktop"
+                                aria-haspopup="dialog" aria-controls="toc-overlay-desktop" aria-label="{% trans 'Contents' %}"
+                                aria-expanded="false">
+                            <svg class="toc-open-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <circle cx="4" cy="6" r="1.3" fill="currentColor"/>
+                                <path d="M9 6h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <circle cx="4" cy="12" r="1.3" fill="currentColor"/>
+                                <path d="M9 12h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <circle cx="4" cy="18" r="1.3" fill="currentColor"/>
+                                <path d="M9 18h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                        {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit table of contents icon size' %}">&#8942;</button>{% endif %}
+                    </div>
                     <div class="toc-overlay-panel" id="toc-overlay-desktop" role="dialog" aria-labelledby="toc-overlay-title-desktop" hidden>
                         <div class="toc-overlay-header">
                             <p class="toc-overlay-title" id="toc-overlay-title-desktop">{% trans "Contents" %}</p>

@@ -20,8 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const bgColorGroup = document.getElementById("quick-style-bg-color");
   const bgCustomColorInput = document.getElementById("quick-style-bg-custom-color");
   const bgPickerInput = document.getElementById("quick-style-bg-picker");
-  const tocIconSizeInput = document.getElementById("quick-style-toc-icon-size");
-  const tocIconSizeValue = document.getElementById("quick-style-toc-icon-size-value");
   const statusEl = document.getElementById("quick-style-status");
   const minimizeButton = document.getElementById("quick-style-minimize");
   const MINIMIZED_KEY = "ifiQuickStyleMinimized";
@@ -51,16 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
   fontSizeInput.addEventListener("input", () => {
     articlePage.style.setProperty("--content-font-size", `${fontSizeInput.value}rem`);
     fontSizeValue.textContent = fontSizeInput.value;
-    window.ifiUnsavedChanges.markDirty("quickStyle");
-  });
-
-  // the ToC icon and its own button circle scale together (article_toc.css's
-  // .toc-open-icon/.toc-open-button both key off this one variable), plus
-  // the gutter reserved for it so a bigger button doesn't get clipped
-  // against/overlap the article text next to it.
-  tocIconSizeInput.addEventListener("input", () => {
-    articlePage.style.setProperty("--toc-icon-size", `${tocIconSizeInput.value}rem`);
-    tocIconSizeValue.textContent = tocIconSizeInput.value;
     window.ifiUnsavedChanges.markDirty("quickStyle");
   });
 
@@ -212,9 +200,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     bgEnabledInput.checked = false;
     bgEnabledInput.dispatchEvent(new Event("change"));
-
-    tocIconSizeInput.value = panel.dataset.defaultTocIconSize;
-    tocIconSizeInput.dispatchEvent(new Event("input"));
   });
 
   // returns a Promise<{ok, error}> -- this panel has no Save button of its
@@ -242,7 +227,6 @@ document.addEventListener("DOMContentLoaded", () => {
         content_bg_enabled: bgEnabledInput.checked,
         content_bg_color: bgColorGroup.dataset.value,
         content_bg_custom_color: bgCustomColorInput.value,
-        toc_icon_size: tocIconSizeInput.value,
       }),
     })
       .then((response) =>

@@ -33,22 +33,59 @@ BOX_FIELDS = {
     "box_margin",
 }
 
+# not box_* -- applies independent of whether a block's box is enabled (see
+# _effective_heading_style() in article_models.py), available wherever
+# font_size is (or, for title/meta/intro, wherever their own box is).
+TEXT_COLOR_FIELDS = {"text_color", "text_custom_color"}
+
 BLOCK_STYLE_FIELDS = {
-    "heading": {"side_padding", "alignment", "font_size"} | BOX_FIELDS,
-    "styled_text": {"side_padding", "alignment", "font_size"} | BOX_FIELDS,
+    "heading": {"side_padding", "alignment", "font_size"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
+    "styled_text": {"side_padding", "alignment", "font_size"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
     "image": {"alignment", "width_rem", "side_padding"} | BOX_FIELDS,
+    # an image's own title (alt_text)/caption, boxed together as one unit
+    # (its own <figcaption>) independent of the image's own box above --
+    # keyed by a synthesized "<image-block-id>-caption" id, same pattern as
+    # a multi_column column's own title.
+    "image_caption": {"side_padding"} | BOX_FIELDS,
+    # the title/caption text's own alignment/font-size/side-padding/color,
+    # independent of each other and of the figcaption's own box above --
+    # keyed by "<image-block-id>-cap-title"/"-cap-body".
+    "image_title": {"side_padding", "alignment", "font_size"} | TEXT_COLOR_FIELDS,
+    "image_caption_body": {"side_padding", "alignment", "font_size"} | TEXT_COLOR_FIELDS,
     "multi_column": {"side_padding", "gap", "column_weights"} | BOX_FIELDS,
-    "column": set(BOX_FIELDS),
+    "column": {"side_padding"} | BOX_FIELDS,
+    # a multi_column column's own title -- alignment/font-size/text-color
+    # only (no box or side padding of its own -- it's edited from the same
+    # trigger/panel as its column, see FIELDS_BY_TYPE.column in
+    # article_block_style.js, which sends this as a second, independent
+    # save request alongside the column's own box fields), keyed by a
+    # synthesized "<column-uuid>-title" id (see _effective_block_styles()
+    # in article_models.py).
+    "column_title": {"alignment", "font_size"} | TEXT_COLOR_FIELDS,
+    # title/meta/intro (the article-header group), keyed by fixed pseudo
+    # ids ("article-title"/"article-meta"/"article-intro", see
+    # ArticlePage.get_context()). Alignment/font-size for these three
+    # already live on dedicated ArticlePage fields, edited via
+    # save_header_style instead -- side padding/box/text color are saved as
+    # ArticleBlockStyle rows for them (side padding and box from their own
+    # individual trigger, text color from the shared article_header one).
+    "title": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
+    "meta": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
+    "intro": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
+    # the title/meta/intro group as a whole, keyed by the fixed pseudo id
+    # "article-header" -- box only (alignment/font-size are plain
+    # ArticlePage fields, saved via save_header_style instead; side padding
+    # is too, see ArticlePage.get_context()'s own comment on this row).
+    "article_header": set(BOX_FIELDS),
 }
 
 
 @require_POST
 def save_quick_style(request, page_id):
     """Save content_side_padding/content_alignment/content_font_size/
-    content_bg_enabled/content_bg_color/content_bg_custom_color/
-    toc_icon_size for one ArticlePage and publish immediately -- this panel
-    is a quick style tweak, not the full editor, so there's no separate
-    draft step."""
+    content_bg_enabled/content_bg_color/content_bg_custom_color for one
+    ArticlePage and publish immediately -- this panel is a quick style tweak,
+    not the full editor, so there's no separate draft step."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.permissions_for_user(request.user).can_edit():
@@ -62,7 +99,6 @@ def save_quick_style(request, page_id):
         bg_enabled = bool(data["content_bg_enabled"])
         bg_color = data["content_bg_color"]
         bg_custom_color = data.get("content_bg_custom_color") or ""
-        toc_icon_size = float(data["toc_icon_size"])
     except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
@@ -84,7 +120,6 @@ def save_quick_style(request, page_id):
     page.content_bg_enabled = bg_enabled
     page.content_bg_color = bg_color
     page.content_bg_custom_color = bg_custom_color
-    page.toc_icon_size = toc_icon_size
     revision = page.save_revision(user=request.user)
     revision.publish(user=request.user)
 
@@ -150,10 +185,14 @@ def save_block_style(request, page_id):
     for color_field, custom_field in (
         ("box_border_color", "box_border_custom_color"),
         ("box_bg_color", "box_bg_custom_color"),
+        # unlike border/bg, "" is a real value here -- text color has no
+        # fallback color of its own, "" means "leave the text color alone"
+        # (see BLOCK_STYLE_DEFAULTS["heading"]["text_color"]).
+        ("text_color", "text_custom_color"),
     ):
         if color_field in allowed_fields and data.get(color_field) is not None:
             color = data[color_field]
-            if color not in dict(COLOR_CHOICES):
+            if color and color not in dict(COLOR_CHOICES):
                 return JsonResponse({"error": f"Invalid {color_field}."}, status=400)
             defaults[color_field] = color
         if custom_field in allowed_fields and data.get(custom_field) is not None:
@@ -241,6 +280,34 @@ def save_hero_image_style(request, page_id):
     page.hero_image_position = alignment
     page.hero_image_width_rem = width_rem
     page.hero_image_side_padding = side_padding
+    revision = page.save_revision(user=request.user)
+    revision.publish(user=request.user)
+
+    return JsonResponse({"ok": True})
+
+
+@require_POST
+def save_toc_icon_style(request, page_id):
+    """Save toc_icon_size for one ArticlePage and publish immediately. Same
+    pattern as save_header_style/save_hero_image_style -- a plain
+    ArticlePage field, not StreamField content or a per-block
+    ArticleBlockStyle override, since there's only ever one table-of-
+    contents icon on the page. Edited via its own trigger next to the icon
+    itself (article_block_style.js's "toc_icon" pseudo block-type), not the
+    global quick-style panel -- it used to live there, but it's specific to
+    one element on the page, not a whole-article default."""
+    page = get_object_or_404(ArticlePage, pk=page_id).style_target
+
+    if not page.permissions_for_user(request.user).can_edit():
+        return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
+
+    try:
+        data = json.loads(request.body)
+        toc_icon_size = float(data["toc_icon_size"])
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+        return JsonResponse({"error": "Invalid data."}, status=400)
+
+    page.toc_icon_size = toc_icon_size
     revision = page.save_revision(user=request.user)
     revision.publish(user=request.user)
 

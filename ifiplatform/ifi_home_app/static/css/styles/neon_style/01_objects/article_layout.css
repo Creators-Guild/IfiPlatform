@@ -110,4 +110,24 @@ configured. */
     margin-left: 0;
     margin-right: 0;
   }
+
+  /* same "ignore editor-picked sizing below this breakpoint" rule as
+  margin/alignment above, extended to the title/intro/meta font sizes
+  (ArticlePage.title_font_size/intro_font_size/meta_font_size,
+  --title-font-size/etc set on .article-header) and their own box padding
+  (h1/.intro/.article-meta are independently boxable -- see
+  _effective_box_style() -- box.padding renders inline here as
+  "padding: Xrem"). Box background/border/radius stay untouched -- only
+  sizing that can overflow or read badly this narrow gets reset. */
+  .article-header {
+    --title-font-size: 2rem !important;
+    --intro-font-size: 1rem !important;
+    --meta-font-size: 0.9rem !important;
+  }
+
+  .article-page h1,
+  .article-header > .intro,
+  .article-header > .article-meta {
+    padding: 0 !important;
+  }
 }

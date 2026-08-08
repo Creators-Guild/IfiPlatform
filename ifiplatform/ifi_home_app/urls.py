@@ -29,6 +29,11 @@ ifi_api_urlpatterns = [
         article_views.save_hero_image_style,
         name="article_hero_image_style",
     ),
+    path(
+        "api/articles/<int:page_id>/toc-icon-style/",
+        article_views.save_toc_icon_style,
+        name="article_toc_icon_style",
+    ),
 ]
 
 ifi_article_urlpatterns = [

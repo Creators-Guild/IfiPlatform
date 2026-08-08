@@ -126,6 +126,33 @@ def article_styled_text_block():
     )
 
 
+def article_card_block():
+    """Embeds another ArticlePage as a homepage-style card (hero image,
+    title, author/date meta, truncated intro) -- lets an editor recommend a
+    related article inline, in the body or inside a multi_column column,
+    reusing the exact same article_card.html partial as the homepage/
+    newsbar/article-index card grids rather than duplicating that markup.
+    A function (not a shared instance) for the same reason article_image_
+    block()/article_styled_text_block() are: Wagtail block instances carry
+    per-use bookkeeping and aren't safe to reuse across multiple StreamField/
+    StreamBlock definitions (this is used at both the top level and inside
+    multi_column's column content)."""
+    return blocks.StructBlock(
+        [
+            (
+                "article",
+                blocks.PageChooserBlock(
+                    page_type="ifi_home_app.ArticlePage",
+                    required=True,
+                    help_text="The article to recommend.",
+                ),
+            ),
+        ],
+        icon="doc-full",
+        label="Article Card",
+    )
+
+
 def _body_content_blocks():
     """The block types available at the top level of an article body --
     factored out so the 'box' block below can offer the exact same set
@@ -195,6 +222,7 @@ def _body_content_blocks():
                                                     article_styled_text_block(),
                                                 ),
                                                 ("image", article_image_block()),
+                                                ("article_card", article_card_block()),
                                             ],
                                             required=False,
                                         ),
@@ -230,6 +258,7 @@ def _body_content_blocks():
             ),
         ),
         ("image", article_image_block()),
+        ("article_card", article_card_block()),
     ]
 
 
@@ -264,9 +293,30 @@ def _iter_toc_entries(body_stream):
 # position, etc.), which still carry their own real default= and aren't
 # read from here for rendering, only for the reset button.
 BLOCK_STYLE_DEFAULTS = {
-    "heading": {"alignment": "left", "font_size": 1.5, "side_padding": 0},
-    "styled_text": {"side_padding": 1, "alignment": "left", "font_size": 1},
+    "heading": {
+        "alignment": "left",
+        "font_size": 1.5,
+        "side_padding": 0,
+        # blank -- no override means "leave the text color alone" (inherit
+        # the page's normal text color) rather than a real color of its own.
+        "text_color": "",
+        "text_custom_color": "",
+    },
+    "styled_text": {
+        "side_padding": 1,
+        "alignment": "left",
+        "font_size": 1,
+        "text_color": "",
+        "text_custom_color": "",
+    },
     "image": {"alignment": "center", "width_rem": 20, "side_padding": 0},
+    # an image's own title (alt_text) and caption text -- independent of
+    # each other and of the figcaption's own box (see "image_caption"
+    # below) -- matches article_image.css's own plain defaults (both
+    # inherit the figcaption's 0.85rem/center, .image-title's own
+    # font-weight:bold stays a fixed CSS rule, not editable here).
+    "image_title": {"alignment": "center", "font_size": 0.85, "side_padding": 0, "text_color": "", "text_custom_color": ""},
+    "image_caption_body": {"alignment": "center", "font_size": 0.85, "side_padding": 0, "text_color": "", "text_custom_color": ""},
     "multi_column": {"side_padding": 1, "gap": 2, "column_weight": 1},
     "article_header": {
         "side_padding": 0,
@@ -278,6 +328,9 @@ BLOCK_STYLE_DEFAULTS = {
         "meta_font_size": 0.9,
     },
     "hero_image": {"alignment": "right", "width_rem": 18, "side_padding": 0},
+    # not a StreamField block or per-block override -- there's only ever one
+    # table-of-contents icon on the page (ArticlePage.toc_icon_size).
+    "toc_icon": {"toc_icon_size": 1.3},
     # box styling is available on every body block (heading/styled_text/
     # image/multi_column) and independently on each multi_column sub-column
     # (keyed by that column's own stable id -- see _effective_block_styles())
@@ -301,6 +354,10 @@ BLOCK_STYLE_DEFAULTS = {
         "margin": 0,
     },
 }
+# a multi_column column's own title offers "the same options as a heading"
+# (see _effective_heading_style()), so it shares that same defaults dict --
+# not a separate copy that could drift out of sync with it.
+BLOCK_STYLE_DEFAULTS["column_title"] = BLOCK_STYLE_DEFAULTS["heading"]
 
 
 def _effective_box_style(override):
@@ -355,6 +412,37 @@ def _effective_box_style(override):
     }
 
 
+def _effective_heading_style(override, defaults):
+    """The effective font_size/side_padding/alignment/box for one heading-
+    shaped piece of text: any ArticleBlockStyle override for it, falling
+    back field-by-field to `defaults` (BLOCK_STYLE_DEFAULTS['heading'] for
+    an actual heading block, but reused as-is for anything else that should
+    offer "the same options as a heading" -- currently also a multi_column
+    column's own title, see _effective_block_styles() below)."""
+    return {
+        "font_size": (
+            override.font_size if override and override.font_size is not None else defaults["font_size"]
+        ),
+        "side_padding": (
+            override.side_padding
+            if override and override.side_padding is not None
+            else defaults["side_padding"]
+        ),
+        "alignment": (
+            override.alignment if override and override.alignment else defaults["alignment"]
+        ),
+        "text_color": (
+            override.text_color if override and override.text_color else defaults["text_color"]
+        ),
+        "text_custom_color": (
+            override.text_custom_color
+            if override and override.text_custom_color
+            else defaults["text_custom_color"]
+        ),
+        "box": _effective_box_style(override),
+    }
+
+
 def _effective_block_styles(body_stream, overrides_by_block_id):
     """Recursively walks a body StreamValue (or a column's own nested
     content, same block types) yielding {block_id: {...}} for every
@@ -375,23 +463,7 @@ def _effective_block_styles(body_stream, overrides_by_block_id):
         block_id = str(block.id)
         override = overrides_by_block_id.get(block_id)
         if block.block_type in ("heading", "styled_text"):
-            defaults = BLOCK_STYLE_DEFAULTS[block.block_type]
-            styles[block_id] = {
-                "font_size": (
-                    override.font_size
-                    if override and override.font_size is not None
-                    else defaults["font_size"]
-                ),
-                "side_padding": (
-                    override.side_padding
-                    if override and override.side_padding is not None
-                    else defaults["side_padding"]
-                ),
-                "alignment": (
-                    override.alignment if override and override.alignment else defaults["alignment"]
-                ),
-                "box": _effective_box_style(override),
-            }
+            styles[block_id] = _effective_heading_style(override, BLOCK_STYLE_DEFAULTS[block.block_type])
         elif block.block_type == "image":
             defaults = BLOCK_STYLE_DEFAULTS["image"]
             styles[block_id] = {
@@ -410,6 +482,35 @@ def _effective_block_styles(body_stream, overrides_by_block_id):
                 ),
                 "box": _effective_box_style(override),
             }
+            # the image's own title (alt_text, also shown visibly -- see
+            # article_image_block.html) and caption are boxable together as
+            # one unit (its own <figcaption>, wrapping both), independent of
+            # the image's own box above -- synthesized id, same pattern as a
+            # multi_column column's own title below.
+            caption_id = f"{block_id}-caption"
+            caption_override = overrides_by_block_id.get(caption_id)
+            styles[caption_id] = {
+                "side_padding": (
+                    caption_override.side_padding
+                    if caption_override and caption_override.side_padding is not None
+                    else 0
+                ),
+                "box": _effective_box_style(caption_override),
+            }
+            # the title/caption text themselves (alignment/font size/side
+            # padding/color) are further independent of each other and of
+            # the figcaption's own box above -- two more synthesized ids,
+            # each reusing _effective_heading_style() like a column's own
+            # title does (its own "box" entry is simply unused here, the
+            # figcaption's own box above is the only one that applies).
+            title_text_id = f"{block_id}-cap-title"
+            styles[title_text_id] = _effective_heading_style(
+                overrides_by_block_id.get(title_text_id), BLOCK_STYLE_DEFAULTS["image_title"]
+            )
+            caption_text_id = f"{block_id}-cap-body"
+            styles[caption_text_id] = _effective_heading_style(
+                overrides_by_block_id.get(caption_text_id), BLOCK_STYLE_DEFAULTS["image_caption_body"]
+            )
         elif block.block_type == "multi_column":
             defaults = BLOCK_STYLE_DEFAULTS["multi_column"]
             own_weights = [defaults["column_weight"]] * len(block.value["columns"])
@@ -430,9 +531,24 @@ def _effective_block_styles(body_stream, overrides_by_block_id):
             }
             for bound_column in block.value["columns"].bound_blocks:
                 column_id = str(bound_column.id)
+                column_override = overrides_by_block_id.get(column_id)
                 styles[column_id] = {
-                    "box": _effective_box_style(overrides_by_block_id.get(column_id)),
+                    "side_padding": (
+                        column_override.side_padding
+                        if column_override and column_override.side_padding is not None
+                        else 0
+                    ),
+                    "box": _effective_box_style(column_override),
                 }
+                # a column's own title (plain text on the column struct
+                # itself, not a real block with a Wagtail-assigned id of its
+                # own) gets the same font_size/alignment/box options as an
+                # actual heading block -- synthesized id so it can still use
+                # the same ArticleBlockStyle override table.
+                title_id = f"{column_id}-title"
+                styles[title_id] = _effective_heading_style(
+                    overrides_by_block_id.get(title_id), BLOCK_STYLE_DEFAULTS["heading"]
+                )
                 styles.update(
                     _effective_block_styles(bound_column.value["content"], overrides_by_block_id)
                 )
@@ -738,7 +854,35 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         overrides_by_block_id = {
             style.block_id: style for style in self.style_target.block_styles.all()
         }
-        context["block_styles"] = _effective_block_styles(self.body, overrides_by_block_id)
+        block_styles = _effective_block_styles(self.body, overrides_by_block_id)
+        # title/meta/intro aren't part of the body StreamField (they're
+        # plain ArticlePage fields, see .article-header in article_page.html)
+        # so _effective_block_styles() above never sees them -- box styling
+        # for each is added the same way as everything else though, via
+        # fixed pseudo ids in the same ArticleBlockStyle override table.
+        for pseudo_id in ("article-title", "article-meta", "article-intro"):
+            override = overrides_by_block_id.get(pseudo_id)
+            block_styles[pseudo_id] = {
+                "side_padding": (
+                    override.side_padding if override and override.side_padding is not None else 0
+                ),
+                "box": _effective_box_style(override),
+                "text_color": override.text_color if override and override.text_color else "",
+                "text_custom_color": (
+                    override.text_custom_color if override and override.text_custom_color else ""
+                ),
+            }
+        # the title/meta/intro group as a whole is also independently
+        # boxable, same as multi_column's own grid wrapper is on top of
+        # each of its columns -- side padding isn't part of this one (see
+        # header_side_padding, a plain ArticlePage field driving a CSS
+        # custom property in article_page.html instead of this generic
+        # mechanism, since the header's own accent underline needs its
+        # margin to move together with the indent -- see article_layout.css).
+        block_styles["article-header"] = {
+            "box": _effective_box_style(overrides_by_block_id.get("article-header")),
+        }
+        context["block_styles"] = block_styles
         context["block_style_defaults"] = BLOCK_STYLE_DEFAULTS
         return context
 
@@ -764,7 +908,10 @@ class ArticleBlockStyle(models.Model):
     article = models.ForeignKey(
         "ArticlePage", on_delete=models.CASCADE, related_name="block_styles"
     )
-    block_id = models.CharField(max_length=36)
+    # a real block's own UUID (36 chars) in most cases, but a few synthetic
+    # ids built from one (e.g. "<column-uuid>-title" for a multi_column
+    # column's own title, see _effective_block_styles()) run longer.
+    block_id = models.CharField(max_length=48)
 
     side_padding = models.FloatField(null=True, blank=True)
     alignment = models.CharField(
@@ -799,6 +946,13 @@ class ArticleBlockStyle(models.Model):
     box_radius = models.FloatField(null=True, blank=True)
     box_bg_color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
     box_bg_custom_color = models.CharField(
+        max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
+    )
+    # NOT box_* -- unlike bg/border, text color applies independent of
+    # whether the box itself is on (see _effective_heading_style()), so it
+    # isn't part of _effective_box_style()'s own dict.
+    text_color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
+    text_custom_color = models.CharField(
         max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
     )
     box_padding = models.FloatField(null=True, blank=True)

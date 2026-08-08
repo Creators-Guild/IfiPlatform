@@ -306,6 +306,15 @@ via margin-left: auto. */
   position: relative;
 }
 
+/* same collapsible-header idea as Box above, but for a plain label with no
+checkbox alongside it (the image title/caption text sections -- there's no
+"enabled" state to toggle, just whether their fields are showing). */
+.block-style-caption-header {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .block-style-box-collapse-toggle {
   margin-left: auto;
   border: none;

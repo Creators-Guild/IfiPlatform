@@ -17,9 +17,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // center/bottom vertical layout, a different axis entirely), not left/
   // center/right text alignment, so it's deliberately left out here.
   const FIELDS_BY_TYPE = {
-    heading: ["side_padding", "alignment", "font_size"],
-    styled_text: ["side_padding", "alignment", "font_size"],
+    heading: ["side_padding", "alignment", "font_size", "text_color"],
+    styled_text: ["side_padding", "alignment", "font_size", "text_color"],
     image: ["alignment", "width_rem", "side_padding"],
+    // an image's own title (alt_text)/caption, boxed together as one unit
+    // (its own <figcaption>, see article_image_block.html) -- box plus its
+    // own side padding, same shape as "column" below.
+    image_caption: ["side_padding"],
     // per-column weight fields aren't listed here -- there's a variable
     // number of them (1-4, multi_column's own min/max_num), added to this
     // at runtime in openPanelFor() based on the block actually being
@@ -27,26 +31,53 @@ document.addEventListener("DOMContentLoaded", () => {
     multi_column: ["side_padding", "gap"],
     // a multi_column sub-column -- not a block type of its own in the
     // StreamField, just a ListBlock item id (see article_models.py's
-    // _effective_block_styles()) with no style but box (below).
-    column: [],
+    // _effective_block_styles()), with its own side padding plus box. Its
+    // title (if it has one) shares this same trigger/panel rather than its
+    // own -- alignment/font_size/text_color are added at runtime in
+    // openPanelFor() when the column actually has one (data-title-block-
+    // id), same pattern as multi_column's own column_weight_N fields
+    // above. Saved as a second, independent request in recordPendingEdit()
+    // (block_id "<column id>-title", block_type "column_title") alongside
+    // the column's own side padding/box.
+    column: ["side_padding"],
+    // title/meta/intro (the article-header group) -- side padding plus
+    // box. Alignment/font-size/text-color for these three all live in the
+    // shared header editor instead (see article_header below and
+    // HEADER_TEXT_COLOR_GROUPS) -- their own individual trigger here is
+    // side padding and Box, nothing else.
+    title: ["side_padding"],
+    meta: ["side_padding"],
+    intro: ["side_padding"],
     // not a StreamField block -- the title/intro/meta group above the body,
     // wrapped together so they share one trigger (see article_page.html's
-    // .article-header). Saved separately via save_header_style, plain
-    // ArticlePage fields rather than an ArticleBlockStyle row.
+    // .article-header). Alignment/font-size saved via save_header_style,
+    // plain ArticlePage fields; text color for each saved as its own
+    // separate ArticleBlockStyle row instead (block_id "article-title"/
+    // "article-meta"/"article-intro", same rows title/meta/intro's own
+    // individual trigger used to write text_color to -- see
+    // HEADER_TEXT_COLOR_GROUPS/recordPendingEdit below), since that's a
+    // per-block-style concern, not a plain ArticlePage field.
     article_header: [
       "side_padding",
       "title_alignment",
       "title_font_size",
-      "intro_alignment",
-      "intro_font_size",
+      "title_text_color",
       "meta_alignment",
       "meta_font_size",
+      "meta_text_color",
+      "intro_alignment",
+      "intro_font_size",
+      "intro_text_color",
     ],
     // same fields as image, and reuses the exact same generic alignment/
     // width/padding inputs below -- also not a StreamField block though
     // (hero_image is a set of plain ArticlePage fields, see article_models.py),
     // so it needs the same special-cased save endpoint as article_header.
     hero_image: ["alignment", "width_rem", "side_padding"],
+    // not a StreamField block either -- there's only ever one
+    // table-of-contents icon on the page (ArticlePage.toc_icon_size), same
+    // special-cased save endpoint as article_header/hero_image.
+    toc_icon: ["toc_icon_size"],
   };
   const CLASS_SWAP = {
     heading: { alignment: { prefix: "heading--align-", values: ["left", "center", "right"] } },
@@ -55,13 +86,32 @@ document.addEventListener("DOMContentLoaded", () => {
     hero_image: { alignment: { prefix: "hero-image--", values: ["left", "center", "right"] } },
   };
 
+
   // box styling (border/background/radius/padding/margin) is available on
   // every one of these -- appended to FIELDS_BY_TYPE at runtime (see
   // openPanelFor/buildSaveRequest below) rather than listed per type above,
   // since it's the same fixed set everywhere it applies. Deliberately not
   // offered on article_header/hero_image -- those are plain ArticlePage
   // fields, not part of the per-block override table box styling lives in.
-  const BOX_CAPABLE_TYPES = new Set(["heading", "styled_text", "image", "multi_column", "column"]);
+  const BOX_CAPABLE_TYPES = new Set([
+    "heading",
+    "styled_text",
+    "image",
+    "image_caption",
+    "multi_column",
+    "column",
+    "title",
+    "meta",
+    "intro",
+    // the title/meta/intro group as a whole, same as multi_column's own
+    // grid wrapper is boxable on top of each of its columns -- its own
+    // side padding is deliberately excluded from this (see paddingInput's
+    // own "input" listener and applyBoxStyle below, both special-case
+    // this type to keep using --header-side-padding instead of margin-
+    // left/right, since that CSS custom property's accent-underline
+    // reasoning still applies regardless of whether the box itself is on).
+    "article_header",
+  ]);
   // box_bg_custom_color/box_border_custom_color aren't listed separately --
   // they're not their own panel field, just the value of the "Custom" hex
   // swatch inside box_bg_color/box_border_color (see the mini panel
@@ -178,6 +228,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const paddingValue = document.getElementById("block-style-padding-value");
   const fontSizeInput = document.getElementById("block-style-font-size");
   const fontSizeValue = document.getElementById("block-style-font-size-value");
+  const fontSizeLabel = document.getElementById("block-style-font-size-label");
+  const textColorLabel = document.getElementById("block-style-text-color-label");
   const widthInput = document.getElementById("block-style-width");
   const widthValue = document.getElementById("block-style-width-value");
   const alignmentGroup = document.getElementById("block-style-alignment");
@@ -192,6 +244,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const metaFontSizeValue = document.getElementById("block-style-meta-font-size-value");
   const gapInput = document.getElementById("block-style-gap");
   const gapValue = document.getElementById("block-style-gap-value");
+  const tocIconSizeInput = document.getElementById("block-style-toc-icon-size");
+  const tocIconSizeValue = document.getElementById("block-style-toc-icon-size-value");
   const MAX_COLUMNS = 4;
   const columnWeightInputs = Array.from({ length: MAX_COLUMNS }, (_, i) =>
     document.getElementById(`block-style-column-weight-${i}`)
@@ -202,11 +256,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.getElementById("block-style-mini-panel-status");
 
   const boxEnabledInput = document.getElementById("block-style-box-enabled");
-  const boxCollapseToggle = document.getElementById("block-style-box-collapse-toggle");
-  const boxFieldsWrapper = document.getElementById("block-style-box-fields");
   const boxBgColorGroup = document.getElementById("block-style-box-bg-color");
   const boxBgCustomColorInput = document.getElementById("block-style-box-bg-custom-color");
   const boxBgPickerInput = document.getElementById("block-style-box-bg-picker");
+  const styleLabel = document.getElementById("block-style-style-label");
+  // NOT box-scoped -- applies independent of that block's own box (see
+  // applyTextColor below), so these live outside the Box section entirely
+  // in the template, in their own "Style" section alongside font-size/
+  // alignment.
+  const textColorGroup = document.getElementById("block-style-text-color");
+  const textCustomColorInput = document.getElementById("block-style-text-custom-color");
+  const textPickerInput = document.getElementById("block-style-text-picker");
   const boxBorderVisibleInput = document.getElementById("block-style-box-border-visible");
   const boxBorderWidthInput = document.getElementById("block-style-box-border-width");
   const boxBorderWidthValue = document.getElementById("block-style-box-border-width-value");
@@ -219,6 +279,88 @@ document.addEventListener("DOMContentLoaded", () => {
   const boxPaddingValue = document.getElementById("block-style-box-padding-value");
   const boxMarginInput = document.getElementById("block-style-box-margin");
   const boxMarginValue = document.getElementById("block-style-box-margin-value");
+
+  // an image_caption's own title (alt_text)/caption text -- see
+  // article_image_block.html's data-title-*/data-caption-* attributes and
+  // BLOCK_STYLE_DEFAULTS["image_title"]/["image_caption_body"] in
+  // article_models.py. Two near-identical groups (same shape as the
+  // generic alignment/font-size/side-padding/text-color fields used
+  // everywhere else), each with its own dedicated panel fields since both
+  // need to be visible/editable at once in this one shared panel -- driven
+  // generically off this config rather than duplicating the wiring below
+  // twice by hand.
+  const CAPTION_TEXT_GROUPS = [
+    {
+      datasetPrefix: "title",
+      styleFieldPrefix: "caption_title",
+      blockType: "image_title",
+      defaultsKey: "image_title",
+      spanSelector: ":scope > .image-title",
+      alignmentGroup: document.getElementById("block-style-caption-title-alignment"),
+      fontSizeInput: document.getElementById("block-style-caption-title-font-size"),
+      fontSizeValue: document.getElementById("block-style-caption-title-font-size-value"),
+      paddingInput: document.getElementById("block-style-caption-title-padding"),
+      paddingValue: document.getElementById("block-style-caption-title-padding-value"),
+      colorGroup: document.getElementById("block-style-caption-title-text-color"),
+      customColorInput: document.getElementById("block-style-caption-title-custom-color"),
+      pickerInput: document.getElementById("block-style-caption-title-picker"),
+    },
+    {
+      datasetPrefix: "caption",
+      styleFieldPrefix: "caption_body",
+      blockType: "image_caption_body",
+      defaultsKey: "image_caption_body",
+      spanSelector: ":scope > .image-caption",
+      alignmentGroup: document.getElementById("block-style-caption-body-alignment"),
+      fontSizeInput: document.getElementById("block-style-caption-body-font-size"),
+      fontSizeValue: document.getElementById("block-style-caption-body-font-size-value"),
+      paddingInput: document.getElementById("block-style-caption-body-padding"),
+      paddingValue: document.getElementById("block-style-caption-body-padding-value"),
+      colorGroup: document.getElementById("block-style-caption-body-text-color"),
+      customColorInput: document.getElementById("block-style-caption-body-custom-color"),
+      pickerInput: document.getElementById("block-style-caption-body-picker"),
+    },
+  ];
+
+  // title/meta/intro's own text color -- edited from the shared
+  // article_header panel now (see FIELDS_BY_TYPE.title/meta/intro above,
+  // now empty besides box), but still saved as each one's own separate
+  // ArticleBlockStyle row (block_id "article-title"/"article-meta"/
+  // "article-intro", block_type "title"/"meta"/"intro" -- the exact same
+  // rows their own individual trigger used to write to), alongside
+  // article_header's own save_header_style request -- see
+  // recordPendingEdit below. targetSelector picks the live-preview target
+  // out of currentBlockEl (.article-header while this group is being
+  // edited), same idea as CAPTION_TEXT_GROUPS' spanSelector.
+  const HEADER_TEXT_COLOR_GROUPS = [
+    {
+      datasetPrefix: "title",
+      blockId: "article-title",
+      blockType: "title",
+      targetSelector: ":scope > h1",
+      colorGroup: document.getElementById("block-style-title-text-color"),
+      customColorInput: document.getElementById("block-style-title-text-custom-color"),
+      pickerInput: document.getElementById("block-style-title-text-picker"),
+    },
+    {
+      datasetPrefix: "meta",
+      blockId: "article-meta",
+      blockType: "meta",
+      targetSelector: ":scope > .article-meta",
+      colorGroup: document.getElementById("block-style-meta-text-color"),
+      customColorInput: document.getElementById("block-style-meta-text-custom-color"),
+      pickerInput: document.getElementById("block-style-meta-text-picker"),
+    },
+    {
+      datasetPrefix: "intro",
+      blockId: "article-intro",
+      blockType: "intro",
+      targetSelector: ":scope > .intro",
+      colorGroup: document.getElementById("block-style-intro-text-color"),
+      customColorInput: document.getElementById("block-style-intro-text-custom-color"),
+      pickerInput: document.getElementById("block-style-intro-text-picker"),
+    },
+  ];
 
   let currentBlockEl = null;
   let currentTrigger = null;
@@ -276,6 +418,17 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
 
+    // not a StreamField block either -- there's only ever one
+    // table-of-contents icon on the page (ArticlePage.toc_icon_size).
+    if (blockType === "toc_icon") {
+      return {
+        url: panel.dataset.tocIconSaveUrl,
+        payload: {
+          toc_icon_size: tocIconSizeInput.value,
+        },
+      };
+    }
+
     const visibleFields = FIELDS_BY_TYPE[blockType] || [];
     let columnWeights = null;
     if (blockType === "multi_column") {
@@ -301,6 +454,8 @@ document.addEventListener("DOMContentLoaded", () => {
         width_rem: visibleFields.includes("width_rem") ? widthInput.value : null,
         gap: visibleFields.includes("gap") ? gapInput.value : null,
         column_weights: columnWeights,
+        text_color: visibleFields.includes("text_color") ? textColorGroup.dataset.value : null,
+        text_custom_color: visibleFields.includes("text_color") ? textCustomColorInput.value : null,
         box_enabled: boxCapable ? boxEnabledInput.checked : null,
         box_bg_color: boxCapable ? boxBgColorGroup.dataset.value : null,
         box_bg_custom_color: boxCapable ? boxBgCustomColorInput.value : null,
@@ -326,6 +481,99 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     pendingEdits.set(blockId, request);
+
+    // a column's title is saved as its own separate ArticleBlockStyle row
+    // (block_id "<column id>-title", block_type "column_title") even
+    // though it now shares the column's own trigger/panel (see
+    // FIELDS_BY_TYPE.column) -- record a second, independent pending edit
+    // for it alongside the column's own, keyed by its own block_id so it
+    // survives switching to a different block same as any other pending
+    // edit (see pendingEdits above).
+    if (targetTypeInput.value === "column" && currentBlockEl && currentBlockEl.dataset.titleBlockId) {
+      const titleId = currentBlockEl.dataset.titleBlockId;
+      pendingEdits.set(titleId, {
+        url: panel.dataset.saveUrl,
+        payload: {
+          block_id: titleId,
+          block_type: "column_title",
+          alignment: alignmentGroup.dataset.value,
+          font_size: fontSizeInput.value,
+          text_color: textColorGroup.dataset.value,
+          text_custom_color: textCustomColorInput.value,
+        },
+      });
+    }
+
+    // an image_caption's own title/caption text are each saved as their
+    // own separate ArticleBlockStyle row too (block_id "<image id>-cap-
+    // title"/"-cap-body", see CAPTION_TEXT_GROUPS above), alongside the
+    // figcaption's own box -- same reasoning as column's title above.
+    if (targetTypeInput.value === "image_caption" && currentBlockEl) {
+      CAPTION_TEXT_GROUPS.forEach((group) => {
+        const textId = currentBlockEl.dataset[`${group.datasetPrefix}TextId`];
+        if (!textId) {
+          return;
+        }
+        pendingEdits.set(textId, {
+          url: panel.dataset.saveUrl,
+          payload: {
+            block_id: textId,
+            block_type: group.blockType,
+            alignment: group.alignmentGroup.dataset.value,
+            font_size: group.fontSizeInput.value,
+            side_padding: group.paddingInput.value,
+            text_color: group.colorGroup.dataset.value,
+            text_custom_color: group.customColorInput.value,
+          },
+        });
+      });
+    }
+
+    // title/meta/intro's own text color, edited from this same shared
+    // article_header panel now (see HEADER_TEXT_COLOR_GROUPS above), is
+    // still saved as each one's own separate ArticleBlockStyle row --
+    // block_id "article-title"/"article-meta"/"article-intro", the exact
+    // same rows their own individual trigger used to write text_color to
+    // -- alongside article_header's own save_header_style request above.
+    if (targetTypeInput.value === "article_header") {
+      HEADER_TEXT_COLOR_GROUPS.forEach((group) => {
+        pendingEdits.set(group.blockId, {
+          url: panel.dataset.saveUrl,
+          payload: {
+            block_id: group.blockId,
+            block_type: group.blockType,
+            text_color: group.colorGroup.dataset.value,
+            text_custom_color: group.customColorInput.value,
+          },
+        });
+      });
+
+      // the header group's own box (background/border/radius/padding/
+      // margin, wrapping title+meta+intro together -- see BOX_CAPABLE_
+      // TYPES above) is a fourth, independent ArticleBlockStyle row, same
+      // block_id "article-header" the save_header_style request above
+      // uses -- a distinct pendingEdits *key* ("article-header-box", not
+      // "article-header") so it doesn't overwrite that primary request in
+      // the map, since they go to two different endpoints entirely.
+      pendingEdits.set("article-header-box", {
+        url: panel.dataset.saveUrl,
+        payload: {
+          block_id: "article-header",
+          block_type: "article_header",
+          box_enabled: boxEnabledInput.checked,
+          box_bg_color: boxBgColorGroup.dataset.value,
+          box_bg_custom_color: boxBgCustomColorInput.value,
+          box_border_visible: boxBorderVisibleInput.checked,
+          box_border_width: boxBorderWidthInput.value,
+          box_border_color: boxBorderColorGroup.dataset.value,
+          box_border_custom_color: boxBorderCustomColorInput.value,
+          box_radius: boxRadiusInput.value,
+          box_padding: boxPaddingInput.value,
+          box_margin: boxMarginInput.value,
+        },
+      });
+    }
+
     window.ifiUnsavedChanges.markDirty("blockStyle");
   };
 
@@ -340,6 +588,34 @@ document.addEventListener("DOMContentLoaded", () => {
     blockEl.classList.add(swap.prefix + value);
   };
 
+  // alignment/font-size/text-color normally read/write directly on
+  // currentBlockEl's own dataset -- but a multi_column column's title has
+  // no separate trigger/panel of its own any more (see FIELDS_BY_TYPE.column
+  // below): these same three fields describe the *title* instead while a
+  // "column" is what's open. Both the dataset key they're stored under (so
+  // reopening this same column later in the same page load picks the right
+  // value back up, see openPanelFor) and the live-preview target (the
+  // title, not the column) need to shift accordingly.
+  const TITLE_DATASET_KEYS = {
+    alignment: "titleAlignment",
+    fontSize: "titleFontSize",
+    textColor: "titleTextColor",
+    textCustomColor: "titleTextCustomColor",
+  };
+  const styleDatasetKey = (key) =>
+    targetTypeInput.value === "column" && TITLE_DATASET_KEYS[key] ? TITLE_DATASET_KEYS[key] : key;
+
+  // alignment positions the title via its wrapping <div> -- column-title is
+  // display:inline-block (so its border-bottom underline hugs just the
+  // text, see article_multicolumn.css), which leaves its own text-align
+  // nothing to align within its own tightly-fit box (see
+  // article_body_blocks.html's own comment on .column-title-wrap). Font-
+  // size/color apply directly to the title text itself instead.
+  const columnTitleWrapEl = () =>
+    currentBlockEl ? currentBlockEl.querySelector(":scope > .column-title-wrap") : null;
+  const columnTitleEl = () =>
+    currentBlockEl ? currentBlockEl.querySelector(":scope > .column-title-wrap > .column-title") : null;
+
   const wireButtonGroup = (group, field, dataAttr) => {
     group.querySelectorAll("button").forEach((button) => {
       button.addEventListener("click", () => {
@@ -348,8 +624,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const value = button.dataset[dataAttr];
         group.dataset.value = value;
-        currentBlockEl.dataset[field] = value;
-        swapClass(currentBlockEl, targetTypeInput.value, field, value);
+        currentBlockEl.dataset[styleDatasetKey(field)] = value;
+        if (field === "alignment" && targetTypeInput.value === "column") {
+          const wrap = columnTitleWrapEl();
+          if (wrap) {
+            wrap.style.textAlign = value;
+          }
+        } else {
+          swapClass(currentBlockEl, targetTypeInput.value, field, value);
+        }
         group.querySelectorAll("button").forEach((b) => {
           b.classList.toggle("active", b === button);
         });
@@ -361,33 +644,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // live-preview mirror of _block_box_style.html's own logic: while the box
   // is off, padding-left/right come from the block's own side_padding (see
-  // paddingInput's own listener below) and nothing else here applies. While
-  // it's on, box.padding takes over as the padding on all four sides
-  // instead (a box's border needs to sit *around* the content, not just
-  // beside it) -- side_padding's own visual effect is superseded, not
-  // stacked with it, same tradeoff as the server-rendered version.
+  // paddingInput's own listener below) -- no visible border to offset, so
+  // indenting the block just means indenting its content. While it's on,
+  // side_padding switches to margin-left/right instead, so it's the box's
+  // *border* (not just empty space inside it) that ends up indented --
+  // box.padding becomes the space between that border and the content on
+  // all four sides, box.margin the vertical space outside it, side_padding
+  // the horizontal counterpart to box.margin, not to box.padding. Skipped
+  // entirely for article_header -- its own side padding always goes
+  // through --header-side-padding instead (paddingInput's own listener
+  // special-cases this same type), regardless of whether its box is on.
   const applyBoxStyle = () => {
     if (!currentBlockEl) {
       return;
     }
     const enabled = boxEnabledInput.checked;
+    const managesSidePadding = targetTypeInput.value !== "article_header";
     currentBlockEl.classList.toggle("block-box", enabled);
     if (!enabled) {
       currentBlockEl.style.padding = "";
       currentBlockEl.style.marginTop = "";
       currentBlockEl.style.marginBottom = "";
+      if (managesSidePadding) {
+        currentBlockEl.style.marginLeft = "";
+        currentBlockEl.style.marginRight = "";
+      }
       currentBlockEl.style.backgroundColor = "";
       currentBlockEl.style.borderRadius = "";
       currentBlockEl.style.boxShadow = "";
       currentBlockEl.style.border = "";
       currentBlockEl.style.display = "";
-      currentBlockEl.style.paddingLeft = `${paddingInput.value}rem`;
-      currentBlockEl.style.paddingRight = `${paddingInput.value}rem`;
+      if (managesSidePadding) {
+        currentBlockEl.style.paddingLeft = `${paddingInput.value}rem`;
+        currentBlockEl.style.paddingRight = `${paddingInput.value}rem`;
+      }
       return;
     }
     currentBlockEl.style.padding = `${boxPaddingInput.value}rem`;
     currentBlockEl.style.marginTop = `${boxMarginInput.value}rem`;
     currentBlockEl.style.marginBottom = `${boxMarginInput.value}rem`;
+    if (managesSidePadding) {
+      currentBlockEl.style.marginLeft = `${paddingInput.value}rem`;
+      currentBlockEl.style.marginRight = `${paddingInput.value}rem`;
+    }
     // multi_column's own grid wrapper needs to stay "display: flex" (set in
     // article_multicolumn.css) for its columns to lay out side by side --
     // "flow-root" would silently replace that outright (same property,
@@ -418,11 +717,63 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // independent of applyBoxStyle above -- text color applies regardless of
+  // whether that block's own box is on (see _effective_heading_style() in
+  // article_models.py). Blank ("" -- no swatch selected) leaves the text
+  // color alone, same as BLOCK_STYLE_DEFAULTS["heading"]["text_color"]'s
+  // own meaning server-side.
+  const applyTextColor = () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    const target = targetTypeInput.value === "column" ? columnTitleEl() : currentBlockEl;
+    if (!target) {
+      return;
+    }
+    const textColor = textColorGroup.dataset.value;
+    if (textColor) {
+      target.style.color =
+        textColor === "custom" ? textCustomColorInput.value || "inherit" : `var(--color-${textColor})`;
+    } else {
+      target.style.color = "";
+    }
+  };
+
+  // a collapsible section's own header (see the panel template's "block-
+  // style-caption-header" divs -- Layout, Style, Column weights, Title/
+  // Intro/Meta) only makes sense to show while at least one real field
+  // inside its own fields wrapper (the very next sibling) is currently
+  // visible -- computed by reading the DOM directly (not a static "which
+  // fields does this type have" list) so it stays correct even when a
+  // field's visibility changes *after* the panel opened for reasons
+  // besides block type, like side_padding hiding once Box gets switched on
+  // (see updateBoxFieldVisibility below) -- without this, a section whose
+  // only field was side_padding would keep showing its own header with an
+  // empty section underneath once Box is checked. Box's own header (data-
+  // style-field="box_enabled") isn't a bare label like these, so it's
+  // excluded by this selector and keeps its own boxCapable-driven
+  // visibility untouched.
+  const updateSectionHeaders = () => {
+    panel.querySelectorAll('[data-style-field$="_label"]').forEach((header) => {
+      const wrapper = header.nextElementSibling;
+      if (!wrapper || !wrapper.classList.contains("block-style-box-fields")) {
+        return;
+      }
+      const hasVisibleField = Array.from(wrapper.querySelectorAll("[data-style-field]")).some(
+        (field) => !field.hidden
+      );
+      header.hidden = !hasVisibleField;
+    });
+  };
+
   // toggles which box-related fields are showing: everything but the
-  // "Box" checkbox itself stays hidden until it's on, the border width/
-  // color only show while the border itself is visible, and side_padding
-  // (superseded once the box is on, see applyBoxStyle above) hides in
-  // favor of box_padding.
+  // "Box" checkbox itself stays hidden until it's on, and the border
+  // width/color only show while the border itself is visible. side_padding
+  // stays visible regardless -- its own live effect is still superseded by
+  // box_padding while the box is on (see applyBoxStyle/paddingInput's own
+  // "input" listener), but the field itself stays put rather than
+  // vanishing (and, with it, Layout as a whole for types where it's the
+  // only field in that section -- see updateSectionHeaders below).
   const updateBoxFieldVisibility = () => {
     if (!BOX_CAPABLE_TYPES.has(targetTypeInput.value)) {
       return;
@@ -442,10 +793,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (borderColorField) {
       borderColorField.hidden = !enabled || !boxBorderVisibleInput.checked;
     }
-    const sidePaddingField = panel.querySelector('[data-style-field="side_padding"]');
-    if (sidePaddingField && FIELDS_BY_TYPE[targetTypeInput.value].includes("side_padding")) {
-      sidePaddingField.hidden = enabled;
-    }
+    updateSectionHeaders();
   };
 
   // #rgb -> #rrggbb, lowercased; null if `value` isn't valid hex at all.
@@ -508,27 +856,33 @@ document.addEventListener("DOMContentLoaded", () => {
   // shared by both the five fixed-color buttons and the "Custom" hex
   // swatch -- whichever one just changed becomes the group's active
   // choice, every other swatch in the group loses its own active state.
-  const selectSwatch = (group, swatch, datasetKey) => {
+  // applyFn defaults to applyBoxStyle (every other color group is box-
+  // scoped) -- text color passes applyTextColor instead, and skips
+  // updateBoxFieldVisibility entirely, since it isn't a box field.
+  const selectSwatch = (group, swatch, datasetKey, applyFn = applyBoxStyle) => {
     if (!currentBlockEl) {
       return;
     }
     group.dataset.value = swatch.dataset.color;
-    currentBlockEl.dataset[datasetKey] = swatch.dataset.color;
+    currentBlockEl.dataset[styleDatasetKey(datasetKey)] = swatch.dataset.color;
     group.querySelectorAll(".color-swatch").forEach((s) => {
       s.classList.toggle("active", s === swatch);
     });
-    updateBoxFieldVisibility();
-    applyBoxStyle();
+    if (applyFn === applyBoxStyle) {
+      updateBoxFieldVisibility();
+    }
+    applyFn();
     recordPendingEdit();
   };
 
-  const wireColorGroup = (group, datasetKey) => {
+  const wireColorGroup = (group, datasetKey, applyFn = applyBoxStyle) => {
     group.querySelectorAll("button.color-swatch").forEach((button) => {
-      button.addEventListener("click", () => selectSwatch(group, button, datasetKey));
+      button.addEventListener("click", () => selectSwatch(group, button, datasetKey, applyFn));
     });
   };
   wireColorGroup(boxBgColorGroup, "boxBgColor");
   wireColorGroup(boxBorderColorGroup, "boxBorderColor");
+  wireColorGroup(textColorGroup, "textColor", applyTextColor);
 
   // the "Custom" swatch is a plain hex text input (see the mini panel
   // template) -- typing a valid hex both selects "custom" for the group
@@ -543,7 +897,8 @@ document.addEventListener("DOMContentLoaded", () => {
   [
     [boxBgCustomColorInput, boxBgPickerInput, boxBgColorGroup, "boxBgColor", "boxBgCustomColor"],
     [boxBorderCustomColorInput, boxBorderPickerInput, boxBorderColorGroup, "boxBorderColor", "boxBorderCustomColor"],
-  ].forEach(([hexInput, pickerInput, group, groupDatasetKey, customDatasetKey]) => {
+    [textCustomColorInput, textPickerInput, textColorGroup, "textColor", "textCustomColor", applyTextColor],
+  ].forEach(([hexInput, pickerInput, group, groupDatasetKey, customDatasetKey, applyFn = applyBoxStyle]) => {
     // custom isn't active yet -- a plain click always immediately focuses a
     // text input (or, for the picker label, forwards straight into opening
     // the native color dialog), with no "just select it" step in between
@@ -571,7 +926,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       event.preventDefault();
-      selectSwatch(group, hexInput, groupDatasetKey);
+      selectSwatch(group, hexInput, groupDatasetKey, applyFn);
     });
 
     hexInput.addEventListener("input", () => {
@@ -583,8 +938,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       setCustomSwatch(hexInput, hex, pickerInput);
-      currentBlockEl.dataset[customDatasetKey] = hex;
-      selectSwatch(group, hexInput, groupDatasetKey);
+      currentBlockEl.dataset[styleDatasetKey(customDatasetKey)] = hex;
+      selectSwatch(group, hexInput, groupDatasetKey, applyFn);
     });
 
     pickerInput.addEventListener("input", () => {
@@ -592,10 +947,181 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       setCustomSwatch(hexInput, pickerInput.value, pickerInput);
-      currentBlockEl.dataset[customDatasetKey] = pickerInput.value;
-      selectSwatch(group, hexInput, groupDatasetKey);
+      currentBlockEl.dataset[styleDatasetKey(customDatasetKey)] = pickerInput.value;
+      selectSwatch(group, hexInput, groupDatasetKey, applyFn);
     });
   });
+
+  // the element a caption-text group's fields actually preview/apply to --
+  // the title/caption span itself, inside the currently-open image_caption
+  // block's figcaption (see CAPTION_TEXT_GROUPS above).
+  const captionTextTargetEl = (group) =>
+    currentBlockEl ? currentBlockEl.querySelector(group.spanSelector) : null;
+
+  const wireCaptionTextGroup = (group) => {
+    group.alignmentGroup.querySelectorAll("button").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!currentBlockEl) {
+          return;
+        }
+        const value = button.dataset.align;
+        group.alignmentGroup.dataset.value = value;
+        currentBlockEl.dataset[`${group.datasetPrefix}Alignment`] = value;
+        const target = captionTextTargetEl(group);
+        if (target) {
+          target.style.textAlign = value;
+        }
+        group.alignmentGroup.querySelectorAll("button").forEach((b) => {
+          b.classList.toggle("active", b === button);
+        });
+        recordPendingEdit();
+      });
+    });
+
+    group.fontSizeInput.addEventListener("input", () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      const target = captionTextTargetEl(group);
+      if (target) {
+        target.style.fontSize = `${group.fontSizeInput.value}rem`;
+      }
+      currentBlockEl.dataset[`${group.datasetPrefix}FontSize`] = group.fontSizeInput.value;
+      group.fontSizeValue.textContent = group.fontSizeInput.value;
+      recordPendingEdit();
+    });
+
+    group.paddingInput.addEventListener("input", () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      const target = captionTextTargetEl(group);
+      if (target) {
+        target.style.paddingLeft = `${group.paddingInput.value}rem`;
+        target.style.paddingRight = `${group.paddingInput.value}rem`;
+      }
+      currentBlockEl.dataset[`${group.datasetPrefix}SidePadding`] = group.paddingInput.value;
+      group.paddingValue.textContent = group.paddingInput.value;
+      recordPendingEdit();
+    });
+
+    const applyColor = () => {
+      const target = captionTextTargetEl(group);
+      if (!target) {
+        return;
+      }
+      const color = group.colorGroup.dataset.value;
+      if (color) {
+        target.style.color =
+          color === "custom" ? group.customColorInput.value || "inherit" : `var(--color-${color})`;
+      } else {
+        target.style.color = "";
+      }
+    };
+    group.applyColor = applyColor;
+
+    const colorDatasetKey = `${group.datasetPrefix}TextColor`;
+    const customDatasetKey = `${group.datasetPrefix}TextCustomColor`;
+    wireColorGroup(group.colorGroup, colorDatasetKey, applyColor);
+
+    // same "click anywhere in the custom swatch's shared outer box selects
+    // it" handling as the generic box/text custom swatches above, just
+    // scoped to this one group's own hex input/picker.
+    const customGroupEl = group.customColorInput.closest(".color-swatch-custom-group");
+    customGroupEl.addEventListener("mousedown", (event) => {
+      if (!currentBlockEl || group.colorGroup.dataset.value === "custom") {
+        return;
+      }
+      event.preventDefault();
+    });
+    customGroupEl.addEventListener("click", (event) => {
+      if (!currentBlockEl || group.colorGroup.dataset.value === "custom") {
+        return;
+      }
+      event.preventDefault();
+      selectSwatch(group.colorGroup, group.customColorInput, colorDatasetKey, applyColor);
+    });
+    group.customColorInput.addEventListener("input", () => {
+      const hex = normalizeHex(group.customColorInput.value);
+      if (!currentBlockEl || !hex) {
+        return;
+      }
+      setCustomSwatch(group.customColorInput, hex, group.pickerInput);
+      currentBlockEl.dataset[customDatasetKey] = hex;
+      selectSwatch(group.colorGroup, group.customColorInput, colorDatasetKey, applyColor);
+    });
+    group.pickerInput.addEventListener("input", () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      setCustomSwatch(group.customColorInput, group.pickerInput.value, group.pickerInput);
+      currentBlockEl.dataset[customDatasetKey] = group.pickerInput.value;
+      selectSwatch(group.colorGroup, group.customColorInput, colorDatasetKey, applyColor);
+    });
+  };
+  CAPTION_TEXT_GROUPS.forEach(wireCaptionTextGroup);
+
+  // title/meta/intro's own text color, edited from the shared
+  // article_header panel now (see HEADER_TEXT_COLOR_GROUPS above) --
+  // color-only, so a lighter version of wireCaptionTextGroup above (no
+  // alignment/font-size/padding, those still live on their own dedicated
+  // title_alignment/title_font_size/etc fields elsewhere in this panel).
+  const wireHeaderTextColorGroup = (group) => {
+    const applyColor = () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      const target = currentBlockEl.querySelector(group.targetSelector);
+      if (!target) {
+        return;
+      }
+      const color = group.colorGroup.dataset.value;
+      if (color) {
+        target.style.color =
+          color === "custom" ? group.customColorInput.value || "inherit" : `var(--color-${color})`;
+      } else {
+        target.style.color = "";
+      }
+    };
+    group.applyColor = applyColor;
+
+    const colorDatasetKey = `${group.datasetPrefix}TextColor`;
+    const customDatasetKey = `${group.datasetPrefix}TextCustomColor`;
+    wireColorGroup(group.colorGroup, colorDatasetKey, applyColor);
+
+    const customGroupEl = group.customColorInput.closest(".color-swatch-custom-group");
+    customGroupEl.addEventListener("mousedown", (event) => {
+      if (!currentBlockEl || group.colorGroup.dataset.value === "custom") {
+        return;
+      }
+      event.preventDefault();
+    });
+    customGroupEl.addEventListener("click", (event) => {
+      if (!currentBlockEl || group.colorGroup.dataset.value === "custom") {
+        return;
+      }
+      event.preventDefault();
+      selectSwatch(group.colorGroup, group.customColorInput, colorDatasetKey, applyColor);
+    });
+    group.customColorInput.addEventListener("input", () => {
+      const hex = normalizeHex(group.customColorInput.value);
+      if (!currentBlockEl || !hex) {
+        return;
+      }
+      setCustomSwatch(group.customColorInput, hex, group.pickerInput);
+      currentBlockEl.dataset[customDatasetKey] = hex;
+      selectSwatch(group.colorGroup, group.customColorInput, colorDatasetKey, applyColor);
+    });
+    group.pickerInput.addEventListener("input", () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      setCustomSwatch(group.customColorInput, group.pickerInput.value, group.pickerInput);
+      currentBlockEl.dataset[customDatasetKey] = group.pickerInput.value;
+      selectSwatch(group.colorGroup, group.customColorInput, colorDatasetKey, applyColor);
+    });
+  };
+  HEADER_TEXT_COLOR_GROUPS.forEach(wireHeaderTextColorGroup);
 
   boxEnabledInput.addEventListener("change", () => {
     if (!currentBlockEl) {
@@ -608,15 +1134,26 @@ document.addEventListener("DOMContentLoaded", () => {
     recordPendingEdit();
   });
 
-  // independent of box_enabled -- purely whether the detail fields below
-  // are showing right now, not whether box styling itself is on. Not reset
-  // when switching to a different block's panel, so collapsing it once
-  // keeps it collapsed for whatever you open next too.
-  boxCollapseToggle.addEventListener("click", (event) => {
-    event.preventDefault();
-    const expanded = boxCollapseToggle.getAttribute("aria-expanded") === "true";
-    boxCollapseToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
-    boxFieldsWrapper.hidden = expanded;
+  // every collapsible section header in the panel (Layout, Style, Column
+  // weights, Title/Intro/Meta, Image title/Image caption, Box) is wired the
+  // same generic way -- purely whether that section's own fields are
+  // showing right now, not (for Box) whether it's enabled. Not reset when
+  // switching to a different block's panel, so collapsing one once keeps
+  // it collapsed for whatever you open next too. data-controls points each
+  // toggle at its own fields wrapper's id (see the panel template) --
+  // there's no per-section JS beyond this one loop, so adding another
+  // section there needs no matching code here.
+  panel.querySelectorAll("[data-controls]").forEach((toggle) => {
+    const wrapper = document.getElementById(toggle.dataset.controls);
+    if (!wrapper) {
+      return;
+    }
+    toggle.addEventListener("click", (event) => {
+      event.preventDefault();
+      const expanded = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", expanded ? "false" : "true");
+      wrapper.hidden = expanded;
+    });
   });
 
   boxBorderVisibleInput.addEventListener("change", () => {
@@ -725,6 +1262,22 @@ document.addEventListener("DOMContentLoaded", () => {
         Array.from({ length: columnCount }, (_, i) => `column_weight_${i}`)
       );
     }
+    if (blockType === "column" && blockEl.dataset.titleBlockId) {
+      visibleFields = visibleFields.concat(["alignment", "font_size", "text_color"]);
+    }
+    if (blockType === "image_caption") {
+      CAPTION_TEXT_GROUPS.forEach((group) => {
+        if (blockEl.dataset[`${group.datasetPrefix}TextId`]) {
+          visibleFields = visibleFields.concat([
+            `${group.styleFieldPrefix}_label`,
+            `${group.styleFieldPrefix}_alignment`,
+            `${group.styleFieldPrefix}_font_size`,
+            `${group.styleFieldPrefix}_side_padding`,
+            `${group.styleFieldPrefix}_text_color`,
+          ]);
+        }
+      });
+    }
     const boxCapable = BOX_CAPABLE_TYPES.has(blockType);
     if (boxCapable) {
       visibleFields = visibleFields.concat(BOX_FIELD_NAMES);
@@ -733,11 +1286,14 @@ document.addEventListener("DOMContentLoaded", () => {
     panel.querySelectorAll("[data-style-field]").forEach((field) => {
       field.hidden = !visibleFields.includes(field.dataset.styleField);
     });
+    updateSectionHeaders();
 
     targetIdInput.value = blockEl.dataset.blockId;
     targetTypeInput.value = blockType;
     statusEl.textContent = "";
     statusEl.classList.remove("is-error");
+    styleLabel.textContent =
+      blockType === "column" ? styleLabel.dataset.labelTitle : styleLabel.dataset.labelDefault;
 
     if (visibleFields.includes("side_padding")) {
       paddingInput.value = blockEl.dataset.sidePadding;
@@ -767,8 +1323,49 @@ document.addEventListener("DOMContentLoaded", () => {
       updateBoxFieldVisibility();
     }
     if (visibleFields.includes("font_size")) {
-      fontSizeInput.value = blockEl.dataset.fontSize;
-      fontSizeValue.textContent = blockEl.dataset.fontSize;
+      const fontVal = blockEl.dataset[styleDatasetKey("fontSize")];
+      fontSizeInput.value = fontVal;
+      fontSizeValue.textContent = fontVal;
+      fontSizeLabel.textContent =
+        blockType === "column" ? fontSizeLabel.dataset.labelTitle : fontSizeLabel.dataset.labelDefault;
+    }
+    if (visibleFields.includes("text_color")) {
+      const colorVal = blockEl.dataset[styleDatasetKey("textColor")] || "";
+      textColorGroup.dataset.value = colorVal;
+      textColorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+        b.classList.toggle("active", b.dataset.color === colorVal);
+      });
+      setCustomSwatch(textCustomColorInput, blockEl.dataset[styleDatasetKey("textCustomColor")], textPickerInput);
+      textColorLabel.textContent =
+        blockType === "column" ? textColorLabel.dataset.labelTitle : textColorLabel.dataset.labelDefault;
+    }
+    if (blockType === "image_caption") {
+      CAPTION_TEXT_GROUPS.forEach((group) => {
+        if (!blockEl.dataset[`${group.datasetPrefix}TextId`]) {
+          return;
+        }
+        const alignVal = blockEl.dataset[`${group.datasetPrefix}Alignment`];
+        group.alignmentGroup.dataset.value = alignVal;
+        group.alignmentGroup.querySelectorAll("button").forEach((b) => {
+          b.classList.toggle("active", b.dataset.align === alignVal);
+        });
+        const fontVal = blockEl.dataset[`${group.datasetPrefix}FontSize`];
+        group.fontSizeInput.value = fontVal;
+        group.fontSizeValue.textContent = fontVal;
+        const paddingVal = blockEl.dataset[`${group.datasetPrefix}SidePadding`];
+        group.paddingInput.value = paddingVal;
+        group.paddingValue.textContent = paddingVal;
+        const colorVal = blockEl.dataset[`${group.datasetPrefix}TextColor`] || "";
+        group.colorGroup.dataset.value = colorVal;
+        group.colorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+          b.classList.toggle("active", b.dataset.color === colorVal);
+        });
+        setCustomSwatch(
+          group.customColorInput,
+          blockEl.dataset[`${group.datasetPrefix}TextCustomColor`],
+          group.pickerInput
+        );
+      });
     }
     if (visibleFields.includes("width_rem")) {
       widthInput.value = blockEl.dataset.widthRem;
@@ -777,6 +1374,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (visibleFields.includes("gap")) {
       gapInput.value = blockEl.dataset.gap;
       gapValue.textContent = blockEl.dataset.gap;
+    }
+    if (visibleFields.includes("toc_icon_size")) {
+      tocIconSizeInput.value = blockEl.dataset.tocIconSize;
+      tocIconSizeValue.textContent = blockEl.dataset.tocIconSize;
     }
     if (blockType === "multi_column") {
       const weights = (blockEl.dataset.columnWeights || "")
@@ -792,9 +1393,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
     if (visibleFields.includes("alignment")) {
-      alignmentGroup.dataset.value = blockEl.dataset.alignment;
+      const alignVal = blockEl.dataset[styleDatasetKey("alignment")];
+      alignmentGroup.dataset.value = alignVal;
       alignmentGroup.querySelectorAll("button").forEach((b) => {
-        b.classList.toggle("active", b.dataset.align === blockEl.dataset.alignment);
+        b.classList.toggle("active", b.dataset.align === alignVal);
       });
     }
     [
@@ -821,6 +1423,20 @@ document.addEventListener("DOMContentLoaded", () => {
       input.value = blockEl.dataset[datasetKey];
       valueEl.textContent = blockEl.dataset[datasetKey];
     });
+    if (blockType === "article_header") {
+      HEADER_TEXT_COLOR_GROUPS.forEach((group) => {
+        const colorVal = blockEl.dataset[`${group.datasetPrefix}TextColor`] || "";
+        group.colorGroup.dataset.value = colorVal;
+        group.colorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+          b.classList.toggle("active", b.dataset.color === colorVal);
+        });
+        setCustomSwatch(
+          group.customColorInput,
+          blockEl.dataset[`${group.datasetPrefix}TextCustomColor`],
+          group.pickerInput
+        );
+      });
+    }
 
     panel.hidden = false;
     trigger.classList.add("is-open");
@@ -876,11 +1492,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // margin does that while padding on a width:auto block wouldn't.
     if (targetTypeInput.value === "article_header") {
       currentBlockEl.style.setProperty("--header-side-padding", `${paddingInput.value}rem`);
-    } else if (!BOX_CAPABLE_TYPES.has(targetTypeInput.value) || !boxEnabledInput.checked) {
-      // while the box is on, box.padding governs all four sides instead
-      // (see applyBoxStyle) -- side_padding's own value is still recorded
-      // below so it's ready to reapply if the box gets turned off again,
-      // just not shown live while superseded.
+    } else if (BOX_CAPABLE_TYPES.has(targetTypeInput.value) && boxEnabledInput.checked) {
+      // while the box is on, side_padding indents the box itself (margin)
+      // instead of the space inside it (padding, which box.padding governs
+      // instead) -- see applyBoxStyle/_block_box_style.html.
+      currentBlockEl.style.marginLeft = `${paddingInput.value}rem`;
+      currentBlockEl.style.marginRight = `${paddingInput.value}rem`;
+    } else {
       currentBlockEl.style.paddingLeft = `${paddingInput.value}rem`;
       currentBlockEl.style.paddingRight = `${paddingInput.value}rem`;
     }
@@ -894,8 +1512,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!currentBlockEl) {
       return;
     }
-    currentBlockEl.style.fontSize = `${fontSizeInput.value}rem`;
-    currentBlockEl.dataset.fontSize = fontSizeInput.value;
+    const target = targetTypeInput.value === "column" ? columnTitleEl() : currentBlockEl;
+    if (target) {
+      target.style.fontSize = `${fontSizeInput.value}rem`;
+    }
+    currentBlockEl.dataset[styleDatasetKey("fontSize")] = fontSizeInput.value;
     fontSizeValue.textContent = fontSizeInput.value;
     positionTextTriggers();
     recordPendingEdit();
@@ -919,6 +1540,23 @@ document.addEventListener("DOMContentLoaded", () => {
     currentBlockEl.style.gap = `${gapInput.value}rem`;
     currentBlockEl.dataset.gap = gapInput.value;
     gapValue.textContent = gapInput.value;
+    recordPendingEdit();
+  });
+
+  // the ToC icon and its own button circle scale together (article_toc.css's
+  // .toc-open-icon/.toc-open-button/.article-page--has-toc all key off this
+  // one variable) -- set on .article-page, not currentBlockEl itself, since
+  // that's the wrapper around just the button+trigger, not the icon.
+  tocIconSizeInput.addEventListener("input", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    const articlePage = document.querySelector(".article-page");
+    if (articlePage) {
+      articlePage.style.setProperty("--toc-icon-size", `${tocIconSizeInput.value}rem`);
+    }
+    currentBlockEl.dataset.tocIconSize = tocIconSizeInput.value;
+    tocIconSizeValue.textContent = tocIconSizeInput.value;
     recordPendingEdit();
   });
 
@@ -1075,6 +1713,14 @@ document.addEventListener("DOMContentLoaded", () => {
       button.click();
     }
   };
+  // for a color group whose default is blank (text color, unlike bg/border,
+  // has no fixed color of its own to click through -- see
+  // BLOCK_STYLE_DEFAULTS["box"]["text_color"]) -- clears it back to "no
+  // swatch selected" directly instead.
+  const clearColorGroup = (group) => {
+    group.dataset.value = "";
+    group.querySelectorAll(".color-swatch").forEach((s) => s.classList.remove("active"));
+  };
   const applyToggle = (input, value) => {
     if (value === undefined || !input) {
       return;
@@ -1085,8 +1731,10 @@ document.addEventListener("DOMContentLoaded", () => {
   resetButton.addEventListener("click", () => {
     const blockType = targetTypeInput.value;
     const defaults = BLOCK_STYLE_DEFAULTS[blockType];
-    // "column" (a multi_column sub-column) has no BLOCK_STYLE_DEFAULTS
-    // entry of its own -- it has no style besides box, reset below.
+    // column/image_caption/title/meta/intro have no BLOCK_STYLE_DEFAULTS
+    // entry of their own -- side padding (see FIELDS_BY_TYPE above) always
+    // defaults to plain 0 for these, handled in the fallback below rather
+    // than needing a whole defaults dict just for one field.
     const boxCapable = BOX_CAPABLE_TYPES.has(blockType);
     if (!blockType || (!defaults && !boxCapable)) {
       return;
@@ -1101,6 +1749,7 @@ document.addEventListener("DOMContentLoaded", () => {
       applySlider(fontSizeInput, defaults.font_size);
       applySlider(widthInput, defaults.width_rem);
       applySlider(gapInput, defaults.gap);
+      applySlider(tocIconSizeInput, defaults.toc_icon_size);
 
       if (blockType === "multi_column" && defaults.column_weight !== undefined) {
         const blockEl =
@@ -1117,6 +1766,68 @@ document.addEventListener("DOMContentLoaded", () => {
       applySlider(introFontSizeInput, defaults.intro_font_size);
       applyButtonGroup(metaAlignmentGroup, defaults.meta_alignment);
       applySlider(metaFontSizeInput, defaults.meta_font_size);
+    }
+
+    // title/meta/intro's own text color, edited from this same shared
+    // article_header panel now (see HEADER_TEXT_COLOR_GROUPS above) --
+    // every type that offers text color defaults to blank (inherit the
+    // page's normal text color), same as the generic text_color field's
+    // own reset elsewhere.
+    if (blockType === "article_header") {
+      HEADER_TEXT_COLOR_GROUPS.forEach((group) => {
+        clearColorGroup(group.colorGroup);
+        setCustomSwatch(group.customColorInput, "", group.pickerInput);
+        group.applyColor();
+      });
+    }
+
+    // column/image_caption/title/meta/intro's own side padding -- no
+    // BLOCK_STYLE_DEFAULTS entry of their own (see above), always resets
+    // to plain 0.
+    if (!defaults && (FIELDS_BY_TYPE[blockType] || []).includes("side_padding")) {
+      applySlider(paddingInput, 0);
+    }
+
+    // a column's title shares this same trigger/panel/reset button now
+    // (see FIELDS_BY_TYPE.column above) -- reset it back to heading's own
+    // defaults (column_title has no separate BLOCK_STYLE_DEFAULTS entry,
+    // it always shared heading's -- see article_models.py) alongside the
+    // column's own box, below.
+    if (blockType === "column" && currentBlockEl && currentBlockEl.dataset.titleBlockId) {
+      const titleDefaults = BLOCK_STYLE_DEFAULTS.heading || {};
+      applyButtonGroup(alignmentGroup, titleDefaults.alignment);
+      applySlider(fontSizeInput, titleDefaults.font_size);
+      clearColorGroup(textColorGroup);
+      setCustomSwatch(textCustomColorInput, "", textPickerInput);
+      applyTextColor();
+    }
+
+    // an image_caption's own title/caption text share this same trigger/
+    // panel/reset button too (see CAPTION_TEXT_GROUPS above) -- reset each
+    // one back to its own BLOCK_STYLE_DEFAULTS entry, independent of the
+    // figcaption's own box below.
+    if (blockType === "image_caption" && currentBlockEl) {
+      CAPTION_TEXT_GROUPS.forEach((group) => {
+        if (!currentBlockEl.dataset[`${group.datasetPrefix}TextId`]) {
+          return;
+        }
+        const groupDefaults = BLOCK_STYLE_DEFAULTS[group.defaultsKey] || {};
+        applyButtonGroup(group.alignmentGroup, groupDefaults.alignment);
+        applySlider(group.fontSizeInput, groupDefaults.font_size);
+        applySlider(group.paddingInput, groupDefaults.side_padding);
+        clearColorGroup(group.colorGroup);
+        setCustomSwatch(group.customColorInput, "", group.pickerInput);
+        group.applyColor();
+      });
+    }
+
+    // text color is independent of box (see FIELDS_BY_TYPE) -- every type
+    // that offers it defaults to blank (inherit the page's normal text
+    // color), so there's no per-type default value to look up.
+    if ((FIELDS_BY_TYPE[blockType] || []).includes("text_color")) {
+      clearColorGroup(textColorGroup);
+      setCustomSwatch(textCustomColorInput, "", textPickerInput);
+      applyTextColor();
     }
 
     if (boxCapable) {

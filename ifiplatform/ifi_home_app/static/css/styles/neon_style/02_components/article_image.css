@@ -112,6 +112,26 @@ multi-column item). */
   }
 }
 
+/* editor-picked side padding (hero_image_side_padding) and box padding
+(body image's own box.padding, when boxed -- see _block_box_style.html)
+are both free-form rem numbers set inline, ignored below this breakpoint
+same as the float/width reset above: large padding here can push the image
+itself past the screen edge on a narrow column. .hero-image-figure only
+gets padding-left/right reset (not the shorthand) since its own boxed
+padding is a fixed, non-editable 1rem from .image-figure--boxed below --
+that one's meant to stay. .body-image-figure has no such fixed class, so
+its whole padding (however _block_box_style.html set it) resets safely. */
+@media (max-width: 640px) {
+  .hero-image-figure {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .body-image-figure {
+    padding: 0 !important;
+  }
+}
+
 /* border-radius comes from inline style (box_border_radius, an editor-chosen
 rem number) rather than being fixed here -- see article_image_block.html /
 article_page.html's hero image figure. */

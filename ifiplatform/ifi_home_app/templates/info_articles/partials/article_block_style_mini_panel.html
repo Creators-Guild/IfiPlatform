@@ -12,7 +12,8 @@ with (registerSaveHandler).
 <form class="block-style-mini-panel" id="block-style-mini-panel" hidden
       data-save-url="{% url 'article_block_style' page.id %}"
       data-header-save-url="{% url 'article_header_style' page.id %}"
-      data-hero-image-save-url="{% url 'article_hero_image_style' page.id %}">
+      data-hero-image-save-url="{% url 'article_hero_image_style' page.id %}"
+      data-toc-icon-save-url="{% url 'article_toc_icon_style' page.id %}">
     {% csrf_token %}
     <input type="hidden" id="block-style-target-id" name="block_id">
     <input type="hidden" id="block-style-target-type" name="block_type">
@@ -21,34 +22,387 @@ with (registerSaveHandler).
         <button type="button" id="block-style-close" class="block-style-close" aria-label="{% trans 'Close' %}">&times;</button>
     </div>
 
-    <label class="block-style-field" data-style-field="side_padding">
-        <span>{% trans "Side padding" %} (<span id="block-style-padding-value"></span>rem)</span>
-        <input type="range" id="block-style-padding" min="0" max="20" step="0.25">
-    </label>
+    {% comment %}
+    Every section below is collapsible, closed by default (see [hidden]/
+    aria-expanded="false" on each one, and the generic [data-controls]
+    wiring in article_block_style.js) -- purely whether that section's own
+    fields are showing right now, independent of whether the section
+    itself (or, for Box, the styling it controls) even applies to the
+    block currently open. A section's own header only appears at all when
+    at least one of its member fields does (see SECTION_MEMBERS in
+    article_block_style.js) -- same "only if relevant" gating every field
+    already had individually, just extended to the group as a whole.
+    {% endcomment %}
 
-    <div class="block-style-field" data-style-field="alignment">
-        <span>{% trans "Alignment" %}</span>
-        <div class="block-style-align-buttons" id="block-style-alignment" data-value="">
-            <button type="button" data-align="left">{% trans "Left" %}</button>
-            <button type="button" data-align="center">{% trans "Center" %}</button>
-            <button type="button" data-align="right">{% trans "Right" %}</button>
+    <div class="block-style-field block-style-caption-header" data-style-field="layout_label">
+        <p class="block-style-box-subsection-title">{% trans "Layout" %}</p>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-layout-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse layout options' %}">&#9662;</button>
+    </div>
+
+    <div class="block-style-box-fields" id="block-style-layout-fields" hidden>
+        <label class="block-style-field" data-style-field="side_padding">
+            <span>{% trans "Side padding" %} (<span id="block-style-padding-value"></span>rem)</span>
+            <input type="range" id="block-style-padding" min="0" max="20" step="0.25">
+        </label>
+
+        <label class="block-style-field" data-style-field="width_rem">
+            <span>{% trans "Width" %} (<span id="block-style-width-value"></span>rem)</span>
+            <input type="range" id="block-style-width" min="4" max="60" step="0.5">
+        </label>
+
+        <label class="block-style-field" data-style-field="gap">
+            <span>{% trans "Gap between columns" %} (<span id="block-style-gap-value"></span>rem)</span>
+            <input type="range" id="block-style-gap" min="0" max="10" step="0.25">
+        </label>
+
+        {% comment %}
+        Not a StreamField block or a per-block ArticleBlockStyle override --
+        there's only ever one table-of-contents icon on the page, so this
+        saves straight to its own ArticlePage field (toc_icon_size) via its
+        own endpoint, same pattern as article_header/hero_image above.
+        {% endcomment %}
+        <label class="block-style-field" data-style-field="toc_icon_size">
+            <span>{% trans "Icon size" %} (<span id="block-style-toc-icon-size-value"></span>rem)</span>
+            <input type="range" id="block-style-toc-icon-size" min="0.75" max="2.5" step="0.05">
+        </label>
+    </div>
+
+    {% comment %}
+    "Style" -- alignment/font-size/text-color together: for heading/styled_
+    text/image this is the block's own; for the merged column panel (see
+    FIELDS_BY_TYPE.column in article_block_style.js) the exact same fields
+    describe the column's *title* instead, so this header's own label swaps
+    to "Column title" in that case (data-label-title, same mechanism as the
+    font-size/text-color field labels below).
+    {% endcomment %}
+    <div class="block-style-field block-style-caption-header" data-style-field="style_label">
+        <p class="block-style-box-subsection-title" id="block-style-style-label" data-label-default="{% trans 'Style' %}" data-label-title="{% trans 'Column title' %}">{% trans "Style" %}</p>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-style-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse style options' %}">&#9662;</button>
+    </div>
+
+    <div class="block-style-box-fields" id="block-style-style-fields" hidden>
+        <div class="block-style-field" data-style-field="alignment">
+            <span>{% trans "Alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
+
+        <label class="block-style-field" data-style-field="font_size">
+            {% comment %}
+            Shared by heading/styled_text (where "Font size" describes the
+            block itself) and the merged column panel (where the exact same
+            field/input describes the column's *title* instead -- see
+            FIELDS_BY_TYPE.column in article_block_style.js). data-label-title
+            holds the alternate wording; openPanelFor() swaps this span's text
+            between the two depending on which one is actually being edited.
+            {% endcomment %}
+            <span><span id="block-style-font-size-label" data-label-default="{% trans 'Font size' %}" data-label-title="{% trans 'Title font size' %}">{% trans "Font size" %}</span> (<span id="block-style-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-font-size" min="0.5" max="3" step="0.05">
+        </label>
+
+        {% comment %}
+        Applies independent of that block's own box -- not nested under Box
+        below, unlike background/border color (see
+        _effective_heading_style()/_block_box_style.html's own docstring for
+        why). No "default"/blank swatch -- not picking one just leaves the
+        text's normal color alone; "Reset to default" clears an already-picked
+        one back to that blank state directly (article_block_style.js), same
+        as it does for box's own color fields.
+        {% endcomment %}
+        <div class="block-style-field" data-style-field="text_color">
+            {% comment %}
+            Same shared-label pattern as font_size above -- "Text color" for
+            heading/styled_text, "Title color" for the merged column panel
+            (see FIELDS_BY_TYPE.column in article_block_style.js).
+            {% endcomment %}
+            <span id="block-style-text-color-label" data-label-default="{% trans 'Text color' %}" data-label-title="{% trans 'Title color' %}">{% trans "Text color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-text-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-text-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-text-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 
-    <label class="block-style-field" data-style-field="font_size">
-        <span>{% trans "Font size" %} (<span id="block-style-font-size-value"></span>rem)</span>
-        <input type="range" id="block-style-font-size" min="0.5" max="3" step="0.05">
-    </label>
+    {% comment %}
+    An image's own title (alt_text)/caption text -- independent of each
+    other and of the figcaption's own box above (see BOX_FIELDS/data-style-
+    field="box_enabled" etc.) -- shown only while editing an image_caption
+    block whose figcaption actually has that text (data-title-text-id/
+    data-caption-text-id, see article_image_block.html), same "only if it
+    exists" gating as the "Style" section's own "Column title" label swap
+    above. Two near-identical groups,
+    same fields as the generic alignment/font_size/text_color/side_padding
+    used everywhere else, just with their own dedicated ids since both need
+    to be visible/editable at once in this one shared panel.
+    {% endcomment %}
+    {% comment %}
+    Collapsible, like Box below -- but no "enabled" checkbox alongside the
+    chevron this time, since there's no on/off state here: this text is
+    already showing on the page (it's the image's own alt_text/caption),
+    only *how* it's styled is being tucked away or not.
+    {% endcomment %}
+    <div class="block-style-field block-style-caption-header" data-style-field="caption_title_label">
+        <p class="block-style-box-subsection-title">{% trans "Image title" %}</p>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-caption-title-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse image title options' %}">&#9662;</button>
+    </div>
 
-    <label class="block-style-field" data-style-field="width_rem">
-        <span>{% trans "Width" %} (<span id="block-style-width-value"></span>rem)</span>
-        <input type="range" id="block-style-width" min="4" max="60" step="0.5">
-    </label>
+    <div class="block-style-box-fields" id="block-style-caption-title-fields" hidden>
+        <div class="block-style-field" data-style-field="caption_title_alignment">
+            <span>{% trans "Alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-caption-title-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
 
-    <label class="block-style-field" data-style-field="gap">
-        <span>{% trans "Gap between columns" %} (<span id="block-style-gap-value"></span>rem)</span>
-        <input type="range" id="block-style-gap" min="0" max="10" step="0.25">
-    </label>
+        <label class="block-style-field" data-style-field="caption_title_font_size">
+            <span>{% trans "Font size" %} (<span id="block-style-caption-title-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-caption-title-font-size" min="0.5" max="3" step="0.05">
+        </label>
+
+        <label class="block-style-field" data-style-field="caption_title_side_padding">
+            <span>{% trans "Side padding" %} (<span id="block-style-caption-title-padding-value"></span>rem)</span>
+            <input type="range" id="block-style-caption-title-padding" min="0" max="10" step="0.25">
+        </label>
+
+        <div class="block-style-field" data-style-field="caption_title_text_color">
+            <span>{% trans "Text color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-caption-title-text-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-caption-title-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-caption-title-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="block-style-field block-style-caption-header" data-style-field="caption_body_label">
+        <p class="block-style-box-subsection-title">{% trans "Image caption" %}</p>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-caption-body-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse image caption options' %}">&#9662;</button>
+    </div>
+
+    <div class="block-style-box-fields" id="block-style-caption-body-fields" hidden>
+        <div class="block-style-field" data-style-field="caption_body_alignment">
+            <span>{% trans "Alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-caption-body-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
+
+        <label class="block-style-field" data-style-field="caption_body_font_size">
+            <span>{% trans "Font size" %} (<span id="block-style-caption-body-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-caption-body-font-size" min="0.5" max="3" step="0.05">
+        </label>
+
+        <label class="block-style-field" data-style-field="caption_body_side_padding">
+            <span>{% trans "Side padding" %} (<span id="block-style-caption-body-padding-value"></span>rem)</span>
+            <input type="range" id="block-style-caption-body-padding" min="0" max="10" step="0.25">
+        </label>
+
+        <div class="block-style-field" data-style-field="caption_body_text_color">
+            <span>{% trans "Text color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-caption-body-text-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-caption-body-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-caption-body-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% comment %}
+    Up to 4 sliders (multi_column's own max_num) -- one per column, kept as
+    separate controls rather than one "column weights" field so each column
+    is independently adjustable, still related only by all living in this
+    one block's panel. article_block_style.js shows only as many as the
+    block being edited actually has (data-column-count), and reads/writes
+    them relative to each other, not as an absolute size -- same "flex"
+    semantics as the column's own weight field in Wagtail (labelled
+    "Column weight" there too, not "width" -- it isn't a literal size).
+    {% endcomment %}
+    <div class="block-style-field block-style-caption-header" data-style-field="column_weights_label">
+        <p class="block-style-box-subsection-title">{% trans "Column weights" %}</p>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-column-weights-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse column weight options' %}">&#9662;</button>
+    </div>
+
+    <div class="block-style-box-fields" id="block-style-column-weights-fields" hidden>
+        <label class="block-style-field" data-style-field="column_weight_0">
+            <span>{% trans "Column 1 weight" %} (<span id="block-style-column-weight-0-value"></span>)</span>
+            <input type="range" id="block-style-column-weight-0" min="1" max="10" step="1">
+        </label>
+
+        <label class="block-style-field" data-style-field="column_weight_1">
+            <span>{% trans "Column 2 weight" %} (<span id="block-style-column-weight-1-value"></span>)</span>
+            <input type="range" id="block-style-column-weight-1" min="1" max="10" step="1">
+        </label>
+
+        <label class="block-style-field" data-style-field="column_weight_2">
+            <span>{% trans "Column 3 weight" %} (<span id="block-style-column-weight-2-value"></span>)</span>
+            <input type="range" id="block-style-column-weight-2" min="1" max="10" step="1">
+        </label>
+
+        <label class="block-style-field" data-style-field="column_weight_3">
+            <span>{% trans "Column 4 weight" %} (<span id="block-style-column-weight-3-value"></span>)</span>
+            <input type="range" id="block-style-column-weight-3" min="1" max="10" step="1">
+        </label>
+    </div>
+
+    {% comment %}
+    Title/Meta/Intro -- in that order, matching the actual page layout
+    (see article_page.html's .article-header: h1, then .article-meta, then
+    .intro). The article-header group's own alignment/font-size (see
+    FIELDS_BY_TYPE.article_header in article_block_style.js) plus, now,
+    each one's own text color too -- title/meta/intro each used to have
+    their own individual trigger for this (still do, for Box), but text
+    color specifically moved here, into the shared header editor, so their
+    own private editors only offer Box and nothing else (see FIELDS_BY_TYPE.
+    title/meta/intro, now empty). Three separate collapsible sections, same
+    granularity as Image title/Image caption below, rather than one shared
+    one, since each is independently adjustable and usually only one at a
+    time is what someone's after.
+    {% endcomment %}
+    <div class="block-style-field block-style-caption-header" data-style-field="title_label">
+        <p class="block-style-box-subsection-title">{% trans "Title" %}</p>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-header-title-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse title options' %}">&#9662;</button>
+    </div>
+
+    <div class="block-style-box-fields" id="block-style-header-title-fields" hidden>
+        <div class="block-style-field" data-style-field="title_alignment">
+            <span>{% trans "Alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-title-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
+
+        <label class="block-style-field" data-style-field="title_font_size">
+            <span>{% trans "Font size" %} (<span id="block-style-title-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-title-font-size" min="1" max="4" step="0.1">
+        </label>
+
+        <div class="block-style-field" data-style-field="title_text_color">
+            <span>{% trans "Text color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-title-text-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-title-text-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-title-text-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="block-style-field block-style-caption-header" data-style-field="meta_label">
+        <p class="block-style-box-subsection-title">{% trans "Meta" %}</p>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-header-meta-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse meta options' %}">&#9662;</button>
+    </div>
+
+    <div class="block-style-box-fields" id="block-style-header-meta-fields" hidden>
+        <div class="block-style-field" data-style-field="meta_alignment">
+            <span>{% trans "Alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-meta-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
+
+        <label class="block-style-field" data-style-field="meta_font_size">
+            <span>{% trans "Font size" %} (<span id="block-style-meta-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-meta-font-size" min="0.5" max="2" step="0.05">
+        </label>
+
+        <div class="block-style-field" data-style-field="meta_text_color">
+            <span>{% trans "Text color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-meta-text-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-meta-text-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-meta-text-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="block-style-field block-style-caption-header" data-style-field="intro_label">
+        <p class="block-style-box-subsection-title">{% trans "Intro" %}</p>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-header-intro-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse intro options' %}">&#9662;</button>
+    </div>
+
+    <div class="block-style-box-fields" id="block-style-header-intro-fields" hidden>
+        <div class="block-style-field" data-style-field="intro_alignment">
+            <span>{% trans "Alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-intro-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
+
+        <label class="block-style-field" data-style-field="intro_font_size">
+            <span>{% trans "Font size" %} (<span id="block-style-intro-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-intro-font-size" min="0.5" max="3" step="0.05">
+        </label>
+
+        <div class="block-style-field" data-style-field="intro_text_color">
+            <span>{% trans "Text color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-intro-text-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-intro-text-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-intro-text-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {% comment %}
     Box styling -- available on every block type (and on each multi_column
@@ -61,15 +415,19 @@ with (registerSaveHandler).
     just tucks the details away once you're done adjusting them. Background,
     border and spacing (padding/margin) each get their own visually-boxed
     subsection so it's obvious at a glance which fields belong to which --
-    see .block-style-box-subsection in article_block_style.css.
+    see .block-style-box-subsection in article_block_style.css. Placed last
+    (right before Reset), after every other field -- box is the "wrap the
+    whole thing in a border/background" option, so it reads more naturally
+    as the final touch than something to configure before the block's own
+    content style is even set.
     {% endcomment %}
     <div class="block-style-field block-style-toggle block-style-box-header" data-style-field="box_enabled">
         <input type="checkbox" id="block-style-box-enabled">
         <span>{% trans "Box" %}</span>
-        <button type="button" id="block-style-box-collapse-toggle" class="block-style-box-collapse-toggle" aria-expanded="true" aria-label="{% trans 'Expand or collapse box options' %}">&#9662;</button>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-box-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse box options' %}">&#9662;</button>
     </div>
 
-    <div class="block-style-box-fields" id="block-style-box-fields">
+    <div class="block-style-box-fields" id="block-style-box-fields" hidden>
         {% comment %}
         The custom swatch is a plain hex text input, not a fixed-color
         button -- typing a valid hex both picks it (article_block_style.js
@@ -147,78 +505,6 @@ with (registerSaveHandler).
             </label>
         </div>
     </div>
-
-    {% comment %}
-    Up to 4 sliders (multi_column's own max_num) -- one per column, kept as
-    separate controls rather than one "column weights" field so each column
-    is independently adjustable, still related only by all living in this
-    one block's panel. article_block_style.js shows only as many as the
-    block being edited actually has (data-column-count), and reads/writes
-    them relative to each other, not as an absolute size -- same "flex"
-    semantics as the column's own weight field in Wagtail (labelled
-    "Column weight" there too, not "width" -- it isn't a literal size).
-    {% endcomment %}
-    <label class="block-style-field" data-style-field="column_weight_0">
-        <span>{% trans "Column 1 weight" %} (<span id="block-style-column-weight-0-value"></span>)</span>
-        <input type="range" id="block-style-column-weight-0" min="1" max="10" step="1">
-    </label>
-
-    <label class="block-style-field" data-style-field="column_weight_1">
-        <span>{% trans "Column 2 weight" %} (<span id="block-style-column-weight-1-value"></span>)</span>
-        <input type="range" id="block-style-column-weight-1" min="1" max="10" step="1">
-    </label>
-
-    <label class="block-style-field" data-style-field="column_weight_2">
-        <span>{% trans "Column 3 weight" %} (<span id="block-style-column-weight-2-value"></span>)</span>
-        <input type="range" id="block-style-column-weight-2" min="1" max="10" step="1">
-    </label>
-
-    <label class="block-style-field" data-style-field="column_weight_3">
-        <span>{% trans "Column 4 weight" %} (<span id="block-style-column-weight-3-value"></span>)</span>
-        <input type="range" id="block-style-column-weight-3" min="1" max="10" step="1">
-    </label>
-
-    <div class="block-style-field" data-style-field="title_alignment">
-        <span>{% trans "Title alignment" %}</span>
-        <div class="block-style-align-buttons" id="block-style-title-alignment" data-value="">
-            <button type="button" data-align="left">{% trans "Left" %}</button>
-            <button type="button" data-align="center">{% trans "Center" %}</button>
-            <button type="button" data-align="right">{% trans "Right" %}</button>
-        </div>
-    </div>
-
-    <label class="block-style-field" data-style-field="title_font_size">
-        <span>{% trans "Title font size" %} (<span id="block-style-title-font-size-value"></span>rem)</span>
-        <input type="range" id="block-style-title-font-size" min="1" max="4" step="0.1">
-    </label>
-
-    <div class="block-style-field" data-style-field="intro_alignment">
-        <span>{% trans "Intro alignment" %}</span>
-        <div class="block-style-align-buttons" id="block-style-intro-alignment" data-value="">
-            <button type="button" data-align="left">{% trans "Left" %}</button>
-            <button type="button" data-align="center">{% trans "Center" %}</button>
-            <button type="button" data-align="right">{% trans "Right" %}</button>
-        </div>
-    </div>
-
-    <label class="block-style-field" data-style-field="intro_font_size">
-        <span>{% trans "Intro font size" %} (<span id="block-style-intro-font-size-value"></span>rem)</span>
-        <input type="range" id="block-style-intro-font-size" min="0.5" max="3" step="0.05">
-    </label>
-
-    <div class="block-style-field" data-style-field="meta_alignment">
-        <span>{% trans "Meta alignment" %}</span>
-        <div class="block-style-align-buttons" id="block-style-meta-alignment" data-value="">
-            <button type="button" data-align="left">{% trans "Left" %}</button>
-            <button type="button" data-align="center">{% trans "Center" %}</button>
-            <button type="button" data-align="right">{% trans "Right" %}</button>
-        </div>
-    </div>
-
-    <label class="block-style-field" data-style-field="meta_font_size">
-        <span>{% trans "Meta font size" %} (<span id="block-style-meta-font-size-value"></span>rem)</span>
-        <input type="range" id="block-style-meta-font-size" min="0.5" max="2" step="0.05">
-    </label>
 
     <div class="block-style-mini-panel-actions">
         <button type="button" id="block-style-reset" class="block-style-reset">{% trans "Reset to default" %}</button>

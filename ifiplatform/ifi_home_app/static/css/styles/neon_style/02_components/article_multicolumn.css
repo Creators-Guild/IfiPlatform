@@ -69,4 +69,14 @@ here regardless of selector specificity, so there's nothing to fight over. */
   .multi-col-item {
     flex-basis: auto !important;
   }
+
+  /* editor-picked side padding/box padding (free-form rem numbers, inline
+  -- see article_body_blocks.html) ignored below this breakpoint, same
+  reasoning as the layout reset above: once columns stack into one, a wide
+  desktop padding just eats space on a screen this narrow. Background/
+  border/radius stay -- only sizing resets. */
+  .multi-col-grid,
+  .multi-col-item {
+    padding: 0 !important;
+  }
 }
