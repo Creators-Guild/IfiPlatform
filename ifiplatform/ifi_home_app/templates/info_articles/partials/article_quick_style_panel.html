@@ -6,17 +6,23 @@ id here would be a much bigger diff for no real benefit): lets someone
 with edit rights on this exact ArticlePage (see can_edit_style in
 article_models.py's get_context()) publish/unpublish it (see the Publish
 section below) and tweak content_side_padding/content_alignment/
-content_font_size/content_bg_enabled/content_bg_color/content_bg_custom_color
-directly on the live page (see the Style section below), with an instant
-preview for the latter (article_quick_style.js writes the CSS custom
-properties/background on .article-page as you interact). Style has no
-Save button of its own -- saving happens via the global floating save bar
-(article_save_bar.html), which this panel's save() registers itself with
-(registerSaveHandler), publishing for real via article_views.save_quick_style
--- Publish/Unpublish act immediately instead, see their own comment below.
-Anyone without edit rights on this page never gets this block rendered at
-all -- the save/publish/unpublish endpoints each enforce the same
-permission checks independently, so this is UX, not the security boundary.
+content_font_size_multiplier/content_bg_enabled/content_bg_color/
+content_bg_custom_color directly on the live page (see the Style section
+below), with an instant preview for the latter (article_quick_style.js
+writes the CSS custom properties/background on .article-page, plus
+rescales every font-size-bearing block live, as you interact). Style has
+no Save button of its own -- saving happens via the global floating save
+bar (article_save_bar.html), which this panel's save() registers itself
+with (registerSaveHandler), publishing for real via
+article_views.save_quick_style -- Publish/Unpublish act immediately
+instead, see their own comment below. Alignment is the one field here
+that's destructive to save: it overwrites every alignment-capable
+block's own alignment throughout the article (see save_quick_style's
+apply_alignment_to_blocks), gated by a confirm dialog in
+article_quick_style.js's save(). Anyone without edit rights on this page
+never gets this block rendered at all -- the save/publish/unpublish
+endpoints each enforce the same permission checks independently, so this
+is UX, not the security boundary.
 {% endcomment %}
 <form class="quick-style-panel" id="quick-style-panel"
       data-quick-style-url="{% url 'article_quick_style' page.id %}"
@@ -88,22 +94,32 @@ permission checks independently, so this is UX, not the security boundary.
         </div>
         <div class="block-style-box-fields" id="quick-style-style-fields" hidden>
             <label class="quick-style-field">
-                <span>{% trans "Side padding" %} (<span id="quick-style-padding-value">{{ page.content_side_padding|unlocalize }}</span>rem)</span>
-                <input type="range" id="quick-style-padding" min="0" max="20" step="0.25" value="{{ page.content_side_padding|unlocalize }}">
+                <span>{% trans "Side padding" %} (<span id="quick-style-padding-value">{{ page.style.content_side_padding|unlocalize }}</span>rem)</span>
+                <input type="range" id="quick-style-padding" min="0" max="20" step="0.25" value="{{ page.style.content_side_padding|unlocalize }}">
             </label>
 
             <div class="quick-style-field">
                 <span>{% trans "Alignment" %}</span>
-                <div class="quick-style-align-buttons" id="quick-style-alignment" data-value="{{ page.content_alignment }}">
-                    <button type="button" data-align="left" class="{% if page.content_alignment == 'left' %}active{% endif %}">{% trans "Left" %}</button>
-                    <button type="button" data-align="center" class="{% if page.content_alignment == 'center' %}active{% endif %}">{% trans "Center" %}</button>
-                    <button type="button" data-align="right" class="{% if page.content_alignment == 'right' %}active{% endif %}">{% trans "Right" %}</button>
+                <div class="quick-style-align-buttons" id="quick-style-alignment" data-value="{{ page.style.content_alignment }}">
+                    <button type="button" data-align="left" class="{% if page.style.content_alignment == 'left' %}active{% endif %}">{% trans "Left" %}</button>
+                    <button type="button" data-align="center" class="{% if page.style.content_alignment == 'center' %}active{% endif %}">{% trans "Center" %}</button>
+                    <button type="button" data-align="right" class="{% if page.style.content_alignment == 'right' %}active{% endif %}">{% trans "Right" %}</button>
                 </div>
+                {% comment %}
+                Alignment is the one field here that doesn't just live-
+                preview -- it only overwrites every block's own alignment
+                once actually saved (see save_quick_style's apply_
+                alignment_to_blocks, and this panel's own save() in
+                article_quick_style.js, which warns right before that
+                POST goes out). This is a reminder that clicking a button
+                above alone changes nothing lasting yet -- Save is required.
+                {% endcomment %}
+                <p class="quick-style-field-hint">{% trans "Only applies to blocks once you Save (see the floating save bar)." %}</p>
             </div>
 
             <label class="quick-style-field">
-                <span>{% trans "Font size" %} (<span id="quick-style-font-size-value">{{ page.content_font_size|unlocalize }}</span>rem)</span>
-                <input type="range" id="quick-style-font-size" min="0.5" max="3" step="0.05" value="{{ page.content_font_size|unlocalize }}">
+                <span>{% trans "Font size multiplier" %} (&times;<span id="quick-style-font-size-value">{{ page.style.content_font_size_multiplier|unlocalize }}</span>)</span>
+                <input type="range" id="quick-style-font-size" min="0.5" max="2" step="0.05" value="{{ page.style.content_font_size_multiplier|unlocalize }}">
             </label>
 
             {% comment %}
@@ -113,25 +129,25 @@ permission checks independently, so this is UX, not the security boundary.
             same swatch-row + hex-chip-with-picker-button control as the
             per-block box styling panel, just for the whole article body's own
             background instead of one block's box. Values render server-side
-            here (page.content_bg_*) rather than via data-* attributes, since
-            this panel edits one fixed ArticlePage, not whichever block was
-            last clicked.
+            here (page.style.content_bg_*) rather than via data-* attributes,
+            since this panel edits one fixed article's shared ArticleStyle
+            row, not whichever block was last clicked.
             {% endcomment %}
             <label class="quick-style-field block-style-toggle">
-                <input type="checkbox" id="quick-style-bg-enabled" {% if page.content_bg_enabled %}checked{% endif %}>
+                <input type="checkbox" id="quick-style-bg-enabled" {% if page.style.content_bg_enabled %}checked{% endif %}>
                 <span>{% trans "Background color" %}</span>
             </label>
-            <div class="quick-style-field" id="quick-style-bg-color-field" {% if not page.content_bg_enabled %}hidden{% endif %}>
-                <div class="block-style-color-buttons" id="quick-style-bg-color" data-value="{{ page.content_bg_color }}">
-                    <button type="button" class="color-swatch color-swatch--bg-light{% if page.content_bg_color == 'bg-light' %} active{% endif %}" data-color="bg-light">{% trans "Light" %}</button>
-                    <button type="button" class="color-swatch color-swatch--turq{% if page.content_bg_color == 'turq' %} active{% endif %}" data-color="turq">{% trans "Turquoise" %}</button>
-                    <button type="button" class="color-swatch color-swatch--pink{% if page.content_bg_color == 'pink' %} active{% endif %}" data-color="pink">{% trans "Pink" %}</button>
-                    <button type="button" class="color-swatch color-swatch--purple{% if page.content_bg_color == 'purple' %} active{% endif %}" data-color="purple">{% trans "Purple" %}</button>
-                    <button type="button" class="color-swatch color-swatch--black{% if page.content_bg_color == 'black' %} active{% endif %}" data-color="black">{% trans "Black" %}</button>
+            <div class="quick-style-field" id="quick-style-bg-color-field" {% if not page.style.content_bg_enabled %}hidden{% endif %}>
+                <div class="block-style-color-buttons" id="quick-style-bg-color" data-value="{{ page.style.content_bg_color }}">
+                    <button type="button" class="color-swatch color-swatch--bg-light{% if page.style.content_bg_color == 'bg-light' %} active{% endif %}" data-color="bg-light">{% trans "Light" %}</button>
+                    <button type="button" class="color-swatch color-swatch--turq{% if page.style.content_bg_color == 'turq' %} active{% endif %}" data-color="turq">{% trans "Turquoise" %}</button>
+                    <button type="button" class="color-swatch color-swatch--pink{% if page.style.content_bg_color == 'pink' %} active{% endif %}" data-color="pink">{% trans "Pink" %}</button>
+                    <button type="button" class="color-swatch color-swatch--purple{% if page.style.content_bg_color == 'purple' %} active{% endif %}" data-color="purple">{% trans "Purple" %}</button>
+                    <button type="button" class="color-swatch color-swatch--black{% if page.style.content_bg_color == 'black' %} active{% endif %}" data-color="black">{% trans "Black" %}</button>
                     <div class="color-swatch-custom-group">
-                        <input type="text" class="color-swatch color-swatch--custom{% if page.content_bg_color == 'custom' %} active{% endif %}" id="quick-style-bg-custom-color" data-color="custom" placeholder="#hex" maxlength="7" value="{{ page.content_bg_custom_color }}" aria-label="{% trans 'Custom hex color' %}">
+                        <input type="text" class="color-swatch color-swatch--custom{% if page.style.content_bg_color == 'custom' %} active{% endif %}" id="quick-style-bg-custom-color" data-color="custom" placeholder="#hex" maxlength="7" value="{{ page.style.content_bg_custom_color }}" aria-label="{% trans 'Custom hex color' %}">
                         <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
-                            <input type="color" id="quick-style-bg-picker" class="color-swatch-picker-input" tabindex="-1" value="{{ page.content_bg_custom_color|default:'#ffffff' }}">
+                            <input type="color" id="quick-style-bg-picker" class="color-swatch-picker-input" tabindex="-1" value="{{ page.style.content_bg_custom_color|default:'#ffffff' }}">
                         </label>
                     </div>
                 </div>

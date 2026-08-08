@@ -12,10 +12,14 @@ from django.views.decorators.http import require_POST
 from wagtail.models import Locale
 
 from ifi_home_app.models.article_models import (
+    BOX_COLOR_CHOICES,
     COLOR_CHOICES,
+    CONTENT_ALIGNMENT_CHOICES,
+    HERO_POSITION_CHOICES,
     HEX_COLOR_VALIDATOR,
     ArticleBlockStyle,
     ArticlePage,
+    alignment_capable_block_ids,
 )
 
 # box styling (see BLOCK_STYLE_DEFAULTS["box"]/_effective_box_style() in
@@ -39,10 +43,20 @@ BOX_FIELDS = {
 # font_size is (or, for title/meta/intro, wherever their own box is).
 TEXT_COLOR_FIELDS = {"text_color", "text_custom_color"}
 
+# alignment-capable types only -- see ArticleBlockStyle.
+# exclude_from_global_alignment and save_quick_style's bulk-overwrite.
+EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD = {"exclude_from_global_alignment"}
+
 BLOCK_STYLE_FIELDS = {
-    "heading": {"side_padding", "alignment", "font_size"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
-    "paragraph": {"side_padding", "alignment", "font_size"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
-    "image": {"alignment", "width_rem", "side_padding"} | BOX_FIELDS,
+    "heading": {"side_padding", "alignment", "font_size"}
+    | BOX_FIELDS
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "paragraph": {"side_padding", "alignment", "font_size"}
+    | BOX_FIELDS
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "image": {"alignment", "width_rem", "side_padding"} | BOX_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
     # article/category/union/tool cards -- width/height, plus (article_card
     # only) list_style/fixed_ratio (see ArticleBlockStyle's own docstrings).
     "article_card": {"width_rem", "height_rem", "list_style", "fixed_ratio"},
@@ -57,8 +71,12 @@ BLOCK_STYLE_FIELDS = {
     # the title/caption text's own alignment/font-size/side-padding/color,
     # independent of each other and of the figcaption's own box above --
     # keyed by "<image-block-id>-cap-title"/"-cap-body".
-    "image_title": {"side_padding", "alignment", "font_size"} | TEXT_COLOR_FIELDS,
-    "image_caption_body": {"side_padding", "alignment", "font_size"} | TEXT_COLOR_FIELDS,
+    "image_title": {"side_padding", "alignment", "font_size"}
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "image_caption_body": {"side_padding", "alignment", "font_size"}
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
     "multi_column": {"side_padding", "gap", "column_weights"} | BOX_FIELDS,
     "column": {"side_padding"} | BOX_FIELDS,
     # a multi_column column's own title -- alignment/font-size/text-color
@@ -68,7 +86,7 @@ BLOCK_STYLE_FIELDS = {
     # save request alongside the column's own box fields), keyed by a
     # synthesized "<column-uuid>-title" id (see _effective_block_styles()
     # in article_models.py).
-    "column_title": {"alignment", "font_size"} | TEXT_COLOR_FIELDS,
+    "column_title": {"alignment", "font_size"} | TEXT_COLOR_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
     # title/meta/intro (the article-header group), keyed by fixed pseudo
     # ids ("article-title"/"article-meta"/"article-intro", see
     # ArticlePage.get_context()). Alignment/font-size for these three
@@ -89,10 +107,25 @@ BLOCK_STYLE_FIELDS = {
 
 @require_POST
 def save_quick_style(request, page_id):
-    """Save content_side_padding/content_alignment/content_font_size/
-    content_bg_enabled/content_bg_color/content_bg_custom_color for one
-    ArticlePage and publish immediately -- this panel is a quick style tweak,
-    not the full editor, so there's no separate draft step."""
+    """Save content_side_padding/content_alignment/
+    content_font_size_multiplier/content_bg_enabled/content_bg_color/
+    content_bg_custom_color -- a plain upsert onto the page's shared
+    ArticleStyle row (see ArticlePage.style), same pattern as
+    save_block_style. Not Wagtail revision/publish at all any more
+    (ArticleStyle isn't a Page field) -- live immediately, same as it
+    always was, just without the redundant revision this used to create
+    for what's really a styling tweak.
+
+    apply_alignment_to_blocks (optional, default False) is the one
+    destructive exception: when true (the JS only ever sends this after
+    the editor confirmed a warning dialog, see article_quick_style.js),
+    this ALSO overwrites the `alignment` field on every alignment-capable
+    ArticleBlockStyle row for this article (creating rows that don't exist
+    yet), except any block individually opted out via its own
+    exclude_from_global_alignment flag -- see alignment_capable_block_ids()
+    in article_models.py. content_font_size_multiplier, in contrast, never
+    touches ArticleBlockStyle at all -- it's applied purely at render time
+    (see _effective_heading_style's display_font_size)."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.permissions_for_user(request.user).can_edit():
@@ -102,15 +135,19 @@ def save_quick_style(request, page_id):
         data = json.loads(request.body)
         side_padding = float(data["content_side_padding"])
         alignment = data["content_alignment"]
-        font_size = float(data["content_font_size"])
+        font_size_multiplier = float(data["content_font_size_multiplier"])
         bg_enabled = bool(data["content_bg_enabled"])
         bg_color = data["content_bg_color"]
         bg_custom_color = data.get("content_bg_custom_color") or ""
+        apply_alignment_to_blocks = bool(data.get("apply_alignment_to_blocks"))
     except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
-    if alignment not in dict(ArticlePage.CONTENT_ALIGNMENT_CHOICES):
+    if alignment not in dict(CONTENT_ALIGNMENT_CHOICES):
         return JsonResponse({"error": "Invalid alignment."}, status=400)
+
+    if not 0.5 <= font_size_multiplier <= 2:
+        return JsonResponse({"error": "Invalid content_font_size_multiplier."}, status=400)
 
     if bg_color not in dict(COLOR_CHOICES):
         return JsonResponse({"error": "Invalid content_bg_color."}, status=400)
@@ -121,14 +158,33 @@ def save_quick_style(request, page_id):
         except ValidationError:
             return JsonResponse({"error": "Invalid content_bg_custom_color."}, status=400)
 
-    page.content_side_padding = side_padding
-    page.content_alignment = alignment
-    page.content_font_size = font_size
-    page.content_bg_enabled = bg_enabled
-    page.content_bg_color = bg_color
-    page.content_bg_custom_color = bg_custom_color
-    revision = page.save_revision(user=request.user)
-    revision.publish(user=request.user)
+    style = page.style
+    style.content_side_padding = side_padding
+    style.content_alignment = alignment
+    style.content_font_size_multiplier = font_size_multiplier
+    style.content_bg_enabled = bg_enabled
+    style.content_bg_color = bg_color
+    style.content_bg_custom_color = bg_custom_color
+    style.save()
+
+    if apply_alignment_to_blocks:
+        excluded_ids = set(
+            ArticleBlockStyle.objects.filter(
+                translation_key=page.translation_key, exclude_from_global_alignment=True
+            ).values_list("block_id", flat=True)
+        )
+        block_ids = [
+            block_id for block_id in alignment_capable_block_ids(page.body) if block_id not in excluded_ids
+        ]
+        ArticleBlockStyle.objects.bulk_create(
+            [
+                ArticleBlockStyle(translation_key=page.translation_key, block_id=block_id, alignment=alignment)
+                for block_id in block_ids
+            ],
+            update_conflicts=True,
+            unique_fields=["translation_key", "block_id"],
+            update_fields=["alignment"],
+        )
 
     return JsonResponse({"ok": True})
 
@@ -182,7 +238,7 @@ def save_block_style(request, page_id):
 
     if "alignment" in allowed_fields and data.get("alignment") is not None:
         alignment = data["alignment"]
-        if alignment not in dict(ArticlePage.CONTENT_ALIGNMENT_CHOICES):
+        if alignment not in dict(CONTENT_ALIGNMENT_CHOICES):
             return JsonResponse({"error": "Invalid alignment."}, status=400)
         defaults["alignment"] = alignment
 
@@ -194,6 +250,8 @@ def save_block_style(request, page_id):
         defaults["list_style"] = bool(data["list_style"])
     if "fixed_ratio" in allowed_fields and data.get("fixed_ratio") is not None:
         defaults["fixed_ratio"] = bool(data["fixed_ratio"])
+    if "exclude_from_global_alignment" in allowed_fields and data.get("exclude_from_global_alignment") is not None:
+        defaults["exclude_from_global_alignment"] = bool(data["exclude_from_global_alignment"])
 
     for color_field, custom_field in (
         ("box_border_color", "box_border_custom_color"),
@@ -218,7 +276,7 @@ def save_block_style(request, page_id):
             defaults[custom_field] = custom_color
 
     ArticleBlockStyle.objects.update_or_create(
-        article=page, block_id=block_id, defaults=defaults
+        translation_key=page.translation_key, block_id=block_id, defaults=defaults
     )
 
     return JsonResponse({"ok": True})
@@ -227,11 +285,8 @@ def save_block_style(request, page_id):
 @require_POST
 def save_header_style(request, page_id):
     """Save title_alignment/intro_alignment/meta_alignment/header_side_padding/
-    title_font_size/intro_font_size/meta_font_size for one ArticlePage and
-    publish immediately. Unlike save_block_style, these are plain ArticlePage
-    fields (not StreamField content), so this is the same
-    save_revision()+publish() pattern as save_quick_style -- no
-    ArticleBlockStyle side table involved."""
+    title_font_size/intro_font_size/meta_font_size -- a plain upsert onto
+    the page's shared ArticleStyle row, same pattern as save_quick_style."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.permissions_for_user(request.user).can_edit():
@@ -249,20 +304,20 @@ def save_header_style(request, page_id):
     except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
-    valid_alignments = dict(ArticlePage.CONTENT_ALIGNMENT_CHOICES)
+    valid_alignments = dict(CONTENT_ALIGNMENT_CHOICES)
     for value in (title_alignment, intro_alignment, meta_alignment):
         if value not in valid_alignments:
             return JsonResponse({"error": "Invalid alignment."}, status=400)
 
-    page.title_alignment = title_alignment
-    page.intro_alignment = intro_alignment
-    page.meta_alignment = meta_alignment
-    page.header_side_padding = header_side_padding
-    page.title_font_size = title_font_size
-    page.intro_font_size = intro_font_size
-    page.meta_font_size = meta_font_size
-    revision = page.save_revision(user=request.user)
-    revision.publish(user=request.user)
+    style = page.style
+    style.title_alignment = title_alignment
+    style.intro_alignment = intro_alignment
+    style.meta_alignment = meta_alignment
+    style.header_side_padding = header_side_padding
+    style.title_font_size = title_font_size
+    style.intro_font_size = intro_font_size
+    style.meta_font_size = meta_font_size
+    style.save()
 
     return JsonResponse({"ok": True})
 
@@ -270,10 +325,11 @@ def save_header_style(request, page_id):
 @require_POST
 def save_hero_image_style(request, page_id):
     """Save hero_image_position/hero_image_width_rem/hero_image_side_padding
-    for one ArticlePage and publish immediately. Same pattern as
-    save_header_style -- plain ArticlePage fields, not StreamField content,
-    since the hero image is a single fixed slot on the page rather than a
-    body block."""
+    plus the box fields (hero_image_boxed/hero_image_box_color/
+    hero_image_box_custom_color/hero_image_box_border_radius, formerly
+    Wagtail-admin-only fields, now on-page like everything else) -- a
+    plain upsert onto the page's shared ArticleStyle row, same pattern as
+    save_quick_style."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.permissions_for_user(request.user).can_edit():
@@ -284,31 +340,50 @@ def save_hero_image_style(request, page_id):
         alignment = data["alignment"]
         width_rem = float(data["width_rem"])
         side_padding = float(data["side_padding"])
+        boxed = bool(data["boxed"])
+        box_color = data["box_color"]
+        box_custom_color = data.get("box_custom_color") or ""
+        box_border_radius = float(data["box_border_radius"])
     except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
-    if alignment not in dict(ArticlePage.HERO_POSITION_CHOICES):
+    if alignment not in dict(HERO_POSITION_CHOICES):
         return JsonResponse({"error": "Invalid alignment."}, status=400)
 
-    page.hero_image_position = alignment
-    page.hero_image_width_rem = width_rem
-    page.hero_image_side_padding = side_padding
-    revision = page.save_revision(user=request.user)
-    revision.publish(user=request.user)
+    if box_color not in dict(BOX_COLOR_CHOICES):
+        return JsonResponse({"error": "Invalid box_color."}, status=400)
+
+    if box_custom_color:
+        try:
+            HEX_COLOR_VALIDATOR(box_custom_color)
+        except ValidationError:
+            return JsonResponse({"error": "Invalid box_custom_color."}, status=400)
+
+    if not 0 <= box_border_radius <= 5:
+        return JsonResponse({"error": "Invalid box_border_radius."}, status=400)
+
+    style = page.style
+    style.hero_image_position = alignment
+    style.hero_image_width_rem = width_rem
+    style.hero_image_side_padding = side_padding
+    style.hero_image_boxed = boxed
+    style.hero_image_box_color = box_color
+    style.hero_image_box_custom_color = box_custom_color
+    style.hero_image_box_border_radius = box_border_radius
+    style.save()
 
     return JsonResponse({"ok": True})
 
 
 @require_POST
 def save_toc_icon_style(request, page_id):
-    """Save toc_icon_size for one ArticlePage and publish immediately. Same
-    pattern as save_header_style/save_hero_image_style -- a plain
-    ArticlePage field, not StreamField content or a per-block
-    ArticleBlockStyle override, since there's only ever one table-of-
-    contents icon on the page. Edited via its own trigger next to the icon
-    itself (article_block_style.js's "toc_icon" pseudo block-type), not the
-    global quick-style panel -- it used to live there, but it's specific to
-    one element on the page, not a whole-article default."""
+    """Save toc_icon_size -- a plain upsert onto the page's shared
+    ArticleStyle row, same pattern as save_quick_style. There's only ever
+    one table-of-contents icon on the page, edited via its own trigger
+    next to the icon itself (article_block_style.js's "toc_icon" pseudo
+    block-type), not the global quick-style panel -- it used to live
+    there, but it's specific to one element on the page, not a
+    whole-article default."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.permissions_for_user(request.user).can_edit():
@@ -320,9 +395,9 @@ def save_toc_icon_style(request, page_id):
     except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
-    page.toc_icon_size = toc_icon_size
-    revision = page.save_revision(user=request.user)
-    revision.publish(user=request.user)
+    style = page.style
+    style.toc_icon_size = toc_icon_size
+    style.save()
 
     return JsonResponse({"ok": True})
 

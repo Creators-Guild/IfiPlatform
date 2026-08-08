@@ -4,6 +4,17 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // the global font-size multiplier (see article_quick_style.js), read
+  // live off .article-page's own data attribute so per-block font-size
+  // edits in this panel stay visually consistent with whatever multiplier
+  // is currently active (including an unsaved one still being dragged in
+  // the Global editor panel) -- never written here, only read.
+  const articlePageEl = document.querySelector(".article-page");
+  const currentFontSizeMultiplier = () => {
+    const value = parseFloat(articlePageEl && articlePageEl.dataset.fontSizeMultiplier);
+    return Number.isNaN(value) ? 1 : value;
+  };
+
   // {block_type: {field: default_value}} -- see BLOCK_STYLE_DEFAULTS in
   // article_models.py, rendered via json_script in
   // article_block_style_mini_panel.html. Powers the "Reset to default" button.
@@ -40,9 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // center/bottom vertical layout, a different axis entirely), not left/
   // center/right text alignment, so it's deliberately left out here.
   const FIELDS_BY_TYPE = {
-    heading: ["side_padding", "alignment", "font_size", "text_color"],
-    paragraph: ["side_padding", "alignment", "font_size", "text_color"],
-    image: ["alignment", "width_rem", "side_padding"],
+    heading: ["side_padding", "alignment", "exclude_from_global_alignment", "font_size", "text_color"],
+    paragraph: ["side_padding", "alignment", "exclude_from_global_alignment", "font_size", "text_color"],
+    image: ["alignment", "exclude_from_global_alignment", "width_rem", "side_padding"],
     // article/category/union/tool cards -- width/height (a fixed-design
     // card, not built from editable text/box parts like everything else
     // here; height 0 = auto), plus, for article_card only, list_style
@@ -103,11 +114,15 @@ document.addEventListener("DOMContentLoaded", () => {
       "intro_font_size",
       "intro_text_color",
     ],
-    // same fields as image, and reuses the exact same generic alignment/
-    // width/padding inputs below -- also not a StreamField block though
-    // (hero_image is a set of plain ArticlePage fields, see article_models.py),
-    // so it needs the same special-cased save endpoint as article_header.
-    hero_image: ["alignment", "width_rem", "side_padding"],
+    // alignment/width/side_padding reuse the exact same generic inputs as
+    // "image" -- also not a StreamField block though (hero_image is a set
+    // of ArticleStyle fields, see article_models.py), so it needs the same
+    // special-cased save endpoint as article_header. boxed/box_color/
+    // box_custom_color/box_border_radius have their own small dedicated
+    // controls below (not the generic Box section -- that one saves to a
+    // per-block ArticleBlockStyle row, these save to ArticleStyle instead,
+    // same endpoint as the other three).
+    hero_image: ["alignment", "width_rem", "side_padding", "boxed", "box_color", "box_custom_color", "box_border_radius"],
     // not a StreamField block either -- there's only ever one
     // table-of-contents icon on the page (ArticlePage.toc_icon_size), same
     // special-cased save endpoint as article_header/hero_image.
@@ -270,7 +285,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const heightValue = document.getElementById("block-style-height-value");
   const listStyleInput = document.getElementById("block-style-list-style");
   const fixedRatioInput = document.getElementById("block-style-fixed-ratio");
+  // hero_image only -- see FIELDS_BY_TYPE.hero_image's own comment for why
+  // these are separate from the generic Box section's box*Input refs below.
+  const heroBoxedInput = document.getElementById("block-style-hero-boxed");
+  const heroBoxColorGroup = document.getElementById("block-style-hero-box-color");
+  const heroBoxCustomColorInput = document.getElementById("block-style-hero-box-custom-color");
+  const heroBoxPickerInput = document.getElementById("block-style-hero-box-picker");
+  const heroBoxRadiusInput = document.getElementById("block-style-hero-box-radius");
+  const heroBoxRadiusValue = document.getElementById("block-style-hero-box-radius-value");
   const alignmentGroup = document.getElementById("block-style-alignment");
+  // opts this block (or, for the merged column panel, the column's own
+  // title -- see FIELDS_BY_TYPE.column) out of the Global editor's
+  // Alignment "overwrite all blocks" action -- see ArticleBlockStyle.
+  // exclude_from_global_alignment, save_quick_style's apply_alignment_to_
+  // blocks, and article_quick_style.js's save(). CAPTION_TEXT_GROUPS below
+  // each have their own separate one (excludeInput), since image_title/
+  // image_caption_body are independently alignment-capable blocks of
+  // their own, not the shared "Style" section this one belongs to.
+  const excludeGlobalAlignmentInput = document.getElementById("block-style-exclude-global-alignment");
   const titleAlignmentGroup = document.getElementById("block-style-title-alignment");
   const introAlignmentGroup = document.getElementById("block-style-intro-alignment");
   const metaAlignmentGroup = document.getElementById("block-style-meta-alignment");
@@ -336,6 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
       defaultsKey: "image_title",
       spanSelector: ":scope > .image-title",
       alignmentGroup: document.getElementById("block-style-caption-title-alignment"),
+      excludeInput: document.getElementById("block-style-caption-title-exclude-global-alignment"),
       fontSizeInput: document.getElementById("block-style-caption-title-font-size"),
       fontSizeValue: document.getElementById("block-style-caption-title-font-size-value"),
       paddingInput: document.getElementById("block-style-caption-title-padding"),
@@ -351,6 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
       defaultsKey: "image_caption_body",
       spanSelector: ":scope > .image-caption",
       alignmentGroup: document.getElementById("block-style-caption-body-alignment"),
+      excludeInput: document.getElementById("block-style-caption-body-exclude-global-alignment"),
       fontSizeInput: document.getElementById("block-style-caption-body-font-size"),
       fontSizeValue: document.getElementById("block-style-caption-body-font-size-value"),
       paddingInput: document.getElementById("block-style-caption-body-padding"),
@@ -443,9 +477,10 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
 
-    // hero_image isn't a StreamField block either -- plain ArticlePage
-    // fields (hero_image_position/width_rem/side_padding), same reasoning
-    // as article_header above.
+    // hero_image isn't a StreamField block either -- ArticleStyle fields
+    // (hero_image_position/width_rem/side_padding/boxed/box_color/
+    // box_custom_color/box_border_radius), same reasoning as article_header
+    // above.
     if (blockType === "hero_image") {
       return {
         url: panel.dataset.heroImageSaveUrl,
@@ -453,6 +488,10 @@ document.addEventListener("DOMContentLoaded", () => {
           alignment: alignmentGroup.dataset.value,
           width_rem: widthInput.value,
           side_padding: paddingInput.value,
+          boxed: heroBoxedInput.checked,
+          box_color: heroBoxColorGroup.dataset.value,
+          box_custom_color: heroBoxCustomColorInput.value,
+          box_border_radius: heroBoxRadiusInput.value,
         },
       };
     }
@@ -489,6 +528,9 @@ document.addEventListener("DOMContentLoaded", () => {
         block_type: blockType,
         side_padding: visibleFields.includes("side_padding") ? paddingInput.value : null,
         alignment: visibleFields.includes("alignment") ? alignmentGroup.dataset.value : null,
+        exclude_from_global_alignment: visibleFields.includes("exclude_from_global_alignment")
+          ? excludeGlobalAlignmentInput.checked
+          : null,
         font_size: visibleFields.includes("font_size") ? fontSizeInput.value : null,
         width_rem: visibleFields.includes("width_rem") ? widthInput.value : null,
         height_rem: visibleFields.includes("height_rem") ? heightInput.value : null,
@@ -539,6 +581,7 @@ document.addEventListener("DOMContentLoaded", () => {
           block_id: titleId,
           block_type: "column_title",
           alignment: alignmentGroup.dataset.value,
+          exclude_from_global_alignment: excludeGlobalAlignmentInput.checked,
           font_size: fontSizeInput.value,
           text_color: textColorGroup.dataset.value,
           text_custom_color: textCustomColorInput.value,
@@ -562,6 +605,7 @@ document.addEventListener("DOMContentLoaded", () => {
             block_id: textId,
             block_type: group.blockType,
             alignment: group.alignmentGroup.dataset.value,
+            exclude_from_global_alignment: group.excludeInput.checked,
             font_size: group.fontSizeInput.value,
             side_padding: group.paddingInput.value,
             text_color: group.colorGroup.dataset.value,
@@ -640,6 +684,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // title, not the column) need to shift accordingly.
   const TITLE_DATASET_KEYS = {
     alignment: "titleAlignment",
+    excludeFromGlobalAlignment: "titleExcludeFromGlobalAlignment",
     fontSize: "titleFontSize",
     textColor: "titleTextColor",
     textCustomColor: "titleTextCustomColor",
@@ -779,6 +824,39 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       target.style.color = "";
     }
+  };
+
+  // hero_image only -- draws a border/box around the image, title and
+  // caption. Mirrors article_page.html's own server-rendered version of
+  // this exact logic (--box-bg custom property + border-radius, gated by
+  // .image-figure--boxed -- see article_image.css); box-color--<color> is
+  // separate from --box-bg itself, only used for text contrast when the
+  // box is black (see .box-color--black .image-title in that same file),
+  // so it needs stripping/re-adding as its own step, not just a plain
+  // classList.toggle the way image-figure--boxed itself is.
+  const applyHeroImageBox = () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    Array.from(currentBlockEl.classList)
+      .filter((cls) => cls.startsWith("box-color--"))
+      .forEach((cls) => currentBlockEl.classList.remove(cls));
+    const boxed = heroBoxedInput.checked;
+    currentBlockEl.classList.toggle("image-figure--boxed", boxed);
+    if (!boxed) {
+      currentBlockEl.style.removeProperty("--box-bg");
+      currentBlockEl.style.borderRadius = "";
+      return;
+    }
+    const boxColor = heroBoxColorGroup.dataset.value;
+    currentBlockEl.classList.add(`box-color--${boxColor}`);
+    currentBlockEl.style.setProperty(
+      "--box-bg",
+      boxColor === "custom"
+        ? heroBoxCustomColorInput.value || "var(--color-bg-light)"
+        : `var(--color-${boxColor})`
+    );
+    currentBlockEl.style.borderRadius = `${heroBoxRadiusInput.value}rem`;
   };
 
   // a collapsible section's own header (see the panel template's "block-
@@ -925,6 +1003,7 @@ document.addEventListener("DOMContentLoaded", () => {
   wireColorGroup(boxBgColorGroup, "boxBgColor");
   wireColorGroup(boxBorderColorGroup, "boxBorderColor");
   wireColorGroup(textColorGroup, "textColor", applyTextColor);
+  wireColorGroup(heroBoxColorGroup, "boxColor", applyHeroImageBox);
 
   // the "Custom" swatch is a plain hex text input (see the mini panel
   // template) -- typing a valid hex both selects "custom" for the group
@@ -940,6 +1019,7 @@ document.addEventListener("DOMContentLoaded", () => {
     [boxBgCustomColorInput, boxBgPickerInput, boxBgColorGroup, "boxBgColor", "boxBgCustomColor"],
     [boxBorderCustomColorInput, boxBorderPickerInput, boxBorderColorGroup, "boxBorderColor", "boxBorderCustomColor"],
     [textCustomColorInput, textPickerInput, textColorGroup, "textColor", "textCustomColor", applyTextColor],
+    [heroBoxCustomColorInput, heroBoxPickerInput, heroBoxColorGroup, "boxColor", "boxCustomColor", applyHeroImageBox],
   ].forEach(([hexInput, pickerInput, group, groupDatasetKey, customDatasetKey, applyFn = applyBoxStyle]) => {
     // custom isn't active yet -- a plain click always immediately focuses a
     // text input (or, for the picker label, forwards straight into opening
@@ -1020,13 +1100,23 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    group.excludeInput.addEventListener("change", () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      currentBlockEl.dataset[`${group.datasetPrefix}ExcludeFromGlobalAlignment`] = group.excludeInput.checked
+        ? "true"
+        : "false";
+      recordPendingEdit();
+    });
+
     group.fontSizeInput.addEventListener("input", () => {
       if (!currentBlockEl) {
         return;
       }
       const target = captionTextTargetEl(group);
       if (target) {
-        target.style.fontSize = `${group.fontSizeInput.value}rem`;
+        target.style.fontSize = `${group.fontSizeInput.value * currentFontSizeMultiplier()}rem`;
       }
       currentBlockEl.dataset[`${group.datasetPrefix}FontSize`] = group.fontSizeInput.value;
       group.fontSizeValue.textContent = group.fontSizeInput.value;
@@ -1305,7 +1395,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
     if (blockType === "column" && blockEl.dataset.titleBlockId) {
-      visibleFields = visibleFields.concat(["alignment", "font_size", "text_color"]);
+      visibleFields = visibleFields.concat(["alignment", "exclude_from_global_alignment", "font_size", "text_color"]);
     }
     if (blockType === "image_caption") {
       CAPTION_TEXT_GROUPS.forEach((group) => {
@@ -1313,6 +1403,7 @@ document.addEventListener("DOMContentLoaded", () => {
           visibleFields = visibleFields.concat([
             `${group.styleFieldPrefix}_label`,
             `${group.styleFieldPrefix}_alignment`,
+            `${group.styleFieldPrefix}_exclude_from_global_alignment`,
             `${group.styleFieldPrefix}_font_size`,
             `${group.styleFieldPrefix}_side_padding`,
             `${group.styleFieldPrefix}_text_color`,
@@ -1365,6 +1456,10 @@ document.addEventListener("DOMContentLoaded", () => {
       boxMarginValue.textContent = blockEl.dataset.boxMargin;
       updateBoxFieldVisibility();
     }
+    if (visibleFields.includes("exclude_from_global_alignment")) {
+      excludeGlobalAlignmentInput.checked =
+        blockEl.dataset[styleDatasetKey("excludeFromGlobalAlignment")] === "true";
+    }
     if (visibleFields.includes("font_size")) {
       const fontVal = blockEl.dataset[styleDatasetKey("fontSize")];
       fontSizeInput.value = fontVal;
@@ -1392,6 +1487,7 @@ document.addEventListener("DOMContentLoaded", () => {
         group.alignmentGroup.querySelectorAll("button").forEach((b) => {
           b.classList.toggle("active", b.dataset.align === alignVal);
         });
+        group.excludeInput.checked = blockEl.dataset[`${group.datasetPrefix}ExcludeFromGlobalAlignment`] === "true";
         const fontVal = blockEl.dataset[`${group.datasetPrefix}FontSize`];
         group.fontSizeInput.value = fontVal;
         group.fontSizeValue.textContent = fontVal;
@@ -1423,6 +1519,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (visibleFields.includes("fixed_ratio")) {
       fixedRatioInput.checked = blockEl.dataset.fixedRatio === "true";
+    }
+    if (visibleFields.includes("boxed")) {
+      heroBoxedInput.checked = blockEl.dataset.boxed === "true";
+    }
+    if (visibleFields.includes("box_color")) {
+      heroBoxColorGroup.dataset.value = blockEl.dataset.boxColor;
+      heroBoxColorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+        b.classList.toggle("active", b.dataset.color === blockEl.dataset.boxColor);
+      });
+      setCustomSwatch(heroBoxCustomColorInput, blockEl.dataset.boxCustomColor, heroBoxPickerInput);
+    }
+    if (visibleFields.includes("box_border_radius")) {
+      heroBoxRadiusInput.value = blockEl.dataset.boxBorderRadius;
+      heroBoxRadiusValue.textContent = blockEl.dataset.boxBorderRadius;
     }
     if (visibleFields.includes("gap")) {
       gapInput.value = blockEl.dataset.gap;
@@ -1567,7 +1677,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const target = targetTypeInput.value === "column" ? columnTitleEl() : currentBlockEl;
     if (target) {
-      target.style.fontSize = `${fontSizeInput.value}rem`;
+      target.style.fontSize = `${fontSizeInput.value * currentFontSizeMultiplier()}rem`;
     }
     currentBlockEl.dataset[styleDatasetKey("fontSize")] = fontSizeInput.value;
     fontSizeValue.textContent = fontSizeInput.value;
@@ -1632,6 +1742,40 @@ document.addEventListener("DOMContentLoaded", () => {
       cardEl.classList.toggle("articlecard--unlocked-ratio", !fixedRatioInput.checked);
     }
     currentBlockEl.dataset.fixedRatio = fixedRatioInput.checked ? "true" : "false";
+    recordPendingEdit();
+  });
+
+  // heading/paragraph/image, and (via styleDatasetKey) a column's own
+  // title -- see ArticleBlockStyle.exclude_from_global_alignment. Purely a
+  // meta-flag, no live-preview visual to update, just the dataset marker
+  // openPanelFor reads back on reopen and recordPendingEdit sends on save.
+  excludeGlobalAlignmentInput.addEventListener("change", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset[styleDatasetKey("excludeFromGlobalAlignment")] = excludeGlobalAlignmentInput.checked
+      ? "true"
+      : "false";
+    recordPendingEdit();
+  });
+
+  // hero_image only -- see applyHeroImageBox's own comment.
+  heroBoxedInput.addEventListener("change", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset.boxed = heroBoxedInput.checked ? "true" : "false";
+    applyHeroImageBox();
+    recordPendingEdit();
+  });
+
+  heroBoxRadiusInput.addEventListener("input", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset.boxBorderRadius = heroBoxRadiusInput.value;
+    heroBoxRadiusValue.textContent = heroBoxRadiusInput.value;
+    applyHeroImageBox();
     recordPendingEdit();
   });
 
@@ -1956,6 +2100,16 @@ document.addEventListener("DOMContentLoaded", () => {
         // needs to run after they've all already been reset above.
         applyToggle(boxEnabledInput, boxDefaults.enabled);
       }
+    }
+
+    // hero_image's own box -- separate from the generic box mechanism
+    // above (hero_image isn't in BOX_CAPABLE_TYPES, see applyHeroImageBox's
+    // own comment), so it needs its own reset here.
+    if (blockType === "hero_image" && defaults) {
+      applyToggle(heroBoxedInput, defaults.boxed);
+      applyColorGroup(heroBoxColorGroup, defaults.box_color);
+      setCustomSwatch(heroBoxCustomColorInput, defaults.box_custom_color, heroBoxPickerInput);
+      applySlider(heroBoxRadiusInput, defaults.box_border_radius);
     }
   });
 });

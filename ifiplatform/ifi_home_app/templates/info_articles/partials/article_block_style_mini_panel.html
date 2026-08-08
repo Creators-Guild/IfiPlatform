@@ -58,6 +58,39 @@ with (registerSaveHandler).
         </label>
 
         {% comment %}
+        hero_image only -- draws a border/box around the image, title and
+        caption (see .image-figure--boxed in article_image.css). Saved via
+        the same hero-image endpoint as alignment/width/side padding above,
+        not ArticleBlockStyle -- these are ArticleStyle fields (formerly
+        Wagtail-admin-only, now on-page like everything else -- see
+        ArticleStyle.hero_image_boxed and friends).
+        {% endcomment %}
+        <label class="block-style-field block-style-toggle" data-style-field="boxed">
+            <input type="checkbox" id="block-style-hero-boxed">
+            <span>{% trans "Box" %}</span>
+        </label>
+        <div class="block-style-field" data-style-field="box_color">
+            <span>{% trans "Box color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-hero-box-color">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-hero-box-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-hero-box-picker" class="color-swatch-picker-input" tabindex="-1">
+                    </label>
+                </div>
+            </div>
+        </div>
+        <label class="block-style-field" data-style-field="box_border_radius">
+            <span>{% trans "Box corner rounding" %} (<span id="block-style-hero-box-radius-value"></span>rem)</span>
+            <input type="range" id="block-style-hero-box-radius" min="0" max="5" step="0.05">
+        </label>
+
+        {% comment %}
         Card blocks only (article/category/union/tool) -- 0 means auto (the
         card's own natural, content-driven height). See ArticleBlockStyle.
         height_rem's own docstring.
@@ -128,6 +161,18 @@ with (registerSaveHandler).
                 <button type="button" data-align="right">{% trans "Right" %}</button>
             </div>
         </div>
+
+        {% comment %}
+        Opts this one block out of the Global editor's Alignment "overwrite
+        all blocks" action (see ArticleBlockStyle.exclude_from_global_
+        alignment, save_quick_style's apply_alignment_to_blocks). Shares
+        the alignment field's own visibility gate above -- only relevant
+        wherever alignment itself is.
+        {% endcomment %}
+        <label class="block-style-field block-style-toggle" data-style-field="exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-exclude-global-alignment">
+            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
+        </label>
 
         <label class="block-style-field" data-style-field="font_size">
             {% comment %}
@@ -207,6 +252,11 @@ with (registerSaveHandler).
             </div>
         </div>
 
+        <label class="block-style-field block-style-toggle" data-style-field="caption_title_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-caption-title-exclude-global-alignment">
+            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
+        </label>
+
         <label class="block-style-field" data-style-field="caption_title_font_size">
             <span>{% trans "Font size" %} (<span id="block-style-caption-title-font-size-value"></span>rem)</span>
             <input type="range" id="block-style-caption-title-font-size" min="0.5" max="3" step="0.05">
@@ -249,6 +299,11 @@ with (registerSaveHandler).
                 <button type="button" data-align="right">{% trans "Right" %}</button>
             </div>
         </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="caption_body_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-caption-body-exclude-global-alignment">
+            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
+        </label>
 
         <label class="block-style-field" data-style-field="caption_body_font_size">
             <span>{% trans "Font size" %} (<span id="block-style-caption-body-font-size-value"></span>rem)</span>

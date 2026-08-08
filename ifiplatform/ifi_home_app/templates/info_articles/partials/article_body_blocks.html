@@ -23,37 +23,37 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
         {% if block.value.level == "h3" %}
             <h3 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                 {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
-                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
+                data-alignment="{{ style.alignment }}" data-exclude-from-global-alignment="{{ style.exclude_from_global_alignment|yesno:"true,false" }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
                 data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
                 {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
-                style="font-size: {{ style.font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
+                style="font-size: {{ style.display_font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             </h3>
         {% elif block.value.level == "h4" %}
             <h4 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                 {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
-                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
+                data-alignment="{{ style.alignment }}" data-exclude-from-global-alignment="{{ style.exclude_from_global_alignment|yesno:"true,false" }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
                 data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
                 {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
-                style="font-size: {{ style.font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
+                style="font-size: {{ style.display_font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             </h4>
         {% elif block.value.level == "h5" %}
             <h5 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                 {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
-                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
+                data-alignment="{{ style.alignment }}" data-exclude-from-global-alignment="{{ style.exclude_from_global_alignment|yesno:"true,false" }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
                 data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
                 {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
-                style="font-size: {{ style.font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
+                style="font-size: {{ style.display_font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             </h5>
         {% else %}
             <h2 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                 {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
-                data-alignment="{{ style.alignment }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
+                data-alignment="{{ style.alignment }}" data-exclude-from-global-alignment="{{ style.exclude_from_global_alignment|yesno:"true,false" }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
                 data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
                 {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
-                style="font-size: {{ style.font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
+                style="font-size: {{ style.display_font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             </h2>
         {% endif %}
@@ -63,10 +63,10 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
         {% with style=block_styles|lookup:block.id %}
         <div class="prose prose--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
              {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="paragraph"
-             data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}" data-alignment="{{ style.alignment }}"
+             data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}" data-alignment="{{ style.alignment }}" data-exclude-from-global-alignment="{{ style.exclude_from_global_alignment|yesno:"true,false" }}"
              data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
              {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
-             style="font-size: {{ style.font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
+             style="font-size: {{ style.display_font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ block.value.text }}
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
         </div>
         {% endwith %}
@@ -99,7 +99,7 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
                      {% if can_edit_style %}data-col-index="{{ forloop.counter0 }}" data-block-id="{{ bound_column.id }}" data-block-type="column"
                      data-side-padding="{{ column_style.side_padding|unlocalize }}"
                      {% include "info_articles/partials/_block_box_data_attrs.html" with box=column_style.box %}
-                     {% if column.title %}data-title-block-id="{{ title_id }}" data-title-alignment="{{ title_style.alignment }}" data-title-font-size="{{ title_style.font_size|unlocalize }}" data-title-text-color="{{ title_style.text_color }}" data-title-text-custom-color="{{ title_style.text_custom_color }}"{% endif %}
+                     {% if column.title %}data-title-block-id="{{ title_id }}" data-title-alignment="{{ title_style.alignment }}" data-title-exclude-from-global-alignment="{{ title_style.exclude_from_global_alignment|yesno:"true,false" }}" data-title-font-size="{{ title_style.font_size|unlocalize }}" data-title-text-color="{{ title_style.text_color }}" data-title-text-custom-color="{{ title_style.text_custom_color }}"{% endif %}
                      {% endif %}
                      style="flex: {{ style.column_weights|index:forloop.counter0|unlocalize }} 1 0; {% include "info_articles/partials/_block_box_style.html" with box=column_style.box side_padding=column_style.side_padding %}">
                     {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
@@ -115,7 +115,8 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
                         {% endcomment %}
                         <div class="column-title-wrap" style="text-align: {{ title_style.alignment }};">
                         <h3 class="column-title heading--align-{{ title_style.alignment }}" id="{{ column.title|slugify }}"
-                            style="font-size: {{ title_style.font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=title_style.text_color text_custom_color=title_style.text_custom_color %}">{{ column.title }}</h3>
+                            {% if can_edit_style %}data-font-size="{{ title_style.font_size|unlocalize }}"{% endif %}
+                            style="font-size: {{ title_style.display_font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=title_style.text_color text_custom_color=title_style.text_custom_color %}">{{ column.title }}</h3>
                         </div>
                     {% endif %}
                     {% include "info_articles/partials/article_column_content.html" with content=column.content %}
