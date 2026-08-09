@@ -15,6 +15,14 @@ on:
         description: "Deploy even if tests/lint fail (emergency override)"
         type: boolean
         default: false
+      skip_tests:
+        description: "Don't run the test suite at all this run (e.g. re-running back-to-back with no code changes)"
+        type: boolean
+        default: false
+      skip_lint:
+        description: "Don't run pylint at all this run"
+        type: boolean
+        default: false
       skip_countdown:
         description: "Skip the 10-minute visitor warning countdown before restarting (independent of force_deploy)"
         type: boolean
@@ -23,6 +31,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Only a manual dispatch can skip this at all -- push/pull_request/
+    # schedule never carry skip_tests, so they're unaffected.
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_tests != 'true'
     env:
       DJANGO_SECRET_KEY: dummy-secret-key-for-ci
       DEBUG: "True"
@@ -46,6 +57,7 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_lint != 'true'
     env:
       DJANGO_SECRET_KEY: dummy-secret-key-for-ci
       DEBUG: "True"
@@ -81,16 +93,33 @@ jobs:
     #   - on the nightly schedule trigger, once test+lint both pass against
     #     whatever is on main at that time (batches same-day merges), or
     #   - on a manual workflow_dispatch run ("Run workflow" in the Actions
-    #     tab), either safely (still requires test+lint to pass) or with
-    #     force_deploy checked to bypass that (emergency override).
-    # `always()` is required here because a failed `needs` job would
-    # otherwise skip this job before its own `if` is even evaluated.
+    #     tab), either safely (still requires test+lint to pass, or to have
+    #     been explicitly skipped via skip_tests/skip_lint -- see below) or
+    #     with force_deploy checked to bypass that check entirely
+    #     (emergency override).
+    # `always()` is required here because a failed (or, now, skipped)
+    # `needs` job would otherwise skip this job before its own `if` is even
+    # evaluated.
+    #
+    # The `skip_tests == 'true' || ... == 'success'` pairs below treat a
+    # *skipped* job the same as a passing one, but only when that skip was
+    # actually requested -- schedule/push/pull_request never set those
+    # inputs at all, so this never accidentally lets an unrelated skip
+    # through.
     if: >
       always() &&
       (
         (github.event_name == 'schedule' && needs.test.result == 'success' && needs.lint.result == 'success')
         ||
-        (github.event_name == 'workflow_dispatch' && (github.event.inputs.force_deploy == 'true' || (needs.test.result == 'success' && needs.lint.result == 'success')))
+        (github.event_name == 'workflow_dispatch' && (
+          github.event.inputs.force_deploy == 'true'
+          ||
+          (
+            (github.event.inputs.skip_tests == 'true' || needs.test.result == 'success')
+            &&
+            (github.event.inputs.skip_lint == 'true' || needs.lint.result == 'success')
+          )
+        ))
       )
     runs-on: ubuntu-latest
     steps:

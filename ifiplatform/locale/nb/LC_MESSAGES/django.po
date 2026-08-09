@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-09 16:30+0200\n"
+"POT-Creation-Date: 2026-08-09 18:33+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,15 +17,19 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: .\account_app\templates\core\account_settings.html:4
+#: .\templates\partials\top_header.html:33
+#: .\templates\partials\top_header.html:50
+msgid "Account"
+msgstr "Konto"
+
 #: .\account_app\templates\core\account_settings.html:14
-#, fuzzy
-#| msgid "Welcome to the Account Page"
 msgid "Account Settings"
-msgstr "Velkommen til Konto Hovedside"
+msgstr "Kontoinnstillinger"
 
 #: .\account_app\templates\core\account_settings.html:16
 msgid "User"
-msgstr ""
+msgstr "Bruker"
 
 #: .\account_app\templates\core\account_settings.html:23
 #, python-format
@@ -60,22 +64,24 @@ msgid ""
 "Your profile is missing some details -- filling them in is <span "
 "class=\"notice-highlight\">optional</span>, but helps us reach you if needed."
 msgstr ""
+"Profilen din mangler noen detaljer -- å fylle dem ut er <span class=\"notice-"
+"highlight\">valgfritt</span>, men hjelper oss å nå deg om nødvendig."
 
 #: .\account_app\templates\core\account_settings.html:45
 msgid "Waiting for you to confirm the new address"
-msgstr ""
+msgstr "Venter på at du bekrefter den nye adressen"
 
 #: .\account_app\templates\core\account_settings.html:46
 msgid "check its inbox for a confirmation link. Your email stays"
-msgstr ""
+msgstr "sjekk innboksen for en bekreftelseslenke. E-posten din forblir"
 
 #: .\account_app\templates\core\account_settings.html:47
 msgid "until then."
-msgstr ""
+msgstr "frem til da."
 
 #: .\account_app\templates\core\account_settings.html:51
 msgid "Cancel this change"
-msgstr ""
+msgstr "Avbryt denne endringen"
 
 #: .\account_app\templates\core\account_settings.html:66
 #: .\account_app\templates\core\account_settings.html:78
@@ -84,20 +90,20 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_save_bar.html:13
 #: .\study_app\templates\flashcards\core\card_form.html:12
 msgid "Save"
-msgstr ""
+msgstr "Lagre"
 
 #: .\account_app\templates\core\account_settings.html:67
 #: .\account_app\templates\core\account_settings.html:79
 #: .\account_app\templates\core\account_settings.html:91
 #: .\ifi_home_app\templates\info_articles\partials\article_unsaved_changes_modal.html:18
 msgid "Cancel"
-msgstr ""
+msgstr "Avbryt"
 
 #: .\account_app\templates\core\account_settings.html:67
 #: .\account_app\templates\core\account_settings.html:79
 #: .\account_app\templates\core\account_settings.html:91
 msgid "Edit"
-msgstr ""
+msgstr "Rediger"
 
 #: .\account_app\templates\core\account_settings.html:112
 msgid ""
@@ -120,7 +126,7 @@ msgstr "Personvernerklæring"
 #: .\account_app\templates\core\account_settings.html:118
 #: .\templates\partials\top_header.html:51
 msgid "Log out"
-msgstr ""
+msgstr "Logg ut"
 
 #: .\account_app\templates\core\account_settings.html:122
 msgid "Delete my account"
@@ -294,127 +300,129 @@ msgstr "Kontoen din er slettet. Vi er lei oss for å se deg gå."
 #: .\account_app\templates\login\account_deleted.html:16
 #: .\account_app\templates\login\logout.html:22
 msgid "Return to main page"
-msgstr ""
+msgstr "Gå tilbake til hovedsiden"
 
 #: .\account_app\templates\login\email_change_invalid.html:4
 #: .\account_app\templates\login\verify_email_invalid.html:4
 msgid "Link invalid"
-msgstr ""
+msgstr "Ugyldig lenke"
 
 #: .\account_app\templates\login\email_change_invalid.html:13
 #: .\account_app\templates\login\verify_email_invalid.html:13
 msgid "Link invalid or expired"
-msgstr ""
+msgstr "Lenken er ugyldig eller utløpt"
 
 #: .\account_app\templates\login\email_change_invalid.html:14
 msgid ""
 "This email confirmation link is no longer valid. It may have expired, "
 "already been used, or that address may now belong to another account."
 msgstr ""
+"Denne e-postbekreftelseslenken er ikke lenger gyldig. Den kan ha utløpt, "
+"allerede blitt brukt, eller adressen tilhører nå en annen konto."
 
 #: .\account_app\templates\login\email_change_invalid.html:16
 #: .\account_app\templates\login\email_change_sent.html:16
-#, fuzzy
-#| msgid "Welcome to the Account Page"
 msgid "Back to account settings"
-msgstr "Velkommen til Konto Hovedside"
+msgstr "Tilbake til kontoinnstillinger"
 
 #: .\account_app\templates\login\email_change_sent.html:4
 #: .\account_app\templates\login\email_change_sent.html:13
 msgid "Confirm your new email"
-msgstr ""
+msgstr "Bekreft din nye e-post"
 
 #: .\account_app\templates\login\email_change_sent.html:14
 msgid ""
 "We've sent a confirmation link to the new email address. Your account keeps "
 "using the old one until you click it."
 msgstr ""
+"Vi har sendt en bekreftelseslenke til den nye e-postadressen. Kontoen din "
+"fortsetter å bruke den gamle frem til du klikker på den."
 
 #: .\account_app\templates\login\email_change_success.html:4
 #: .\account_app\templates\login\email_change_success.html:13
 msgid "Email updated"
-msgstr ""
+msgstr "E-post oppdatert"
 
 #: .\account_app\templates\login\email_change_success.html:14
 msgid "Your account's email is now"
-msgstr ""
+msgstr "E-posten til kontoen din er nå"
 
 #: .\account_app\templates\login\email_change_success.html:16
 #: .\account_app\templates\login\signin_success.html:17
 #: .\account_app\templates\login\verify_email_success.html:16
 msgid "Go to your account"
-msgstr ""
+msgstr "Gå til kontoen din"
 
 #: .\account_app\templates\login\login.html:4
 #: .\account_app\templates\login\login.html:13
 msgid "User Login"
-msgstr ""
+msgstr "Brukerinnlogging"
 
 #: .\account_app\templates\login\login.html:36
 #: .\templates\partials\top_header.html:58
 msgid "Log in"
-msgstr ""
+msgstr "Logg inn"
 
 #: .\account_app\templates\login\login.html:39
 msgid "New user? Sign in here"
-msgstr ""
+msgstr "Ny bruker? Registrer deg her"
 
 #: .\account_app\templates\login\login.html:42
 msgid "Didn't get a verification email?"
-msgstr ""
+msgstr "Fikk du ikke en bekreftelses-e-post?"
 
 #: .\account_app\templates\login\logout.html:4
 #: .\account_app\templates\login\logout.html:13
 msgid "User Logout"
-msgstr ""
+msgstr "Brukerutlogging"
 
 #: .\account_app\templates\login\logout.html:14
 msgid "You are now logged out!"
-msgstr ""
+msgstr "Du er nå logget ut!"
 
 #: .\account_app\templates\login\logout.html:16
 #, python-format
 msgid "Goodbye for now, %(display_name)s. Hope to see you soon!"
-msgstr ""
+msgstr "Ha det så lenge, %(display_name)s. Håper å se deg snart!"
 
 #: .\account_app\templates\login\logout.html:18
 msgid "Goodbye for now:) Hope to see you soon!"
-msgstr ""
+msgstr "Ha det så lenge :) Håper å se deg snart!"
 
 #: .\account_app\templates\login\logout.html:21
 msgid "Log in again"
-msgstr ""
+msgstr "Logg inn igjen"
 
 #: .\account_app\templates\login\resend_verification.html:4
 #: .\account_app\templates\login\resend_verification.html:13
 #: .\account_app\templates\login\verify_email_invalid.html:16
 msgid "Resend verification email"
-msgstr ""
+msgstr "Send bekreftelses-e-post på nytt"
 
 #: .\account_app\templates\login\resend_verification.html:14
 msgid ""
 "Enter the email address you signed up with and we'll send a new confirmation "
 "link, if there's an unverified account for it."
 msgstr ""
+"Skriv inn e-postadressen du registrerte deg med, så sender vi en ny "
+"bekreftelseslenke, hvis det finnes en ubekreftet konto for den."
 
 #: .\account_app\templates\login\resend_verification.html:30
 msgid "Resend email"
-msgstr ""
+msgstr "Send e-post på nytt"
 
 #: .\account_app\templates\login\resend_verification.html:33
 #: .\account_app\templates\login\verify_email_invalid.html:19
 #: .\account_app\templates\login\verify_email_sent.html:16
-#, fuzzy
-#| msgid "Ifi Homepage"
 msgid "Back to login"
-msgstr "Ifi Hjemmesiden"
+msgstr "Tilbake til innlogging"
 
 #: .\account_app\templates\login\signin.html:4
 #: .\account_app\templates\login\signin.html:13
 #: .\account_app\templates\login\signin_success.html:4
 #: .\account_app\templates\login\signin_success.html:13
 msgid "User Registration"
-msgstr ""
+msgstr "Brukerregistrering"
 
 #: .\account_app\templates\login\signin.html:71
 #, python-format
@@ -427,70 +435,83 @@ msgstr ""
 
 #: .\account_app\templates\login\signin.html:73
 msgid "Sign In"
-msgstr ""
+msgstr "Registrer deg"
 
 #: .\account_app\templates\login\signin.html:76
 msgid "Already an user? Log in here"
-msgstr ""
+msgstr "Allerede bruker? Logg inn her"
 
 #: .\account_app\templates\login\signin_success.html:14
 msgid "Sign up complete!"
-msgstr ""
+msgstr "Registrering fullført!"
 
 #: .\account_app\templates\login\signin_success.html:15
 msgid "Welcome"
-msgstr ""
+msgstr "Velkommen"
 
 #: .\account_app\templates\login\verify_email_invalid.html:14
 msgid ""
 "This verification link is no longer valid. It may have already been used, or "
 "your account may already be active."
 msgstr ""
+"Denne bekreftelseslenken er ikke lenger gyldig. Den kan allerede ha blitt "
+"brukt, eller kontoen din kan allerede være aktiv."
 
 #: .\account_app\templates\login\verify_email_sent.html:4
 #: .\account_app\templates\login\verify_email_sent.html:13
 msgid "Check your email"
-msgstr ""
+msgstr "Sjekk e-posten din"
 
 #: .\account_app\templates\login\verify_email_sent.html:14
 msgid ""
 "We've sent a confirmation link to your email address. Click it to activate "
 "your account."
 msgstr ""
+"Vi har sendt en bekreftelseslenke til e-postadressen din. Klikk på den for å "
+"aktivere kontoen din."
 
 #: .\account_app\templates\login\verify_email_success.html:4
 #: .\account_app\templates\login\verify_email_success.html:13
 msgid "Email confirmed"
-msgstr ""
+msgstr "E-post bekreftet"
 
 #: .\account_app\templates\login\verify_email_success.html:14
 msgid "Your account is now active. Welcome"
-msgstr ""
+msgstr "Kontoen din er nå aktiv. Velkommen"
 
 #: .\ifi_home_app\models\article_models.py:954
 msgid "Unknown"
 msgstr "Ukjent"
 
+#: .\ifi_home_app\templates\core\home_index.html:4
+#: .\ifi_home_app\templates\home_base.html:4
+msgid "Ifi Home"
+msgstr "Ifi Hjem"
+
 #: .\ifi_home_app\templates\core\home_index.html:17
-msgid "Suggested News"
-msgstr ""
+msgid "Latest News"
+msgstr "Siste Nyheter"
 
 #: .\ifi_home_app\templates\core\home_index.html:21
 msgid "Suggested Info Articles"
-msgstr ""
+msgstr "Foreslåtte Infoartikkler"
+
+#: .\ifi_home_app\templates\core\partials\home_articlesbar.html:13
+msgid "No articles yet or something is broken ;_;"
+msgstr "Ingen artikkler ennå, eller noe er ødelagt ;_;"
 
 #: .\ifi_home_app\templates\core\partials\home_messageboard.html:31
 msgid "Previous message"
-msgstr ""
+msgstr "Forrige melding"
 
 #: .\ifi_home_app\templates\core\partials\home_messageboard.html:37
 #, python-format
 msgid "Go to message %(n)s"
-msgstr ""
+msgstr "Gå til melding %(n)s"
 
 #: .\ifi_home_app\templates\core\partials\home_messageboard.html:40
 msgid "Next message"
-msgstr ""
+msgstr "Neste melding"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:8
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:47
@@ -512,44 +533,44 @@ msgstr "Nyheter"
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:38
 #: .\study_app\templates\core\partials\study_sidemenu.html:18
 msgid "All"
-msgstr ""
+msgstr "Alle"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:17
 msgid "No news yet"
-msgstr ""
+msgstr "Ingen nyheter ennå"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:24
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:34
 msgid "Info Articles"
-msgstr ""
+msgstr "Infoartikkler"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:33
+msgid "No categories yet"
+msgstr "Ingen kategorier ennå"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:40
-#, fuzzy
-#| msgid "Student Organizations"
 msgid "Student Unions"
-msgstr "Student Foreninger"
+msgstr "Studentforeninger"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:54
 msgid "No unions or articles yet"
-msgstr ""
+msgstr "Ingen foreninger eller artikkler ennå"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:63
 msgid "Ifi Tools"
-msgstr ""
+msgstr "Ifi Verktøy"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:80
 msgid "No tools or articles yet"
-msgstr ""
+msgstr "Ingen verktøy eller artikkler ennå"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:88
 msgid "New Student?"
-msgstr ""
+msgstr "Ny Student?"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:93
-#, fuzzy
-#| msgid "Starer Kit"
 msgid "Starter Kit"
-msgstr "Starterpakke"
+msgstr "Startpakke"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:96
 msgid "Student Life"
@@ -563,114 +584,134 @@ msgstr "Tips og Triks"
 msgid "Apps n Links"
 msgstr "Apper og linker"
 
+#: .\ifi_home_app\templates\core\partials\home_newsbar.html:12
+msgid "No news yet or something is broken ;_;"
+msgstr "Ingen nyheter ennå, eller noe er ødelagt ;_;"
+
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:12
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:13
 #: .\study_app\templates\core\partials\study_sidemenu.html:9
 msgid "Close menu"
-msgstr ""
+msgstr "Lukk meny"
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:14
+#: .\study_app\templates\core\partials\study_sidemenu.html:11
+msgid "menu"
+msgstr "meny"
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:15
+#: .\study_app\templates\core\partials\study_sidemenu.html:12
+msgid "Menu"
+msgstr "Meny"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:19
 msgid "About"
-msgstr ""
+msgstr "Om"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:23
-#: .\templates\partials\top_header.html:8
+#: .\templates\ifi_base.html:8 .\templates\partials\top_header.html:8
 msgid "Ifi Platform"
 msgstr "Ifi Plattform"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:26
+#: .\templates\partials\bottom_header.html:5
 msgid "Ifi-Guild of Creators"
-msgstr ""
+msgstr "Ifi-Guild of Creators"
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:59
+msgid "Events"
+msgstr "Arrangementer"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:63
 msgid "This Month"
-msgstr ""
+msgstr "Denne Måneden"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:66
 msgid "Always at Ifi"
-msgstr ""
+msgstr "Alltid på Ifi"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:72
 msgid "hELP"
-msgstr ""
+msgstr "hJELP"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:76
-#, fuzzy
-#| msgid "Ifi Platform"
 msgid "Ifi Platform Support"
-msgstr "Ifi Plattform"
+msgstr "Ifi Plattform-støtte"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:79
 msgid "School Reception"
-msgstr ""
+msgstr "Skolens Resepsjon"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:82
 msgid "Vaktsentralen"
-msgstr ""
+msgstr "Vaktsentralen"
+
+#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:4
+#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:4
+msgid "Information Articles"
+msgstr "Informasjonsartikkler"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:45
 msgid "Subcategories"
-msgstr ""
+msgstr "Underkategorier"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:61
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:59
 msgid "Happening now"
-msgstr ""
+msgstr "Skjer nå"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:65
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:63
 msgid "Limited time"
-msgstr ""
+msgstr "Begrenset tid"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:79
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:82
 msgid "Tools"
-msgstr ""
+msgstr "Verktøy"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:90
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:93
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:137
 #: .\ifi_home_app\templates\info_articles\partials\tool_card.html:18
 msgid "By"
-msgstr ""
+msgstr "Av"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:93
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:96
 #: .\ifi_home_app\templates\info_articles\pages\tool_page.html:55
 #: .\ifi_home_app\templates\info_articles\partials\tool_card.html:21
 msgid "Open tool"
-msgstr ""
+msgstr "Åpne verktøy"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:25
 #: .\ifi_home_app\templates\info_articles\partials\article_breadcrumbs.html:30
-#, fuzzy
-#| msgid "Ifi Homepage"
 msgid "Back to Homepage"
-msgstr "Ifi Hjemmesiden"
+msgstr "Tilbake til Hjemmesiden"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:44
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:20
 msgid "Categories"
-msgstr ""
+msgstr "Kategorier"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:73
 msgid "Suggested Articles"
-msgstr ""
+msgstr "Foreslåtte Artikkler"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:53
 msgid "DRAFT"
-msgstr ""
+msgstr "UTKAST"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:53
 msgid "not visible to the public"
-msgstr ""
+msgstr "ikke synlig for offentligheten"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:82
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:167
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:204
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:219
 msgid "Contents"
-msgstr ""
+msgstr "Innhold"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:119
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:126
@@ -696,168 +737,182 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_image_block.html:8
 #: .\ifi_home_app\templates\info_articles\partials\article_image_block.html:21
 msgid "Edit block style"
-msgstr ""
+msgstr "Rediger blokkstil"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:140
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:76
 msgid "Published"
-msgstr ""
+msgstr "Publisert"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:143
 msgid "Last edited"
-msgstr ""
+msgstr "Sist redigert"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:166
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:220
 #: .\ifi_home_app\templates\info_articles\pages\tool_page.html:76
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:29
 msgid "Close"
-msgstr ""
+msgstr "Lukk"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:215
 msgid "Edit table of contents icon size"
-msgstr ""
+msgstr "Rediger ikonstørrelse for innholdsfortegnelse"
 
 #: .\ifi_home_app\templates\info_articles\pages\studentunion_category_page.html:80
 msgid "Programspesifikke foreninger"
-msgstr ""
+msgstr "Programspesifikke foreninger"
 
 #: .\ifi_home_app\templates\info_articles\pages\studentunion_category_page.html:103
 msgid "Andre foreninger"
-msgstr ""
+msgstr "Andre foreninger"
 
 #: .\ifi_home_app\templates\info_articles\pages\studentunion_category_page.html:111
 msgid "All active unions"
-msgstr ""
+msgstr "Alle aktive foreninger"
 
 #: .\ifi_home_app\templates\info_articles\pages\studentunion_category_page.html:119
 msgid "Old, but not forgotten"
-msgstr ""
+msgstr "Gamle, men ikke glemt"
 
 #: .\ifi_home_app\templates\info_articles\pages\studentunion_category_page.html:128
 msgid "Missing in action"
-msgstr ""
+msgstr "Savnet"
 
 #: .\ifi_home_app\templates\info_articles\pages\studentunion_category_page.html:129
 msgid ""
 "We couldn't confirm whether these are still active -- no working website or "
 "contact found."
 msgstr ""
+"Vi kunne ikke bekrefte om disse fortsatt er aktive -- ingen fungerende "
+"nettside eller kontakt funnet."
 
 #: .\ifi_home_app\templates\info_articles\pages\tool_page.html:28
 #: .\ifi_home_app\templates\info_articles\pages\tool_page.html:39
 msgid "Made by"
-msgstr ""
+msgstr "Laget av"
 
 #: .\ifi_home_app\templates\info_articles\pages\tool_page.html:67
 msgid "preview"
-msgstr ""
+msgstr "forhåndsvisning"
 
 #: .\ifi_home_app\templates\info_articles\pages\tool_page.html:75
 msgid "Preview"
-msgstr ""
+msgstr "Forhåndsvisning"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:28
 #: .\ifi_home_app\templates\info_articles\partials\union_card.html:20
 msgid "Retired"
-msgstr ""
+msgstr "Nedlagt"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:29
 #: .\ifi_home_app\templates\info_articles\partials\union_card.html:21
 msgid "Status unknown"
-msgstr ""
+msgstr "Status ukjent"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:32
 #: .\ifi_home_app\templates\info_articles\partials\union_card.html:24
 msgid "Closed"
-msgstr ""
+msgstr "Stengt"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:32
 #: .\ifi_home_app\templates\info_articles\partials\union_card.html:24
 msgid "Program-specific"
-msgstr ""
+msgstr "Programspesifikk"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:32
 #: .\ifi_home_app\templates\info_articles\partials\union_card.html:24
 msgid "Open to everyone"
-msgstr ""
+msgstr "Åpen for alle"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:46
 msgid "Purpose"
-msgstr ""
+msgstr "Formål"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:51
 msgid "Activities"
-msgstr ""
+msgstr "Aktiviteter"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:56
 msgid "Bylaws"
-msgstr ""
+msgstr "Vedtekter"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:61
 msgid "Full bylaws"
-msgstr ""
+msgstr "Fullstendige vedtekter"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:66
 msgid "Sitting Members"
-msgstr ""
+msgstr "Sittende Medlemmer"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:92
 msgid "Sign up / register interest"
-msgstr ""
+msgstr "Meld deg på / meld interesse"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:100
 msgid "Email"
-msgstr ""
+msgstr "E-post"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:103
 msgid "Website"
-msgstr ""
+msgstr "Nettside"
+
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:108
+msgid "LinkedIn"
+msgstr "LinkedIn"
+
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:108
+msgid "TikTok"
+msgstr "TikTok"
+
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:108
+msgid "GitHub"
+msgstr "GitHub"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:117
 msgid "Members"
-msgstr ""
+msgstr "Medlemmer"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:122
 msgid "Sitting"
-msgstr ""
+msgstr "Sittende"
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:128
 msgid "Interns"
-msgstr ""
+msgstr "Interner"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:28
 msgid "Block style"
-msgstr ""
+msgstr "Blokkstil"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:47
 msgid "Layout"
-msgstr ""
+msgstr "Oppsett"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:48
 msgid "Expand or collapse layout options"
-msgstr ""
+msgstr "Vis eller skjul oppsettsalternativer"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:53
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:280
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:328
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:99
 msgid "Side padding"
-msgstr ""
+msgstr "Sidepolstring"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:58
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:95
 msgid "Width"
-msgstr ""
+msgstr "Bredde"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:73
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:537
 msgid "Box"
-msgstr ""
+msgstr "Boks"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:76
 msgid "Box color"
-msgstr ""
+msgstr "Boksfarge"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:78
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:219
@@ -870,7 +925,7 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:589
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:146
 msgid "Light"
-msgstr ""
+msgstr "Lys"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:79
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:220
@@ -883,7 +938,7 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:590
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:147
 msgid "Turquoise"
-msgstr ""
+msgstr "Turkis"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:80
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:221
@@ -896,7 +951,7 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:591
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:148
 msgid "Pink"
-msgstr ""
+msgstr "Rosa"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:81
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:222
@@ -909,7 +964,7 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:592
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:149
 msgid "Purple"
-msgstr ""
+msgstr "Lilla"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:82
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:223
@@ -922,7 +977,7 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:593
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:150
 msgid "Black"
-msgstr ""
+msgstr "Svart"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:84
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:225
@@ -935,7 +990,7 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:595
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:152
 msgid "Custom hex color"
-msgstr ""
+msgstr "Egendefinert hex-farge"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:85
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:226
@@ -948,50 +1003,50 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:596
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:153
 msgid "Pick a custom color"
-msgstr ""
+msgstr "Velg en egendefinert farge"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:92
 msgid "Box corner rounding"
-msgstr ""
+msgstr "Avrunding av bokshjørner"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:103
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:100
 msgid "Height"
-msgstr ""
+msgstr "Høyde"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:103
 msgid "rem, 0 = auto"
-msgstr ""
+msgstr "rem, 0 = auto"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:115
 msgid "Show as list item"
-msgstr ""
+msgstr "Vis som listeelement"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:128
 msgid "Lock image ratio"
-msgstr ""
+msgstr "Lås bildeforhold"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:132
 msgid "Gap between columns"
-msgstr ""
+msgstr "Avstand mellom kolonner"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:144
 msgid "Icon size"
-msgstr ""
+msgstr "Ikonstørrelse"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:159
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:94
 msgid "Style"
-msgstr ""
+msgstr "Stil"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:159
 msgid "Column title"
-msgstr ""
+msgstr "Kolonnetittel"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:160
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:95
 msgid "Expand or collapse style options"
-msgstr ""
+msgstr "Vis eller skjul stilalternativer"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:165
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:261
@@ -1001,7 +1056,7 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:486
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:104
 msgid "Alignment"
-msgstr ""
+msgstr "Justering"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:167
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:263
@@ -1011,7 +1066,7 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:488
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:106
 msgid "Left"
-msgstr ""
+msgstr "Venstre"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:168
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:264
@@ -1021,7 +1076,7 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:489
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:107
 msgid "Center"
-msgstr ""
+msgstr "Midtstilt"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:169
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:265
@@ -1031,13 +1086,13 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:490
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:108
 msgid "Right"
-msgstr ""
+msgstr "Høyre"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:183
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:271
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:319
 msgid "Lock alignment (ignore Global editor overwrites)"
-msgstr ""
+msgstr "Lås justering (ignorer overstyringer fra global redigering)"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:196
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:275
@@ -1046,12 +1101,12 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:457
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:495
 msgid "Font size"
-msgstr ""
+msgstr "Skriftstørrelse"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:196
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:105
 msgid "Title font size"
-msgstr ""
+msgstr "Skriftstørrelse for tittel"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:217
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:285
@@ -1060,263 +1115,265 @@ msgstr ""
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:462
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:500
 msgid "Text color"
-msgstr ""
+msgstr "Tekstfarge"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:217
 msgid "Title color"
-msgstr ""
+msgstr "Tittelfarge"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:255
 msgid "Image title"
-msgstr ""
+msgstr "Bildetittel"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:256
 msgid "Expand or collapse image title options"
-msgstr ""
+msgstr "Vis eller skjul alternativer for bildetittel"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:303
 msgid "Image caption"
-msgstr ""
+msgstr "Bildetekst"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:304
 msgid "Expand or collapse image caption options"
-msgstr ""
+msgstr "Vis eller skjul alternativer for bildetekst"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:362
 msgid "Column weights"
-msgstr ""
+msgstr "Kolonnevekter"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:363
 msgid "Expand or collapse column weight options"
-msgstr ""
+msgstr "Vis eller skjul alternativer for kolonnevekt"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:368
 msgid "Column 1 weight"
-msgstr ""
+msgstr "Vekt for kolonne 1"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:373
 msgid "Column 2 weight"
-msgstr ""
+msgstr "Vekt for kolonne 2"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:378
 msgid "Column 3 weight"
-msgstr ""
+msgstr "Vekt for kolonne 3"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:383
 msgid "Column 4 weight"
-msgstr ""
+msgstr "Vekt for kolonne 4"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:404
 msgid "Title"
-msgstr ""
+msgstr "Tittel"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:405
 msgid "Expand or collapse title options"
-msgstr ""
+msgstr "Vis eller skjul tittelalternativer"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:442
 msgid "Meta"
-msgstr ""
+msgstr "Meta"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:443
 msgid "Expand or collapse meta options"
-msgstr ""
+msgstr "Vis eller skjul metaalternativer"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:480
 msgid "Intro"
-msgstr ""
+msgstr "Intro"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:481
 msgid "Expand or collapse intro options"
-msgstr ""
+msgstr "Vis eller skjul introalternativer"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:538
 msgid "Expand or collapse box options"
-msgstr ""
+msgstr "Vis eller skjul boksalternativer"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:560
 msgid "Background"
-msgstr ""
+msgstr "Bakgrunn"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:577
 msgid "Border"
-msgstr ""
+msgstr "Kantlinje"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:580
 msgid "Show border"
-msgstr ""
+msgstr "Vis kantlinje"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:583
 msgid "Thickness"
-msgstr ""
+msgstr "Tykkelse"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:587
 msgid "Color"
-msgstr ""
+msgstr "Farge"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:603
 msgid "Corner radius"
-msgstr ""
+msgstr "Hjørneradius"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:609
 msgid "Spacing"
-msgstr ""
+msgstr "Avstand"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:611
 msgid "Padding inside box"
-msgstr ""
+msgstr "Polstring inni boksen"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:615
 msgid "Margin outside box"
-msgstr ""
+msgstr "Margin utenfor boksen"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:622
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:161
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:112
 msgid "Reset to default"
-msgstr ""
+msgstr "Tilbakestill til standard"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_breadcrumbs.html:4
 msgid "Breadcrumb"
-msgstr ""
+msgstr "Brødsmulesti"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_breadcrumbs.html:6
 msgid "Back"
-msgstr ""
+msgstr "Tilbake"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_card.html:34
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:76
 msgid "Draft"
-msgstr ""
+msgstr "Utkast"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_card.html:39
 #: .\study_app\templates\flashcards\partials\deck_list.html:10
 msgid "by"
-msgstr ""
+msgstr "av"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_editor_mode_toggle.html:11
 msgid "Editor mode"
-msgstr ""
+msgstr "Redigeringsmodus"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_editor_mode_toggle.html:11
 msgid "Off"
-msgstr ""
+msgstr "Av"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:35
 msgid "Global editor (editors only)"
-msgstr ""
+msgstr "Global redigering (kun for redaktører)"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:37
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:30
 msgid "Minimize"
-msgstr ""
+msgstr "Minimer"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:54
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:81
 msgid "Publish"
-msgstr ""
+msgstr "Publiser"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:55
 msgid "Expand or collapse publish options"
-msgstr ""
+msgstr "Vis eller skjul publiseringsalternativer"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:76
 msgid "Published (changes pending)"
-msgstr ""
+msgstr "Publisert (endringer venter)"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:86
 msgid "Unpublish"
-msgstr ""
+msgstr "Avpubliser"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:120
 msgid "Only applies to blocks once you Save (see the floating save bar)."
-msgstr ""
+msgstr "Gjelder kun blokker når du lagrer (se den flytende lagringslinjen)."
 
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:124
 msgid "Font size multiplier"
-msgstr ""
+msgstr "Skriftstørrelsesmultiplikator"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:142
 msgid "Background color"
-msgstr ""
+msgstr "Bakgrunnsfarge"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_save_bar.html:12
 msgid "Unsaved changes"
-msgstr ""
+msgstr "Ulagrede endringer"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_save_bar.html:14
 msgid "Discard"
-msgstr ""
+msgstr "Forkast"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_unsaved_changes_modal.html:13
 msgid "You have unsaved changes!"
-msgstr ""
+msgstr "Du har ulagrede endringer!"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_unsaved_changes_modal.html:14
 msgid "Save your changes before leaving, or discard them and go anyway."
 msgstr ""
+"Lagre endringene dine før du forlater siden, eller forkast dem og fortsett "
+"likevel."
 
 #: .\ifi_home_app\templates\info_articles\partials\article_unsaved_changes_modal.html:16
 msgid "Save changes"
-msgstr ""
+msgstr "Lagre endringer"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_unsaved_changes_modal.html:17
 msgid "Discard & leave"
-msgstr ""
+msgstr "Forkast og forlat"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:28
 msgid "Banner style (editors only)"
-msgstr ""
+msgstr "Bannerstil (kun for redaktører)"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:36
 msgid "Show banner"
-msgstr ""
+msgstr "Vis banner"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:48
 msgid "Colors"
-msgstr ""
+msgstr "Farger"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:49
 msgid "Expand or collapse color options"
-msgstr ""
+msgstr "Vis eller skjul fargealternativer"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:53
 msgid "Banner color"
-msgstr ""
+msgstr "Bannerfarge"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:56
 msgid "Banner color hex"
-msgstr ""
+msgstr "Bannerfarge hex"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:57
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:69
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:81
 msgid "Pick a color"
-msgstr ""
+msgstr "Velg en farge"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:65
 msgid "Dot color"
-msgstr ""
+msgstr "Prikkfarge"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:68
 msgid "Dot color hex"
-msgstr ""
+msgstr "Prikkfarge hex"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:77
 msgid "Title text color"
-msgstr ""
+msgstr "Titteltekstfarge"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:80
 msgid "Title text color hex"
-msgstr ""
+msgstr "Titteltekstfarge hex"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:90
 msgid "Size & Text"
-msgstr ""
+msgstr "Størrelse og tekst"
 
 #: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:91
 msgid "Expand or collapse size options"
-msgstr ""
+msgstr "Vis eller skjul størrelsesalternativer"
 
 #: .\ifi_home_app\templates\info_articles\partials\translation_warning.html:3
 msgid "This page hasn't been translated yet"
@@ -1324,241 +1381,222 @@ msgstr "Denne siden er ikke oversatt ennå"
 
 #: .\study_app\templates\core\partials\study_sidemenu.html:16
 #: .\study_app\templates\core\study_main.html:21
-#, fuzzy
-#| msgid "Study Home"
 msgid "Studytools"
-msgstr "Studie Hjem"
+msgstr "Studieverktøy"
 
 #: .\study_app\templates\core\partials\study_sidemenu.html:20
 #: .\study_app\templates\core\study_main.html:23
 msgid "Flashcards"
-msgstr ""
+msgstr "Flashkort"
 
 #: .\study_app\templates\core\partials\study_sidemenu.html:23
 msgid "Multiplechoice"
-msgstr ""
+msgstr "Flervalg"
 
+#: .\study_app\templates\core\study_main.html:5
 #: .\study_app\templates\core\study_main.html:17
 msgid "Study Home"
 msgstr "Studie Hjem"
 
 #: .\study_app\templates\core\study_main.html:18
-#, fuzzy
-#| msgid "Here is content for the study section."
 msgid ""
 "Here is content for the study section. This is currently in development..."
-msgstr "Dette er en midletidig side for studieside"
+msgstr ""
+"Her er innhold for studieseksjonen. Dette er for tiden under utvikling..."
 
 #: .\study_app\templates\core\study_main.html:27
 msgid "Multiple Choice"
-msgstr ""
+msgstr "Flervalg"
 
 #: .\study_app\templates\core\study_main.html:31
-#, fuzzy
-#| msgid "Ifi Study"
 msgid "Mix Studyset"
-msgstr "Ifi Studie"
+msgstr "Miks Studiesett"
 
 #: .\study_app\templates\core\study_main.html:35
-#, fuzzy
-#| msgid "Study Home"
 msgid "Study Games"
-msgstr "Studie Hjem"
+msgstr "Studiespill"
 
 #: .\study_app\templates\core\study_main.html:39
-#, fuzzy
-#| msgid "Ifi Study"
 msgid "Ifi Studycompanion AI"
-msgstr "Ifi Studie"
+msgstr "Ifi Studiepartner AI"
 
 #: .\study_app\templates\flashcards\core\card_form.html:4
 msgid "Create Card"
-msgstr ""
+msgstr "Opprett kort"
 
 #: .\study_app\templates\flashcards\core\card_form.html:7
 msgid "New card in"
-msgstr ""
+msgstr "Nytt kort i"
 
 #: .\study_app\templates\flashcards\core\deck_detail.html:5
 msgid "Deck Details"
-msgstr ""
+msgstr "Kortstokkdetaljer"
 
 #: .\study_app\templates\flashcards\core\deck_detail.html:11
 msgid "<- Back to Flashcard Menu"
-msgstr ""
+msgstr "<- Tilbake til flashkort-meny"
 
 #: .\study_app\templates\flashcards\core\deck_detail.html:17
 msgid "Start reviewing"
-msgstr ""
+msgstr "Start gjennomgang"
 
 #: .\study_app\templates\flashcards\core\deck_detail.html:18
 msgid "Add card"
-msgstr ""
+msgstr "Legg til kort"
 
 #: .\study_app\templates\flashcards\core\deck_detail.html:25
 msgid "Are you sure you want to delete this card?"
-msgstr ""
+msgstr "Er du sikker på at du vil slette dette kortet?"
 
 #: .\study_app\templates\flashcards\core\deck_detail.html:27
 #: .\study_app\templates\flashcards\partials\deck_list.html:19
 msgid "Delete"
-msgstr ""
+msgstr "Slett"
 
 #: .\study_app\templates\flashcards\core\deck_detail.html:31
 msgid "No cards in this deck."
-msgstr ""
+msgstr "Ingen kort i denne kortstokken."
 
 #: .\study_app\templates\flashcards\core\deck_form.html:4
 msgid "Create New Deck"
-msgstr ""
+msgstr "Opprett ny kortstokk"
 
 #: .\study_app\templates\flashcards\core\deck_form.html:7
 msgid "<- Back to your decks"
-msgstr ""
+msgstr "<- Tilbake til dine kortstokker"
 
 #: .\study_app\templates\flashcards\core\deck_form.html:8
 msgid "Create a new deck"
-msgstr ""
+msgstr "Opprett en ny kortstokk"
 
 #: .\study_app\templates\flashcards\core\deck_form.html:13
 msgid "Save deck"
-msgstr ""
+msgstr "Lagre kortstokk"
 
 #: .\study_app\templates\flashcards\core\menu.html:5
 msgid "Flashcard Menu"
-msgstr ""
+msgstr "Flashkort-meny"
 
 #: .\study_app\templates\flashcards\core\menu.html:18
 #: .\study_app\templates\mix_studyset\core\menu.html:11
 #: .\study_app\templates\multiplechoice\core\menu.html:11
 #: .\study_app\templates\studygames\core\menu.html:11
-#, fuzzy
-#| msgid "Ifi Study"
 msgid "<- Back to Ifi Study"
-msgstr "Ifi Studie"
+msgstr "<- Tilbake til Ifi Studie"
 
 #: .\study_app\templates\flashcards\core\menu.html:21
-#, fuzzy
-#| msgid "Welcome to the Your Page"
 msgid "Welcome to the FlashCard Menu"
-msgstr "Velkommen til din side"
+msgstr "Velkommen til Flashkort-menyen"
 
 #: .\study_app\templates\flashcards\core\menu.html:22
-#, fuzzy
-#| msgid "This is the main content for the Ifi home page."
 msgid "This is the main menu for flashcards"
-msgstr "Dette er hovedinnholdet for Ifi hjemmeside"
+msgstr "Dette er hovedmenyen for flashkort"
+
+#: .\study_app\templates\flashcards\core\review.html:5
+msgid "Flashcard Review"
+msgstr "Flashkort-gjennomgang"
 
 #: .\study_app\templates\flashcards\core\review.html:10
 msgid "<- Back to deck"
-msgstr ""
+msgstr "<- Tilbake til kortstokk"
+
+#: .\study_app\templates\flashcards\core\review.html:12
+#, python-format
+msgid "Review: %(deck.name)s"
+msgstr "Gjennomgang: %(deck.name)s"
 
 #: .\study_app\templates\flashcards\core\review.html:15
 msgid "This deck has no cards."
-msgstr ""
+msgstr "Denne kortstokken har ingen kort."
 
 #: .\study_app\templates\flashcards\core\review.html:18
 msgid "Question:"
-msgstr ""
+msgstr "Spørsmål:"
 
 #: .\study_app\templates\flashcards\core\review.html:23
 msgid "Card"
-msgstr ""
+msgstr "Kort"
 
 #: .\study_app\templates\flashcards\core\review.html:23
 msgid "of"
-msgstr ""
+msgstr "av"
 
 #: .\study_app\templates\flashcards\core\review.html:27
 msgid "Show answer"
-msgstr ""
+msgstr "Vis svar"
 
 #: .\study_app\templates\flashcards\core\review.html:31
 msgid "Answer:"
-msgstr ""
+msgstr "Svar:"
 
 #: .\study_app\templates\flashcards\core\review.html:35
 msgid "I knew it"
-msgstr ""
+msgstr "Jeg visste det"
 
 #: .\study_app\templates\flashcards\core\review.html:36
 msgid "I didn’t know"
-msgstr ""
+msgstr "Jeg visste det ikke"
 
 #: .\study_app\templates\flashcards\core\review.html:47
 msgid "Previous"
-msgstr ""
+msgstr "Forrige"
 
 #: .\study_app\templates\flashcards\core\review.html:57
 msgid "Next"
-msgstr ""
+msgstr "Neste"
 
 #: .\study_app\templates\flashcards\partials\deck_list.html:2
-#, fuzzy
-#| msgid "Your Page"
 msgid "Your Decks"
-msgstr "Din Side"
+msgstr "Dine Kortstokker"
 
 #: .\study_app\templates\flashcards\partials\deck_list.html:4
 msgid "Total:"
-msgstr ""
+msgstr "Totalt:"
 
 #: .\study_app\templates\flashcards\partials\deck_list.html:17
 msgid "Are you sure you want to delete this deck?"
-msgstr ""
+msgstr "Er du sikker på at du vil slette denne kortstokken?"
 
 #: .\study_app\templates\flashcards\partials\deck_list.html:23
 msgid "No decks found."
-msgstr ""
+msgstr "Ingen kortstokker funnet."
 
 #: .\study_app\templates\flashcards\partials\deck_list.html:27
 msgid "Create New Deck?"
-msgstr ""
+msgstr "Opprette ny kortstokk?"
 
 #: .\study_app\templates\mix_studyset\core\menu.html:5
-#, fuzzy
-#| msgid "Ifi Study"
 msgid "Mix Study Menu"
-msgstr "Ifi Studie"
+msgstr "Miks Studie-meny"
 
 #: .\study_app\templates\mix_studyset\core\menu.html:14
-#, fuzzy
-#| msgid "Welcome to the Ifi Home Page"
 msgid "Welcome to the Mix Studyset Menu"
-msgstr "Velkommen til Ifi Hjemmesiden"
+msgstr "Velkommen til Miks Studiesett-menyen"
 
 #: .\study_app\templates\mix_studyset\core\menu.html:15
 #: .\study_app\templates\multiplechoice\core\menu.html:15
-#, fuzzy
-#| msgid "This is the main content for the Ifi home page."
 msgid "This is the main menu for mutiple choice"
-msgstr "Dette er hovedinnholdet for Ifi hjemmeside"
+msgstr "Dette er hovedmenyen for flervalg"
 
 #: .\study_app\templates\multiplechoice\core\menu.html:5
 msgid "Mutiple Choice Menu"
-msgstr ""
+msgstr "Flervalg-meny"
 
 #: .\study_app\templates\multiplechoice\core\menu.html:14
-#, fuzzy
-#| msgid "Welcome to the Ifi Home Page"
 msgid "Welcome to the Mutiple Choice Menu"
-msgstr "Velkommen til Ifi Hjemmesiden"
+msgstr "Velkommen til Flervalg-menyen"
 
 #: .\study_app\templates\studygames\core\menu.html:5
 msgid "Study Games Launcher"
-msgstr ""
+msgstr "Studiespill-oppstarter"
 
 #: .\study_app\templates\studygames\core\menu.html:14
-#, fuzzy
-#| msgid "Welcome to the Ifi Home Page"
 msgid "Welcome to the Study Games Launcher"
-msgstr "Velkommen til Ifi Hjemmesiden"
+msgstr "Velkommen til Studiespill-oppstarteren"
 
 #: .\study_app\templates\studygames\core\menu.html:15
-#, fuzzy
-#| msgid "This is the main content for the Ifi home page."
 msgid "This is the main menu for study games"
-msgstr "Dette er hovedinnholdet for Ifi hjemmeside"
+msgstr "Dette er hovedmenyen for studiespill"
 
 #: .\study_app\urls.py:58 .\templates\partials\top_header.html:25
 msgid "Study"
@@ -1566,7 +1604,7 @@ msgstr "Studie"
 
 #: .\templates\partials\bottom_header.html:4
 msgid "This webpage was made by Ifi-Creators' Guild"
-msgstr ""
+msgstr "Denne nettsiden ble laget av Ifi-Creators' Guild"
 
 #: .\templates\partials\deploy_notice.html:13
 msgid ""
@@ -1580,6 +1618,14 @@ msgstr ""
 msgid "Restarting now..."
 msgstr "Starter på nytt nå..."
 
+#: .\templates\partials\select_language.html:16
+msgid "English"
+msgstr "English"
+
+#: .\templates\partials\select_language.html:25
+msgid "Norsk"
+msgstr "Norsk"
+
 #: .\templates\partials\top_header.html:19
 msgid "Ifi Homepage"
 msgstr "Ifi Hjemmesiden"
@@ -1592,26 +1638,23 @@ msgstr "Hjem"
 msgid "Ifi Study"
 msgstr "Ifi Studie"
 
-#: .\templates\partials\top_header.html:29 .\yourpage_app\urls.py:10
+#: .\templates\partials\top_header.html:29
+#: .\yourpage_app\templates\core\yourpage_main.html:5 .\yourpage_app\urls.py:10
 msgid "Your Page"
 msgstr "Din Side"
 
-#: .\templates\partials\top_header.html:33
-#: .\templates\partials\top_header.html:50
-msgid "Account"
-msgstr "Konto"
-
 #: .\templates\under_development.html:4 .\templates\under_development.html:13
 msgid "Under Development"
-msgstr ""
+msgstr "Under Utvikling"
 
 #: .\templates\under_development.html:14
 msgid "This section of Ifi Platform is still being built. Check back soon!"
 msgstr ""
+"Denne delen av Ifi Platform er fortsatt under bygging. Kom tilbake snart!"
 
 #: .\templates\under_development.html:15
 msgid "Unless..."
-msgstr ""
+msgstr "Med mindre..."
 
 #: .\templates\under_development.html:16
 msgid ""
@@ -1619,6 +1662,9 @@ msgid ""
 "Software. Why shouldn't you? Now that it comes to it, you don't feel like "
 "waiting, it could be yours. You are here, it came to you!"
 msgstr ""
+"Du tror du kunne gjort det. Hvorfor ikke, når det kommer til det? Det er "
+"åpen kildekode. Hvorfor skulle du ikke? Nå som det kommer til stykket, har "
+"du ikke lyst til å vente, det kunne vært ditt. Du er her, det kom til deg!"
 
 #: .\templates\under_development.html:17
 msgid ""
@@ -1626,29 +1672,78 @@ msgid ""
 "enough to get hired. Start today. Build a portfolio. Build a long GitHub "
 "history that proves your interest in IT lies beyond school."
 msgstr ""
+"Færre og færre studenter får sommerjobb. Teorien du blir lært er ikke nok "
+"til å bli ansatt. Start i dag. Bygg en portefølje. Bygg en lang GitHub-"
+"historikk som viser at interessen din for IT strekker seg utover skolen."
 
 #: .\templates\under_development.html:18
 msgid ""
 "Join today! We are looking for contributors. Difficulties starting, but want "
 "to help? Join Ifi-Creators' Guild and we'll help you out."
 msgstr ""
+"Bli med i dag! Vi ser etter bidragsytere. Vanskelig å komme i gang, men vil "
+"hjelpe til? Bli med i Ifi-Creators' Guild, så hjelper vi deg i gang."
+
+#: .\templates\under_development.html:19
+msgid ""
+"Links coming soon. OSS is not open quite yet... (Why you hype me so much up "
+"then?)"
+msgstr ""
+"Lenker kommer snart. OSS er ikke helt åpen ennå... (Hvorfor hyper du meg da "
+"opp så mye?)"
 
 #: .\yourpage_app\templates\core\yourpage_main.html:10
 msgid "Welcome to the Your Page"
 msgstr "Velkommen til din side"
 
 #: .\yourpage_app\templates\core\yourpage_main.html:11
-#, fuzzy
-#| msgid "This is the placeholder for Your Page."
 msgid "This is the placeholder for Your Page. This is an upcoming feature..."
-msgstr "Dette er en midlertidig side for din side"
+msgstr "Dette er plassholderen for Din Side. Dette er en kommende funksjon..."
 
 #: .\yourpage_app\templates\core\yourpage_main.html:12
 msgid "Current user: "
+msgstr "Nåværende bruker: "
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:3
+msgid "Personlize Your Studywork"
+msgstr "Personliggjør Studiearbeidet Ditt"
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:4
+msgid ""
+"Ifi Study support mutiple study workflows consisting of multiple study "
+"models."
 msgstr ""
+"Ifi Studie støtter flere studieflyter bestående av flere studiemodeller."
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:7
+msgid "Customize your active subjects and studytags?"
+msgstr "Tilpass dine aktive fag og studietagger?"
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:8
+msgid "ex. IN1000, python, classes"
+msgstr "f.eks. IN1000, python, klasser"
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:11
+msgid "Customize your preferred study models?"
+msgstr "Tilpass dine foretrukne studiemodeller?"
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:12
+msgid "ex. proritise videos over text, no flashcards etc."
+msgstr "f.eks. prioriter videoer over tekst, ingen flashkort osv."
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:15
+msgid "Customize your spaced repetitions?"
+msgstr "Tilpass din intervallrepetisjon?"
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:16
+msgid "ex. IN1000 every wednsday, more IN1000 in week: 22, 23, 24"
+msgstr "f.eks. IN1000 hver onsdag, mer IN1000 i uke: 22, 23, 24"
+
+#: .\yourpage_app\templates\partials\your_subjects.html:3
+msgid "Your Active Subjects"
+msgstr "Dine Aktive Fag"
 
 #, fuzzy
-#~| msgid "This is the placeholder for Account."
 #~ msgid "This is the placeholder for Account Settings."
 #~ msgstr "Dette er en midlertidig side for konto"
 

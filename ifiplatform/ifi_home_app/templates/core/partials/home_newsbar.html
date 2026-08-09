@@ -9,6 +9,6 @@
     {% for article in news_articles %}
         {% include "info_articles/partials/article_card.html" with article=article %}
     {% empty %}
-        <p>No news yet or something is broken ;_;</p>
+        <p>{% trans "No news yet or something is broken ;_;" %}</p>
     {% endfor %}
 </div>

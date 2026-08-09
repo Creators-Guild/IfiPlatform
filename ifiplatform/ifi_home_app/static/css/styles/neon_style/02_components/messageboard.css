@@ -58,6 +58,11 @@
   bottom: 1.75rem;
   width: 14px;
   cursor: pointer;
+  /* the drag is driven entirely by JS (pointer events + setPointerCapture,
+     see messageboard.js) -- without this, touch input here would also try
+     to pan/scroll the page underneath while a drag is in progress. Harmless
+     for mouse users, touch-action only governs touch gesture handling. */
+  touch-action: none;
 }
 
 .messageboard-scrollbar-thumb {
@@ -66,6 +71,7 @@
   left: 0;
   width: 100%;
   cursor: grab;
+  touch-action: none;
 }
 
 .messageboard-scrollbar-thumb::after {
@@ -186,6 +192,26 @@
   .messageboard-body {
     height: auto;
     max-height: 7rem; /* ~5 lines -- short messages stay smaller, longer ones scroll within this */
+    /* stops a touch drag that runs out of room here from chaining into the
+       page's own scroll/rubber-band -- without this, dragging past this
+       box's top/bottom edge (easy to hit at only ~5 lines tall) bubbled
+       into the page and could trigger the browser's pull-to-refresh.
+       Mobile-only: containing this would also kill normal desktop
+       mouse-wheel chaining (continuing to scroll the page once the wheel
+       reaches the bottom of the box), which is fine on desktop and isn't
+       part of this bug. */
+    overscroll-behavior-y: contain;
+    /* a bit more room to grab now that .messageboard-scrollbar-thumb is
+       actually draggable via touch (see messageboard.js) -- was matched to
+       the desktop-sized 14px track below. */
+    padding-right: 1.25rem;
+  }
+
+  /* widened alongside .messageboard-body's padding-right above, for the
+     same reason -- a 14px target (sized for a mouse cursor) is small to
+     reliably grab with a finger. */
+  .messageboard-scrollbar {
+    width: 20px;
   }
 
   .messageboard-signature {

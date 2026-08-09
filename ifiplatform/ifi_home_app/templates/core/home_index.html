@@ -1,7 +1,7 @@
 {% extends "home_base.html" %}
 {% load i18n static %}
 
-{% block title %}Ifi Home{% endblock %}
+{% block title %}{% trans "Ifi Home" %}{% endblock %}
 
 <div class = "home-layout">
     {% block sidemenu %}
@@ -14,7 +14,7 @@
         </div>
         <div class="suggestions-row">
             <div class="newsbar_container">
-                <h2 class="newsbar-heading newsbar-heading--news">{% trans "Suggested News" %}</h2>
+                <h2 class="newsbar-heading newsbar-heading--news">{% trans "Latest News" %}</h2>
                 {% include "core/partials/home_newsbar.html" %}
             </div>
             <div class="articlesbar_container">
