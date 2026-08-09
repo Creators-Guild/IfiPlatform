@@ -104,7 +104,14 @@ WSGI_APPLICATION = "ifiplatform_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if DEBUG:
+# USE_POSTGRES lets local dev opt into the Postgres branch below while
+# DEBUG stays True (e.g. testing against a local Postgres Docker container)
+# -- kept independent of DEBUG so the DB backend and the DEBUG-gated
+# security settings further down (SECURE_SSL_REDIRECT etc.) can vary
+# separately instead of DEBUG=False being the only way to reach Postgres.
+USE_POSTGRES = os.environ.get("USE_POSTGRES", "False") == "True"
+
+if DEBUG and not USE_POSTGRES:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",

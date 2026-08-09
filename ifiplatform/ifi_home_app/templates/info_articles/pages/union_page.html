@@ -23,9 +23,13 @@
                 <img class="union-logo" src="{{ logo_img.url }}" alt="{{ page.title }}">
             {% endif %}
             <div class="union-header-text">
-                <h1>{{ page.title }}</h1>
+                <h1>
+                    {{ page.title }}
+                    {% if page.status == "retired" %}<span aria-hidden="true" title="{% trans 'Retired' %}">&#129702;</span>
+                    {% elif page.status == "unknown" %}<span aria-hidden="true" title="{% trans 'Status unknown' %}">&#10067;</span>{% endif %}
+                </h1>
                 <span class="union-type-badge union-type-badge--{{ page.union_type }}">
-                    {% if page.union_type == "program" %}{% trans "Program-specific" %}{% else %}{% trans "Open to everyone" %}{% endif %}
+                    {% if page.status == "retired" %}{% trans "Closed" %}{% elif page.union_type == "program" %}{% trans "Program-specific" %}{% else %}{% trans "Open to everyone" %}{% endif %}
                 </span>
             </div>
         </div>
@@ -48,9 +52,14 @@
                     <div class="prose">{{ page.activities|richtext }}</div>
                 {% endif %}
 
-                {% if page.vedtekter %}
+                {% if page.vedtekter or page.vedtekter_url %}
                     <h2>{% trans "Bylaws" %}</h2>
-                    <div class="prose">{{ page.vedtekter|richtext }}</div>
+                    {% if page.vedtekter %}
+                        <div class="prose">{{ page.vedtekter|richtext }}</div>
+                    {% endif %}
+                    {% if page.vedtekter_url %}
+                        <a class="union-bylaws-link" href="{{ page.vedtekter_url }}" target="_blank" rel="noopener noreferrer">{% trans "Full bylaws" %} <span aria-hidden="true">&rarr;</span></a>
+                    {% endif %}
                 {% endif %}
 
                 {% if page.sitting_members %}
@@ -78,11 +87,17 @@
             </article>
 
             <aside class="union-sidebar">
-                {% if page.email or page.website_url or page.social_links %}
+                {% if page.signup_url %}
                     <div class="union-info-box">
+                        <a class="union-info-link union-info-link--signup" href="{{ page.signup_url }}" target="_blank" rel="noopener noreferrer">{% trans "Sign up / register interest" %}</a>
+                    </div>
+                {% endif %}
+
+                {% if page.email or page.website_url or page.social_links %}
+                    <div class="union-info-box union-info-box--contact">
                         <h2>{% trans "Contact" %}</h2>
                         {% if page.email %}
-                            <a class="union-info-link" href="mailto:{{ page.email }}">{{ page.email }}</a>
+                            <a class="union-info-link" href="mailto:{{ page.email }}">{% trans "Email" %}</a>
                         {% endif %}
                         {% if page.website_url %}
                             <a class="union-info-link" href="{{ page.website_url }}" target="_blank" rel="noopener noreferrer">{% trans "Website" %}</a>
@@ -90,7 +105,7 @@
                         {% for block in page.social_links %}
                             {% with platform=block.value.platform %}
                                 <a class="union-info-link" href="{{ block.value.url }}" target="_blank" rel="noopener noreferrer">
-                                    {% if platform == "linkedin" %}LinkedIn{% elif platform == "tiktok" %}TikTok{% else %}{{ platform|title }}{% endif %}
+                                    {% if platform == "linkedin" %}LinkedIn{% elif platform == "tiktok" %}TikTok{% elif platform == "github" %}GitHub{% else %}{{ platform|title }}{% endif %}
                                 </a>
                             {% endwith %}
                         {% endfor %}
