@@ -46,6 +46,11 @@
   border-radius: 12px;
 }
 
+/* hero image: width is a free-form rem number (editor picks it via
+width_rem, same on-page editor as body images -- see article_page.html),
+set via inline style rather than a class here, same reasoning as the body
+image note below. */
+
 /* hero image: alignment (float / position) */
 .hero-image--right {
   float: right;
@@ -61,23 +66,6 @@
   margin: 0 auto 1.5rem;
 }
 
-/* hero image: size (max-width) */
-.hero-image--size-small {
-  max-width: 12rem;
-}
-
-.hero-image--size-medium {
-  max-width: 18rem;
-}
-
-.hero-image--size-large {
-  max-width: 30rem;
-}
-
-.hero-image--size-full {
-  max-width: 100%;
-}
-
 @media (max-width: 640px) {
   .hero-image--left,
   .hero-image--right {
@@ -87,21 +75,16 @@
   }
 }
 
-/* body images: size (max-width) */
+/* body images: width is a free-form rem number now (editor picks the exact
+value via width_rem), set via inline style in article_image_block.html --
+width, not max-width, since a floated width:auto figure's shrink-to-fit
+sizing falls back to the <img>'s own intrinsic resolution when nothing else
+anchors it, so max-width alone can only ever shrink an image, never enlarge
+it past the source file's natural size. max-width:100% comes along inline
+too, as a safety net so it still can't overflow a narrow container (e.g. a
+multi-column item). */
 .body-image-figure {
   margin: 1rem 0;
-}
-
-.body-image--small {
-  max-width: 12rem;
-}
-
-.body-image--medium {
-  max-width: 20rem;
-}
-
-.body-image--large {
-  max-width: 100%;
 }
 
 /* body images: alignment (float / position) */
@@ -126,6 +109,26 @@
     float: none;
     max-width: 100%;
     margin: 0 0 1.5rem;
+  }
+}
+
+/* editor-picked side padding (hero_image_side_padding) and box padding
+(body image's own box.padding, when boxed -- see _block_box_style.html)
+are both free-form rem numbers set inline, ignored below this breakpoint
+same as the float/width reset above: large padding here can push the image
+itself past the screen edge on a narrow column. .hero-image-figure only
+gets padding-left/right reset (not the shorthand) since its own boxed
+padding is a fixed, non-editable 1rem from .image-figure--boxed below --
+that one's meant to stay. .body-image-figure has no such fixed class, so
+its whole padding (however _block_box_style.html set it) resets safely. */
+@media (max-width: 640px) {
+  .hero-image-figure {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .body-image-figure {
+    padding: 0 !important;
   }
 }
 

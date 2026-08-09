@@ -1,4 +1,4 @@
-/* styled text block: alignment */
+/* paragraph block: alignment */
 .prose--align-left {
   text-align: left;
 }
@@ -11,25 +11,53 @@
   text-align: right;
 }
 
-/* styled text block: letter size */
-.prose--size-small {
-  font-size: 0.875rem;
+/* paragraph block: font size and side padding are both free-form rem
+numbers (editor picks the exact value), applied directly via inline style
+with no min/max clamp -- it's on the editor to pick a sane value for their
+screen. */
+
+/* heading blocks (h2/h3 in the article body): same alignment/font-size/
+side-padding editing as paragraph above, and font-size/side-padding are
+applied the same way (inline style, see article_body_blocks.html) -- but
+alignment needs its own class family here since headings don't share
+prose's own classes. */
+.heading--align-left {
+  text-align: left;
 }
 
-.prose--size-medium {
-  font-size: 1rem;
+.heading--align-center {
+  text-align: center;
 }
 
-.prose--size-large {
-  font-size: 1.15rem;
+.heading--align-right {
+  text-align: right;
 }
 
-.prose--size-larger {
-  font-size: 1.35rem;
-}
+/* editor-picked font size and side padding/box padding (both free-form rem
+numbers, applied inline -- see article_body_blocks.html/article_column_
+content.html) are ignored below this breakpoint, same reasoning and
+breakpoint as article_layout.css's own top-level reset: a size or padding
+picked for a wide desktop column can overflow or read badly once the
+column is this narrow. Hard-reset to each block's own default size rather
+than the article's plain 1rem, since a heading/column-title that's the
+same size as body text stops reading as a heading at all. Box background/
+border/radius (and any text color) are untouched -- only sizing. Matches
+.heading--align-* for both heading (h2-h5) and column-title (h3.column-
+title, sharing this same class family) at once, and .prose--align-* for
+paragraph (also shared by the nested column variant in article_column_
+content.html). */
+@media (max-width: 480px) {
+  .heading--align-left,
+  .heading--align-center,
+  .heading--align-right {
+    font-size: 1.5rem !important;
+    padding: 0 !important;
+  }
 
-/* styled text block: side padding is a free-form rem number now (editor
-picks the exact value), set via inline style -- clamp(0rem, Nrem, 20vw) in
-the template scales it down automatically on narrow screens instead of a
-fixed set of mobile-override classes, since there's no longer a fixed set
-of steps to override. */
+  .prose--align-left,
+  .prose--align-center,
+  .prose--align-right {
+    font-size: 1rem !important;
+    padding: 0 !important;
+  }
+}
