@@ -22,6 +22,9 @@ account-specific concerns]" means in practice: this module only deals with
 Wagtail Page permissions and alias/locale resolution, nothing else."""
 
 from account_app.permissions import is_pending_editor
+from wagtail_localize.models import TranslationSource
+
+from .translation_sync import SOURCE_LANGUAGE_CODE
 
 
 def editor_mode_allowed(target, user, action):
@@ -60,7 +63,12 @@ class EditorModeMixin:
     other three page types expose no publish controls), so those live as
     ArticlePage's own methods, next to its existing publish_target, reusing
     editor_mode_allowed() directly rather than being forced through a
-    style_target every other page type also has to carry."""
+    style_target every other page type also has to carry.
+
+    can_sync_mirrored_page: whether `user` may trigger the "Sync mirrored
+    page" button -- unlike publish/unpublish, this one *is* shared by all
+    four page types, since it's just a plain edit action (see
+    translation_sync.py) rather than a wagtail publish action."""
 
     @property
     def style_target(self):
@@ -68,3 +76,19 @@ class EditorModeMixin:
 
     def can_edit_in_editor_mode(self, user):
         return editor_mode_allowed(self.style_target, user, "edit")
+
+    def can_sync_mirrored_page(self, user):
+        """Whether `user` may manually push this page's synchronized fields
+        to its translations right now: `user` needs edit permission (same
+        check as can_edit_in_editor_mode), this page must actually be the
+        nb/"OG" copy (mirrored *from*, not *to* -- there's nothing to sync
+        the other way), and it needs an existing wagtail-localize
+        translation to push to (nothing to sync before "Submit for
+        translation" has ever been used)."""
+        target = self.style_target
+        if target.locale.language_code != SOURCE_LANGUAGE_CODE:
+            return False
+        if not editor_mode_allowed(target, user, "edit"):
+            return False
+        source = TranslationSource.objects.get_for_instance_or_none(target)
+        return source is not None and source.translations.filter(enabled=True).exists()

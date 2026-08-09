@@ -15,6 +15,7 @@ from wagtail.url_routing import RouteResult
 from wagtail import blocks
 
 from ifi_home_app.editor_mode import EditorModeMixin, editor_mode_allowed
+from ifi_home_app.translation_sync import SOURCE_LANGUAGE_CODE
 
 # !Wagtail has no views and don't need any!
 
@@ -983,8 +984,12 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
         return ArticleStyle.objects.get_or_create(translation_key=self.translation_key)[0]
 
     # the nb tree is the OG/source content that every other locale mirrors
-    # and translates (wagtail_localize) -- see publish_target below.
-    SOURCE_LANGUAGE_CODE = "nb"
+    # and translates (wagtail_localize) -- see publish_target below. Aliases
+    # the single shared constant (translation_sync.py) rather than its own
+    # literal, so every existing self.SOURCE_LANGUAGE_CODE/ArticlePage.
+    # SOURCE_LANGUAGE_CODE reference (this file, article_views.py) keeps
+    # working unchanged.
+    SOURCE_LANGUAGE_CODE = SOURCE_LANGUAGE_CODE
 
     @property
     def publish_target(self):
@@ -1065,6 +1070,7 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
         context["page_has_pending_publish"] = (not self.live) or self.has_unpublished_changes
         context["can_publish_page"] = self.can_publish_in_editor_mode(request.user)
         context["can_unpublish_page"] = self.can_unpublish_in_editor_mode(request.user)
+        context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
         overrides_by_block_id = {
             style.block_id: style
             for style in ArticleBlockStyle.objects.filter(translation_key=self.translation_key)
@@ -1531,9 +1537,12 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
         articles to the template context, plus can_edit_style (whether the
         visitor can use the on-page banner style panel, see
         BannerStyleMixin/PageBannerStyle -- same permission check
-        save_banner_style itself enforces, article_views.py)."""
+        save_banner_style itself enforces, article_views.py) and
+        can_sync_mirrored_page (whether the "Sync mirrored page" button
+        should show -- see EditorModeMixin.can_sync_mirrored_page)."""
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
+        context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
         subcategories = (
             CategoryPage.objects.child_of(self)
             .live()
@@ -1616,6 +1625,7 @@ class ArticleIndexPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixi
         CategoryPage.get_context()'s own identical addition)."""
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
+        context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
         categories = (
             CategoryPage.objects.child_of(self)
             .live()
@@ -1879,6 +1889,7 @@ class StudentUnionCategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWar
         alongside its own more specific section."""
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
+        context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
         unions = (
             UnionPage.objects.child_of(self)
             .live()

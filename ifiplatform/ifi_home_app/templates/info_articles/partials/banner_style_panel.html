@@ -21,6 +21,7 @@ with (registerSaveHandler), same pattern as quick-style-panel.html.
 {% endcomment %}
 <form class="quick-style-panel" id="banner-style-panel"
       data-banner-style-url="{% url 'page_banner_style' page.id %}"
+      data-sync-mirrored-url="{% url 'page_sync_mirrored' page.id %}"
       data-default-banner-color="#197dc4" data-default-dot-color="#ffffff" data-default-text-color="#fffff9"
       data-default-width="60" data-default-height="14" data-default-font-size="2.75">
     {% csrf_token %}
@@ -31,6 +32,24 @@ with (registerSaveHandler), same pattern as quick-style-panel.html.
     </div>
 
     <div class="quick-style-panel-body" id="banner-style-panel-body">
+        {% comment %}
+        Not a style field (nothing here is part of this panel's own
+        dirty-tracking/save-bar flow) -- only shows up when we're standing
+        on the nb ("OG") copy of this page with an existing translation to
+        push synchronized fields (show_in_menu, status, etc.) to, see
+        EditorModeMixin.can_sync_mirrored_page. CategoryPage/ArticleIndexPage/
+        StudentUnionCategoryPage have no Publish/Unpublish concept in editor
+        mode at all (unlike ArticlePage's quick-style panel), so this is its
+        own small row rather than living inside a "Publish" section.
+        {% endcomment %}
+        {% if can_sync_mirrored_page %}
+            <div class="quick-style-field quick-style-status-row">
+                <button type="button" id="banner-style-sync-mirrored-button" class="quick-style-publish-button">
+                    {% trans "Sync mirrored page" %}
+                </button>
+            </div>
+        {% endif %}
+
         <label class="quick-style-field block-style-toggle">
             <input type="checkbox" id="banner-style-show-banner" {% if page.banner_style.show_banner %}checked{% endif %}>
             <span>{% trans "Show banner" %}</span>

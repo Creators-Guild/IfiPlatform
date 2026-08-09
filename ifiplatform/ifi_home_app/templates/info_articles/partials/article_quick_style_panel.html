@@ -28,6 +28,7 @@ is UX, not the security boundary.
       data-quick-style-url="{% url 'article_quick_style' page.id %}"
       data-publish-url="{% url 'article_publish' page.id %}"
       data-unpublish-url="{% url 'article_unpublish' page.id %}"
+      data-sync-mirrored-url="{% url 'page_sync_mirrored' page.id %}"
       data-default-padding="0" data-default-alignment="left" data-default-font-size="1"
       data-default-bg-color="bg-light">
     {% csrf_token %}
@@ -67,7 +68,13 @@ is UX, not the security boundary.
             Publish only shows up when there's actually something to
             publish; Unpublish only when the nb copy is actually live
             (can_unpublish_page is False otherwise -- Wagtail's own
-            can_unpublish() requires it).
+            can_unpublish() requires it). Sync mirrored page is the odd one
+            out here -- it's not about *this* page's publish state at all,
+            just whether we're standing on the nb ("OG") copy with an
+            existing translation to push synchronized fields (show_in_menu,
+            status, etc.) to (see EditorModeMixin.can_sync_mirrored_page) --
+            grouped with Publish/Unpublish anyway since it's the same kind
+            of immediate, no-preview action.
             {% endcomment %}
             <div class="quick-style-field quick-style-status-row">
                 <span class="quick-style-status-badge{% if not page_is_live %} quick-style-status-badge--draft{% elif page_has_unpublished_changes %} quick-style-status-badge--pending{% else %} quick-style-status-badge--live{% endif %}">
@@ -82,6 +89,11 @@ is UX, not the security boundary.
                     {% if can_unpublish_page %}
                         <button type="button" id="quick-style-unpublish-button" class="quick-style-unpublish-button">
                             {% trans "Unpublish" %}
+                        </button>
+                    {% endif %}
+                    {% if can_sync_mirrored_page %}
+                        <button type="button" id="quick-style-sync-mirrored-button" class="quick-style-publish-button">
+                            {% trans "Sync mirrored page" %}
                         </button>
                     {% endif %}
                 </span>
