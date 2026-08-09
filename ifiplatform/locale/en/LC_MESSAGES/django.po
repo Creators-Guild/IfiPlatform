@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: IfiPlatform 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-09 18:33+0200\n"
+"POT-Creation-Date: 2026-08-09 21:56+0200\n"
 "PO-Revision-Date: 2026-02-26 13:30+0100\n"
 "Last-Translator: YOUR NAME <you@example.com>\n"
 "Language-Team: English <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: .\account_app\templates\core\account_settings.html:4
-#: .\templates\partials\top_header.html:33
-#: .\templates\partials\top_header.html:50
+#: .\templates\partials\top_header.html:45
+#: .\templates\partials\top_header.html:62
 msgid "Account"
 msgstr ""
 
@@ -114,7 +114,7 @@ msgid "Privacy Policy"
 msgstr ""
 
 #: .\account_app\templates\core\account_settings.html:118
-#: .\templates\partials\top_header.html:51
+#: .\templates\partials\top_header.html:63
 msgid "Log out"
 msgstr ""
 
@@ -310,7 +310,7 @@ msgid "User Login"
 msgstr ""
 
 #: .\account_app\templates\login\login.html:36
-#: .\templates\partials\top_header.html:58
+#: .\templates\partials\top_header.html:70
 msgid "Log in"
 msgstr ""
 
@@ -445,30 +445,46 @@ msgstr ""
 msgid "No articles yet or something is broken ;_;"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_messageboard.html:31
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:29
+msgid "View full message"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:40
 msgid "Previous message"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_messageboard.html:37
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:46
 #, python-format
 msgid "Go to message %(n)s"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_messageboard.html:40
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:49
 msgid "Next message"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:8
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:59
+msgid "Message"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:73
+#: .\ifi_home_app\templates\info_articles\pages\article_page.html:166
+#: .\ifi_home_app\templates\info_articles\pages\article_page.html:220
+#: .\ifi_home_app\templates\info_articles\pages\tool_page.html:76
+#: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:29
+msgid "Close"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:18
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:47
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:35
 msgid "News"
 msgstr "News"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:11
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:27
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:43
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:66
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:91
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:21
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:37
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:62
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:85
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:110
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:21
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:37
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:49
@@ -480,56 +496,64 @@ msgstr "News"
 msgid "All"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:17
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:27
 msgid "No news yet"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:24
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:34
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:34
 msgid "Info Articles"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:33
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:43
 msgid "No categories yet"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:40
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:57
 #, fuzzy
 #| msgid "Student Organizations"
 msgid "Student Unions"
 msgstr "Student Organizations"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:54
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:58
+#, fuzzy
+#| msgid "Student Organizations"
+msgid "Unions"
+msgstr "Student Organizations"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:73
 msgid "No unions or articles yet"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:63
-msgid "Ifi Tools"
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:82
+#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:79
+#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:82
+msgid "Tools"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:80
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:99
 msgid "No tools or articles yet"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:88
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:107
 msgid "New Student?"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:93
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:112
 #, fuzzy
 #| msgid "Starer Kit"
 msgid "Starter Kit"
 msgstr "Starer Kit"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:96
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:115
 msgid "Student Life"
 msgstr "Student Life"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:99
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:118
 msgid "Tips n Tricks"
 msgstr "Tips n Tricks"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:102
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:121
 msgid "Apps n Links"
 msgstr "Apps n Links"
 
@@ -616,11 +640,6 @@ msgstr ""
 msgid "Limited time"
 msgstr ""
 
-#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:79
-#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:82
-msgid "Tools"
-msgstr ""
-
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:90
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:93
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:137
@@ -699,13 +718,6 @@ msgstr ""
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:143
 msgid "Last edited"
-msgstr ""
-
-#: .\ifi_home_app\templates\info_articles\pages\article_page.html:166
-#: .\ifi_home_app\templates\info_articles\pages\article_page.html:220
-#: .\ifi_home_app\templates\info_articles\pages\tool_page.html:76
-#: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:29
-msgid "Close"
 msgstr ""
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:215
@@ -1200,6 +1212,10 @@ msgstr ""
 msgid "by"
 msgstr ""
 
+#: .\ifi_home_app\templates\info_articles\partials\article_card.html:60
+msgid "Toggle card size"
+msgstr ""
+
 #: .\ifi_home_app\templates\info_articles\partials\article_editor_mode_toggle.html:11
 msgid "Editor mode"
 msgstr ""
@@ -1574,7 +1590,8 @@ msgstr "Welcome to the Ifi Home Page"
 msgid "This is the main menu for study games"
 msgstr "This is the main content for the Ifi home page."
 
-#: .\study_app\urls.py:58 .\templates\partials\top_header.html:25
+#: .\study_app\urls.py:58 .\templates\partials\top_header.html:28
+#: .\templates\partials\top_header.html:33
 msgid "Study"
 msgstr "Study"
 
@@ -1592,27 +1609,31 @@ msgstr ""
 msgid "Restarting now..."
 msgstr ""
 
-#: .\templates\partials\select_language.html:16
+#: .\templates\partials\select_language.html:17
+#: .\templates\partials\select_language.html:49
 msgid "English"
 msgstr ""
 
-#: .\templates\partials\select_language.html:25
+#: .\templates\partials\select_language.html:26
+#: .\templates\partials\select_language.html:59
 msgid "Norsk"
 msgstr ""
 
 #: .\templates\partials\top_header.html:19
-msgid "Ifi Homepage"
-msgstr "Ifi Homepage"
-
-#: .\templates\partials\top_header.html:20
+#: .\templates\partials\top_header.html:24
 msgid "Home"
 msgstr "Home"
 
-#: .\templates\partials\top_header.html:24
+#: .\templates\partials\top_header.html:23
+msgid "Ifi Homepage"
+msgstr "Ifi Homepage"
+
+#: .\templates\partials\top_header.html:32
 msgid "Ifi Study"
 msgstr "Ifi Study"
 
-#: .\templates\partials\top_header.html:29
+#: .\templates\partials\top_header.html:37
+#: .\templates\partials\top_header.html:41
 #: .\yourpage_app\templates\core\yourpage_main.html:5 .\yourpage_app\urls.py:10
 msgid "Your Page"
 msgstr "Your Page"

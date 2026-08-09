@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-09 18:33+0200\n"
+"POT-Creation-Date: 2026-08-09 21:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: .\account_app\templates\core\account_settings.html:4
-#: .\templates\partials\top_header.html:33
-#: .\templates\partials\top_header.html:50
+#: .\templates\partials\top_header.html:45
+#: .\templates\partials\top_header.html:62
 msgid "Account"
 msgstr "Konto"
 
@@ -124,7 +124,7 @@ msgid "Privacy Policy"
 msgstr "Personvernerklæring"
 
 #: .\account_app\templates\core\account_settings.html:118
-#: .\templates\partials\top_header.html:51
+#: .\templates\partials\top_header.html:63
 msgid "Log out"
 msgstr "Logg ut"
 
@@ -359,7 +359,7 @@ msgid "User Login"
 msgstr "Brukerinnlogging"
 
 #: .\account_app\templates\login\login.html:36
-#: .\templates\partials\top_header.html:58
+#: .\templates\partials\top_header.html:70
 msgid "Log in"
 msgstr "Logg inn"
 
@@ -500,30 +500,50 @@ msgstr "Foreslåtte Infoartikkler"
 msgid "No articles yet or something is broken ;_;"
 msgstr "Ingen artikkler ennå, eller noe er ødelagt ;_;"
 
-#: .\ifi_home_app\templates\core\partials\home_messageboard.html:31
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:29
+#, fuzzy
+#| msgid "Next message"
+msgid "View full message"
+msgstr "Neste melding"
+
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:40
 msgid "Previous message"
 msgstr "Forrige melding"
 
-#: .\ifi_home_app\templates\core\partials\home_messageboard.html:37
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:46
 #, python-format
 msgid "Go to message %(n)s"
 msgstr "Gå til melding %(n)s"
 
-#: .\ifi_home_app\templates\core\partials\home_messageboard.html:40
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:49
 msgid "Next message"
 msgstr "Neste melding"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:8
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:59
+#, fuzzy
+#| msgid "Next message"
+msgid "Message"
+msgstr "Neste melding"
+
+#: .\ifi_home_app\templates\core\partials\home_messageboard.html:73
+#: .\ifi_home_app\templates\info_articles\pages\article_page.html:166
+#: .\ifi_home_app\templates\info_articles\pages\article_page.html:220
+#: .\ifi_home_app\templates\info_articles\pages\tool_page.html:76
+#: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:29
+msgid "Close"
+msgstr "Lukk"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:18
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:47
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:35
 msgid "News"
 msgstr "Nyheter"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:11
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:27
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:43
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:66
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:91
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:21
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:37
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:62
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:85
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:110
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:21
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:37
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:49
@@ -535,52 +555,58 @@ msgstr "Nyheter"
 msgid "All"
 msgstr "Alle"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:17
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:27
 msgid "No news yet"
 msgstr "Ingen nyheter ennå"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:24
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:34
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:34
 msgid "Info Articles"
 msgstr "Infoartikkler"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:33
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:43
 msgid "No categories yet"
 msgstr "Ingen kategorier ennå"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:40
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:57
 msgid "Student Unions"
 msgstr "Studentforeninger"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:54
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:58
+msgid "Unions"
+msgstr "Foreninger"
+
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:73
 msgid "No unions or articles yet"
 msgstr "Ingen foreninger eller artikkler ennå"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:63
-msgid "Ifi Tools"
-msgstr "Ifi Verktøy"
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:82
+#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:79
+#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:82
+msgid "Tools"
+msgstr "Verktøy"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:80
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:99
 msgid "No tools or articles yet"
 msgstr "Ingen verktøy eller artikkler ennå"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:88
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:107
 msgid "New Student?"
 msgstr "Ny Student?"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:93
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:112
 msgid "Starter Kit"
 msgstr "Startpakke"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:96
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:115
 msgid "Student Life"
 msgstr "Studentlivet"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:99
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:118
 msgid "Tips n Tricks"
 msgstr "Tips og Triks"
 
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:102
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:121
 msgid "Apps n Links"
 msgstr "Apper og linker"
 
@@ -665,11 +691,6 @@ msgstr "Skjer nå"
 msgid "Limited time"
 msgstr "Begrenset tid"
 
-#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:79
-#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:82
-msgid "Tools"
-msgstr "Verktøy"
-
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:90
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:93
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:137
@@ -747,13 +768,6 @@ msgstr "Publisert"
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:143
 msgid "Last edited"
 msgstr "Sist redigert"
-
-#: .\ifi_home_app\templates\info_articles\pages\article_page.html:166
-#: .\ifi_home_app\templates\info_articles\pages\article_page.html:220
-#: .\ifi_home_app\templates\info_articles\pages\tool_page.html:76
-#: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:29
-msgid "Close"
-msgstr "Lukk"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:215
 msgid "Edit table of contents icon size"
@@ -1249,6 +1263,10 @@ msgstr "Utkast"
 msgid "by"
 msgstr "av"
 
+#: .\ifi_home_app\templates\info_articles\partials\article_card.html:60
+msgid "Toggle card size"
+msgstr ""
+
 #: .\ifi_home_app\templates\info_articles\partials\article_editor_mode_toggle.html:11
 msgid "Editor mode"
 msgstr "Redigeringsmodus"
@@ -1598,7 +1616,8 @@ msgstr "Velkommen til Studiespill-oppstarteren"
 msgid "This is the main menu for study games"
 msgstr "Dette er hovedmenyen for studiespill"
 
-#: .\study_app\urls.py:58 .\templates\partials\top_header.html:25
+#: .\study_app\urls.py:58 .\templates\partials\top_header.html:28
+#: .\templates\partials\top_header.html:33
 msgid "Study"
 msgstr "Studie"
 
@@ -1618,27 +1637,31 @@ msgstr ""
 msgid "Restarting now..."
 msgstr "Starter på nytt nå..."
 
-#: .\templates\partials\select_language.html:16
+#: .\templates\partials\select_language.html:17
+#: .\templates\partials\select_language.html:49
 msgid "English"
 msgstr "English"
 
-#: .\templates\partials\select_language.html:25
+#: .\templates\partials\select_language.html:26
+#: .\templates\partials\select_language.html:59
 msgid "Norsk"
 msgstr "Norsk"
 
 #: .\templates\partials\top_header.html:19
-msgid "Ifi Homepage"
-msgstr "Ifi Hjemmesiden"
-
-#: .\templates\partials\top_header.html:20
+#: .\templates\partials\top_header.html:24
 msgid "Home"
 msgstr "Hjem"
 
-#: .\templates\partials\top_header.html:24
+#: .\templates\partials\top_header.html:23
+msgid "Ifi Homepage"
+msgstr "Ifi Hjemmesiden"
+
+#: .\templates\partials\top_header.html:32
 msgid "Ifi Study"
 msgstr "Ifi Studie"
 
-#: .\templates\partials\top_header.html:29
+#: .\templates\partials\top_header.html:37
+#: .\templates\partials\top_header.html:41
 #: .\yourpage_app\templates\core\yourpage_main.html:5 .\yourpage_app\urls.py:10
 msgid "Your Page"
 msgstr "Din Side"
@@ -1742,6 +1765,9 @@ msgstr "f.eks. IN1000 hver onsdag, mer IN1000 i uke: 22, 23, 24"
 #: .\yourpage_app\templates\partials\your_subjects.html:3
 msgid "Your Active Subjects"
 msgstr "Dine Aktive Fag"
+
+#~ msgid "Ifi Tools"
+#~ msgstr "Ifi Verktøy"
 
 #, fuzzy
 #~ msgid "This is the placeholder for Account Settings."

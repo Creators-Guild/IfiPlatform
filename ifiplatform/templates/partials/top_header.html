@@ -15,18 +15,30 @@
     </div>
     <div class="nav_links">
         <a href="{% url 'ifi_home' %}"
-            class="nav_link {% if request.resolver_match.url_name == 'ifi_home' or '/articles/' in request.path %}active{% endif %}">
+            class="nav_link {% if request.resolver_match.url_name == 'ifi_home' or '/articles/' in request.path %}active{% endif %}"
+            aria-label="{% trans "Home" %}">
+            <span class="nav_link-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3.2 3 11h2.5v9h5v-6h3v6h5v-9H21L12 3.2z" fill="currentColor"/></svg>
+            </span>
             <span class="nav_link-full">{% trans "Ifi Homepage" %}</span>
             <span class="nav_link-short">{% trans "Home" %}</span>
         </a>
         <a href="{% url 'study_home' %}"
-            class="nav_link {% if '/study/' in request.path %}active{% endif %}">
+            class="nav_link {% if '/study/' in request.path %}active{% endif %}"
+            aria-label="{% trans "Study" %}">
+            <span class="nav_link-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false"><path d="M4 5c3 0 5.5.6 7 1.8v12.7C9.5 18.4 7 17.8 4 17.8V5zm16 0v12.8c-3 0-5.5.6-7 1.7V6.8C14.5 5.6 17 5 20 5z" fill="currentColor"/></svg>
+            </span>
             <span class="nav_link-full">{% trans "Ifi Study" %}</span>
             <span class="nav_link-short">{% trans "Study" %}</span>
         </a>
         <a href="{% url 'yourpage_main' %}"
-            class="nav_link {% if request.resolver_match.url_name == 'yourpage_main' %}active{% endif %}">
-            {% trans "Your Page" %}
+            class="nav_link {% if request.resolver_match.url_name == 'yourpage_main' %}active{% endif %}"
+            aria-label="{% trans "Your Page" %}">
+            <span class="nav_link-icon nav_link-icon--page" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false"><path d="M6 2h8l5 5v15H6V2zm7 1.5V8h4.5L13 3.5zM8 12.5h8v1.5H8v-1.5zm0 4h8V18H8v-1.5z" fill="currentColor"/></svg>
+            </span>
+            <span class="nav_link-label">{% trans "Your Page" %}</span>
         </a>
         {% if request.user.is_authenticated %}
             <div class="dropdown-menu profile-dropdown">

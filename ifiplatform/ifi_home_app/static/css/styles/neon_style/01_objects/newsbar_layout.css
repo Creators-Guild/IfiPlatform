@@ -25,49 +25,20 @@
 /* matches the 45rem breakpoint in home_layout.css where the two sections
 stack into a single column and drop to 4 visible cards each -- using a
 narrower breakpoint here left a gap zone (480px-45rem) where cards had
-already stacked/capped but weren't list-styled yet. 3rd+ card in each
-section becomes a compact list row instead of a full card: keeps the first
-two (most prominent) as normal cards, but a narrow screen shouldn't be
-dominated by a long stack of full image cards for every remaining
-suggestion. grid-column:1/-1 pulls it out of the card grid's track sizing
-so it spans the full row width like a list item; the image and intro
-paragraph are dropped, leaving just title + meta in the same card
-background/border/shadow styling. */
+already stacked/capped but weren't list-styled yet.
+
+Collapsing to a list row is now driven by article_list_toggle.js adding
+.articlecard--list directly (default: every card past the first two,
+same as this used to hard-code via :nth-child -- now also toggleable per
+card via the arrow button, see articlecard.css's .articlecard-toggle),
+reusing the exact same class/look the "Show as list item" editor toggle
+already produces (articlecard.css) instead of a second, separately
+maintained set of rules for what's visually identical. All this layout
+needs to add on top is grid placement -- .articlecard--list alone doesn't
+know it's sitting in a grid, so without this it would keep its normal
+card-sized grid track instead of spanning the full row like a list item. */
 @media (max-width: 45rem) {
-  /* title left, meta as a right-aligned block -- a stacked title+small-gray-
-  text layout read as "just a title" with the meta barely noticeable, so
-  this uses the full row width freed up by dropping the image instead,
-  and bumps the meta's size/color for more visual weight. */
-  .newsbar-layout .articlecard:nth-child(n + 3) {
+  .newsbar-layout .articlecard--list {
     grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.6rem 0.75rem;
-  }
-
-  .newsbar-layout .articlecard:nth-child(n + 3) img {
-    display: none;
-  }
-
-  .newsbar-layout .articlecard:nth-child(n + 3) h3 {
-    margin: 0;
-    flex: 1 1 auto;
-    min-width: 0; /* lets the existing text-overflow:ellipsis on h3 actually kick in inside a flex row */
-  }
-
-  .newsbar-layout .articlecard:nth-child(n + 3) .articlecard-meta {
-    flex: 0 0 auto;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.15rem;
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--color-text);
-  }
-
-  .newsbar-layout .articlecard:nth-child(n + 3) .articlecard-intro {
-    display: none;
   }
 }
