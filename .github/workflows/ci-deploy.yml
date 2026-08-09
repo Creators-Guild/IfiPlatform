@@ -133,6 +133,13 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script_stop: true
           envs: SKIP_COUNTDOWN
+          # appleboy/ssh-action defaults command_timeout to 10m -- the
+          # visitor-warning countdown below already sleeps for a full 10
+          # minutes by itself (skip_countdown aside), so the two together
+          # were guaranteed to hit this timeout before ever reaching git
+          # reset/migrate/collectstatic/restart. 20m covers the 10-minute
+          # sleep plus the actual deploy work with room to spare.
+          command_timeout: 20m
           script: |
             cd /home/ubuntu/IfiPlatform
             source venv/bin/activate
