@@ -114,6 +114,11 @@ If that fails because `msgfmt` (part of GNU gettext) isn't installed — common 
 py manage.py compile_translations
 ```
 Same effect, no system dependency. Only compiles this project's own `.po` files (`ifiplatform/locale/`), not any third-party package's.
+#### Delete unverified accounts (GDPR storage limitation)
+```bash
+py manage.py cleanup_unverified_accounts
+```
+Deletes signups that never confirmed their email address once they're older than `UNVERIFIED_ACCOUNT_RETENTION_DAYS` (7 days by default, see settings.py). Use `--dry-run` to list what would be deleted without deleting anything. No task scheduler is set up in this project -- run this periodically yourself (host cron, or your platform's own scheduled-job feature) if you want it enforced automatically.
 #### Log in on admin interface or wagtail-admin interface
 Log in via a superuser you have created.
 ```

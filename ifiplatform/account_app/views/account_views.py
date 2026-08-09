@@ -1,19 +1,32 @@
 """Views for account settings and user profile management."""
 
+import json
+
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
 from django.core import signing
 from django.core.mail import send_mail
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
-from account_app.forms import ProfileForm
+from account_app.forms import AccountDeleteForm, NicknameForm, ProfileForm
 from account_app.models import Profile
+from account_app.permissions import is_pending_editor
+from ifi_home_app.models import ArticlePage
+from study_app.models import Card, Deck
 
 _EMAIL_CHANGE_SALT = "account_app.email_change"
 _EMAIL_CHANGE_MAX_AGE = 60 * 60 * 24 * 3  # 3 days
+
+# Groups granting editor rights are found via GroupPagePermission's own
+# 'add'/'change' codenames on Page -- same actions is_pending_editor (see
+# account_app.permissions) treats as "can write pages".
+_PAGE_EDIT_CODENAMES = ["add_page", "change_page"]
 
 
 def _send_email_change_confirmation(request, user, new_email):
@@ -39,6 +52,35 @@ def _send_email_change_confirmation(request, user, new_email):
     )
     if settings.DEBUG:
         print(f"[email change confirmation] {new_email} -> {confirm_url}")
+
+
+def _account_settings_context(request, *, form=None, delete_form=None):
+    """Shared context for core/account_settings.html -- used both by a
+    normal GET/POST render (account_settings_view) and by delete_account_view
+    re-rendering the same page with AccountDeleteForm's own validation
+    errors on it, so the two don't duplicate the profile_incomplete/editor-
+    notice computation."""
+    user = request.user
+    profile, _ = Profile.objects.get_or_create(user=user)
+    allow_clearing = user.is_staff or user.is_superuser
+
+    profile_incomplete = not (user.email and user.first_name and user.last_name)
+    show_editor_notice = is_pending_editor(user)
+
+    return {
+        "user": user,
+        "form": form or ProfileForm(instance=user, allow_clearing=allow_clearing),
+        "profile_incomplete": profile_incomplete,
+        "pending_email": profile.pending_email,
+        "nickname_form": NicknameForm(instance=profile),
+        "delete_form": delete_form or AccountDeleteForm(user=user),
+        "show_editor_notice": show_editor_notice,
+        "editor_terms_just_disagreed": request.GET.get("editor_terms") == "disagreed",
+        # set only by EditorTermsGateMiddleware's redirect -- shakes the
+        # terms box on that "caught mid-attempt" landing, not on a plain
+        # self-navigated visit to this page (which carries no query param).
+        "editor_terms_shake": request.GET.get("editor_terms") == "required",
+    }
 
 
 @login_required()
@@ -89,18 +131,144 @@ def account_settings_view(request):
     else:
         form = ProfileForm(instance=user, allow_clearing=allow_clearing)
 
-    profile_incomplete = not (user.email and user.first_name and user.last_name)
-
     return render(
         request=request,
         template_name="core/account_settings.html",
-        context={
-            "user": user,
-            "form": form,
-            "profile_incomplete": profile_incomplete,
-            "pending_email": profile.pending_email,
-        },
+        context=_account_settings_context(request, form=form),
     )
+
+
+@login_required()
+@require_POST
+def update_nickname_view(request):
+    """Set/change the nickname on the current user's Profile -- see
+    NicknameForm."""
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    form = NicknameForm(request.POST, instance=profile)
+    if form.is_valid():
+        form.save()
+    return redirect("account_settings")
+
+
+@login_required()
+@require_POST
+def editor_terms_response_view(request):
+    """Records the current user's response to the content-ownership terms
+    shown once they're granted permission to write pages (see
+    account_settings_view's show_editor_notice). Agreeing just records the
+    decision; disagreeing also revokes the permission itself -- only the
+    specific group(s) actually granting add/change page rights, leaving any
+    other, unrelated group membership untouched."""
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    decision = request.POST.get("decision")
+
+    if decision == "agree":
+        profile.editor_terms_status = "agreed"
+        profile.save(update_fields=["editor_terms_status"])
+        return redirect("account_settings")
+
+    if decision == "disagree":
+        profile.editor_terms_status = "disagreed"
+        profile.save(update_fields=["editor_terms_status"])
+        editor_groups = Group.objects.filter(
+            user=request.user, page_permissions__permission__codename__in=_PAGE_EDIT_CODENAMES
+        ).distinct()
+        request.user.groups.remove(*editor_groups)
+        return redirect(reverse("account_settings") + "?editor_terms=disagreed")
+
+    return redirect("account_settings")
+
+
+@login_required()
+def export_data_view(request):
+    """Lets a user download the personal data IfiPlatform holds on them
+    (GDPR Art. 15/20) as a JSON file: account fields, owned study decks/
+    cards, and authored articles."""
+    user = request.user
+    profile, _ = Profile.objects.get_or_create(user=user)
+
+    data = {
+        "username": user.username,
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "nickname": profile.nickname,
+        "date_joined": user.date_joined.isoformat(),
+        "last_login": user.last_login.isoformat() if user.last_login else None,
+        "decks": [
+            {
+                "name": deck.name,
+                "description": deck.description,
+                "cards": [
+                    {
+                        "front": card.front,
+                        "back": card.back,
+                        "created_at": card.created_at.isoformat(),
+                    }
+                    for card in deck.cards.all()
+                ],
+            }
+            for deck in user.decks.all()
+        ],
+        "authored_articles": [
+            {
+                "title": article.title,
+                "slug": article.slug,
+                "published_date": (
+                    article.published_date.isoformat() if article.published_date else None
+                ),
+                "author_attribution": article.author_attribution,
+            }
+            for article in ArticlePage.objects.filter(author=user)
+        ],
+    }
+
+    response = HttpResponse(
+        json.dumps(data, indent=2, ensure_ascii=False), content_type="application/json"
+    )
+    response["Content-Disposition"] = 'attachment; filename="ifiplatform_my_data.json"'
+    return response
+
+
+@login_required()
+@require_POST
+def delete_account_view(request):
+    """Self-service account deletion (GDPR Art. 17) -- see AccountDeleteForm
+    for the password re-auth + study-tools/articles choices this reads.
+    Everything that needs the still-live user/profile/FKs happens before
+    user.delete() itself; Profile cascades away with it, and Deck.owner/
+    ArticlePage.author (for anything not already explicitly deleted below)
+    become NULL automatically via their existing on_delete=SET_NULL."""
+    user = request.user
+    form = AccountDeleteForm(request.POST, user=user)
+    if not form.is_valid():
+        context = _account_settings_context(request, delete_form=form)
+        context["delete_form_open"] = True
+        return render(
+            request=request, template_name="core/account_settings.html", context=context
+        )
+
+    profile, _ = Profile.objects.get_or_create(user=user)
+    real_name = user.get_full_name() or user.username
+    nickname = profile.nickname
+
+    def _resolve(choice):
+        return {"real_name": real_name, "nickname": nickname, "unknown": "unknown"}[choice]
+
+    if form.cleaned_data["study_tools_action"] == "delete":
+        Card.objects.filter(deck__owner=user).delete()
+        Deck.objects.filter(owner=user).delete()
+    else:
+        resolved = _resolve(form.cleaned_data["study_tools_attribution"])
+        Deck.objects.filter(owner=user).update(owner_display_name=resolved)
+
+    resolved_articles = _resolve(form.cleaned_data["articles_attribution"])
+    ArticlePage.objects.filter(author=user).update(author_display_name=resolved_articles)
+
+    user.delete()
+    logout(request)
+
+    return render(request=request, template_name="login/account_deleted.html")
 
 
 @login_required()

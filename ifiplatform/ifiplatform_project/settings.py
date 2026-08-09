@@ -79,6 +79,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
+    # after AuthenticationMiddleware (needs request.user) and LocaleMiddleware
+    # (needs the real, locale-prefixed request.path) -- see its own docstring.
+    "account_app.middleware.EditorTermsGateMiddleware",
 ]
 
 ROOT_URLCONF = "ifiplatform_project.urls"
@@ -231,6 +234,16 @@ CACHES = {
         "LOCATION": BASE_DIR / "django_cache",
     }
 }
+
+# How long an unverified signup (is_active=False, never clicked the emailed
+# verification link) is kept before account_app's cleanup_unverified_accounts
+# management command deletes it -- GDPR storage-limitation (Art. 5(1)(e)).
+# 7 days rather than something shorter: default_token_generator (the
+# verification link's own token) already expires after Django's own
+# PASSWORD_RESET_TIMEOUT (3 days, left at its default here), so this keeps
+# swept-away accounts safely past their dead-link point without being
+# needlessly aggressive.
+UNVERIFIED_ACCOUNT_RETENTION_DAYS = 7
 
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "/"  # where the user will be redirected when finished logging in

@@ -122,15 +122,15 @@ leaving a visible strip of the site's default background there instead.
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             </h1>
 
-            {% if page.author or page.published_date or page.last_published_at or needs_translation %}
+            {% if page.display_author_name or page.published_date or page.last_published_at or needs_translation %}
                 <div class="article-meta{% if meta_style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                      {% if can_edit_style %}data-block-id="article-meta" data-block-type="meta"
                      data-side-padding="{{ meta_style.side_padding|unlocalize }}"
                      {% include "info_articles/partials/_block_box_data_attrs.html" with box=meta_style.box %}{% endif %}
                      style="{% include "info_articles/partials/_text_color_style.html" with text_color=meta_style.text_color text_custom_color=meta_style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=meta_style.box side_padding=meta_style.side_padding %}">
                     {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
-                    {% if page.author %}
-                        <span class="article-meta-item">{% trans "By" %} {{ page.author.get_full_name|default:page.author.username }}</span>
+                    {% if page.display_author_name %}
+                        <span class="article-meta-item">{% trans "By" %} {{ page.display_author_name }}</span>
                     {% endif %}
                     {% if page.published_date %}
                         <span class="article-meta-item">{% trans "Published" %} {{ page.published_date }}</span>

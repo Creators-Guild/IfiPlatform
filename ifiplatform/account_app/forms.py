@@ -4,6 +4,8 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 
+from account_app.models import Profile
+
 
 class SignupForm(UserCreationForm):
     """Registration form requiring username, email, first and last name (in
@@ -81,3 +83,68 @@ class ProfileForm(forms.ModelForm):
 
     def clean_last_name(self):
         return self._reject_blanking("last_name")
+
+
+class NicknameForm(forms.ModelForm):
+    """Lets a user set/change the optional nickname on their Profile,
+    used instead of their real name on content they choose to attribute
+    that way -- see ArticlePage.author_attribution."""
+
+    class Meta:
+        model = Profile
+        fields = ["nickname"]
+
+
+class AccountDeleteForm(forms.Form):
+    """Confirms self-service account deletion -- see delete_account_view.
+    Requires the current password (re-auth: CSRF alone doesn't stop a
+    hijacked session or shared/unlocked browser from triggering an
+    irreversible action, and there's no 2FA backstop in this app), plus two
+    independent choices for what happens to the user's own content:
+    study tools (decks/flashcards) can be deleted outright or kept, and
+    articles/news -- never deleted, they're platform/union property -- are
+    always credited one of three ways once the account is gone."""
+
+    ATTRIBUTION_CHOICES = [
+        ("real_name", "My real name"),
+        ("nickname", "My nickname"),
+        ("unknown", "Unknown (anonymous)"),
+    ]
+
+    password = forms.CharField(widget=forms.PasswordInput)
+    study_tools_action = forms.ChoiceField(
+        choices=[("delete", "Delete them"), ("keep", "Keep them")],
+        widget=forms.RadioSelect,
+    )
+    study_tools_attribution = forms.ChoiceField(
+        choices=ATTRIBUTION_CHOICES, widget=forms.RadioSelect, required=False
+    )
+    articles_attribution = forms.ChoiceField(
+        choices=ATTRIBUTION_CHOICES, widget=forms.RadioSelect
+    )
+
+    def __init__(self, *args, user, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_password(self):
+        password = self.cleaned_data["password"]
+        if not self.user.check_password(password):
+            raise forms.ValidationError("Incorrect password.")
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        nickname = getattr(getattr(self.user, "profile", None), "nickname", "")
+        wants_nickname = "nickname" in (
+            cleaned_data.get("articles_attribution"),
+            cleaned_data.get("study_tools_attribution")
+            if cleaned_data.get("study_tools_action") == "keep"
+            else None,
+        )
+        if wants_nickname and not nickname:
+            raise forms.ValidationError(
+                "Set a nickname in your account settings before choosing to "
+                "be credited by nickname."
+            )
+        return cleaned_data

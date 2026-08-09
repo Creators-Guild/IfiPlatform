@@ -3,8 +3,10 @@
 from django.urls import path
 from .views import login_views
 from .views import account_views
+from .views import legal_views
 
 urlpatterns = [
+    path("privacy_policy", legal_views.privacy_policy_view, name="privacy_policy"),
     path("signin", login_views.signin_view, name="signin"),
     path("signin_success", login_views.signin_success_view, name="signin_success"),
     path(
@@ -27,6 +29,14 @@ urlpatterns = [
     path(
         "account_settings", account_views.account_settings_view, name="account_settings"
     ),
+    path("update_nickname", account_views.update_nickname_view, name="update_nickname"),
+    path(
+        "editor_terms_response",
+        account_views.editor_terms_response_view,
+        name="editor_terms_response",
+    ),
+    path("export_data", account_views.export_data_view, name="export_data"),
+    path("delete_account", account_views.delete_account_view, name="delete_account"),
     path(
         "email_change_sent",
         account_views.email_change_sent_view,
