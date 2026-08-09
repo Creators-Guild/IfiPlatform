@@ -62,6 +62,34 @@
   opacity: 0.15;
 }
 
+.union-card--retired {
+  border-top-color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+.union-card--retired:hover,
+.union-card--retired:focus-visible {
+  opacity: 1;
+}
+
+.union-card--retired .union-card-logo {
+  filter: grayscale(1);
+}
+
+.union-card--unknown {
+  border-top-style: dashed;
+  border-top-color: var(--color-text-muted);
+  opacity: 0.85;
+}
+
+.union-card--unknown .union-card-logo {
+  filter: saturate(0.4);
+}
+
+.union-card--retired .union-type-badge {
+  background-color: var(--color-text-muted);
+}
+
 /* a union_card block's own width is a free-form rem number (editor picks
 it via width_rem), set via inline style in article_body_blocks.html/
 article_column_content.html -- .union-card's own "flex: 0 1 14rem" only

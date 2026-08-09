@@ -225,6 +225,12 @@ own .body-article-card. */
   text-align: left;
 }
 
+.section-subheading {
+  margin: -0.5rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
 .category-badge {
   position: absolute;
   top: 0.5rem;

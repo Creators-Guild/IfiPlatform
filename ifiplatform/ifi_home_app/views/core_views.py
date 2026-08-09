@@ -6,6 +6,7 @@ from ifi_home_app.models.article_models import (
     ArticlePage,
     CategoryPage,
     StudentUnionCategoryPage,
+    UnionPage,
     get_section_index,
 )
 
@@ -69,7 +70,7 @@ def main_view(request):
         "studentforeninger", "nb", model=StudentUnionCategoryPage
     )
     student_union_children = (
-        student_union_category.get_children().live().specific()
+        UnionPage.objects.child_of(student_union_category).live().filter(show_in_menu=True)
         if student_union_category
         else []
     )

@@ -1616,6 +1616,10 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         blank=True,
         help_text="Optional -- the union's bylaws/statutes, shown on its own page.",
     )
+    vedtekter_url = models.URLField(
+        blank=True,
+        help_text="Optional -- link to the full bylaws/statutes elsewhere (e.g. a PDF or the union's own site), shown alongside the text above.",
+    )
 
     TYPE_CHOICES = [
         ("general", "Open to everyone"),
@@ -1629,7 +1633,27 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         help_text="Whether this union is open to everyone or tied to a specific program.",
     )
 
+    STATUS_CHOICES = [
+        ("active", "Active"),
+        ("retired", "Retired -- no longer active"),
+        ("unknown", "Unknown -- can't confirm if still active"),
+    ]
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default="active",
+        help_text="Active unions are shown in the main listing, retired ones under 'Old, but not forgotten', and unknown ones (e.g. no working contact/website found) under 'Missing in action'.",
+    )
+    show_in_menu = models.BooleanField(
+        default=False,
+        help_text="Show this union in the homepage navigation menu's Student Unions dropdown.",
+    )
+
     website_url = models.URLField(blank=True)
+    signup_url = models.URLField(
+        blank=True,
+        help_text="Optional -- link to a membership/interest sign-up form (e.g. a Google Form to join or register interest).",
+    )
 
     SOCIAL_PLATFORM_CHOICES = [
         ("facebook", "Facebook"),
@@ -1637,6 +1661,8 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         ("discord", "Discord"),
         ("linkedin", "LinkedIn"),
         ("tiktok", "TikTok"),
+        ("github", "GitHub"),
+        ("slack", "Slack"),
         ("other", "Other"),
     ]
 
@@ -1700,10 +1726,14 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         FieldPanel("email"),
         FieldPanel("logo"),
         FieldPanel("union_type"),
+        FieldPanel("status"),
+        FieldPanel("show_in_menu"),
         FieldPanel("purpose"),
         FieldPanel("activities"),
         FieldPanel("vedtekter"),
+        FieldPanel("vedtekter_url"),
         FieldPanel("website_url"),
+        FieldPanel("signup_url"),
         FieldPanel("social_links"),
         FieldPanel("member_count_sitting"),
         FieldPanel("member_count_intern"),
@@ -1787,15 +1817,45 @@ class StudentUnionCategoryPage(BannerStyleMixin, TranslationWarningMixin, Page):
 
     def get_context(self, request, *args, **kwargs):
         """Add this category's live student unions to the template
-        context, plus can_edit_style (see CategoryPage.get_context()'s own
-        identical addition)."""
+        context, split into active_unions/retired_unions/unknown_unions
+        (see UnionPage.status), plus can_edit_style (see CategoryPage.
+        get_context()'s own identical addition).
+
+        program_unions and other_unions are both automatic, not
+        editor-curated: program_unions is every active union with
+        union_type="program"; other_unions is every active union that
+        isn't program-specific and isn't already placed in one of
+        union_groups' own curated groups/rows (e.g. Sentrale foreninger,
+        Utvalget) -- so a union never ends up listed in "Andre foreninger"
+        alongside its own more specific section."""
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.permissions_for_user(request.user).can_edit()
-        context["unions"] = (
+        unions = (
             UnionPage.objects.child_of(self)
             .live()
             .filter(locale=Locale.get_active())
             .order_by("title")
+        )
+        active_unions = unions.filter(status="active")
+        context["active_unions"] = active_unions
+        context["retired_unions"] = unions.filter(status="retired")
+        context["unknown_unions"] = unions.filter(status="unknown")
+
+        curated_ids = set()
+        for block in self.union_groups:
+            if block.block_type == "row":
+                for group in block.value["groups"]:
+                    curated_ids.update(
+                        item["union"].id for item in group["unions"] if item["union"]
+                    )
+            elif block.block_type == "group":
+                curated_ids.update(
+                    item["union"].id for item in block.value["unions"] if item["union"]
+                )
+
+        context["program_unions"] = active_unions.filter(union_type="program")
+        context["other_unions"] = (
+            active_unions.exclude(id__in=curated_ids).exclude(union_type="program")
         )
         return context
 
