@@ -1,5 +1,19 @@
 .articlecard {
   display: block;
+  /* a block element's own width already fills its parent by default, but
+  height doesn't -- height:100% only takes effect once its parent (the
+  wrapping .body-article-card div in article_body_blocks.html) actually
+  has an explicit height of its own (see "Height" in the block-style
+  panel); percentage height against an auto-height parent just resolves
+  back to auto (the CSS spec's own rule for this), so this is a no-op
+  until then. box-sizing so that 100% includes this element's own
+  padding/border instead of adding on top of it (which would overflow the
+  parent's own explicit height by that amount); overflow:hidden so
+  content taller than an explicit height gets cleanly clipped rather than
+  spilling out underneath. */
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
   padding: 0.5rem;
   color: inherit;
   text-decoration: none;
@@ -34,6 +48,21 @@
   white-space: nowrap;
 }
 
+/* editors only ever see this (see article_card.html's own comment) --
+same red used for the "Draft" badge in the global style panel
+(quick-style-status-badge--draft in article_quick_style.css), so a draft
+reads as the same thing wherever it shows up. */
+.articlecard-draft-badge {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: var(--color-on-accent);
+  background: var(--color-error);
+}
+
 .articlecard-meta {
   display: flex;
   flex-wrap: wrap;
@@ -50,4 +79,80 @@
   line-clamp: 2;
   overflow: hidden;
   margin: 0;
+}
+
+/* an article_card block's own width is a free-form rem number now (editor
+picks the exact value via width_rem, same as a body image's own), set via
+inline style in article_body_blocks.html/article_column_content.html --
+width, not just max-width, since .articlecard's own display:block would
+otherwise stretch to the full prose column with nothing else to size it.
+max-width:100% comes along inline too, as a safety net so it still can't
+overflow a narrow container (e.g. a multi-column item) -- same pattern as
+article_image.css's own body images. */
+
+/* editor-picked list_style (article_body_blocks.html's own "Show as list
+item" toggle, see ArticleBlockStyle.list_style) -- title left, meta as a
+right-aligned block, image/intro dropped. Same layout newsbar_layout.css's
+own ".newsbar-layout .articlecard:nth-child(n + 3)" already applies
+automatically on narrow screens (a long stack of full cards reads badly
+there) -- this is the same look made available on purpose, on any card,
+regardless of screen size or position in a grid. Declared separately
+rather than shared with that rule (different trigger condition -- one's a
+media query + nth-child, this is a plain class) at the cost of duplicating
+the properties themselves; if that mobile behavior ever changes, update
+both. */
+.articlecard--list {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+}
+
+.articlecard--list img {
+  display: none;
+}
+
+.articlecard--list h3 {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0; /* lets the existing text-overflow:ellipsis on h3 actually kick in inside a flex row */
+}
+
+.articlecard--list .articlecard-meta {
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.articlecard--list .articlecard-intro {
+  display: none;
+}
+
+/* the draft badge sits before h3 in the markup, which in the plain card
+layout is fine (block flow, stacks above the title) -- but .articlecard--
+list is a flex row, so left as-is it'd become its own stretched flex item
+instead. Pin it to a small leading chip in front of the title instead. */
+.articlecard--list .articlecard-draft-badge {
+  order: -1;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+/* editor-picked fixed_ratio=False (article_body_blocks.html's own "Lock
+image ratio" toggle, see ArticleBlockStyle.fixed_ratio) -- normally the
+image's own aspect-ratio:8/5 scales its height together with the card's
+width_rem, so an explicit card height (see "Height") has nothing to do:
+the image already fills whatever space that ratio leaves it. Unlocking
+drops that ratio and gives the image a plain fixed height instead, so it
+stops scaling with width and an explicit card height actually has visible
+room to matter -- object-fit:cover (already set on .articlecard img)
+still crops it cleanly regardless of the source image's own proportions. */
+.articlecard--unlocked-ratio img {
+  aspect-ratio: unset;
+  height: 10rem;
 }
