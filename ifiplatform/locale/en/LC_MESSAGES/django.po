@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: IfiPlatform 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-09 14:13+0200\n"
+"POT-Creation-Date: 2026-08-09 16:30+0200\n"
 "PO-Revision-Date: 2026-02-26 13:30+0100\n"
 "Last-Translator: YOUR NAME <you@example.com>\n"
 "Language-Team: English <LL@li.org>\n"
@@ -416,7 +416,7 @@ msgstr ""
 msgid "Your account is now active. Welcome"
 msgstr ""
 
-#: .\ifi_home_app\models\article_models.py:952
+#: .\ifi_home_app\models\article_models.py:954
 msgid "Unknown"
 msgstr ""
 
@@ -1513,6 +1513,16 @@ msgstr "Study"
 
 #: .\templates\partials\bottom_header.html:4
 msgid "This webpage was made by Ifi-Creators' Guild"
+msgstr ""
+
+#: .\templates\partials\deploy_notice.html:13
+msgid ""
+"Ifi Platform will restart shortly for an update. You may notice a few brief "
+"interruptions during the update. Time remaining:"
+msgstr ""
+
+#: .\templates\partials\deploy_notice.html:14
+msgid "Restarting now..."
 msgstr ""
 
 #: .\templates\partials\top_header.html:19

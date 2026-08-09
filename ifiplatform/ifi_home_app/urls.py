@@ -3,12 +3,18 @@
 from django.urls import path, include
 from wagtail import urls as wagtail_urls
 
+from .deploy_notice import deploy_notice_status_view
 from .views import home_views
 from .views import article_views
 
 ifi_home_urlpatterns = [path("", home_views.main_view, name="ifi_home")]
 
 ifi_api_urlpatterns = [
+    path(
+        "api/deploy-notice-status/",
+        deploy_notice_status_view,
+        name="deploy_notice_status",
+    ),
     path(
         "api/articles/<int:page_id>/quick-style/",
         article_views.save_quick_style,
