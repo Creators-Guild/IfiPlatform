@@ -13,14 +13,22 @@ def backfill(apps, schema_editor):
     chosen = {}
     with connection.cursor() as cursor:
         for table in ("ifi_home_app_categorypage", "ifi_home_app_articleindexpage"):
+            # a bound param (not a hardcoded "= 1") so each backend's own
+            # adapter translates Python True correctly -- SQLite stores
+            # booleans as 0/1 and accepts "= 1" as a literal, but
+            # PostgreSQL has a real boolean type and rejects comparing it
+            # to an integer outright ("operator does not exist: boolean =
+            # integer"). Caught when this hit production (Postgres) after
+            # working fine against the SQLite dev DB.
             cursor.execute(
                 f"""
                 SELECT p.translation_key, l.language_code, c.banner_color, c.banner_text_color
                 FROM {table} c
                 JOIN wagtailcore_page p ON p.id = c.page_ptr_id
                 JOIN wagtailcore_locale l ON l.id = p.locale_id
-                WHERE c.show_banner = 1
-                """
+                WHERE c.show_banner = %s
+                """,
+                [True],
             )
             for translation_key, language_code, banner_color, banner_text_color in cursor.fetchall():
                 is_nb = language_code == "nb"
