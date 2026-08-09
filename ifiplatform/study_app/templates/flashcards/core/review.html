@@ -2,14 +2,14 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}Ifi Home{% endblock %}
+{% block title %}{% trans "Flashcard Review" %}{% endblock %}
 
 {% block extra_head %} <link rel="stylesheet" href="{% static "styles/neon_style/ifi_study/flashcards.css" %}"> {% endblock extra_head %}
 
 {% block content %}
     <a class="back-to" href="{% url 'deck_detail' deck.pk %}">{% trans '<- Back to deck' %}</a>
     <div class="flashcard-review-page">
-        <h1>Review: {{ deck.name }}</h1>
+        <h1>{% blocktrans %}Review: {{ deck.name }}{% endblocktrans %}</h1>
 
         {% if total_cards == 0 %}
             <p>{% trans "This deck has no cards." %}</p>

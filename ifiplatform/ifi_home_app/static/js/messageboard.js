@@ -44,19 +44,29 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const onDragEnd = () => {
-      document.removeEventListener("mousemove", onDragMove);
-      document.removeEventListener("mouseup", onDragEnd);
+      thumb.removeEventListener("pointermove", onDragMove);
+      thumb.removeEventListener("pointerup", onDragEnd);
+      thumb.removeEventListener("pointercancel", onDragEnd);
     };
 
-    thumb.addEventListener("mousedown", (event) => {
+    // Pointer Events (not mouse-only) so the thumb is actually draggable on
+    // touch, not just mouse -- previously mousedown/mousemove/mouseup never
+    // fire from a finger, leaving this an inert decoration on mobile and
+    // forcing users to grab the bare, small message text box directly.
+    // setPointerCapture keeps move/up events targeted at the thumb even as
+    // a finger drifts off it mid-drag, which listening on the thumb alone
+    // wouldn't otherwise give us.
+    thumb.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       dragStartY = event.clientY;
       dragStartScrollTop = body.scrollTop;
-      document.addEventListener("mousemove", onDragMove);
-      document.addEventListener("mouseup", onDragEnd);
+      thumb.setPointerCapture(event.pointerId);
+      thumb.addEventListener("pointermove", onDragMove);
+      thumb.addEventListener("pointerup", onDragEnd);
+      thumb.addEventListener("pointercancel", onDragEnd);
     });
 
-    track.addEventListener("mousedown", (event) => {
+    track.addEventListener("pointerdown", (event) => {
       if (event.target === thumb) {
         return;
       }

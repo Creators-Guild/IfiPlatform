@@ -10,6 +10,6 @@
     {% for article in suggested_articles %}
         {% include "info_articles/partials/article_card.html" with article=article %}
     {% empty %}
-        <p>No articles yet or something is broken ;_;</p>
+        <p>{% trans "No articles yet or something is broken ;_;" %}</p>
     {% endfor %}
 </div>

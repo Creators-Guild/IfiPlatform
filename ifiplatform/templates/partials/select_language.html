@@ -13,7 +13,7 @@
         <input type="hidden" name="next" value="{{ en_next }}">
         <button type="submit" name="language" value="en"
                 class="lang-btn {% if LANGUAGE_CODE == 'en' %}active{% endif %}">
-            English
+            {% trans "English" %}
         </button>
     </form>
 
@@ -22,7 +22,7 @@
         <input type="hidden" name="next" value="{{ nb_next }}">
         <button type="submit" name="language" value="nb"
                 class="lang-btn {% if LANGUAGE_CODE == 'nb' %}active{% endif %}">
-            Norsk
+            {% trans "Norsk" %}
         </button>
     </form>
 </div>

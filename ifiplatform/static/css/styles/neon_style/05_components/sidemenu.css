@@ -45,6 +45,18 @@ clipped area instead of the true collapsed width. */
 .sidemenu .sidemenu-option {
     border-bottom: 1px solid var(--color-border);
     width: 100%;
+    /* without this, a label like "Info Articles" wraps onto multiple lines
+    at the narrower widths partway through the open/close transition (the
+    same min-width:0 that lets .sidemenu-item shrink to fit the collapsed
+    column -- see the grid comment above -- also lets its text wrap there).
+    Since .sidemenu is display:grid with grid-auto-rows:min-content, that
+    row-height change during the transition reflowed the whole item stack,
+    reading as the items squeezing together. Same fix already applied to
+    .icon-text below for the identical reason; overflow:hidden on .sidemenu
+    itself clips the nowrap text while collapsed instead of forcing the
+    grid column wider (same min-width:0 interaction as the icon-centering
+    fix above). */
+    white-space: nowrap;
 }
 
 .sidemenu-item a {
@@ -122,28 +134,37 @@ risk of it firing on a hover device. */
 /* :hover only, not touch -- scoped so a tap's simulated/sticky :hover state
 (a well-known mobile quirk, since hover has no real meaning on touch) can't
 keep the rail expanded after dropdown_menu.js has already toggled .is-open
-off. Touch devices rely purely on the JS-driven class above. */
+off. Touch devices rely purely on the JS-driven class above.
+
+Triggered off .sidemenu_container:hover rather than .sidemenu:hover --
+.sidemenu itself is only as tall as its own content (see the comment at the
+top of this file), while .sidemenu_container is the one that actually
+stretches to the full rail height the user sees (background-color lives
+there too, in home_layout.css). Hovering .sidemenu directly meant moving the
+cursor into the lower part of the visibly-colored rail -- still inside
+.sidemenu_container, but below the short .sidemenu box -- fell outside the
+real hover target and snapped the rail shut. */
 @media (hover: hover) and (pointer: fine) {
-    .sidemenu:hover {
+    .sidemenu_container:hover .sidemenu {
         width: 250px;
         padding: 1rem;
         border-right: 1px solid color-mix(in srgb, var(--color-border) 15%, transparent);
     }
 
-    .sidemenu:hover .sidemenu-item {
+    .sidemenu_container:hover .sidemenu-item {
         opacity: 1;
     }
 
-    .sidemenu:hover .icon {
+    .sidemenu_container:hover .icon {
         opacity: 0;
     }
 
-    .sidemenu:hover .icon-text {
+    .sidemenu_container:hover .icon-text {
         opacity: 1;
         max-width: 200px;
     }
 
-    .sidemenu:hover .sidemenu-header {
+    .sidemenu_container:hover .sidemenu-header {
         justify-content: flex-start;
     }
 }
@@ -211,6 +232,33 @@ keep the submenu expanded after dropdown_menu.js has already toggled
     }
 }
 
+/* same caret pattern as the top navbar's .dropdown-menu (see
+dropdownmenu.css) -- a small triangle after the trigger link that flips to
+point the other way once its submenu is open, the visual cue that tapping
+(or hovering) reveals a submenu rather than navigating away immediately.
+Every .sidemenu-option always has a sibling .drop-content across all three
+sidemenu partials (home/article/study), so it's unconditional here, same as
+the navbar's .link::after. */
+.sidemenu-item .sidemenu-option::after {
+    content: "";
+    display: inline-block;
+    margin-left: 0.35em;
+    border: 0.35em solid transparent;
+    border-top-color: currentColor;
+    vertical-align: middle;
+    transition: transform 0.15s ease;
+}
+
+.sidemenu-item.is-open .sidemenu-option::after {
+    transform: rotate(180deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .sidemenu-item:hover .sidemenu-option::after {
+        transform: rotate(180deg);
+    }
+}
+
 /* the top-level link still doubles as a direct navigation link for mouse
 users (hover reveals the dropdown underneath it), so "All" would be
 redundant there. On touch it's the only way in, since the top-level tap is
@@ -252,8 +300,22 @@ the JS's hover-capability check. */
         background-color: var(--color-accent-hover);
     }
 
+    /* full height only while actively open as a touch-driven overlay -- the
+    collapsed rail above stays content-sized (same sticky-squeeze reasoning
+    as the base .sidemenu rule). Without this, .is-open only grew the width,
+    not the height, so the overlay stopped partway down the screen instead
+    of covering it, exposing page content underneath. 100vh first as a
+    fallback for browsers without dvh support; 100dvh overrides it where
+    available so mobile browser chrome doesn't over/undershoot the panel.
+    Going back to auto on close is handled in dropdown_menu.js, not here --
+    height going to/from 'auto' isn't reliably interpolable, so a
+    transition-delay on it (tried first) wasn't consistently honored across
+    mobile browsers; JS locks the pixel height in place until the width
+    collapse actually finishes instead. */
     .sidemenu.is-open {
         width: 200px;
+        height: 100vh;
+        height: 100dvh;
     }
 
     .sidemenu-item {
@@ -270,7 +332,7 @@ the JS's hover-capability check. */
 }
 
 @media (max-width: 480px) and (hover: hover) and (pointer: fine) {
-    .sidemenu:hover {
+    .sidemenu_container:hover .sidemenu {
         width: 200px;
         padding: 0.5rem;
     }

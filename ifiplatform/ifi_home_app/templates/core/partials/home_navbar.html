@@ -30,7 +30,7 @@
                     {{ category.title }} <!-- dont use normal translate with wagtail, check out wagtails tranlation instead -->
                 </a>
             {% empty %}
-                <a class="drop-option-empty" href="">No categories yet</a>
+                <a class="drop-option-empty" href="">{% trans "No categories yet" %}</a>
             {% endfor %}
         </div>
     </div>

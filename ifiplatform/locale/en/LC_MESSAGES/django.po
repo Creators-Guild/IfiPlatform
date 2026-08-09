@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: IfiPlatform 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-09 16:30+0200\n"
+"POT-Creation-Date: 2026-08-09 18:33+0200\n"
 "PO-Revision-Date: 2026-02-26 13:30+0100\n"
 "Last-Translator: YOUR NAME <you@example.com>\n"
 "Language-Team: English <LL@li.org>\n"
@@ -16,6 +16,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\account_app\templates\core\account_settings.html:4
+#: .\templates\partials\top_header.html:33
+#: .\templates\partials\top_header.html:50
+msgid "Account"
+msgstr ""
 
 #: .\account_app\templates\core\account_settings.html:14
 msgid "Account Settings"
@@ -420,12 +426,23 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
+#: .\ifi_home_app\templates\core\home_index.html:4
+#: .\ifi_home_app\templates\home_base.html:4
+#, fuzzy
+#| msgid "Ifi Homepage"
+msgid "Ifi Home"
+msgstr "Ifi Homepage"
+
 #: .\ifi_home_app\templates\core\home_index.html:17
-msgid "Suggested News"
+msgid "Latest News"
 msgstr ""
 
 #: .\ifi_home_app\templates\core\home_index.html:21
 msgid "Suggested Info Articles"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_articlesbar.html:13
+msgid "No articles yet or something is broken ;_;"
 msgstr ""
 
 #: .\ifi_home_app\templates\core\partials\home_messageboard.html:31
@@ -472,6 +489,10 @@ msgstr ""
 msgid "Info Articles"
 msgstr ""
 
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:33
+msgid "No categories yet"
+msgstr ""
+
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:40
 #, fuzzy
 #| msgid "Student Organizations"
@@ -512,10 +533,24 @@ msgstr "Tips n Tricks"
 msgid "Apps n Links"
 msgstr "Apps n Links"
 
+#: .\ifi_home_app\templates\core\partials\home_newsbar.html:12
+msgid "No news yet or something is broken ;_;"
+msgstr ""
+
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:12
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:13
 #: .\study_app\templates\core\partials\study_sidemenu.html:9
 msgid "Close menu"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:14
+#: .\study_app\templates\core\partials\study_sidemenu.html:11
+msgid "menu"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:15
+#: .\study_app\templates\core\partials\study_sidemenu.html:12
+msgid "Menu"
 msgstr ""
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:19
@@ -523,12 +558,17 @@ msgid "About"
 msgstr ""
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:23
-#: .\templates\partials\top_header.html:8
+#: .\templates\ifi_base.html:8 .\templates\partials\top_header.html:8
 msgid "Ifi Platform"
 msgstr "Ifi Platform"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:26
+#: .\templates\partials\bottom_header.html:5
 msgid "Ifi-Guild of Creators"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:59
+msgid "Events"
 msgstr ""
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:63
@@ -555,6 +595,11 @@ msgstr ""
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:82
 msgid "Vaktsentralen"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:4
+#: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:4
+msgid "Information Articles"
 msgstr ""
 
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:45
@@ -761,6 +806,18 @@ msgstr ""
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:103
 msgid "Website"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:108
+msgid "LinkedIn"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:108
+msgid "TikTok"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:108
+msgid "GitHub"
 msgstr ""
 
 #: .\ifi_home_app\templates\info_articles\pages\union_page.html:117
@@ -1287,6 +1344,7 @@ msgstr ""
 msgid "Multiplechoice"
 msgstr ""
 
+#: .\study_app\templates\core\study_main.html:5
 #: .\study_app\templates\core\study_main.html:17
 msgid "Study Home"
 msgstr ""
@@ -1396,8 +1454,17 @@ msgstr "Welcome to the Ifi Home Page"
 msgid "This is the main menu for flashcards"
 msgstr "This is the main content for the Ifi home page."
 
+#: .\study_app\templates\flashcards\core\review.html:5
+msgid "Flashcard Review"
+msgstr ""
+
 #: .\study_app\templates\flashcards\core\review.html:10
 msgid "<- Back to deck"
+msgstr ""
+
+#: .\study_app\templates\flashcards\core\review.html:12
+#, python-format
+msgid "Review: %(deck.name)s"
 msgstr ""
 
 #: .\study_app\templates\flashcards\core\review.html:15
@@ -1525,6 +1592,14 @@ msgstr ""
 msgid "Restarting now..."
 msgstr ""
 
+#: .\templates\partials\select_language.html:16
+msgid "English"
+msgstr ""
+
+#: .\templates\partials\select_language.html:25
+msgid "Norsk"
+msgstr ""
+
 #: .\templates\partials\top_header.html:19
 msgid "Ifi Homepage"
 msgstr "Ifi Homepage"
@@ -1537,14 +1612,10 @@ msgstr "Home"
 msgid "Ifi Study"
 msgstr "Ifi Study"
 
-#: .\templates\partials\top_header.html:29 .\yourpage_app\urls.py:10
+#: .\templates\partials\top_header.html:29
+#: .\yourpage_app\templates\core\yourpage_main.html:5 .\yourpage_app\urls.py:10
 msgid "Your Page"
 msgstr "Your Page"
-
-#: .\templates\partials\top_header.html:33
-#: .\templates\partials\top_header.html:50
-msgid "Account"
-msgstr ""
 
 #: .\templates\under_development.html:4 .\templates\under_development.html:13
 msgid "Under Development"
@@ -1578,6 +1649,12 @@ msgid ""
 "to help? Join Ifi-Creators' Guild and we'll help you out."
 msgstr ""
 
+#: .\templates\under_development.html:19
+msgid ""
+"Links coming soon. OSS is not open quite yet... (Why you hype me so much up "
+"then?)"
+msgstr ""
+
 #: .\yourpage_app\templates\core\yourpage_main.html:10
 #, fuzzy
 #| msgid "Welcome to the Ifi Home Page"
@@ -1592,6 +1669,44 @@ msgstr "This is the main content for the Ifi home page."
 
 #: .\yourpage_app\templates\core\yourpage_main.html:12
 msgid "Current user: "
+msgstr ""
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:3
+msgid "Personlize Your Studywork"
+msgstr ""
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:4
+msgid ""
+"Ifi Study support mutiple study workflows consisting of multiple study "
+"models."
+msgstr ""
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:7
+msgid "Customize your active subjects and studytags?"
+msgstr ""
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:8
+msgid "ex. IN1000, python, classes"
+msgstr ""
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:11
+msgid "Customize your preferred study models?"
+msgstr ""
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:12
+msgid "ex. proritise videos over text, no flashcards etc."
+msgstr ""
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:15
+msgid "Customize your spaced repetitions?"
+msgstr ""
+
+#: .\yourpage_app\templates\partials\personal_workflow_settings.html:16
+msgid "ex. IN1000 every wednsday, more IN1000 in week: 22, 23, 24"
+msgstr ""
+
+#: .\yourpage_app\templates\partials\your_subjects.html:3
+msgid "Your Active Subjects"
 msgstr ""
 
 #, fuzzy
