@@ -957,10 +957,21 @@ class Command(BaseCommand):
         is properly tracked (not a bare copy_for_translation()). Titles here
         are proper nouns with no msgstr entry, so every segment just falls
         back to the nb source text unchanged, same as seed_dev_data's own
-        untranslated-string fallback behavior."""
-        if nb_union.has_translation(en_locale):
+        untranslated-string fallback behavior.
+
+        If a LocaleSynchronization is configured (en synced from nb, as on
+        production), Wagtail auto-creates an *alias* page in en the moment
+        the nb page is created -- has_translation()/get_translation() can't
+        tell that apart from a real translation, but alias pages reject
+        save_revision() outright (see page.alias_of_id), which is what
+        _enrich_union() would otherwise crash on. So: only treat an
+        existing en page as "already translated" if it isn't an alias;
+        otherwise fall through to the real translation pipeline below,
+        which converts the alias into a proper tracked translation."""
+        existing = nb_union.get_translation_or_none(en_locale)
+        if existing is not None and existing.alias_of_id is None:
             self.skipped_count += 1
-            return nb_union.get_translation(en_locale)
+            return existing
 
         source, _ = TranslationSource.get_or_create_from_instance(nb_union)
         translation, _ = Translation.objects.get_or_create(
