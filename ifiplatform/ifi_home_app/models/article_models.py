@@ -1611,6 +1611,7 @@ class ArticleIndexPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixi
         "ifi_home_app.CategoryPage",
         "ifi_home_app.StudentUnionCategoryPage",
         "ifi_home_app.ToolPage",
+        "ifi_home_app.EventIndexPage",
         # allowed here for symmetry with ArticlePage.parent_page_types, but
         # only actually creatable when this index isn't a "hub" -- see
         # ArticlePage.can_create_at().
@@ -1806,6 +1807,19 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
     def union_category(self):
         """The StudentUnionCategoryPage this union lives under."""
         return self.get_parent().specific
+
+    def get_context(self, request, *args, **kwargs):
+        """Add upcoming_events: live, still-upcoming EventPages that tag
+        this union in their related_unions field, regardless of role (see
+        event_models.upcoming_events_for_union). Imported locally rather
+        than at module level -- event_models.py already imports
+        TranslationWarningMixin from this module, so a module-level import
+        the other way would be circular."""
+        context = super().get_context(request, *args, **kwargs)
+        from ifi_home_app.models.event_models import upcoming_events_for_union
+
+        context["upcoming_events"] = upcoming_events_for_union(self)
+        return context
 
 
 # Model for the category listing all student unions

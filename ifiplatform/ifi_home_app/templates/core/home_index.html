@@ -10,16 +10,25 @@
     {% block maincontent %}
         <div class="top">
             {% include "core/partials/home_navbar.html" %}
-            {% include "core/partials/home_messageboard.html" %}
         </div>
-        <div class="suggestions-row">
-            <div class="newsbar_container">
-                <h2 class="newsbar-heading newsbar-heading--news">{% trans "Latest News" %}</h2>
-                {% include "core/partials/home_newsbar.html" %}
+        <div class="content-row">
+            <div class="content-main">
+                {% include "core/partials/home_messageboard.html" %}
+                <div class="suggestions-row">
+                    <div class="newsbar_container">
+                        <h2 class="newsbar-heading newsbar-heading--news">{% trans "Latest News" %}</h2>
+                        {% include "core/partials/home_newsbar.html" %}
+                    </div>
+                    <div class="articlesbar_container">
+                        <h2 class="newsbar-heading newsbar-heading--articles">{% trans "Suggested Info Articles" %}</h2>
+                        {% include "core/partials/home_articlesbar.html" %}
+                    </div>
+                </div>
             </div>
-            <div class="articlesbar_container">
-                <h2 class="newsbar-heading newsbar-heading--articles">{% trans "Suggested Info Articles" %}</h2>
-                {% include "core/partials/home_articlesbar.html" %}
+            <div class="eventsbox_container">
+                {% now "F" as current_month %}
+                <h2 class="newsbar-heading newsbar-heading--events">{% blocktrans %}This month at Ifi &ndash; {{ current_month }}{% endblocktrans %}</h2>
+                {% include "core/partials/home_eventsbox.html" %}
             </div>
         </div>
     {% endblock maincontent %}

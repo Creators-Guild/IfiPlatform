@@ -56,9 +56,15 @@
     </div>
 
     <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="">{% trans "Events" %}</a>
+        {% get_event_index as event_index_page %}
+        <a class="sidemenu-option" href="{% pageurl event_index_page %}">{% trans "Events" %}</a>
         <div class="drop-content">
-            <a class="drop-option drop-option--all" href="">{% trans "All" %}</a>
+            <a class="drop-option drop-option--all" href="{% pageurl event_index_page %}">{% trans "All" %}</a>
+            {% comment %}
+            "This Month"/"Always at Ifi" would need real filtering logic
+            (query params on EventIndexPage) that's out of scope for the
+            initial events feature -- left as stubs for now, same as before.
+            {% endcomment %}
             <a href="">
                 {% trans "This Month" %}
             </a>

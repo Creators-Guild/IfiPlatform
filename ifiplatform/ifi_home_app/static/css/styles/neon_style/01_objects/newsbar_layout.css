@@ -2,9 +2,24 @@
   margin: 1rem 1em 0;
 }
 
+/* News/Info Articles headings only (not .newsbar-heading--events, the
+homepage events box's own heading in home_layout.css -- that one isn't
+centered) -- matches the .newsbar-layout grid below now centering its
+cards as a group instead of sitting flush-left. */
+.newsbar-heading--news,
+.newsbar-heading--articles {
+  text-align: center;
+}
+
 .newsbar-layout {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 26rem));
+  /* auto-fit's own default (justify-content:start) left leftover column
+  tracks flush-left instead of centered -- most visible with just one card
+  (sits flush-left with a big empty gap beside it), but also matters for
+  a partially-filled last row of several. Centers the whole group of cards
+  as a block; each card's own width inside its track is unaffected. */
+  justify-content: center;
   gap: 1rem;
   padding: 0.5em 0.1em;
 }

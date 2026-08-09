@@ -1,0 +1,100 @@
+{% load i18n static wagtailcore_tags %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/event_page.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/home_eventsbox.css' %}">
+{% endblock %}
+
+<ul class="home-eventsbox-list">
+    {% for event in upcoming_events %}
+        <li>
+            {% comment %}
+            Not an <a> itself any more -- the union tags below need to be
+            their own separate links to the union's page, and a nested
+            <a> inside another <a> is invalid HTML (browsers silently mangle
+            it). Instead this uses the "stretched link" pattern: .home-
+            eventsbox-title-link's ::after (home_eventsbox.css) is
+            absolutely positioned to cover this entire item, making the
+            whole row clickable through to the event, while the tags --
+            real elements with their own stacking context (position:
+            relative + z-index) -- sit above that invisible overlay and
+            still get their own clicks.
+            {% endcomment %}
+            <div class="home-eventsbox-item">
+                <span class="event-type-badge event-type-badge--{{ event.event_type }}">
+                    {{ event.get_event_type_display }}
+                </span>
+                <span class="home-eventsbox-title">
+                    <a class="home-eventsbox-title-link" href="{% pageurl event %}">{{ event.title }}</a>
+                </span>
+                <span class="home-eventsbox-date">
+                    {% if event.event_time %}
+                        {{ event.event_date|date:"j. F" }} {% trans "at" %} {{ event.event_time|time:"H:i" }}
+                    {% elif event.end_date %}
+                        {{ event.event_date|date:"j." }}&ndash;{{ event.end_date|date:"j. F" }}
+                    {% else %}
+                        {{ event.event_date|date:"j. F" }}
+                    {% endif %}
+                </span>
+                {% if event.related_unions %}
+                    <span class="home-eventsbox-unions">
+                        {% for entry in event.related_unions %}
+                            {% if entry.value.union %}
+                                <a class="home-eventsbox-union-tag" href="{% pageurl entry.value.union.specific %}">{{ entry.value.union.title }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                {% endif %}
+                {% with sub_count=event.sub_events.count highlighted=event.highlighted_sub_events %}
+                    {% if highlighted %}
+                        {% comment %}
+                        Only highlighted sub-events (is_highlighted, checked
+                        per sub-event) are named here -- the rest stay
+                        count-only, same as the plain-text fallback below,
+                        still fully listed on the event's own page.
+                        Same expand-in-place pattern as the sidemenu's own
+                        submenus (.sidemenu-item, home_sidemenu.html/
+                        sidemenu.css -- click-to-toggle on touch via
+                        dropdown_menu.js's shared setupTapToggle(), CSS
+                        :hover reveal on desktop), not the site's other
+                        pattern, the floating .dropdown-menu -- that one
+                        overlays via position:absolute (or fixed, to escape
+                        an overflow:auto ancestor), which doesn't suit
+                        .eventsbox_container (itself overflow-y:auto) at
+                        all: a fixed panel drifts away from its trigger the
+                        moment the box scrolls while it's open. Expanding
+                        in normal flow instead just grows this row, so the
+                        surrounding scroll behaves exactly like it would
+                        for any other in-flow content.
+                        position:relative + z-index (home_eventsbox.css)
+                        still puts the toggle button above the row's
+                        stretched title link, same escape as the union tags.
+                        {% endcomment %}
+                        <div class="home-eventsbox-subevents">
+                            <button type="button" class="home-eventsbox-subevents-toggle">
+                                {% blocktrans count counter=sub_count %}{{ counter }} sub-event{% plural %}{{ counter }} sub-events{% endblocktrans %}
+                            </button>
+                            <div class="home-eventsbox-subevents-list">
+                                {% for sub_event in highlighted %}
+                                    <a href="{% pageurl sub_event %}">{{ sub_event.title }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% elif sub_count %}
+                        {% comment %}
+                        No highlighted sub-events to expand -- just the
+                        count, same as before. Still viewable on the event's
+                        own page (event_page.html), which is already where
+                        clicking anywhere on this row leads.
+                        {% endcomment %}
+                        <span class="home-eventsbox-subcount">
+                            {% blocktrans count counter=sub_count %}{{ counter }} sub-event{% plural %}{{ counter }} sub-events{% endblocktrans %}
+                        </span>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </li>
+    {% empty %}
+        <li class="home-eventsbox-empty">{% trans "No upcoming events." %}</li>
+    {% endfor %}
+</ul>
+<script src="{% static 'js/dropdown_menu.js' %}" defer></script>

@@ -96,6 +96,15 @@ if (!window.__ifiTapToggleMenusInit) {
 
     setupTapToggle(".dropdown-menu:not(.profile-dropdown)", "button.link");
     setupTapToggle(".sidemenu-item", "a.sidemenu-option");
+    // Homepage events box: an event's highlighted sub-events (home_
+    // eventsbox.html/.css), same in-flow expand-in-place pattern as
+    // .sidemenu-item above rather than a floating .dropdown-menu -- it
+    // lives inside .eventsbox_container, which scrolls (overflow-y:auto),
+    // and a position:absolute/fixed panel there either gets clipped or (if
+    // fixed) drifts away from its trigger on scroll. Expanding in normal
+    // flow sidesteps that entirely: it just grows the row, same as any
+    // other in-flow content would.
+    setupTapToggle(".home-eventsbox-subevents", "button.home-eventsbox-subevents-toggle");
 
     // The sidebar rail itself: tapping .sidemenu-header expands it (this is
     // what makes the submenus above visible/reachable at all on touch --
