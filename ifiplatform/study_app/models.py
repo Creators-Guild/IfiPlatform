@@ -19,6 +19,15 @@ class Deck(models.Model):
     )
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    # Only ever written by account_app's delete_account_view, once `owner`
+    # itself is about to go NULL there (deck kept, owner chose to be
+    # credited by real name/nickname/"unknown" -- same sentinel convention
+    # as ArticlePage.author_display_name). No study_app view shows this
+    # today (every view here filters strictly by owner=request.user), but
+    # it's ready for the shared student study-resource library the README
+    # lists as a future goal, so deletion has somewhere to put the choice
+    # now rather than needing another schema change once that ships.
+    owner_display_name = models.CharField(max_length=150, blank=True)
 
     class Meta:
         # make sure that the same user can't have mutiple deck with same name

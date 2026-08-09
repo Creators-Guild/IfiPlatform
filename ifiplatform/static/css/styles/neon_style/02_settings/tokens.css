@@ -17,6 +17,8 @@
   --color-navy: #001f5e;
   --color-azure: #197dc4;
   --color-red: #ff0000;
+  --color-yellow: #ffe600;
+  --color-bright-yellow: #fff5bc;
 
   /* ---- 2. Wagtail compatibility aliases ----
      ArticlePage box/image colors and CategoryPage.color store a plain
@@ -47,6 +49,7 @@
   --color-secondary-hover: var(--color-purple-hover);
   --color-error: var(--color-red);
   --color-danger: var(--color-red);
+  --color-warning: var(--color-bright-yellow);
   --color-link: var(--color-navy);
   --color-link-hover: var(--color-azure);
 

@@ -15,6 +15,10 @@ on:
         description: "Deploy even if tests/lint fail (emergency override)"
         type: boolean
         default: false
+      skip_countdown:
+        description: "Skip the 10-minute visitor warning countdown before restarting (independent of force_deploy)"
+        type: boolean
+        default: false
 
 jobs:
   test:
@@ -92,13 +96,44 @@ jobs:
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          SKIP_COUNTDOWN: ${{ github.event.inputs.skip_countdown }}
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script_stop: true
+          envs: SKIP_COUNTDOWN
           script: |
             cd /home/ubuntu/IfiPlatform
+            source venv/bin/activate
+            # Warn visitors before restarting -- announce_deploy runs against
+            # whatever code is *currently* deployed (this run's git reset
+            # hasn't happened yet), so it's the still-live gunicorn workers
+            # that actually render the countdown banner for the full window.
+            # Only skipped when skip_countdown was explicitly set on a manual
+            # dispatch; the nightly schedule trigger (no inputs at all) and a
+            # plain manual run always get it. Independent of force_deploy --
+            # bypassing failing tests/lint doesn't imply bypassing the
+            # visitor warning too.
+            #
+            # The `if ... ; then ... else ...` here (rather than a bare
+            # command) is deliberate: script_stop is on, so an unhandled
+            # failure would abort the whole deploy. announce_deploy not
+            # existing yet on whatever's currently deployed (true the very
+            # first time this feature ships -- see announce_deploy's own
+            # docstring) must not block deploying the fix for that; it
+            # should just skip the warning for this one run instead.
+            if [ "$SKIP_COUNTDOWN" != "true" ]; then
+              cd ifiplatform
+              if python manage.py announce_deploy --minutes 10; then
+                cd ..
+                sleep 600
+              else
+                echo "announce_deploy unavailable on the currently-deployed code -- skipping the warning countdown for this run."
+                cd ..
+              fi
+            fi
             git fetch origin main
             git reset --hard origin/main
             source venv/bin/activate
@@ -107,3 +142,9 @@ jobs:
             python manage.py migrate
             python manage.py collectstatic --noinput --clear
             sudo systemctl restart gunicorn
+            # Clears the banner immediately rather than waiting for its own
+            # timeout to eventually expire -- deploy_notice.js reloads each
+            # visitor's page shortly after its countdown hits zero, and by
+            # then the restart above has already completed, so this makes
+            # sure that reload actually lands on a banner-free page.
+            python manage.py announce_deploy --clear

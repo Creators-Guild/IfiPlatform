@@ -129,7 +129,7 @@ def save_quick_style(request, page_id):
     (see _effective_heading_style's display_font_size)."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
-    if not page.permissions_for_user(request.user).can_edit():
+    if not page.can_edit_in_editor_mode(request.user):
         return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
 
     try:
@@ -198,7 +198,7 @@ def save_block_style(request, page_id):
     for why). Live immediately, same as save_quick_style, no draft step."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
-    if not page.permissions_for_user(request.user).can_edit():
+    if not page.can_edit_in_editor_mode(request.user):
         return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
 
     try:
@@ -290,7 +290,7 @@ def save_header_style(request, page_id):
     the page's shared ArticleStyle row, same pattern as save_quick_style."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
-    if not page.permissions_for_user(request.user).can_edit():
+    if not page.can_edit_in_editor_mode(request.user):
         return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
 
     try:
@@ -333,7 +333,7 @@ def save_hero_image_style(request, page_id):
     save_quick_style."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
-    if not page.permissions_for_user(request.user).can_edit():
+    if not page.can_edit_in_editor_mode(request.user):
         return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
 
     try:
@@ -387,7 +387,7 @@ def save_toc_icon_style(request, page_id):
     whole-article default."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
-    if not page.permissions_for_user(request.user).can_edit():
+    if not page.can_edit_in_editor_mode(request.user):
         return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
 
     try:
@@ -439,7 +439,7 @@ def publish_page(request, page_id):
     can_publish_page, which gates whether the Publish button even renders)."""
     page = get_object_or_404(ArticlePage, pk=page_id).publish_target
 
-    if not page.permissions_for_user(request.user).can_publish():
+    if not page.can_publish_in_editor_mode(request.user):
         return JsonResponse({"error": "You don't have permission to publish this page."}, status=403)
 
     revision = page.get_latest_revision()
@@ -470,7 +470,7 @@ def unpublish_page(request, page_id):
     can_unpublish_page)."""
     page = get_object_or_404(ArticlePage, pk=page_id).publish_target
 
-    if not page.permissions_for_user(request.user).can_unpublish():
+    if not page.can_unpublish_in_editor_mode(request.user):
         return JsonResponse({"error": "You don't have permission to unpublish this page."}, status=403)
 
     page.unpublish(user=request.user)
@@ -494,13 +494,14 @@ def save_banner_style(request, page_id):
     banner_width_rem/banner_height_rem/banner_font_size -- a plain upsert
     onto the page's shared PageBannerStyle row (see BannerStyleMixin.
     banner_style in article_models.py), same pattern as save_quick_style.
-    Not ArticlePage-specific -- looks up the plain Wagtail Page
-    (translation_key/permissions_for_user are available on any page),
-    since CategoryPage and ArticleIndexPage both use this same endpoint
-    via BannerStyleMixin."""
-    page = get_object_or_404(Page, pk=page_id)
+    Not ArticlePage-specific -- looks up the plain Wagtail Page then
+    resolves it to its specific subtype's own style_target (EditorModeMixin
+    -- see that module for why this alias-resolution step matters), since
+    CategoryPage, ArticleIndexPage and StudentUnionCategoryPage all use
+    this same endpoint via BannerStyleMixin."""
+    page = get_object_or_404(Page, pk=page_id).specific.style_target
 
-    if not page.permissions_for_user(request.user).can_edit():
+    if not page.can_edit_in_editor_mode(request.user):
         return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
 
     try:

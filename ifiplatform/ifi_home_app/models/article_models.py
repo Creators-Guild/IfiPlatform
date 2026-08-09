@@ -6,12 +6,15 @@ from django.conf import settings
 from django.http import Http404
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from wagtail.models import Locale, Page
 from wagtail.fields import StreamField, RichTextField
 from wagtail.admin.panels import FieldPanel
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.url_routing import RouteResult
 from wagtail import blocks
+
+from ifi_home_app.editor_mode import EditorModeMixin, editor_mode_allowed
 
 # !Wagtail has no views and don't need any!
 
@@ -820,7 +823,7 @@ def get_section_categories(section):
 
 
 # Model for Articles (yeah, they are all so f*ing long, don't ask...)
-class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
     """A single article page, published under a CategoryPage."""
 
     template = "info_articles/pages/article_page.html"  # custom path
@@ -852,6 +855,26 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
     )
+    # which identity `author` is credited under while their account still
+    # exists -- see display_author_name below. Purely a display choice, not
+    # exposed once the account (and this FK) is gone.
+    ATTRIBUTION_CHOICES = [
+        ("real_name", "Real name"),
+        ("nickname", "Nickname"),
+    ]
+    author_attribution = models.CharField(
+        max_length=20,
+        choices=ATTRIBUTION_CHOICES,
+        default="real_name",
+        help_text="Which identity to credit the author under, if they've set a nickname.",
+    )
+    # Only ever written by account_app's delete_account_view once `author`
+    # itself is about to go NULL -- one of: an actual name/nickname string,
+    # the literal sentinel "unknown" (the author chose to be anonymized),
+    # or blank (this article never had an author worth crediting at all,
+    # e.g. old seed data -- must keep rendering with no byline, not a new
+    # "Unknown" label). See display_author_name.
+    author_display_name = models.CharField(max_length=150, blank=True)
     published_date = models.DateField(null=True, blank=True)
     show_on_homepage = models.BooleanField(
         default=True,
@@ -875,6 +898,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         FieldPanel("hero_image_alt"),
         FieldPanel("hero_image_caption"),
         FieldPanel("author"),
+        FieldPanel("author_attribution"),
         FieldPanel("published_date"),
         FieldPanel("show_on_homepage"),
         FieldPanel("body"),
@@ -907,6 +931,29 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         parent = self.get_parent().specific
         return parent if isinstance(parent, CategoryPage) else None
 
+    @property
+    def display_author_name(self):
+        """The name to credit this article to, or None if there's nothing
+        worth showing a byline for. While `author` is still set, this is a
+        live value -- the nickname (if author_attribution asks for it and
+        one is set) or else their real name/username, same as this field
+        used to be computed directly in the templates. Once `author` is
+        gone (their account was deleted), it falls back to the frozen
+        author_display_name snapshot written by delete_account_view: the
+        literal sentinel "unknown" renders as a translated "Unknown", a
+        real string renders as-is, and blank means this article never had
+        an author worth crediting in the first place (renders nothing,
+        same as before this field existed)."""
+        if self.author_id:
+            if self.author_attribution == "nickname":
+                nickname = getattr(self.author, "profile", None) and self.author.profile.nickname
+                if nickname:
+                    return nickname
+            return self.author.get_full_name() or self.author.username
+        if self.author_display_name == "unknown":
+            return _("Unknown")
+        return self.author_display_name or None
+
     def route(self, request, path_components):
         """Same as Page.route(), except a draft (not-yet-published) article
         is still reachable at its normal front-end URL for anyone with edit
@@ -919,20 +966,10 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         same reasoning as can_edit_style in get_context() below: an alias
         page's own permissions aren't meaningful, only its source's are."""
         if not path_components and not self.live:
-            if self.style_target.permissions_for_user(request.user).can_edit():
+            if self.can_edit_in_editor_mode(request.user):
                 return RouteResult(self)
             raise Http404
         return super().route(request, path_components)
-
-    @property
-    def style_target(self):
-        """The ArticlePage that quick-style edits should actually be saved
-        to. Alias pages (e.g. an untranslated locale mirroring another
-        locale's page) can't take their own revisions -- Wagtail raises if
-        you try (they're an exact, auto-synced copy of their source), so
-        edits have to go to the source instead, which Wagtail then
-        propagates back to this alias automatically on publish."""
-        return self.alias_of.specific if self.alias_of_id else self
 
     @cached_property
     def style(self):
@@ -972,6 +1009,19 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
             return target
         return target.get_translation_or_none(nb_locale) or target
 
+    def can_publish_in_editor_mode(self, user):
+        """Whether `user` may publish this article (via publish_target, not
+        the plain style_target every other editor-mode capability uses --
+        see publish_target's own docstring for why publishing specifically
+        needs the nb-locale copy) -- not part of EditorModeMixin since
+        publish/unpublish don't exist as a concept on the other three page
+        types that mixin also covers."""
+        return editor_mode_allowed(self.publish_target, user, "publish")
+
+    def can_unpublish_in_editor_mode(self, user):
+        """Same as can_publish_in_editor_mode, for unpublishing."""
+        return editor_mode_allowed(self.publish_target, user, "unpublish")
+
     @property
     def toc_entries(self):
         """(level, text) pairs for the table of contents -- see
@@ -1005,7 +1055,7 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         shouldn't be able to trigger that just because they can edit the
         en copy."""
         context = super().get_context(request, *args, **kwargs)
-        context["can_edit_style"] = self.style_target.permissions_for_user(request.user).can_edit()
+        context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
         context["page_is_live"] = self.live
         context["page_has_unpublished_changes"] = self.has_unpublished_changes
         # Django's {% if %} can't parse parenthesized expressions, so the
@@ -1013,9 +1063,8 @@ class ArticlePage(TranslationWarningMixin, Page):  # pylint: disable=too-many-an
         # (not live, or live but with a newer unpublished draft on top) is
         # computed here instead of inline in article_quick_style_panel.html.
         context["page_has_pending_publish"] = (not self.live) or self.has_unpublished_changes
-        publish_permissions = self.publish_target.permissions_for_user(request.user)
-        context["can_publish_page"] = publish_permissions.can_publish()
-        context["can_unpublish_page"] = publish_permissions.can_unpublish()
+        context["can_publish_page"] = self.can_publish_in_editor_mode(request.user)
+        context["can_unpublish_page"] = self.can_unpublish_in_editor_mode(request.user)
         overrides_by_block_id = {
             style.block_id: style
             for style in ArticleBlockStyle.objects.filter(translation_key=self.translation_key)
@@ -1394,7 +1443,7 @@ class BannerStyleMixin:
 
 
 # Model for article category to list articles within category
-class CategoryPage(BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
     """A category of articles, optionally shown only during a specific date range."""
 
     template = "info_articles/pages/article_category_page.html"
@@ -1484,7 +1533,7 @@ class CategoryPage(BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: 
         BannerStyleMixin/PageBannerStyle -- same permission check
         save_banner_style itself enforces, article_views.py)."""
         context = super().get_context(request, *args, **kwargs)
-        context["can_edit_style"] = self.permissions_for_user(request.user).can_edit()
+        context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
         subcategories = (
             CategoryPage.objects.child_of(self)
             .live()
@@ -1512,7 +1561,7 @@ class CategoryPage(BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: 
 
 
 # parent page to list articles categories
-class ArticleIndexPage(BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+class ArticleIndexPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
     """Landing page listing all article categories and suggested articles."""
 
     template = "info_articles/pages/article_index_page.html"  # custom path
@@ -1566,7 +1615,7 @@ class ArticleIndexPage(BannerStyleMixin, TranslationWarningMixin, Page):  # pyli
         articles to the template context, plus can_edit_style (see
         CategoryPage.get_context()'s own identical addition)."""
         context = super().get_context(request, *args, **kwargs)
-        context["can_edit_style"] = self.permissions_for_user(request.user).can_edit()
+        context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
         categories = (
             CategoryPage.objects.child_of(self)
             .live()
@@ -1750,7 +1799,7 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
 
 
 # Model for the category listing all student unions
-class StudentUnionCategoryPage(BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+class StudentUnionCategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
     """A category page whose only children are student union pages."""
 
     template = "info_articles/pages/studentunion_category_page.html"
@@ -1829,7 +1878,7 @@ class StudentUnionCategoryPage(BannerStyleMixin, TranslationWarningMixin, Page):
         Utvalget) -- so a union never ends up listed in "Andre foreninger"
         alongside its own more specific section."""
         context = super().get_context(request, *args, **kwargs)
-        context["can_edit_style"] = self.permissions_for_user(request.user).can_edit()
+        context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
         unions = (
             UnionPage.objects.child_of(self)
             .live()
