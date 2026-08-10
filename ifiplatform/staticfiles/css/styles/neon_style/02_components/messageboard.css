@@ -58,6 +58,11 @@
   bottom: 1.75rem;
   width: 14px;
   cursor: pointer;
+  /* the drag is driven entirely by JS (pointer events + setPointerCapture,
+     see messageboard.js) -- without this, touch input here would also try
+     to pan/scroll the page underneath while a drag is in progress. Harmless
+     for mouse users, touch-action only governs touch gesture handling. */
+  touch-action: none;
 }
 
 .messageboard-scrollbar-thumb {
@@ -66,6 +71,7 @@
   left: 0;
   width: 100%;
   cursor: grab;
+  touch-action: none;
 }
 
 .messageboard-scrollbar-thumb::after {
@@ -93,6 +99,16 @@
   text-align: right;
   font-style: italic;
   line-height: 1.15;
+}
+
+/* base/desktop default -- the mobile-scoped rule below only set this
+inside @media (max-width: 480px), so at desktop widths neither it nor
+.is-visible ever applied at all and the browser's own default <button>
+styling rendered instead (a plain gray bar), regardless of the
+mobile-only JS gate on when .is-visible gets added. This unscoped rule is
+what actually keeps it hidden outside mobile. */
+.messageboard-expand {
+  display: none;
 }
 
 /* invisible at desktop size -- lets .messageboard-prev/-dots/-next keep
@@ -160,7 +176,7 @@
 @media (max-width: 480px) {
   .messageboard {
     height: auto;
-    max-height: 24rem;
+    max-height: 34rem;
     margin: 0.5rem 0;
     /* the prev/next arrows no longer float at the card's left/right edges
        at this size (they're in .messageboard-controls, bottom-centered),
@@ -170,6 +186,15 @@
 
   .messageboard-slide h2 {
     font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .messageboard-date {
+    /* smaller than the base 0.85rem -- next to a centered heading and
+       centered body text, the original size read as too prominent for a
+       secondary metadata line */
+    font-size: 0.7rem;
+    text-align: center;
   }
 
   .messageboard-slide {
@@ -185,7 +210,47 @@
 
   .messageboard-body {
     height: auto;
-    max-height: 7rem; /* ~5 lines -- short messages stay smaller, longer ones scroll within this */
+    max-height: none;
+    text-align: center;
+    /* multi-line clamp instead of an internal scroll -- dragging inside a
+       ~5-7 line scrollable box felt awkward on touch (easy to fight the
+       page's own scroll/rubber-band right at the box's edges, see the
+       overscroll-behavior-y this used to need). A fixed number of lines
+       with a trailing ellipsis, plus "View full message" opening the rest
+       in a modal (messageboard.js, same pattern as tool_page.html's
+       .tool-lightbox), reads as more natural on mobile than scrolling
+       inside a small card. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+    line-clamp: 6;
+    overflow: hidden;
+  }
+
+  /* no more internal scroll on mobile (see .messageboard-body above) --
+     this drag handle has nothing left to control. Desktop keeps it. */
+  .messageboard-scrollbar {
+    display: none;
+  }
+
+  /* styling only -- display:none lives in the unscoped base rule above
+     (see its own comment on why), shown via JS (messageboard.js) toggling
+     .is-visible below only once it's confirmed the body is actually
+     clamped. */
+  .messageboard-expand {
+    margin: 0.5rem auto 0;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .messageboard-expand.is-visible {
+    display: block;
   }
 
   .messageboard-signature {
@@ -194,6 +259,7 @@
     padding-left: 0;
     margin-top: 0.35rem;
     text-align: right;
+    font-size: 0.8rem; /* was inheriting the same size as the body text -- too prominent for a byline */
   }
 
   .messageboard-controls {
@@ -254,4 +320,174 @@
   -webkit-mask: radial-gradient(closest-side, transparent 68%, black 74%, black 100%);
   mask: radial-gradient(closest-side, transparent 68%, black 74%, black 100%);
   pointer-events: none;
+}
+
+/* "View full message" dialog -- same visual/interaction pattern as
+tool_page.html's .tool-lightbox (fixed dark backdrop, centered card,
+close button, outside-click/Escape to close), just showing text instead
+of an image. Not media-query-gated itself: only ever opened from
+.messageboard-expand, which JS only shows on mobile (see messageboard.js
+and .messageboard-expand.is-visible above), so it's inert everywhere
+else regardless. */
+.messageboard-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: color-mix(in srgb, var(--color-text) 88%, transparent);
+}
+
+.messageboard-modal:not([hidden]) {
+  display: flex;
+}
+
+/* non-scrolling shell -- only .messageboard-modal-scroll inside it
+   scrolls. Positions/sizes the box; the close button and fade (both
+   direct children, not inside the scroll area) stay genuinely fixed in
+   place regardless of how far .messageboard-modal-scroll is scrolled. */
+.messageboard-modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 26rem;
+  /* dvh, not just vh -- vh is pinned to the viewport size from *before*
+     the mobile browser's address bar shows/hides, so as it does, the
+     modal's actual available height silently drifts out of sync with
+     what this was computed against (same fix already used for the mobile
+     sidemenu's height earlier). That drift is what made the "hide the
+     fade near the bottom" JS logic (messageboard.js) look right at the
+     moment it ran, then wrong again once the browser chrome settled --
+     100vh kept as a fallback for browsers without dvh support. */
+  max-height: 85vh;
+  max-height: 85dvh;
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px var(--color-shadow);
+  /* small gutter so the scroll area's own scrollbar (which sits flush
+     against *its* box's edge) lands just inside this border/corner
+     instead of butting right up against it. */
+  padding: 0.35rem;
+}
+
+.messageboard-modal-scroll {
+  max-height: calc(85vh - 0.7rem);
+  max-height: calc(85dvh - 0.7rem);
+  overflow-y: auto;
+  /* same fix as .messageboard-body's mobile scroll (the card preview) --
+     without this, dragging past this box's own top/bottom edge chains
+     into the page's scroll/rubber-band underneath the modal and can
+     trigger the browser's pull-to-refresh, even though the modal itself
+     is meant to be a fully self-contained overlay. */
+  overscroll-behavior-y: contain;
+  /* extra top padding clears the close button, which floats over this
+     area rather than sharing a row with the title */
+  padding: 2.5rem 1.15rem 1.15rem;
+  text-align: center;
+  /* visible "black" scrollbar (matching .messageboard-scrollbar-thumb's
+     own color elsewhere) instead of the browser's default gray one -- no
+     custom drag handle needed here like the card's version, this panel
+     has real room to scroll with a normal native scrollbar. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-text) transparent;
+}
+
+.messageboard-modal-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.messageboard-modal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messageboard-modal-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--color-text);
+  border-radius: 999px;
+}
+
+.messageboard-modal-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: none;
+  border-radius: 999px;
+  /* was transparent -- a bare "x" glyph blended into the white panel too
+     easily. A filled circle behind it (same idea as tool_page.css's
+     .tool-lightbox-close) makes it read as an actual button instead of
+     stray text. */
+  background-color: color-mix(in srgb, var(--color-text) 12%, transparent);
+  color: var(--color-text);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.messageboard-modal-title {
+  margin: 0 0 0.25rem;
+}
+
+.messageboard-modal-date {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.messageboard-modal-signature {
+  margin: 1rem 0 0;
+  text-align: right;
+  font-style: italic;
+  line-height: 1.15;
+  /* belt-and-suspenders alongside messageboard.js's own scroll-position
+     check: guarantees real blank space below the last bit of actual
+     content (rather than relying solely on JS timing the fade's
+     visibility exactly right, which needed several attempts to get
+     genuinely correct against mobile browser chrome resizing things
+     out from under it -- see .messageboard-modal-panel's own comment).
+     Matches .messageboard-modal-fade's own height, so even if the fade
+     were still visible right at max scroll, it would only ever cover
+     this blank buffer, never the signature text itself. */
+  padding-bottom: 4.5rem;
+}
+
+/* a sibling of .messageboard-modal-scroll, not a child of it -- both are
+positioned relative to the non-scrolling .messageboard-modal-panel, so
+this stays fixed at the panel's own bottom edge regardless of how far the
+scroll area is scrolled (see the comment on .messageboard-modal-panel in
+home_messageboard.html for why it *can't* live inside the scroll area and
+still do that). Toggled via JS (messageboard.js), which also re-checks on
+scroll so it disappears once you've actually reached the real end. */
+.messageboard-modal-fade {
+  display: none;
+  position: absolute;
+  /* flush with 0, not another inset -- absolute offsets resolve against
+     .messageboard-modal-panel's padding box, which already has its own
+     0.35rem padding (for the scrollbar gutter). Insetting *again* here
+     left a visible gap between the fade and the panel's actual bottom
+     edge instead of the fade reaching it. */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4.5rem;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0.6rem;
+  border-radius: 0 0 10px 10px;
+  background: linear-gradient(to bottom, transparent, var(--color-bg) 55%);
+  color: var(--color-text-muted);
+  font-weight: bold;
+  font-size: 1.25rem;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+
+.messageboard-modal-fade.is-visible {
+  display: flex;
+}
+
+body.messageboard-modal-open {
+  overflow: hidden;
 }

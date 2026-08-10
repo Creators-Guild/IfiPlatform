@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const minimizeButton = document.getElementById("quick-style-minimize");
   const publishButton = document.getElementById("quick-style-publish-button");
   const unpublishButton = document.getElementById("quick-style-unpublish-button");
+  const syncMirroredButton = document.getElementById("quick-style-sync-mirrored-button");
   const MINIMIZED_KEY = "ifiQuickStyleMinimized";
 
   // Alignment is destructive to save (see save() below) -- tracked
@@ -91,6 +92,16 @@ document.addEventListener("DOMContentLoaded", () => {
       "Unpublish this page? This takes the Norwegian version off the live site (and the English translation along with it), regardless of which one you're editing.",
       "Unpublishing...",
       "Unpublish"
+    );
+  }
+
+  if (syncMirroredButton) {
+    runPublishAction(
+      syncMirroredButton,
+      panel.dataset.syncMirroredUrl,
+      "Push this page's synchronized fields (menu visibility, status, etc.) to its English translation now?",
+      "Syncing...",
+      "Sync mirrored page"
     );
   }
 

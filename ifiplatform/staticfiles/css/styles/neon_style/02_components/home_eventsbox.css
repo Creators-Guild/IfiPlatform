@@ -1,0 +1,253 @@
+/* Homepage "This month at Ifi" box -- a compact bulleted list (see
+event_page.css for the shared .event-type-badge), not the card-grid layout
+newsbar_layout.css uses for News/Info Articles, since it lives in a
+narrower column (see home_layout.css's own .eventsbox_container rule,
+which also already provides this box's left/right padding -- no extra
+horizontal padding needed here). */
+
+.home-eventsbox-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.home-eventsbox-item {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  /* same hover-lift convention as .articlecard (articlecard.css) and the
+  top nav's .nav_link (topheader_bar.css) -- :hover on this element already
+  fires from hovering any child (including the tags), no :has() needed. */
+  transition: transform 0.15s ease;
+}
+
+.home-eventsbox-item:hover {
+  transform: translateY(-1px);
+}
+
+.home-eventsbox-list li:last-child .home-eventsbox-item {
+  border-bottom: none;
+}
+
+.home-eventsbox-title {
+  font-weight: bold;
+  flex-basis: 100%;
+}
+
+.home-eventsbox-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* "Stretched link": covers the whole .home-eventsbox-item (its nearest
+positioned ancestor, see position:relative above) so clicking anywhere in
+the row navigates to the event -- this item is a <div> rather than an <a>
+now specifically so .home-eventsbox-union-tag below can be its own,
+separately-clickable <a> without nesting one link inside another. */
+.home-eventsbox-title-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.home-eventsbox-date {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+/* flex-basis:100% (same trick .home-eventsbox-title uses above) so this
+drops to its own line below the date, rather than trailing after it. */
+.home-eventsbox-unions {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.home-eventsbox-union-tag {
+  /* position:relative + z-index puts this above .home-eventsbox-title-
+  link's stretched ::after overlay, so it intercepts its own clicks
+  (to the union) instead of the whole row's click going to the event. */
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: transform 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.home-eventsbox-union-tag:hover {
+  color: var(--color-text);
+  border-color: var(--color-accent-hover);
+  /* stacks with the row's own -1px lift (.home-eventsbox-item:hover above
+  is already in effect too, since hovering a child counts as hovering its
+  parent), so the tag itself nudges up slightly further than the row. */
+  transform: translateY(-1px);
+}
+
+/* Hidden past the first 2 tags (home_eventsbox.html) until
+.home-eventsbox-unions gets .is-open (tap, dropdown_menu.js's shared
+setupTapToggle) or is hovered on a real-mouse device below -- a plain
+display:none/inline-block toggle rather than the max-height/opacity
+animation .home-eventsbox-subevents-list uses, since these are individual
+inline pills wrapping in a flex row, not a block list that needs to grow
+smoothly. */
+.home-eventsbox-union-tag--extra {
+  display: none;
+}
+
+.home-eventsbox-unions.is-open .home-eventsbox-union-tag--extra {
+  display: inline-block;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .home-eventsbox-unions--collapsible:hover .home-eventsbox-union-tag--extra {
+    display: inline-block;
+  }
+}
+
+.home-eventsbox-unions-toggle {
+  /* position:relative + z-index, same reason as .home-eventsbox-union-tag
+  above -- sits above the row's stretched title link. */
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  font: inherit;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 999px;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.home-eventsbox-unions-toggle:hover {
+  color: var(--color-text);
+  border-color: var(--color-accent-hover);
+}
+
+/* flex-basis:100% so this drops to its own line, same as .home-eventsbox-
+unions/-title above -- no href of its own (see home_eventsbox.html's own
+comment), just text; the row's stretched link still covers it. */
+.home-eventsbox-subcount {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+/* Same flex-basis:100%-drops-to-its-own-line treatment as .home-eventsbox-
+subcount above, since this replaces it whenever there's at least one
+highlighted sub-event. */
+.home-eventsbox-subevents {
+  flex-basis: 100%;
+}
+
+.home-eventsbox-subevents-toggle {
+  /* position:relative + z-index puts this above .home-eventsbox-title-
+  link's stretched ::after overlay, so it toggles the list below instead of
+  the click falling through to the row's own link. */
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.home-eventsbox-subevents-toggle:hover {
+  color: var(--color-text);
+}
+
+/* Same caret convention as .sidemenu-item .sidemenu-option::after
+(sidemenu.css)/.dropdown-menu .link::after (dropdownmenu.css) -- a small
+triangle that flips once open, self-contained here rather than shared. */
+.home-eventsbox-subevents-toggle::after {
+  content: "";
+  display: inline-block;
+  border: 0.3em solid transparent;
+  border-top-color: currentColor;
+  transition: transform 0.15s ease;
+}
+
+.home-eventsbox-subevents.is-open .home-eventsbox-subevents-toggle::after {
+  transform: rotate(180deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .home-eventsbox-subevents:hover .home-eventsbox-subevents-toggle::after {
+    transform: rotate(180deg);
+  }
+}
+
+/* Same expand-in-place mechanism as .sidemenu-item .drop-content
+(sidemenu.css): collapsed via max-height:0 (a real height, unlike display:
+none, is what makes the max-height transition below animate at all) rather
+than position:absolute/fixed, so expanding this just grows the row in
+normal document flow -- every event below it moves down naturally, and
+.eventsbox_container's own overflow-y:auto (home_layout.css) just scrolls
+to fit like it would for any other in-flow content, no clipping/drift risk. */
+.home-eventsbox-subevents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.4rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--color-border);
+
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease, opacity 0.25s ease;
+}
+
+.home-eventsbox-subevents.is-open .home-eventsbox-subevents-list {
+  max-height: 20rem; /* big enough to fit every highlighted sub-event */
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .home-eventsbox-subevents:hover .home-eventsbox-subevents-list {
+    max-height: 20rem;
+    opacity: 1;
+  }
+}
+
+.home-eventsbox-subevents-list a {
+  position: relative;
+  z-index: 1;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.home-eventsbox-subevents-list a:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+.home-eventsbox-empty {
+  color: var(--color-text-muted);
+}

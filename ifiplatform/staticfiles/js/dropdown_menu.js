@@ -96,6 +96,21 @@ if (!window.__ifiTapToggleMenusInit) {
 
     setupTapToggle(".dropdown-menu:not(.profile-dropdown)", "button.link");
     setupTapToggle(".sidemenu-item", "a.sidemenu-option");
+    // Homepage events box: an event's highlighted sub-events (home_
+    // eventsbox.html/.css), same in-flow expand-in-place pattern as
+    // .sidemenu-item above rather than a floating .dropdown-menu -- it
+    // lives inside .eventsbox_container, which scrolls (overflow-y:auto),
+    // and a position:absolute/fixed panel there either gets clipped or (if
+    // fixed) drifts away from its trigger on scroll. Expanding in normal
+    // flow sidesteps that entirely: it just grows the row, same as any
+    // other in-flow content would.
+    setupTapToggle(".home-eventsbox-subevents", "button.home-eventsbox-subevents-toggle");
+    // Same collapsed-by-default treatment for an event with more than 3
+    // related_unions (home_eventsbox.html/.css) -- harmless to call this
+    // for every .home-eventsbox-unions row regardless of whether it
+    // actually has a toggle button; setupTapToggle just no-ops (returns
+    // early) on the ones that don't.
+    setupTapToggle(".home-eventsbox-unions", "button.home-eventsbox-unions-toggle");
 
     // The sidebar rail itself: tapping .sidemenu-header expands it (this is
     // what makes the submenus above visible/reachable at all on touch --
@@ -113,9 +128,65 @@ if (!window.__ifiTapToggleMenusInit) {
         sidemenu.classList.add("is-open");
         header.setAttribute("aria-expanded", "true");
       };
+      // On mobile .sidemenu.is-open sets an explicit height (100dvh, see
+      // sidemenu.css) so the overlay covers the full screen; removing
+      // "is-open" reverts that back to the short, content-sized height
+      // instantly, while width takes ~0.2s to animate back down to 56px.
+      // Left alone, that gap showed a still-wide-but-already-short box for
+      // a moment -- the same "too short" sidemenu look the hover fix
+      // addressed, just appearing on close instead. A CSS transition-delay
+      // on height was tried first, but height animating to/from 'auto'
+      // isn't reliably interpolable, so mobile browsers didn't consistently
+      // honor the delay. Locking the current pixel height as an inline
+      // style (which beats the class-based height rule regardless of
+      // specificity) and only releasing it once the width transition has
+      // actually finished sidesteps that unreliability entirely. Harmless
+      // on non-mobile/hover-incapable devices too (e.g. a touch tablet
+      // above the 480px breakpoint): there .sidemenu.is-open never sets an
+      // explicit height, so the locked value just matches the unchanged
+      // content height and the lock/release is a no-op.
       const closeSidemenu = () => {
+        const lockedHeight = sidemenu.getBoundingClientRect().height;
+        sidemenu.style.height = `${lockedHeight}px`;
         sidemenu.classList.remove("is-open");
         header.setAttribute("aria-expanded", "false");
+
+        // Reset any submenu (.sidemenu-item) left open, not just the rail
+        // itself -- without this, an item tapped open earlier stayed
+        // "open" internally even while hidden by the collapsed rail, so
+        // reopening the rail would fade it back in already-expanded, and
+        // that same reopening tap -- being outside every .sidemenu-item --
+        // would immediately trigger setupTapToggle's own outside-click
+        // closer on it too, producing a visible flash-open-then-collapse
+        // right as the rail opened. Closing the whole menu now always
+        // starts the next open from a clean state.
+        sidemenu.querySelectorAll(".sidemenu-item.is-open").forEach((item) => {
+          item.classList.remove("is-open");
+          const trigger = item.querySelector("a.sidemenu-option");
+          if (trigger) {
+            trigger.setAttribute("aria-expanded", "false");
+          }
+        });
+
+        let released = false;
+        const releaseHeight = () => {
+          if (released) {
+            return;
+          }
+          released = true;
+          sidemenu.style.height = "";
+          sidemenu.removeEventListener("transitionend", onTransitionEnd);
+        };
+        const onTransitionEnd = (event) => {
+          if (event.target === sidemenu && event.propertyName === "width") {
+            releaseHeight();
+          }
+        };
+        sidemenu.addEventListener("transitionend", onTransitionEnd);
+        // fallback in case width didn't actually change (so no
+        // transitionend fires) -- matches sidemenu.css's 0.2s width
+        // transition, with slack for timing jitter.
+        window.setTimeout(releaseHeight, 300);
       };
 
       header.addEventListener("click", (event) => {

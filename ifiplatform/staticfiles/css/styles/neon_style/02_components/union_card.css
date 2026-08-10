@@ -15,6 +15,12 @@
   text-align: center;
   gap: 0.6rem;
   flex: 0 1 14rem;
+  /* explicit cap regardless of what a given flex container's own gaps/
+  cross-axis rules resolve to -- flex-basis alone is a *starting* size,
+  not a hard ceiling, so a container with generous leftover row space
+  (e.g. .event-union-list on a wide screen) could still let this stretch
+  past 14rem despite flex-grow already being 0 here. */
+  max-width: 14rem;
   /* a block-level element's own width already fills its parent by
   default, but height doesn't -- height:100% only takes effect once its
   parent (the wrapping .body-union-card div in article_body_blocks.html)
