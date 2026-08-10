@@ -17,7 +17,24 @@ from wagtail.admin.panels import FieldPanel
 from wagtail.fields import RichTextField, StreamField
 from wagtail.models import Locale, Page
 
-from ifi_home_app.models.article_models import TranslationWarningMixin
+from ifi_home_app.models.article_models import HEX_COLOR_VALIDATOR, TranslationWarningMixin
+
+# Same "fixed palette + custom hex fallback" pattern as article_models.py's
+# COLOR_CHOICES (reusing HEX_COLOR_VALIDATOR from there directly), but its
+# own list rather than that one: these name a pastel set matched to a
+# printed program's own color-coded legend (see calendar_color's own
+# comment below), not article_models.py's box/border palette, and "" here
+# means "derive one from event_type" rather than a fixed default color.
+EVENT_CALENDAR_COLOR_CHOICES = [
+    ("", _("Auto (by event type)")),
+    ("blue", _("Blue")),
+    ("yellow", _("Yellow")),
+    ("orange", _("Orange")),
+    ("pink", _("Pink")),
+    ("green", _("Green")),
+    ("purple", _("Purple")),
+    ("custom", _("Custom (hex code)")),
+]
 
 
 class EventPageTag(TaggedItemBase):
@@ -65,6 +82,35 @@ def event_union_block():
         ],
         icon="group",
         label="Union",
+    )
+
+
+def calendar_legend_entry_block():
+    """One row of a parent event's own color legend (calendar_legend below)
+    -- a color (this event's calendar_color palette, minus "Auto" and
+    "Custom": a legend entry has to name one specific, fixed color) plus
+    freeform label text explaining what that color means for *this*
+    event's sub-events (e.g. "Blue = Study-relevant"), since that meaning
+    is specific to whatever schedule is being recreated, not a fixed
+    sitewide convention. A function (not a shared instance) for the same
+    reason as event_union_block above -- Wagtail block instances aren't
+    safe to reuse across StreamField definitions."""
+    return blocks.StructBlock(
+        [
+            (
+                "color",
+                blocks.ChoiceBlock(
+                    choices=[
+                        (key, label) for key, label in EVENT_CALENDAR_COLOR_CHOICES
+                        if key not in ("", "custom")
+                    ],
+                    default="blue",
+                ),
+            ),
+            ("label", blocks.CharBlock(max_length=60, help_text="What this color means, e.g. \"Study-relevant\".")),
+        ],
+        icon="tag",
+        label="Legend entry",
     )
 
 
@@ -116,6 +162,23 @@ class EventPage(TranslationWarningMixin, Page):
     # home_eventsbox.html).
     event_date = models.DateField()
     event_time = models.TimeField(null=True, blank=True)
+    # Optional -- only used to size/position this event's block in a parent
+    # event's week-calendar view (calendar_days below). Left blank, a sub-
+    # event just gets a fixed-length block there instead of a clipped one.
+    event_end_time = models.TimeField(null=True, blank=True)
+    # Optional -- lets an editor color-code a sub-event's week-calendar
+    # block directly (e.g. to recreate a printed program's own color
+    # legend, like "yellow = food, orange = alcohol-free"), instead of only
+    # ever getting the automatic event_type-based color (see
+    # _resolve_calendar_color below). Blank means "auto".
+    calendar_color = models.CharField(
+        max_length=20, choices=EVENT_CALENDAR_COLOR_CHOICES, blank=True,
+        help_text="Optional -- overrides the automatic color of this event's block in a parent event's week-calendar view.",
+    )
+    calendar_color_custom = models.CharField(
+        max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR],
+        help_text="Used only when Calendar color above is set to Custom.",
+    )
     end_date = models.DateField(
         null=True,
         blank=True,
@@ -151,6 +214,20 @@ class EventPage(TranslationWarningMixin, Page):
         help_text="Optional -- student unions involved in this event, and their role.",
     )
 
+    # Only meaningful on a *parent* event (one with sub_events) -- explains
+    # what each calendar_color actually means for this specific schedule
+    # (event_page.html renders it as a row above the week-calendar, only
+    # when non-empty -- there's no separate on/off toggle, having any
+    # entries at all *is* "on"). Harmless if left empty or set on an event
+    # with no sub-events, same as is_highlighted above being a no-op
+    # outside its own intended context.
+    calendar_legend = StreamField(
+        [("entry", calendar_legend_entry_block())],
+        use_json_field=True,
+        blank=True,
+        help_text="Optional -- explains what each sub-event calendar color means (e.g. \"Blue = Study-relevant\"), shown above the week-calendar.",
+    )
+
     signup_url = models.URLField(
         blank=True,
         help_text="Optional -- link to a signup/registration form for this event.",
@@ -168,12 +245,16 @@ class EventPage(TranslationWarningMixin, Page):
         FieldPanel("event_type"),
         FieldPanel("event_date"),
         FieldPanel("event_time"),
+        FieldPanel("event_end_time"),
+        FieldPanel("calendar_color"),
+        FieldPanel("calendar_color_custom"),
         FieldPanel("end_date"),
         FieldPanel("location"),
         FieldPanel("intro"),
         FieldPanel("show_on_homepage"),
         FieldPanel("is_highlighted"),
         FieldPanel("related_unions"),
+        FieldPanel("calendar_legend"),
         FieldPanel("signup_url"),
         FieldPanel("info_tags"),
     ]
@@ -213,6 +294,168 @@ class EventPage(TranslationWarningMixin, Page):
         dropdown (home_eventsbox.html); the rest stay count-only there,
         still fully listed on this event's own page regardless."""
         return self.sub_events.filter(is_highlighted=True)
+
+    @property
+    def calendar_days(self):
+        """This event's sub_events laid out for a week-calendar view
+        (event_page.html), one column per distinct date among them, blocks
+        positioned/sized by minutes-since-midnight within a shared hour
+        range spanning just the sub_events themselves (not a fixed 00-24)
+        -- and fanned out side by side within a day when their times
+        overlap, same as a real calendar app does for a scheduling clash
+        (see _cluster_overlapping/_assign_columns below).
+
+        Untimed sub-events (event_time blank -- "no specific time", per the
+        field's own comment above) can't be placed on a grid at all, so
+        they come back separately under "untimed" rather than being
+        silently dropped."""
+        timed = [e for e in self.sub_events if e.event_time]
+        untimed = [e for e in self.sub_events if not e.event_time]
+
+        if not timed:
+            return {
+                "hour_start": 0, "hour_end": 0, "hour_marks": [], "hour_count": 0,
+                "days": [], "untimed": untimed,
+            }
+
+        def start_minutes(event):
+            return event.event_time.hour * 60 + event.event_time.minute
+
+        def end_minutes(event):
+            if event.event_end_time:
+                return event.event_end_time.hour * 60 + event.event_end_time.minute
+            # No stored end -- fall back to a nominal 1-hour block, same as
+            # a bare click-to-create event in most calendar apps.
+            return start_minutes(event) + 60
+
+        hour_start = min(start_minutes(e) for e in timed) // 60
+        hour_end = max(-(-end_minutes(e) // 60) for e in timed)  # ceil-div
+        hour_end = max(hour_end, hour_start + 1)
+        total_minutes = (hour_end - hour_start) * 60
+
+        days = []
+        for day_date in sorted({e.event_date for e in timed}):
+            day_events = sorted(
+                (e for e in timed if e.event_date == day_date),
+                key=lambda e: (start_minutes(e), end_minutes(e)),
+            )
+            blocks = []
+            for cluster in _cluster_overlapping(day_events, start_minutes, end_minutes):
+                columns = _assign_columns(cluster, start_minutes, end_minutes)
+                for event in cluster:
+                    col, col_count = columns[event]
+                    color_key, color_hex = _resolve_calendar_color(event)
+                    blocks.append({
+                        "event": event,
+                        "top_pct": _pct(start_minutes(event) - hour_start * 60, total_minutes),
+                        "height_pct": _pct(end_minutes(event) - start_minutes(event), total_minutes),
+                        "left_pct": _pct(col, col_count),
+                        "width_pct": _pct(1, col_count),
+                        "color_key": color_key,
+                        "color_hex": color_hex,
+                    })
+            days.append({"date": day_date, "events": blocks})
+
+        # top_pct per label, same math as each block above -- lets the
+        # template position labels by percentage (so they line up with the
+        # actual gridlines/blocks) instead of doing arithmetic itself.
+        hour_marks = [
+            {"hour": h, "top_pct": _pct(h * 60 - hour_start * 60, total_minutes)}
+            for h in range(hour_start, hour_end + 1)
+        ]
+
+        return {
+            "hour_start": hour_start,
+            "hour_end": hour_end,
+            "hour_marks": hour_marks,
+            "hour_count": hour_end - hour_start,
+            "days": days,
+            "untimed": untimed,
+        }
+
+
+# event_type -> calendar_color fallback for events that never picked one --
+# only a rough default (event_type's own 4 categories can't distinguish
+# e.g. "food" from "alcohol-free social" the way calendar_color can), good
+# enough for whatever wasn't worth an editor's explicit color choice.
+_AUTO_CALENDAR_COLOR_BY_EVENT_TYPE = {
+    "academic": "blue",
+    "deadline": "pink",
+    "company": "purple",
+    "social": "orange",
+    "other": "orange",
+}
+
+
+def _resolve_calendar_color(event):
+    """The (color_key, custom_hex) this event's calendar block should
+    render with -- color_key is a CSS class suffix (event-calendar-block--
+    {{ color_key }}, event_page.css) for every choice except "custom",
+    where custom_hex (calendar_color_custom) is the real color and
+    color_key is just the class that applies dark text to it."""
+    color = event.calendar_color or _AUTO_CALENDAR_COLOR_BY_EVENT_TYPE.get(event.event_type, "orange")
+    if color == "custom" and event.calendar_color_custom:
+        return "custom", event.calendar_color_custom
+    return color, None
+
+
+def _pct(numerator, denominator):
+    """A percentage pre-formatted as a plain '12.34' string, not a float --
+    these values only ever land in an inline `style="...%"` attribute
+    (event_page.html), and Django's own {{ }} number rendering is locale-
+    aware (USE_L10N): the active nb locale would render e.g. 7.69 as
+    "7,69", a comma decimal separator that's simply invalid inside CSS and
+    silently drops the whole declaration, breaking every block's
+    positioning. Plain str formatting here is never locale-aware, unlike
+    the template's own filters."""
+    return f"{numerator / denominator * 100:.4f}"
+
+
+def _cluster_overlapping(events, start_minutes, end_minutes):
+    """Partition start-time-sorted `events` into clusters of transitively
+    overlapping events -- two events overlap directly if their time ranges
+    intersect; two clusters merge if any pair across them does. A single
+    sweep is enough: a new event only starts a fresh cluster once every
+    event in the current cluster has already ended by the time this one
+    starts (current_max_end tracks that "already ended" point)."""
+    clusters = []
+    current = []
+    current_max_end = None
+    for event in events:
+        s = start_minutes(event)
+        if current and s >= current_max_end:
+            clusters.append(current)
+            current = []
+            current_max_end = None
+        current.append(event)
+        e = end_minutes(event)
+        current_max_end = e if current_max_end is None else max(current_max_end, e)
+    if current:
+        clusters.append(current)
+    return clusters
+
+
+def _assign_columns(cluster, start_minutes, end_minutes):
+    """Greedy interval-graph coloring within one cluster of overlapping
+    events: walking in start-time order, each event gets the lowest-
+    numbered column whose most recent occupant has already ended by this
+    event's own start -- the same side-by-side fan-out a real calendar app
+    uses for a scheduling clash, rather than stacking overlapping events on
+    top of each other. column_count is per cluster, not global, so an
+    event with no clash of its own still gets the full day-column width
+    even if some other, unrelated cluster later that day needed several."""
+    columns_end = []
+    column_of = {}
+    for event in cluster:
+        s, e = start_minutes(event), end_minutes(event)
+        col = next((i for i, end in enumerate(columns_end) if end <= s), len(columns_end))
+        if col == len(columns_end):
+            columns_end.append(e)
+        else:
+            columns_end[col] = e
+        column_of[event] = col
+    column_count = len(columns_end)
+    return {event: (col, column_count) for event, col in column_of.items()}
 
 
 def upcoming_events_for_union(union):

@@ -36,13 +36,39 @@
                     {% endif %}
                 </span>
                 {% if event.related_unions %}
-                    <span class="home-eventsbox-unions">
-                        {% for entry in event.related_unions %}
-                            {% if entry.value.union %}
-                                <a class="home-eventsbox-union-tag" href="{% pageurl entry.value.union.specific %}">{{ entry.value.union.title }}</a>
+                    {% with total=event.related_unions|length %}
+                        {% comment %}
+                        An event with many related_unions (e.g. a whole
+                        week-long event rolled up from every sub-event's own
+                        host, event_models.py's calendar_days) would otherwise
+                        flood this compact row with a wall of tags -- only the
+                        first 2 show by default, same "collapsed unless
+                        expanded" treatment as .home-eventsbox-subevents below
+                        (tap-to-toggle on touch via dropdown_menu.js's shared
+                        setupTapToggle(), :hover reveal on desktop), rather
+                        than a second, separately-behaving toggle mechanism.
+                        2 rather than 3: this column is narrow enough on a
+                        phone that even 3 short tags plus a toggle button
+                        can wrap awkwardly -- 2 stays comfortably clear of
+                        that at every width this box actually renders at,
+                        so there's no need for a separate mobile-only cutoff.
+                        {% endcomment %}
+                        <span class="home-eventsbox-unions{% if total > 2 %} home-eventsbox-unions--collapsible{% endif %}">
+                            {% for entry in event.related_unions|slice:":2" %}
+                                {% if entry.value.union %}
+                                    <a class="home-eventsbox-union-tag" href="{% pageurl entry.value.union.specific %}">{{ entry.value.union.title }}</a>
+                                {% endif %}
+                            {% endfor %}
+                            {% if total > 2 %}
+                                {% for entry in event.related_unions|slice:"2:" %}
+                                    {% if entry.value.union %}
+                                        <a class="home-eventsbox-union-tag home-eventsbox-union-tag--extra" href="{% pageurl entry.value.union.specific %}">{{ entry.value.union.title }}</a>
+                                    {% endif %}
+                                {% endfor %}
+                                <button type="button" class="home-eventsbox-unions-toggle">+{{ total|add:"-2" }}</button>
                             {% endif %}
-                        {% endfor %}
-                    </span>
+                        </span>
+                    {% endwith %}
                 {% endif %}
                 {% with sub_count=event.sub_events.count highlighted=event.highlighted_sub_events %}
                     {% if highlighted %}
