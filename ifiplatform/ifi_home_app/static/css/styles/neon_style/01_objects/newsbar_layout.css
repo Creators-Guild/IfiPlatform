@@ -61,11 +61,15 @@ the column has room is the sidebar + events box + viewport together. */
   rem removes it structurally: auto-fit still decides *how many* columns
   fit using the minimum (18rem) as usual, but every column that does fit
   then stretches to evenly fill 100% of the container's width, with
-  nothing left over at any width. The only remaining trade-off is card
-  size varying more across different column counts (a lone card in a very
-  wide column can get quite large) -- accepted here since it's aspect-
-  ratio:5/4-locked (articlecard.css), so it stays proportioned rather than
-  looking stretched/distorted, just bigger. */
+  nothing left over at any width. The remaining trade-off (a lone card in
+  a very wide column growing quite large) turned out to be too extreme in
+  practice -- .newsbar-layout .articlecard below now caps the *card's* own
+  max-width and centers it within whatever track it's given, instead of
+  capping the track itself the way the rejected fixed-max approach did.
+  Set generously high (40rem) so it only kicks in for genuinely extreme
+  cases (few cards in a very wide container, worst case just one) --
+  normal rows of 2+ cards stay well under it and keep this rule's own
+  no-dead-space behavior untouched. */
   grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
   /* auto-fit's own default (justify-content:start) left leftover column
   tracks flush-left instead of centered -- most visible with just one card
@@ -124,6 +128,14 @@ two clipped. */
   clips anything that doesn't fit, instead of the box just growing. */
   min-height: 0;
   aspect-ratio: 5 / 4;
+  /* Caps how large a single card can get when its own grid track is far
+  wider than a normal card (few cards in a wide container, worst case just
+  one) -- see the .newsbar-layout comment above. justify-self:center
+  (grid's own default here is stretch) is what actually centers the
+  now-narrower card within its still-wide track, rather than leaving it
+  flush against the track's start edge. */
+  max-width: 40rem;
+  justify-self: center;
 }
 
 /* Shorter than the card's own image aspect-ratio (8/5, articlecard.css) --
@@ -140,6 +152,11 @@ it here would leave a large blank gap below that short content instead of
 this variant's own intentionally compact height. */
 .newsbar-layout .articlecard--list {
   aspect-ratio: unset;
+  /* This variant is meant to span the row edge-to-edge (grid-column: 1/-1
+  below), so the lone-card max-width/centering above would otherwise
+  shrink it down to a narrow centered strip instead. */
+  max-width: unset;
+  justify-self: stretch;
 }
 
 @media (max-width: 480px) {
