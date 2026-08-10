@@ -79,7 +79,7 @@
             <h2>{% trans "Sub-events" %}</h2>
             {% with calendar=page.calendar_days %}
                 {% if calendar.days %}
-                    <div class="event-calendar-section">
+                    <div class="event-calendar-section" id="event-calendar">
                         {% if page.calendar_legend %}
                             <div class="event-calendar-legend">
                                 {% for entry in page.calendar_legend %}

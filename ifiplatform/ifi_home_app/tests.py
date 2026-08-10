@@ -179,6 +179,53 @@ class EditorModeEndpointTests(TestCase):
         )
         self.assertNotEqual(response.status_code, 403)
 
+    def test_block_style_rejects_out_of_range_width(self):
+        # width_rem/height_rem have no bound in the request body itself --
+        # the on-page slider caps at 4-60rem/0-40rem (article_block_style_
+        # mini_panel.html), but a direct POST bypasses that entirely. This
+        # confirms the server-side bound added alongside the mobile-overflow
+        # fix (article_multicolumn.css et al) actually rejects a value the
+        # slider could never produce, same pattern as save_banner_style's
+        # own width/height bound below.
+        self._login_editor("block_style_oversized", agreed=True)
+        response = self.client.post(
+            reverse("article_block_style", kwargs={"page_id": self.article.pk}),
+            data=json.dumps(
+                {"block_id": "test-block", "block_type": "article_card", "width_rem": 999}
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_block_style_allows_in_range_width(self):
+        self._login_editor("block_style_normal", agreed=True)
+        response = self.client.post(
+            reverse("article_block_style", kwargs={"page_id": self.article.pk}),
+            data=json.dumps(
+                {"block_id": "test-block", "block_type": "article_card", "width_rem": 20}
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_hero_image_style_rejects_out_of_range_width(self):
+        self._login_editor("hero_image_oversized", agreed=True)
+        response = self.client.post(
+            reverse("article_hero_image_style", kwargs={"page_id": self.article.pk}),
+            data=json.dumps(
+                {
+                    "alignment": "center",
+                    "width_rem": 999,
+                    "side_padding": 0,
+                    "boxed": False,
+                    "box_color": "",
+                    "box_border_radius": 0,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_banner_style_blocked_while_pending(self):
         self._login_editor("banner_pending", agreed=False)
         response = self.client.post(

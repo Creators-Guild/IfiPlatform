@@ -238,6 +238,16 @@ def save_block_style(request, page_id):
     except (TypeError, ValueError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
+    # matches the on-page slider's own range (article_block_style_mini_panel.
+    # html, #block-style-width/#block-style-height) -- nothing stops a direct
+    # POST to this endpoint from setting an arbitrary value otherwise, and an
+    # oversized width/height here is exactly the kind of editor-set value the
+    # mobile CSS resets (article_multicolumn.css et al) can't fully undo.
+    for field_name, bounds in (("width_rem", (4, 60)), ("height_rem", (0, 40))):
+        value = defaults.get(field_name)
+        if value is not None and not bounds[0] <= value <= bounds[1]:
+            return JsonResponse({"error": f"Invalid {field_name}."}, status=400)
+
     if "alignment" in allowed_fields and data.get("alignment") is not None:
         alignment = data["alignment"]
         if alignment not in dict(CONTENT_ALIGNMENT_CHOICES):
@@ -351,6 +361,9 @@ def save_hero_image_style(request, page_id):
 
     if alignment not in dict(HERO_POSITION_CHOICES):
         return JsonResponse({"error": "Invalid alignment."}, status=400)
+
+    if not 4 <= width_rem <= 60:
+        return JsonResponse({"error": "Invalid width_rem."}, status=400)
 
     if box_color not in dict(BOX_COLOR_CHOICES):
         return JsonResponse({"error": "Invalid box_color."}, status=400)

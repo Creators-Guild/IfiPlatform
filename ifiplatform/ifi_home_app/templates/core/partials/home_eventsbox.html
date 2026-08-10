@@ -23,6 +23,21 @@
                 <span class="event-type-badge event-type-badge--{{ event.event_type }}">
                     {{ event.get_event_type_display }}
                 </span>
+                {% if event.calendar_days.days %}
+                    {% comment %}
+                    Straight to the week-calendar grid on the event's own
+                    page (event_page.html's #event-calendar), not just the
+                    plain "click the row" navigation -- only shown when
+                    there's actually a timed grid to jump to (untimed-only
+                    events have nothing at that anchor). Above the title.
+                    flex-basis:100% (home_eventsbox.css) drops it to its own
+                    line, same trick as .home-eventsbox-unions/-subcount
+                    below; position:relative + z-index puts it above the
+                    row's stretched title link, same escape as the union
+                    tags.
+                    {% endcomment %}
+                    <a class="home-eventsbox-calendar-link" href="{% pageurl event %}#event-calendar">{% trans "Click to see calendar" %}</a>
+                {% endif %}
                 <span class="home-eventsbox-title">
                     <a class="home-eventsbox-title-link" href="{% pageurl event %}">{{ event.title }}</a>
                 </span>
@@ -92,10 +107,13 @@
                 {% with sub_count=event.sub_events.count highlighted=event.highlighted_sub_events %}
                     {% if highlighted %}
                         {% comment %}
-                        Only highlighted sub-events (is_highlighted, checked
-                        per sub-event) are named here -- the rest stay
-                        count-only, same as the plain-text fallback below,
-                        still fully listed on the event's own page.
+                        event.highlighted_sub_events -- today's sub-event(s)
+                        when there's anything scheduled today, otherwise the
+                        explicitly-curated is_highlighted set (see that
+                        property's own docstring, event_models.py). Only
+                        these are named here -- the rest stay count-only,
+                        same as the plain-text fallback below, still fully
+                        listed on the event's own page.
                         Same expand-in-place pattern as the sidemenu's own
                         submenus (.sidemenu-item, home_sidemenu.html/
                         sidemenu.css -- click-to-toggle on touch via
@@ -117,10 +135,16 @@
                         <div class="home-eventsbox-subevents">
                             <button type="button" class="home-eventsbox-subevents-toggle">
                                 {% blocktrans count counter=sub_count %}{{ counter }} sub-event{% plural %}{{ counter }} sub-events{% endblocktrans %}
+                                <span class="home-eventsbox-subevents-toggle-hint">{% trans "See today's events" %}</span>
                             </button>
                             <div class="home-eventsbox-subevents-list">
                                 {% for sub_event in highlighted %}
-                                    <a href="{% pageurl sub_event %}">{{ sub_event.title }}</a>
+                                    <a href="{% pageurl sub_event %}">
+                                        {% if sub_event.event_time %}
+                                            <span class="home-eventsbox-subevent-time">{{ sub_event.event_time|time:"H:i" }}</span>
+                                        {% endif %}
+                                        {{ sub_event.title }}
+                                    </a>
                                 {% endfor %}
                             </div>
                         </div>

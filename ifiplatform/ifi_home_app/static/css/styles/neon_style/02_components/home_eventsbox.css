@@ -151,6 +151,24 @@ comment), just text; the row's stretched link still covers it. */
 }
 
 /* Same flex-basis:100%-drops-to-its-own-line treatment as .home-eventsbox-
+subcount below, so it sits on its own row above the sub-event count/list. */
+.home-eventsbox-calendar-link {
+  position: relative;
+  z-index: 1;
+  flex-basis: 100%;
+  display: inline-block;
+  width: fit-content;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  text-decoration: underline;
+}
+
+.home-eventsbox-calendar-link:hover {
+  color: var(--color-accent-hover);
+}
+
+/* Same flex-basis:100%-drops-to-its-own-line treatment as .home-eventsbox-
 subcount above, since this replaces it whenever there's at least one
 highlighted sub-event. */
 .home-eventsbox-subevents {
@@ -179,6 +197,18 @@ highlighted sub-event. */
 
 .home-eventsbox-subevents-toggle:hover {
   color: var(--color-text);
+}
+
+/* "See highlights" -- a second, visually lighter hint after the count, not
+its own separate element/click target (the whole button already toggles the
+list; this is just a clearer label for what that click reveals). */
+.home-eventsbox-subevents-toggle-hint {
+  opacity: 0.75;
+}
+
+.home-eventsbox-subevents-toggle-hint::before {
+  content: "\2013"; /* en dash */
+  margin: 0 0.3em;
 }
 
 /* Same caret convention as .sidemenu-item .sidemenu-option::after
@@ -238,6 +268,10 @@ to fit like it would for any other in-flow content, no clipping/drift risk. */
 .home-eventsbox-subevents-list a {
   position: relative;
   z-index: 1;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-size: 0.85rem;
   color: var(--color-text);
   text-decoration: none;
@@ -246,6 +280,12 @@ to fit like it would for any other in-flow content, no clipping/drift risk. */
 .home-eventsbox-subevents-list a:hover {
   color: var(--color-accent-hover);
   text-decoration: underline;
+}
+
+.home-eventsbox-subevent-time {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  margin-right: 0.3em;
 }
 
 .home-eventsbox-empty {

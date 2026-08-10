@@ -66,7 +66,11 @@ image note below. */
   margin: 0 auto 1.5rem;
 }
 
-@media (max-width: 640px) {
+/* 45rem, not 640px -- matches the breakpoint every other mobile treatment
+on the site uses (event_page.css, union_card.css, article_multicolumn.css,
+...); 640px left a gap for phones reporting a CSS viewport width between
+640-720px, where none of these resets fired at all. */
+@media (max-width: 45rem) {
   .hero-image--left,
   .hero-image--right {
     float: none;
@@ -103,7 +107,7 @@ multi-column item). */
   margin-right: auto;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 45rem) {
   .body-image--left,
   .body-image--right {
     float: none;
@@ -121,7 +125,7 @@ gets padding-left/right reset (not the shorthand) since its own boxed
 padding is a fixed, non-editable 1rem from .image-figure--boxed below --
 that one's meant to stay. .body-image-figure has no such fixed class, so
 its whole padding (however _block_box_style.html set it) resets safely. */
-@media (max-width: 640px) {
+@media (max-width: 45rem) {
   .hero-image-figure {
     padding-left: 0 !important;
     padding-right: 0 !important;

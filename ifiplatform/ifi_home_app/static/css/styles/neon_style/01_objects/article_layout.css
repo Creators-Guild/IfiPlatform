@@ -79,13 +79,14 @@ text above it. */
   margin-right: var(--content-side-padding, 0);
 }
 
-/* editor-set side padding/alignment are ignored below this (same "phone"
-breakpoint used throughout the rest of the site) -- a large padding or
-centered/right alignment picked for a wide desktop column can eat the whole
-screen or read badly once the column is already this narrow, so mobile
-always gets the plain left-aligned, unpadded default regardless of what's
-configured. */
-@media (max-width: 480px) {
+/* editor-set side padding/alignment are ignored below this (45rem -- same
+"phone" breakpoint used throughout the rest of the site: event_page.css,
+union_card.css, article_multicolumn.css, article_image.css, dropdown_menu.js,
+...) -- a large padding or centered/right alignment picked for a wide desktop
+column can eat the whole screen or read badly once the column is already
+this narrow, so mobile always gets the plain left-aligned, unpadded default
+regardless of what's configured. */
+@media (max-width: 45rem) {
   .article-page {
     text-align: left;
     font-size: 1rem;
@@ -113,7 +114,14 @@ configured. */
   (h1/.intro/.article-meta are independently boxable -- see
   _effective_box_style() -- box.padding renders inline here as
   "padding: Xrem"). Box background/border/radius stay untouched -- only
-  sizing that can overflow or read badly this narrow gets reset. */
+  sizing that can overflow or read badly this narrow gets reset.
+
+  This whole block reset used to fire at 480px -- narrower than 45rem
+  (720px), the breakpoint every other mobile treatment on the site uses
+  (event_page.css, union_card.css, article_multicolumn.css, article_image.css,
+  dropdown_menu.js, ...). A visitor in that 480-720px gap got none of this:
+  editor-picked side padding/alignment/font-size on the article header
+  stayed at their desktop values on a phone-width screen. */
   .article-header {
     --title-font-size: 2rem !important;
     --intro-font-size: 1rem !important;

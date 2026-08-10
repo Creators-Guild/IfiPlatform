@@ -61,7 +61,16 @@ here regardless of selector specificity, so there's nothing to fight over. */
   padding-bottom: 0.2rem;
 }
 
-@media (max-width: 640px) {
+/* 45rem, not some narrower phone-specific number -- matches the breakpoint
+every other mobile treatment on the site already uses (event_page.css,
+union_card.css, dropdown_menu.js, article_list_toggle.js, ...). This used
+to be 640px, which is narrower than 45rem (720px): a visitor whose phone
+reports a CSS viewport width in that 640-720px gap never got this reset at
+all, so an editor-picked desktop padding (seen in production: 15.25rem
+per side, on top of a 5rem gap) stayed in place and blew the row out
+past the screen -- reproduced and confirmed against the live site before
+this fix. */
+@media (max-width: 45rem) {
   .multi-col-grid {
     flex-direction: column;
   }

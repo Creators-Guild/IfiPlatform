@@ -45,8 +45,14 @@ border/radius (and any text color) are untouched -- only sizing. Matches
 .heading--align-* for both heading (h2-h5) and column-title (h3.column-
 title, sharing this same class family) at once, and .prose--align-* for
 paragraph (also shared by the nested column variant in article_column_
-content.html). */
-@media (max-width: 480px) {
+content.html).
+
+45rem, not 480px -- matches the breakpoint every other mobile treatment on
+the site uses (event_page.css, union_card.css, article_multicolumn.css,
+article_image.css, article_layout.css, ...). 480px left a gap for phones
+reporting a CSS viewport width between 480-720px, where an editor-picked
+desktop font-size/padding on a heading or paragraph never got reset at all. */
+@media (max-width: 45rem) {
   .heading--align-left,
   .heading--align-center,
   .heading--align-right {

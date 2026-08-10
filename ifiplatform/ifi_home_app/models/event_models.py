@@ -411,10 +411,18 @@ class EventPage(TranslationWarningMixin, Page):
 
     @property
     def highlighted_sub_events(self):
-        """The subset of sub_events explicitly marked is_highlighted --
-        these are the only ones actually named in the homepage box's
-        dropdown (home_eventsbox.html); the rest stay count-only there,
-        still fully listed on this event's own page regardless."""
+        """Sub-events named in the homepage box's dropdown (home_eventsbox.
+        html) -- the rest stay count-only there, still fully listed on this
+        event's own page regardless. Today's sub-event(s) win whenever
+        there's anything scheduled today (e.g. day 3 of a week-long event
+        like Fadderuke), so the homepage always surfaces "what's on today"
+        without an editor having to re-flag is_highlighted daily. Falls back
+        to the explicitly-curated is_highlighted set otherwise -- before the
+        event starts (a "coming up" teaser) or on a day with nothing
+        scheduled."""
+        today_events = self.sub_events.filter(event_date=timezone.localdate())
+        if today_events.exists():
+            return today_events
         return self.sub_events.filter(is_highlighted=True)
 
     @property
