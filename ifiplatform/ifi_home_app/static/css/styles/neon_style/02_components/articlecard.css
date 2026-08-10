@@ -117,14 +117,42 @@ of it sitting closer to one side. */
   transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
 }
 
-/* an article_card block's own width is a free-form rem number now (editor
-picks the exact value via width_rem, same as a body image's own), set via
-inline style in article_body_blocks.html/article_column_content.html --
-width, not just max-width, since .articlecard's own display:block would
-otherwise stretch to the full prose column with nothing else to size it.
-max-width:100% comes along inline too, as a safety net so it still can't
-overflow a narrow container (e.g. a multi-column item) -- same pattern as
-article_image.css's own body images. */
+/* an article_card block's own width is a free-form rem number (editor picks
+the exact value via width_rem, same as a body image's own) -- carried in as
+a --card-width custom property (article_body_blocks.html/
+article_column_content.html) rather than a literal inline width, so the
+480px override below can win over it at normal specificity instead of
+needing !important to beat an inline style. width, not just max-width,
+since .articlecard's own display:block would otherwise stretch to the full
+prose column with nothing else to size it. Height only applies via the
+--fixed-height modifier (added by article_block_style.js alongside
+--card-height whenever an editor sets a nonzero height_rem) -- 0/blank
+height leaves the card at its own natural content-driven height instead. */
+.body-article-card {
+  width: var(--card-width);
+  max-width: 100%;
+}
+
+.body-article-card--fixed-height {
+  height: var(--card-height);
+  overflow: hidden;
+}
+
+/* Editor-chosen width/height are desktop-only concerns -- on a phone the
+card should just use the page's own given width and size to its content,
+same reasoning as .newsbar-layout's own cards (newsbar_layout.css)
+already not being sized by a fixed rem value at this width. overflow:
+visible (not hidden) since height is back to auto here: nothing needs
+clipping any more, and hidden would otherwise still clip this card's own
+hover-lift/shadow, which paints slightly outside its border box. */
+@media (max-width: 480px) {
+  .body-article-card,
+  .body-article-card--fixed-height {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+}
 
 /* editor-picked list_style (article_body_blocks.html's own "Show as list
 item" toggle, see ArticleBlockStyle.list_style) -- title left, meta as a

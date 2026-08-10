@@ -211,14 +211,56 @@ already centers itself explicitly, everywhere it's used. */
   margin: 0;
   font-size: 1.1rem;
   color: var(--color-text);
+  /* a long single unbroken word (no spaces to wrap at otherwise) would
+  overflow the card and get raw-clipped by its own overflow:hidden above --
+  same reasoning as .title-banner h1's own overflow-wrap further down this
+  file. */
+  overflow-wrap: break-word;
 }
 
 /* a category_card block's own width is a free-form rem number (editor
-picks it via width_rem), set via inline style in article_body_blocks.html/
-article_column_content.html -- .category-card's own "flex: 0 1 14rem" only
-means anything as a flex *item* (inside .category-grid), so standalone it
-needs its own explicit width instead, same pattern as articlecard.css's
-own .body-article-card. */
+picks it via width_rem) -- carried in as a --card-width custom property
+(article_body_blocks.html/article_column_content.html) rather than a
+literal inline width, so the 480px override below can win over it at
+normal specificity instead of needing !important to beat an inline style.
+.category-card's own "flex: 0 1 14rem" only means anything as a flex
+*item* (inside .category-grid), so standalone it needs its own explicit
+width instead, same pattern as articlecard.css's own .body-article-card. */
+.body-category-card {
+  width: var(--card-width);
+  max-width: 100%;
+}
+
+.body-category-card--fixed-height {
+  height: var(--card-height);
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .body-category-card,
+  .body-category-card--fixed-height {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Compact list row on phone regardless of context (standalone in an
+  article body, or inside .category-grid's own listing pages) -- a
+  centered title tile with 1.5rem padding on every side ate too much
+  vertical space on a narrow screen for what's ultimately just a link with
+  a title. */
+  .category-card {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    min-height: 0;
+    padding: 0.6rem 0.9rem;
+  }
+
+  .category-card h2 {
+    font-size: 1rem;
+  }
+}
 
 .section-heading {
   margin-top: 2.5rem;

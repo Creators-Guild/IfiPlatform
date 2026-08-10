@@ -52,6 +52,10 @@
 .union-card h3 {
   margin: 0;
   font-size: 1.05rem;
+  /* a long single unbroken union name (no spaces to wrap at otherwise)
+  would overflow the card and get raw-clipped by its own overflow:hidden
+  above. */
+  overflow-wrap: break-word;
 }
 
 .union-card-logo,
@@ -97,8 +101,56 @@
 }
 
 /* a union_card block's own width is a free-form rem number (editor picks
-it via width_rem), set via inline style in article_body_blocks.html/
-article_column_content.html -- .union-card's own "flex: 0 1 14rem" only
-means anything as a flex *item* (inside .union-grid), so standalone it
-needs its own explicit width instead, same pattern as articlecard.css's
-own .body-article-card. */
+it via width_rem) -- carried in as a --card-width custom property
+(article_body_blocks.html/article_column_content.html) rather than a
+literal inline width, so the 480px override below can win over it at
+normal specificity instead of needing !important to beat an inline style.
+.union-card's own "flex: 0 1 14rem" only means anything as a flex *item*
+(inside .union-grid), so standalone it needs its own explicit width
+instead, same pattern as articlecard.css's own .body-article-card. */
+.body-union-card {
+  width: var(--card-width);
+  max-width: 100%;
+}
+
+.body-union-card--fixed-height {
+  height: var(--card-height);
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .body-union-card,
+  .body-union-card--fixed-height {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Compact row on phone regardless of context (standalone in an article
+  body, or inside .union-grid's own listing pages) -- the vertical-stack
+  layout's fixed 5rem circular logo plus 1.5rem padding on every side
+  made this the single biggest space user on a narrow screen among all
+  four card types; a leaner row fixes that directly. */
+  .union-card {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .union-card-logo,
+  .union-card-logo--placeholder {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+  }
+
+  .union-card h3 {
+    font-size: 0.95rem;
+  }
+
+  .union-type-badge {
+    display: none;
+  }
+}

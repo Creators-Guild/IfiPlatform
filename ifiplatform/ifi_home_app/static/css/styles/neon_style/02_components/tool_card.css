@@ -56,7 +56,13 @@
 
 .tool-card-image {
   width: 100%;
-  height: 9rem;
+  /* was a fixed 9rem -- didn't scale with the card's own width at all, so
+  a narrow editor-chosen width_rem (or the new forced 100% mobile width
+  below) distorted/over-cropped it independent of anything the box's
+  actual proportions called for. aspect-ratio keeps it proportioned the
+  same way every other card's own image already is (e.g. .articlecard
+  img's 8/5, articlecard.css). */
+  aspect-ratio: 16 / 9;
   object-fit: cover;
 }
 
@@ -72,6 +78,10 @@
   margin: 0;
   font-size: 1rem;
   font-weight: bold;
+  /* a long single unbroken tool name (no spaces to wrap at otherwise)
+  would overflow the card and get raw-clipped by its own overflow:hidden
+  above. */
+  overflow-wrap: break-word;
 }
 
 .tool-card-maker {
@@ -86,8 +96,53 @@
 }
 
 /* a tool_card block's own width is a free-form rem number (editor picks
-it via width_rem), set via inline style in article_body_blocks.html/
-article_column_content.html -- .tool-card's own "flex: 0 1 18rem" only
-means anything as a flex *item* (inside .tool-grid), so standalone it
-needs its own explicit width instead, same pattern as articlecard.css's
-own .body-article-card. */
+it via width_rem) -- carried in as a --card-width custom property
+(article_body_blocks.html/article_column_content.html) rather than a
+literal inline width, so the 480px override below can win over it at
+normal specificity instead of needing !important to beat an inline style.
+.tool-card's own "flex: 0 1 18rem" only means anything as a flex *item*
+(inside .tool-grid), so standalone it needs its own explicit width
+instead, same pattern as articlecard.css's own .body-article-card. */
+.body-tool-card {
+  width: var(--card-width);
+  max-width: 100%;
+}
+
+.body-tool-card--fixed-height {
+  height: var(--card-height);
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .body-tool-card,
+  .body-tool-card--fixed-height {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Compact row on phone regardless of context (standalone in an article
+  body, or inside .tool-grid's own listing pages) -- image beside title/
+  maker instead of stacked above, so the card doesn't need a full image's
+  worth of extra height just to show a small amount of text. */
+  .tool-card {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .tool-card-image {
+    width: 4rem;
+    height: 4rem;
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
+  }
+
+  .tool-card-body {
+    padding: 0.5rem 0.75rem;
+    gap: 0.15rem;
+  }
+
+  .tool-card-link-hint {
+    display: none;
+  }
+}

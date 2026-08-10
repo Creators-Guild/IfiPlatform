@@ -24,11 +24,11 @@ Usage: {% include "info_articles/partials/article_column_content.html" with cont
     {% elif sub.block_type == "article_card" %}
         {% with chosen=sub.value.article style=block_styles|lookup:sub.id %}
         {% if chosen %}
-        <div class="body-article-card{% if can_edit_style %} editable-block{% endif %}"
+        <div class="body-article-card{% if style.height_rem %} body-article-card--fixed-height{% endif %}{% if can_edit_style %} editable-block{% endif %}"
              {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="article_card"
              data-width-rem="{{ style.width_rem|unlocalize }}" data-height-rem="{{ style.height_rem|unlocalize }}"
              data-list-style="{{ style.list_style|yesno:"true,false" }}" data-fixed-ratio="{{ style.fixed_ratio|yesno:"true,false" }}"{% endif %}
-             style="width: {{ style.width_rem|unlocalize }}rem; max-width: 100%;{% if style.height_rem %} height: {{ style.height_rem|unlocalize }}rem; overflow: hidden;{% endif %}">
+             style="--card-width: {{ style.width_rem|unlocalize }}rem;{% if style.height_rem %} --card-height: {{ style.height_rem|unlocalize }}rem;{% endif %}">
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             {% include "info_articles/partials/article_card.html" with article=chosen.specific list_style=style.list_style fixed_ratio=style.fixed_ratio %}
         </div>
@@ -37,10 +37,10 @@ Usage: {% include "info_articles/partials/article_column_content.html" with cont
     {% elif sub.block_type == "category_card" %}
         {% with chosen=sub.value.category style=block_styles|lookup:sub.id %}
         {% if chosen %}
-        <div class="body-category-card{% if can_edit_style %} editable-block{% endif %}"
+        <div class="body-category-card{% if style.height_rem %} body-category-card--fixed-height{% endif %}{% if can_edit_style %} editable-block{% endif %}"
              {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="category_card"
              data-width-rem="{{ style.width_rem|unlocalize }}" data-height-rem="{{ style.height_rem|unlocalize }}"{% endif %}
-             style="width: {{ style.width_rem|unlocalize }}rem; max-width: 100%;{% if style.height_rem %} height: {{ style.height_rem|unlocalize }}rem; overflow: hidden;{% endif %}">
+             style="--card-width: {{ style.width_rem|unlocalize }}rem;{% if style.height_rem %} --card-height: {{ style.height_rem|unlocalize }}rem;{% endif %}">
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             {% include "info_articles/partials/category_card.html" with category=chosen.specific %}
         </div>
@@ -49,10 +49,10 @@ Usage: {% include "info_articles/partials/article_column_content.html" with cont
     {% elif sub.block_type == "union_card" %}
         {% with chosen=sub.value.union style=block_styles|lookup:sub.id %}
         {% if chosen %}
-        <div class="body-union-card{% if can_edit_style %} editable-block{% endif %}"
+        <div class="body-union-card{% if style.height_rem %} body-union-card--fixed-height{% endif %}{% if can_edit_style %} editable-block{% endif %}"
              {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="union_card"
              data-width-rem="{{ style.width_rem|unlocalize }}" data-height-rem="{{ style.height_rem|unlocalize }}"{% endif %}
-             style="width: {{ style.width_rem|unlocalize }}rem; max-width: 100%;{% if style.height_rem %} height: {{ style.height_rem|unlocalize }}rem; overflow: hidden;{% endif %}">
+             style="--card-width: {{ style.width_rem|unlocalize }}rem;{% if style.height_rem %} --card-height: {{ style.height_rem|unlocalize }}rem;{% endif %}">
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             {% include "info_articles/partials/union_card.html" with union=chosen.specific %}
         </div>
@@ -61,10 +61,10 @@ Usage: {% include "info_articles/partials/article_column_content.html" with cont
     {% elif sub.block_type == "tool_card" %}
         {% with chosen=sub.value.tool style=block_styles|lookup:sub.id %}
         {% if chosen %}
-        <div class="body-tool-card{% if can_edit_style %} editable-block{% endif %}"
+        <div class="body-tool-card{% if style.height_rem %} body-tool-card--fixed-height{% endif %}{% if can_edit_style %} editable-block{% endif %}"
              {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="tool_card"
              data-width-rem="{{ style.width_rem|unlocalize }}" data-height-rem="{{ style.height_rem|unlocalize }}"{% endif %}
-             style="width: {{ style.width_rem|unlocalize }}rem; max-width: 100%;{% if style.height_rem %} height: {{ style.height_rem|unlocalize }}rem; overflow: hidden;{% endif %}">
+             style="--card-width: {{ style.width_rem|unlocalize }}rem;{% if style.height_rem %} --card-height: {{ style.height_rem|unlocalize }}rem;{% endif %}">
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             {% include "info_articles/partials/tool_card.html" with tool=chosen.specific %}
         </div>

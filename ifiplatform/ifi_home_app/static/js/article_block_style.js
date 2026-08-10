@@ -128,6 +128,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // special-cased save endpoint as article_header/hero_image.
     toc_icon: ["toc_icon_size"],
   };
+  // wrapper <div> class prefix for each card block type (article_body_blocks.html/
+  // article_column_content.html) -- these blocks' width/height live-preview (below)
+  // sets CSS custom properties on the wrapper (--card-width/--card-height) rather
+  // than a literal inline width/height, so a mobile breakpoint's own CSS can
+  // override them at normal specificity instead of having to fight an inline style.
+  const CARD_WRAPPER_CLASS = {
+    article_card: "body-article-card",
+    category_card: "body-category-card",
+    union_card: "body-union-card",
+    tool_card: "body-tool-card",
+  };
   const CLASS_SWAP = {
     heading: { alignment: { prefix: "heading--align-", values: ["left", "center", "right"] } },
     paragraph: { alignment: { prefix: "prose--align-", values: ["left", "center", "right"] } },
@@ -1689,21 +1700,38 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!currentBlockEl) {
       return;
     }
-    currentBlockEl.style.width = `${widthInput.value}rem`;
+    // Card blocks (CARD_WRAPPER_CLASS above) drive their width from a
+    // --card-width custom property instead of a literal inline width --
+    // everything else (just "image" today) keeps the plain inline style.
+    if (CARD_WRAPPER_CLASS[currentBlockEl.dataset.blockType]) {
+      currentBlockEl.style.setProperty("--card-width", `${widthInput.value}rem`);
+    } else {
+      currentBlockEl.style.width = `${widthInput.value}rem`;
+    }
     currentBlockEl.dataset.widthRem = widthInput.value;
     widthValue.textContent = widthInput.value;
     positionTextTriggers();
     recordPendingEdit();
   });
 
-  // card blocks only -- 0 means auto (drop the inline height/overflow
-  // entirely, back to the card's own natural content-driven height).
+  // card blocks only -- 0 means auto (drop the fixed-height custom property
+  // and its modifier class entirely, back to the card's own natural
+  // content-driven height).
   heightInput.addEventListener("input", () => {
     if (!currentBlockEl) {
       return;
     }
     const height = parseFloat(heightInput.value);
-    if (height > 0) {
+    const wrapperClass = CARD_WRAPPER_CLASS[currentBlockEl.dataset.blockType];
+    if (wrapperClass) {
+      if (height > 0) {
+        currentBlockEl.style.setProperty("--card-height", `${heightInput.value}rem`);
+        currentBlockEl.classList.add(`${wrapperClass}--fixed-height`);
+      } else {
+        currentBlockEl.style.removeProperty("--card-height");
+        currentBlockEl.classList.remove(`${wrapperClass}--fixed-height`);
+      }
+    } else if (height > 0) {
       currentBlockEl.style.height = `${heightInput.value}rem`;
       currentBlockEl.style.overflow = "hidden";
     } else {

@@ -156,6 +156,20 @@ this variant's own intentionally compact height. */
     gap: 0.5rem;
     padding: 0.35rem 0.5rem;
   }
+
+  /* Drops the base rule's aspect-ratio:5/4 lock (which derives the whole
+  card's height from its width) specifically at this width -- an expanded
+  (non--list) card's image+h3+meta+.articlecard-intro no longer had room
+  to actually fit inside that shrinking, width-derived box, and
+  overflow:hidden was clipping the intro rather than the card growing to
+  fit it. At this width the grid above is effectively always a single
+  column anyway (16rem is close to the practical per-card minimum), so
+  there's rarely a row-mate left to visually match in the first place --
+  content-driven height instead. */
+  .newsbar-layout .articlecard {
+    aspect-ratio: unset;
+    height: auto;
+  }
 }
 
 /* matches the 45rem breakpoint in home_layout.css where the two sections
