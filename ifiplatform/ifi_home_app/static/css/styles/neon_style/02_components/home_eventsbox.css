@@ -97,6 +97,49 @@ drops to its own line below the date, rather than trailing after it. */
   transform: translateY(-1px);
 }
 
+/* Hidden past the first 2 tags (home_eventsbox.html) until
+.home-eventsbox-unions gets .is-open (tap, dropdown_menu.js's shared
+setupTapToggle) or is hovered on a real-mouse device below -- a plain
+display:none/inline-block toggle rather than the max-height/opacity
+animation .home-eventsbox-subevents-list uses, since these are individual
+inline pills wrapping in a flex row, not a block list that needs to grow
+smoothly. */
+.home-eventsbox-union-tag--extra {
+  display: none;
+}
+
+.home-eventsbox-unions.is-open .home-eventsbox-union-tag--extra {
+  display: inline-block;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .home-eventsbox-unions--collapsible:hover .home-eventsbox-union-tag--extra {
+    display: inline-block;
+  }
+}
+
+.home-eventsbox-unions-toggle {
+  /* position:relative + z-index, same reason as .home-eventsbox-union-tag
+  above -- sits above the row's stretched title link. */
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  font: inherit;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 999px;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.home-eventsbox-unions-toggle:hover {
+  color: var(--color-text);
+  border-color: var(--color-accent-hover);
+}
+
 /* flex-basis:100% so this drops to its own line, same as .home-eventsbox-
 unions/-title above -- no href of its own (see home_eventsbox.html's own
 comment), just text; the row's stretched link still covers it. */

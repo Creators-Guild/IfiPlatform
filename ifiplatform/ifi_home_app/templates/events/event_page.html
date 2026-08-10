@@ -18,6 +18,7 @@
 {% block maincontent %}
     {% include "info_articles/partials/article_breadcrumbs.html" %}
     <div class="event-page">
+      <div class="event-page-prose">
         <span class="event-type-badge event-type-badge--{{ page.event_type }}">
             {{ page.get_event_type_display }}
         </span>
@@ -26,7 +27,7 @@
         <div class="event-meta">
             <span>
                 {{ page.event_date }}{% if page.end_date %} &ndash; {{ page.end_date }}{% endif %}
-                {% if page.event_time %} {% trans "at" %} {{ page.event_time|time:"H:i" }}{% endif %}
+                {% if page.event_time %} {% trans "at" %} {{ page.event_time|time:"H:i" }}{% if page.event_end_time %}&ndash;{{ page.event_end_time|time:"H:i" }}{% endif %}{% endif %}
             </span>
             {% if page.location %}<span>{{ page.location }}</span>{% endif %}
         </div>
@@ -52,36 +53,111 @@
         {% if page.intro %}
             <div class="event-page-intro">{{ page.intro|richtext }}</div>
         {% endif %}
+      </div>
 
         {% if page.sub_events %}
             <h2>{% trans "Sub-events" %}</h2>
-            <ul class="event-list">
-                {% for sub_event in page.sub_events %}
-                    <li>
-                        <a class="event-list-item" href="{% pageurl sub_event %}">
-                            <span class="event-type-badge event-type-badge--{{ sub_event.event_type }}">
-                                {{ sub_event.get_event_type_display }}
-                            </span>
-                            <span class="event-list-title">{{ sub_event.title }}</span>
-                            <span class="event-list-date">
-                                {{ sub_event.event_date }}{% if sub_event.event_time %} {{ sub_event.event_time|time:"H:i" }}{% endif %}
-                            </span>
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
+            {% with calendar=page.calendar_days %}
+                {% if calendar.days %}
+                    {% if page.calendar_legend %}
+                        <div class="event-calendar-legend">
+                            {% for entry in page.calendar_legend %}
+                                <span class="event-calendar-legend-item">
+                                    <span class="event-calendar-legend-swatch event-calendar-block--{{ entry.value.color }}"></span>
+                                    {{ entry.value.label }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="event-calendar" style="--ec-hours: {{ calendar.hour_count }};">
+                        <div class="event-calendar-header">
+                            <div class="event-calendar-header-spacer"></div>
+                            {% for day in calendar.days %}
+                                <div class="event-calendar-header-day">{{ day.date|date:"D d.m" }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="event-calendar-body">
+                            <div class="event-calendar-hours">
+                                {% for mark in calendar.hour_marks %}
+                                    <div class="event-calendar-hour-label" style="top: {{ mark.top_pct }}%;">
+                                        {{ mark.hour }}:00
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="event-calendar-days">
+                                {% for day in calendar.days %}
+                                    <div class="event-calendar-day">
+                                        {% for block in day.events %}
+                                            <a class="event-calendar-block"
+                                               href="{% pageurl block.event %}"
+                                               style="top: {{ block.top_pct }}%; height: {{ block.height_pct }}%; left: {{ block.left_pct }}%; width: {{ block.width_pct }}%;">
+                                                <span class="event-calendar-block-inner event-calendar-block--{{ block.color_key }}"
+                                                      style="{% if block.color_hex %}background-color: {{ block.color_hex }};{% endif %}">
+                                                    <span class="event-calendar-block-title">{{ block.event.title }}</span>
+                                                    <span class="event-calendar-block-time">
+                                                        {{ block.event.event_time|time:"H:i" }}{% if block.event.event_end_time %}&ndash;{{ block.event.event_end_time|time:"H:i" }}{% endif %}
+                                                    </span>
+                                                </span>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if calendar.untimed %}
+                    <ul class="event-list event-list--untimed">
+                        {% for sub_event in calendar.untimed %}
+                            <li>
+                                <a class="event-list-item" href="{% pageurl sub_event %}">
+                                    <span class="event-type-badge event-type-badge--{{ sub_event.event_type }}">
+                                        {{ sub_event.get_event_type_display }}
+                                    </span>
+                                    <span class="event-list-title">{{ sub_event.title }}</span>
+                                    <span class="event-list-date">{{ sub_event.event_date }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
         {% endif %}
 
         {% if page.related_unions %}
             <h2>{% trans "Involved Unions" %}</h2>
+
+            {% comment %}
+            Host(s) get their own row above everyone else -- role isn't just
+            a label here, it's the whole point of splitting the section this
+            way, so whoever's actually running the event doesn't just blend
+            into the same wrapped grid as every collaborator. Two separate
+            passes over the same StreamField (once per role group) rather than
+            one combined loop, since a plain {% templatetag openblock %} for
+            {% templatetag closeblock %} can't filter/group on its own.
+            {% endcomment %}
+            <div class="event-union-list event-union-list--host">
+                {% for entry in page.related_unions %}
+                    {% with union=entry.value.union.specific role=entry.value.role %}
+                        {% if union and role == "host" %}
+                            <div class="event-union-entry">
+                                <span class="event-union-role">{% trans "Host" %}</span>
+                                {% include "info_articles/partials/union_card.html" with union=union %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% endfor %}
+            </div>
+
             <div class="event-union-list">
                 {% for entry in page.related_unions %}
                     {% with union=entry.value.union.specific role=entry.value.role %}
-                        {% if union %}
+                        {% if union and role != "host" %}
                             <div class="event-union-entry">
                                 <span class="event-union-role">
-                                    {% if role == "host" %}{% trans "Host" %}
-                                    {% elif role == "contributor" %}{% trans "Contributor" %}
+                                    {% if role == "contributor" %}{% trans "Contributor" %}
                                     {% else %}{% trans "Collaborator" %}{% endif %}
                                 </span>
                                 {% include "info_articles/partials/union_card.html" with union=union %}
