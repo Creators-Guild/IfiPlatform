@@ -1807,6 +1807,10 @@ msgstr ""
 "Lenker kommer snart. OSS er ikke helt åpen ennå... (Hvorfor hyper du meg da "
 "opp så mye?)"
 
+#: .\templates\under_development.html:20
+msgid "IfiPlatform will become Open Source! Coming this autumn 2026!"
+msgstr "IfiPlattform blir Open Source! Kommer høsten 2026!"
+
 #: .\yourpage_app\templates\core\yourpage_main.html:10
 msgid "Welcome to the Your Page"
 msgstr "Velkommen til din side"

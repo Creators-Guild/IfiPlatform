@@ -1760,6 +1760,10 @@ msgid ""
 "then?)"
 msgstr ""
 
+#: .\templates\under_development.html:20
+msgid "IfiPlatform will become Open Source! Coming this autumn 2026!"
+msgstr ""
+
 #: .\yourpage_app\templates\core\yourpage_main.html:10
 #, fuzzy
 #| msgid "Welcome to the Ifi Home Page"
