@@ -72,6 +72,118 @@ EVENT_SPECS = [
     ("DNB Bedriftspresentasjon med Navet", "company", 20, "16:00", None),
 ]
 
+# Fadderuke's own week-calendar color legend (see EventPage.calendar_legend's
+# docstring) -- one entry per calendar_color actually used in
+# FADDERUKE_SUB_EVENT_SPECS below.
+FADDERUKE_LEGEND = [
+    ("blue", "Relevant for studiet"),
+    ("yellow", "Mat"),
+    ("orange", "Alkoholfritt"),
+    ("pink", "Med eller uten alkohol"),
+    ("green", "Felles for hele MatNat"),
+]
+
+# (days-from-Fadderuke's-own-event_date, title, event_type, start "HH:MM",
+# end "HH:MM", calendar_color) -- a full Mon-Fri Fadderuke programme, so
+# EventPage.calendar_days has a realistic week to lay out instead of just
+# the lone parent event. Titles that would otherwise repeat under the same
+# parent (Lunsj, Forkurs, Grill n' chill) get a day/time qualifier purely to
+# stay unique per (parent, slug, locale) -- see _get_or_create_page.
+FADDERUKE_SUB_EVENT_SPECS = [
+    (0, "Oppmøteregistrering", "academic", "09:00", "10:00", "blue"),
+    (0, "Programvis opplegg (formiddag)", "academic", "10:00", "12:00", "blue"),
+    (0, "Lunsj med fadderne", "social", "12:00", "13:00", "yellow"),
+    (0, "Programvis opplegg (ettermiddag)", "academic", "13:00", "15:00", "blue"),
+    (0, "Tale på universitetsplassen", "academic", "15:00", "16:00", "blue"),
+    (0, "Grill n' chill (mandag)", "social", "16:00", "17:00", "yellow"),
+    (0, "Quiz m/CYB", "social", "18:00", "19:00", "pink"),
+    (0, "Brettspillkveld m/FUI", "social", "18:00", "21:00", "orange"),
+    (1, "Forkurs (tirsdag)", "academic", "09:00", "12:30", "blue"),
+    (1, "Lunsj (tirsdag)", "social", "12:00", "13:00", "yellow"),
+    (1, "IFI-Olympiaden", "social", "13:00", "16:00", "orange"),
+    (1, "Grill n' chill + Kåring av Olympiadevinner", "social", "16:00", "17:00", "yellow"),
+    (1, "Kickoff m/ Navet", "social", "17:30", "19:30", "pink"),
+    (1, "Spillkveld m/Progsys", "social", "18:00", "21:00", "pink"),
+    (1, "Musikkbingo m/MAKI", "social", "18:00", "21:00", "orange"),
+    (2, "Forkurs (onsdag)", "academic", "09:00", "12:30", "blue"),
+    (2, "Lunsj (onsdag)", "social", "12:00", "13:00", "yellow"),
+    (2, "How to IFI m/FUI", "academic", "13:00", "14:00", "orange"),
+    (2, "Introduksjon til foreningslivet m/FU", "social", "14:00", "15:00", "orange"),
+    (2, "Foreningstorg", "social", "14:00", "16:00", "orange"),
+    (2, "Grill n' chill (onsdag)", "social", "16:00", "17:00", "yellow"),
+    (2, "Temafest m/Dagen@ifi", "social", "18:00", "21:00", "pink"),
+    (3, "Lunsj + Speedfriending m/Fadderstyret", "social", "12:00", "13:00", "yellow"),
+    (3, "Gaffaregatt m/Mikro", "social", "13:00", "16:00", "orange"),
+    (3, "Volleyballturnering m/VIFI", "social", "13:00", "16:00", "orange"),
+    (3, "Kaffesmaking m/CYB & kaffeforeningen", "social", "14:00", "16:00", "orange"),
+    (3, "Grill n' chill (torsdag)", "social", "16:00", "17:00", "yellow"),
+    (3, "Paint & Sip m/Defi", "social", "18:00", "21:00", "pink"),
+    (3, "Realstart! Felles kveld for hele MatNat!", "social", "19:00", "22:00", "green"),
+    (4, "Lunsj (fredag)", "social", "12:00", "13:00", "yellow"),
+    (4, "Shitty cars m/Sonen", "social", "13:00", "15:00", "orange"),
+    (4, "Fotballturnering m/FIFI", "social", "13:00", "16:00", "orange"),
+    (4, "2000-Meter m/Digitus", "social", "15:00", "16:00", "pink"),
+    (4, "Grill n' chill + Kakefredag m/Progsys", "social", "16:00", "17:00", "yellow"),
+    (4, "CTRL+ALT+DEL m/CYB", "social", "18:00", "21:00", "pink"),
+]
+
+# Shown in Fadderuke's own homepage dropdown (see
+# EventPage.highlighted_sub_events) -- just the one event common to all of
+# MatNat, not every sub-event.
+FADDERUKE_HIGHLIGHTED_TITLES = {"Realstart! Felles kveld for hele MatNat!"}
+
+# Student unions referenced by the "m/XXX" abbreviations in
+# FADDERUKE_SUB_EVENT_SPECS's titles above -- created as minimal UnionPage
+# children of the same Studentforeninger category as Testforening 1/2, with
+# just enough fields filled in to be a real page (see _seed_fadderuke_unions).
+FADDERUKE_UNION_SPECS = [
+    "CYB", "FUI", "Progsys", "MAKI", "VIFI", "FU", "Mikro", "Defi",
+    "Sonen", "FIFI", "Digitus", "Navet", "Fadderstyret", "Dagen@ifi",
+]
+
+# Sub-event title -> [(union title, role), ...] for EventPage.related_unions
+# -- "host" for the union directly named in the sub-event's own title,
+# "contributor"/"collaborator" used on a couple of entries (Foreningstorg,
+# Realstart!) to also demo those roles and multi-union entries. Sub-events
+# not listed here (Lunsj, Grill n' chill, ...) are deliberately left
+# union-less -- nobody specific "hosts" the cafeteria lunch.
+FADDERUKE_SUB_EVENT_UNIONS = {
+    "Oppmøteregistrering": [("Fadderstyret", "host")],
+    "Programvis opplegg (formiddag)": [("Fadderstyret", "host")],
+    "Programvis opplegg (ettermiddag)": [("Fadderstyret", "host")],
+    "Tale på universitetsplassen": [("Fadderstyret", "host")],
+    "Quiz m/CYB": [("CYB", "host")],
+    "Brettspillkveld m/FUI": [("FUI", "host")],
+    "Forkurs (tirsdag)": [("Fadderstyret", "host")],
+    "IFI-Olympiaden": [("Fadderstyret", "host")],
+    "Kickoff m/ Navet": [("Navet", "host")],
+    "Spillkveld m/Progsys": [("Progsys", "host")],
+    "Musikkbingo m/MAKI": [("MAKI", "host")],
+    "Forkurs (onsdag)": [("Fadderstyret", "host")],
+    "How to IFI m/FUI": [("FUI", "host")],
+    "Introduksjon til foreningslivet m/FU": [("FU", "host")],
+    "Foreningstorg": [
+        ("CYB", "contributor"), ("FUI", "contributor"),
+        ("Progsys", "contributor"), ("VIFI", "contributor"),
+    ],
+    "Temafest m/Dagen@ifi": [("Dagen@ifi", "host")],
+    "Lunsj + Speedfriending m/Fadderstyret": [("Fadderstyret", "host")],
+    "Gaffaregatt m/Mikro": [("Mikro", "host")],
+    "Volleyballturnering m/VIFI": [("VIFI", "host")],
+    "Kaffesmaking m/CYB & kaffeforeningen": [("CYB", "host")],
+    "Paint & Sip m/Defi": [("Defi", "host")],
+    "Realstart! Felles kveld for hele MatNat!": [
+        ("Fadderstyret", "host"),
+        ("CYB", "collaborator"),
+        ("Progsys", "collaborator"),
+    ],
+    "Shitty cars m/Sonen": [("Sonen", "host")],
+    "Fotballturnering m/FIFI": [("FIFI", "host")],
+    "2000-Meter m/Digitus": [("Digitus", "host")],
+    "Grill n' chill + Kakefredag m/Progsys": [("Progsys", "host")],
+    "CTRL+ALT+DEL m/CYB": [("CYB", "host")],
+}
+
 BANNER_TEXT = "Welcome to your local dev server"
 
 LOREM_IPSUM = (
@@ -119,6 +231,53 @@ TRANSLATIONS = {
     "Bar til bar": "Bar crawl",
     "Frist for funk-oppmelding for Dagen@IFI": "Deadline: Dagen@IFI committee signup",
     "DNB Bedriftspresentasjon med Navet": "DNB company presentation with Navet",
+    # Fadderuke's own calendar-color legend (FADDERUKE_LEGEND).
+    "Relevant for studiet": "Relevant to Studies",
+    "Mat": "Food",
+    "Alkoholfritt": "Non-alcoholic",
+    "Med eller uten alkohol": "With or without alcohol",
+    "Felles for hele MatNat": "Common to the entire MatNat",
+    # Fadderuke sub-events (FADDERUKE_SUB_EVENT_SPECS).
+    "Oppmøteregistrering": "Check-in",
+    "Programvis opplegg (formiddag)": "Programme-specific session (morning)",
+    "Lunsj med fadderne": "Lunch with the mentors",
+    "Programvis opplegg (ettermiddag)": "Programme-specific session (afternoon)",
+    "Tale på universitetsplassen": "Speech at the University Square",
+    "Grill n' chill (mandag)": "Grill n' chill (Monday)",
+    "Quiz m/CYB": "Quiz w/CYB",
+    "Brettspillkveld m/FUI": "Board game night w/FUI",
+    "Forkurs (tirsdag)": "Pre-course (Tuesday)",
+    "Lunsj (tirsdag)": "Lunch (Tuesday)",
+    "IFI-Olympiaden": "The IFI Olympics",
+    "Grill n' chill + Kåring av Olympiadevinner": "Grill n' chill + Olympics winner announcement",
+    "Kickoff m/ Navet": "Kickoff w/ Navet",
+    "Spillkveld m/Progsys": "Games night w/Progsys",
+    "Musikkbingo m/MAKI": "Music bingo w/MAKI",
+    "Forkurs (onsdag)": "Pre-course (Wednesday)",
+    "Lunsj (onsdag)": "Lunch (Wednesday)",
+    "How to IFI m/FUI": "How to IFI w/FUI",
+    "Introduksjon til foreningslivet m/FU": "Intro to student union life w/FU",
+    "Foreningstorg": "Student union fair",
+    "Grill n' chill (onsdag)": "Grill n' chill (Wednesday)",
+    "Temafest m/Dagen@ifi": "Theme party w/Dagen@ifi",
+    "Lunsj + Speedfriending m/Fadderstyret": "Lunch + Speedfriending w/the Mentor Committee",
+    "Gaffaregatt m/Mikro": "Gaffaregatt w/Mikro",
+    "Volleyballturnering m/VIFI": "Volleyball tournament w/VIFI",
+    "Kaffesmaking m/CYB & kaffeforeningen": "Coffee tasting w/CYB & the coffee student union",
+    "Grill n' chill (torsdag)": "Grill n' chill (Thursday)",
+    "Paint & Sip m/Defi": "Paint & Sip w/Defi",
+    "Realstart! Felles kveld for hele MatNat!": "Realstart! Joint evening for all of MatNat!",
+    "Lunsj (fredag)": "Lunch (Friday)",
+    "Shitty cars m/Sonen": "Shitty cars w/Sonen",
+    "Fotballturnering m/FIFI": "Football tournament w/FIFI",
+    "2000-Meter m/Digitus": "2000m race w/Digitus",
+    "Grill n' chill + Kakefredag m/Progsys": "Grill n' chill + Cake Friday w/Progsys",
+    "CTRL+ALT+DEL m/CYB": "CTRL+ALT+DEL w/CYB",
+    # Fadderuke-hosting unions (FADDERUKE_UNION_SPECS) -- most are
+    # abbreviations/proper names left as-is; only Fadderstyret has a real
+    # English equivalent worth translating.
+    "Fadderstyret": "The Mentor Committee",
+    "En studentforening ved Ifi generert av seed-scriptet.": "A student union at Ifi generated by the seed script.",
 }
 
 ARTICLE_BODY = [
@@ -235,7 +394,7 @@ class Command(BaseCommand):
             elif title == "Praktisk":
                 self._seed_tool(category, nb_locale, en_locale, seed_image)
 
-        self._seed_events(artikkler, nb_locale, en_locale)
+        self._seed_events(artikkler, nb_locale, en_locale, seed_image)
 
         self._sync_english_locale(nb_locale, en_locale)
 
@@ -310,15 +469,24 @@ class Command(BaseCommand):
             )
             self._translate_page(article, en_locale)
 
-    def _seed_events(self, artikkler, nb_locale, en_locale):
+    def _seed_events(self, artikkler, nb_locale, en_locale, seed_image):
         event_index = self._get_or_create_page(
             artikkler, EventIndexPage, "Arrangementer", nb_locale,
         )
         self._translate_page(event_index, en_locale)
 
         today = timezone.now().date()
+        fadderuke = None
         for title, event_type, offset_days, time_str, end_offset_days in EVENT_SPECS:
-            event_date = today + timedelta(days=offset_days)
+            # Fadderuke's sub-events (FADDERUKE_SUB_EVENT_SPECS) are a Mon-Fri
+            # programme, so Fadderuke itself always starts on the next Monday
+            # rather than EVENT_SPECS's plain offset -- otherwise its week
+            # would land on arbitrary weekdays depending on when this command
+            # happens to run.
+            if title == "Fadderuke":
+                event_date = today + timedelta(days=(7 - today.weekday()) % 7)
+            else:
+                event_date = today + timedelta(days=offset_days)
             event = self._get_or_create_page(
                 event_index, EventPage, title, nb_locale,
                 event_type=event_type,
@@ -332,6 +500,67 @@ class Command(BaseCommand):
                 ),
             )
             self._translate_page(event, en_locale)
+            if title == "Fadderuke":
+                fadderuke = event
+
+        self._seed_fadderuke_sub_events(fadderuke, nb_locale, en_locale, seed_image)
+
+    def _seed_fadderuke_unions(self, nb_locale, en_locale, seed_image):
+        """Creates the minimal UnionPage per name in FADDERUKE_UNION_SPECS
+        (as children of the same Studentforeninger category Testforening
+        1/2 live under), for FADDERUKE_SUB_EVENT_UNIONS to link sub-events
+        to via EventPage.related_unions. Returns {title: nb UnionPage}."""
+        union_category = StudentUnionCategoryPage.objects.get(
+            slug="studentforeninger", locale=nb_locale
+        )
+        unions = {}
+        for title in FADDERUKE_UNION_SPECS:
+            union = self._get_or_create_page(
+                union_category, UnionPage, title, nb_locale,
+                logo=seed_image,
+                purpose="En studentforening ved Ifi generert av seed-scriptet.",
+                union_type="general",
+            )
+            self._translate_page(union, en_locale)
+            unions[title] = union
+        return unions
+
+    def _seed_fadderuke_sub_events(self, fadderuke, nb_locale, en_locale, seed_image):
+        """Fills Fadderuke with a full Mon-Fri programme (see
+        FADDERUKE_SUB_EVENT_SPECS) and its own calendar-color legend, so
+        EventPage.calendar_days has a realistic week to lay out instead of
+        just the lone parent event."""
+        if not fadderuke.calendar_legend:
+            fadderuke.calendar_legend = [
+                ("entry", {"color": color, "label": label})
+                for color, label in FADDERUKE_LEGEND
+            ]
+            fadderuke.save_revision().publish()
+
+        unions = self._seed_fadderuke_unions(nb_locale, en_locale, seed_image)
+
+        for day_offset, title, event_type, start, end, color in FADDERUKE_SUB_EVENT_SPECS:
+            event_date = fadderuke.event_date + timedelta(days=day_offset)
+            sub_event = self._get_or_create_page(
+                fadderuke, EventPage, title, nb_locale,
+                event_type=event_type,
+                event_date=event_date,
+                event_time=datetime.strptime(start, "%H:%M").time(),
+                event_end_time=datetime.strptime(end, "%H:%M").time(),
+                calendar_color=color,
+                show_on_homepage=False,
+                is_highlighted=title in FADDERUKE_HIGHLIGHTED_TITLES,
+            )
+
+            union_roles = FADDERUKE_SUB_EVENT_UNIONS.get(title)
+            if union_roles and not sub_event.related_unions:
+                sub_event.related_unions = [
+                    ("union", {"union": unions[union_title], "role": role})
+                    for union_title, role in union_roles
+                ]
+                sub_event.save_revision().publish()
+
+            self._translate_page(sub_event, en_locale)
 
     def _seed_tool(self, praktisk_category, nb_locale, en_locale, seed_image):
         # core_views.main_view looks this category up by the hardcoded slug

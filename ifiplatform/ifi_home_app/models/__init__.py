@@ -8,9 +8,11 @@ __all__ = [
     "HomeBoardMessage",
     "EventIndexPage",
     "EventPage",
+    "GlossarySyncState",
 ]
 
 from .home_models import *
 from .article_models import ArticlePage, ArticleIndexPage
 from .site_models import HeaderMessage
 from .event_models import EventIndexPage, EventPage
+from .glossary_models import GlossarySyncState

@@ -265,5 +265,9 @@ WAGTAILLOCALIZE_MACHINE_TRANSLATOR = {
     "CLASS": "wagtail_localize.machine_translators.deepl.DeepLTranslator",
     "OPTIONS": {
         "AUTH_KEY": os.environ.get("DEEPL_API_KEY"),
+        # Set by `manage.py sync_deepl_glossary` -- see that command and
+        # ifi_home_app/deepl_glossary_terms.py. Left unset, DeepL just
+        # translates freely (a plain warning gets logged, not an error).
+        "GLOSSARY_IDS": {("NB", "EN"): os.environ.get("DEEPL_GLOSSARY_ID")},
     },
 }

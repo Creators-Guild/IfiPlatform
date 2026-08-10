@@ -1,0 +1,24 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+{% block titletag %}Machine-translate subtree{% endblock %}
+
+{% block content %}
+    {% include "wagtailadmin/shared/header.html" with title="Machine-translate subtree" subtitle=page.get_admin_display_title icon="doc-empty-inverse" %}
+
+    <div class="nice-padding">
+        <p>
+            This will create/update the English translation of "{{ page.get_admin_display_title }}"
+            {% if descendant_count %}
+                and its {{ descendant_count }} descendant page{{ descendant_count|pluralize }},
+            {% endif %}
+            fill in any missing text via DeepL, and publish{% if descendant_count %} each of them{% endif %} immediately.
+        </p>
+        <p>Segments that already have a translation are left untouched.</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="submit" value="Translate and publish" class="button" />
+            <a href="{% url 'wagtailadmin_pages:edit' page.id %}" class="button button-secondary">Cancel</a>
+        </form>
+    </div>
+{% endblock %}
