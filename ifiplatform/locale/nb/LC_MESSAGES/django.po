@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-09 21:56+0200\n"
+"POT-Creation-Date: 2026-08-10 02:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -276,7 +276,7 @@ msgstr ""
 "krediteres videre."
 
 #: .\account_app\templates\legal\privacy_policy.html:33
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:98
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:120
 msgid "Contact"
 msgstr "Kontakt"
 
@@ -479,26 +479,89 @@ msgstr "E-post bekreftet"
 msgid "Your account is now active. Welcome"
 msgstr "Kontoen din er nå aktiv. Velkommen"
 
-#: .\ifi_home_app\models\article_models.py:954
+#: .\ifi_home_app\models\article_models.py:955
 msgid "Unknown"
 msgstr "Ukjent"
+
+#: .\ifi_home_app\models\event_models.py:58
+#: .\ifi_home_app\templates\events\event_page.html:83
+msgid "Host"
+msgstr ""
+
+#: .\ifi_home_app\models\event_models.py:59
+#: .\ifi_home_app\templates\events\event_page.html:84
+msgid "Contributor"
+msgstr ""
+
+#: .\ifi_home_app\models\event_models.py:60
+#: .\ifi_home_app\templates\events\event_page.html:85
+msgid "Collaborator"
+msgstr ""
+
+#: .\ifi_home_app\models\event_models.py:97
+msgid "Social"
+msgstr ""
+
+#: .\ifi_home_app\models\event_models.py:98
+msgid "Deadline"
+msgstr ""
+
+#: .\ifi_home_app\models\event_models.py:99
+msgid "Academic"
+msgstr ""
+
+#: .\ifi_home_app\models\event_models.py:100
+msgid "Company presentation"
+msgstr ""
+
+#: .\ifi_home_app\models\event_models.py:101
+msgid "Other"
+msgstr ""
 
 #: .\ifi_home_app\templates\core\home_index.html:4
 #: .\ifi_home_app\templates\home_base.html:4
 msgid "Ifi Home"
 msgstr "Ifi Hjem"
 
-#: .\ifi_home_app\templates\core\home_index.html:17
+#: .\ifi_home_app\templates\core\home_index.html:19
 msgid "Latest News"
 msgstr "Siste Nyheter"
 
-#: .\ifi_home_app\templates\core\home_index.html:21
+#: .\ifi_home_app\templates\core\home_index.html:33
 msgid "Suggested Info Articles"
 msgstr "Foreslåtte Infoartikkler"
+
+#: .\ifi_home_app\templates\core\home_index.html:34
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:34
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:34
+msgid "Info Articles"
+msgstr "Infoartikkler"
+
+#: .\ifi_home_app\templates\core\home_index.html:42
+#, python-format
+msgid "This month at Ifi &ndash; %(current_month)s"
+msgstr ""
 
 #: .\ifi_home_app\templates\core\partials\home_articlesbar.html:13
 msgid "No articles yet or something is broken ;_;"
 msgstr "Ingen artikkler ennå, eller noe er ødelagt ;_;"
+
+#: .\ifi_home_app\templates\core\partials\home_eventsbox.html:32
+#: .\ifi_home_app\templates\events\event_page.html:29
+msgid "at"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\partials\home_eventsbox.html:76
+#: .\ifi_home_app\templates\core\partials\home_eventsbox.html:93
+#, python-format
+msgid "%(counter)s sub-event"
+msgid_plural "%(counter)s sub-events"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\ifi_home_app\templates\core\partials\home_eventsbox.html:100
+msgid "No upcoming events."
+msgstr ""
 
 #: .\ifi_home_app\templates\core\partials\home_messageboard.html:29
 #, fuzzy
@@ -547,8 +610,8 @@ msgstr "Nyheter"
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:21
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:37
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:49
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:61
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:74
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:62
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:81
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:23
 #: .\ifi_home_app\templates\info_articles\partials\article_sidemenu.html:38
 #: .\study_app\templates\core\partials\study_sidemenu.html:18
@@ -558,11 +621,6 @@ msgstr "Alle"
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:27
 msgid "No news yet"
 msgstr "Ingen nyheter ennå"
-
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:34
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:34
-msgid "Info Articles"
-msgstr "Infoartikkler"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:43
 msgid "No categories yet"
@@ -644,33 +702,56 @@ msgstr "Ifi Plattform"
 msgid "Ifi-Guild of Creators"
 msgstr "Ifi-Guild of Creators"
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:59
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:60
+#: .\ifi_home_app\templates\events\event_index_page.html:4
 msgid "Events"
 msgstr "Arrangementer"
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:63
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:70
 msgid "This Month"
 msgstr "Denne Måneden"
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:66
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:73
 msgid "Always at Ifi"
 msgstr "Alltid på Ifi"
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:72
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:79
 msgid "hELP"
 msgstr "hJELP"
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:76
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:83
 msgid "Ifi Platform Support"
 msgstr "Ifi Plattform-støtte"
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:79
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:86
 msgid "School Reception"
 msgstr "Skolens Resepsjon"
 
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:82
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:89
 msgid "Vaktsentralen"
 msgstr "Vaktsentralen"
+
+#: .\ifi_home_app\templates\events\event_index_page.html:42
+#, fuzzy
+#| msgid "No categories yet"
+msgid "No upcoming events yet."
+msgstr "Ingen kategorier ennå"
+
+#: .\ifi_home_app\templates\events\event_page.html:43
+#, fuzzy
+#| msgid "Sign In"
+msgid "Sign up"
+msgstr "Registrer deg"
+
+#: .\ifi_home_app\templates\events\event_page.html:57
+#, fuzzy
+#| msgid "Events"
+msgid "Sub-events"
+msgstr "Arrangementer"
+
+#: .\ifi_home_app\templates\events\event_page.html:76
+msgid "Involved Unions"
+msgstr ""
 
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:4
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:4
@@ -761,7 +842,7 @@ msgid "Edit block style"
 msgstr "Rediger blokkstil"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:140
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:76
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:83
 msgid "Published"
 msgstr "Publisert"
 
@@ -814,84 +895,90 @@ msgstr "forhåndsvisning"
 msgid "Preview"
 msgstr "Forhåndsvisning"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:28
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:29
 #: .\ifi_home_app\templates\info_articles\partials\union_card.html:20
 msgid "Retired"
 msgstr "Nedlagt"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:29
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:30
 #: .\ifi_home_app\templates\info_articles\partials\union_card.html:21
 msgid "Status unknown"
 msgstr "Status ukjent"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:32
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:33
 #: .\ifi_home_app\templates\info_articles\partials\union_card.html:24
 msgid "Closed"
 msgstr "Stengt"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:32
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:33
 #: .\ifi_home_app\templates\info_articles\partials\union_card.html:24
 msgid "Program-specific"
 msgstr "Programspesifikk"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:32
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:33
 #: .\ifi_home_app\templates\info_articles\partials\union_card.html:24
 msgid "Open to everyone"
 msgstr "Åpen for alle"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:46
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:47
 msgid "Purpose"
 msgstr "Formål"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:51
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:52
 msgid "Activities"
 msgstr "Aktiviteter"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:56
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:57
 msgid "Bylaws"
 msgstr "Vedtekter"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:61
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:62
 msgid "Full bylaws"
 msgstr "Fullstendige vedtekter"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:66
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:67
 msgid "Sitting Members"
 msgstr "Sittende Medlemmer"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:92
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:93
 msgid "Sign up / register interest"
 msgstr "Meld deg på / meld interesse"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:100
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:99
+#, fuzzy
+#| msgid "No categories yet"
+msgid "Upcoming Events"
+msgstr "Ingen kategorier ennå"
+
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:122
 msgid "Email"
 msgstr "E-post"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:103
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:125
 msgid "Website"
 msgstr "Nettside"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:108
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:130
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:108
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:130
 msgid "TikTok"
 msgstr "TikTok"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:108
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:130
 msgid "GitHub"
 msgstr "GitHub"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:117
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:139
 msgid "Members"
 msgstr "Medlemmer"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:122
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:144
 msgid "Sitting"
 msgstr "Sittende"
 
-#: .\ifi_home_app\templates\info_articles\pages\union_page.html:128
+#: .\ifi_home_app\templates\info_articles\pages\union_page.html:150
 msgid "Interns"
 msgstr "Interner"
 
@@ -910,12 +997,12 @@ msgstr "Vis eller skjul oppsettsalternativer"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:53
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:280
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:328
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:99
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:111
 msgid "Side padding"
 msgstr "Sidepolstring"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:58
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:95
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:115
 msgid "Width"
 msgstr "Bredde"
 
@@ -937,7 +1024,7 @@ msgstr "Boksfarge"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:502
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:562
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:589
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:146
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:158
 msgid "Light"
 msgstr "Lys"
 
@@ -950,7 +1037,7 @@ msgstr "Lys"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:503
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:563
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:590
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:147
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:159
 msgid "Turquoise"
 msgstr "Turkis"
 
@@ -963,7 +1050,7 @@ msgstr "Turkis"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:504
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:564
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:591
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:148
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:160
 msgid "Pink"
 msgstr "Rosa"
 
@@ -976,7 +1063,7 @@ msgstr "Rosa"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:505
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:565
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:592
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:149
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:161
 msgid "Purple"
 msgstr "Lilla"
 
@@ -989,7 +1076,7 @@ msgstr "Lilla"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:506
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:566
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:593
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:150
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:162
 msgid "Black"
 msgstr "Svart"
 
@@ -1002,7 +1089,7 @@ msgstr "Svart"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:508
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:568
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:595
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:152
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:164
 msgid "Custom hex color"
 msgstr "Egendefinert hex-farge"
 
@@ -1015,7 +1102,7 @@ msgstr "Egendefinert hex-farge"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:509
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:569
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:596
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:153
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:165
 msgid "Pick a custom color"
 msgstr "Velg en egendefinert farge"
 
@@ -1024,7 +1111,7 @@ msgid "Box corner rounding"
 msgstr "Avrunding av bokshjørner"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:103
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:100
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:120
 msgid "Height"
 msgstr "Høyde"
 
@@ -1049,7 +1136,7 @@ msgid "Icon size"
 msgstr "Ikonstørrelse"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:159
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:94
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:106
 msgid "Style"
 msgstr "Stil"
 
@@ -1058,7 +1145,7 @@ msgid "Column title"
 msgstr "Kolonnetittel"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:160
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:95
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:107
 msgid "Expand or collapse style options"
 msgstr "Vis eller skjul stilalternativer"
 
@@ -1068,7 +1155,7 @@ msgstr "Vis eller skjul stilalternativer"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:410
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:448
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:486
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:104
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:116
 msgid "Alignment"
 msgstr "Justering"
 
@@ -1078,7 +1165,7 @@ msgstr "Justering"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:412
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:450
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:488
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:106
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:118
 msgid "Left"
 msgstr "Venstre"
 
@@ -1088,7 +1175,7 @@ msgstr "Venstre"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:413
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:451
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:489
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:107
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:119
 msgid "Center"
 msgstr "Midtstilt"
 
@@ -1098,7 +1185,7 @@ msgstr "Midtstilt"
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:414
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:452
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:490
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:108
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:120
 msgid "Right"
 msgstr "Høyre"
 
@@ -1118,7 +1205,7 @@ msgid "Font size"
 msgstr "Skriftstørrelse"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:196
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:105
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:125
 msgid "Title font size"
 msgstr "Skriftstørrelse for tittel"
 
@@ -1240,8 +1327,8 @@ msgid "Margin outside box"
 msgstr "Margin utenfor boksen"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_block_style_mini_panel.html:622
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:161
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:112
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:173
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:132
 msgid "Reset to default"
 msgstr "Tilbakestill til standard"
 
@@ -1254,7 +1341,7 @@ msgid "Back"
 msgstr "Tilbake"
 
 #: .\ifi_home_app\templates\info_articles\partials\article_card.html:34
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:76
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:83
 msgid "Draft"
 msgstr "Utkast"
 
@@ -1275,41 +1362,46 @@ msgstr "Redigeringsmodus"
 msgid "Off"
 msgstr "Av"
 
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:35
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:36
 msgid "Global editor (editors only)"
 msgstr "Global redigering (kun for redaktører)"
 
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:37
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:30
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:38
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:31
 msgid "Minimize"
 msgstr "Minimer"
 
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:54
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:81
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:55
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:88
 msgid "Publish"
 msgstr "Publiser"
 
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:55
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:56
 msgid "Expand or collapse publish options"
 msgstr "Vis eller skjul publiseringsalternativer"
 
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:76
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:83
 msgid "Published (changes pending)"
 msgstr "Publisert (endringer venter)"
 
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:86
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:93
 msgid "Unpublish"
 msgstr "Avpubliser"
 
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:120
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:98
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:49
+msgid "Sync mirrored page"
+msgstr ""
+
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:132
 msgid "Only applies to blocks once you Save (see the floating save bar)."
 msgstr "Gjelder kun blokker når du lagrer (se den flytende lagringslinjen)."
 
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:124
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:136
 msgid "Font size multiplier"
 msgstr "Skriftstørrelsesmultiplikator"
 
-#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:142
+#: .\ifi_home_app\templates\info_articles\partials\article_quick_style_panel.html:154
 msgid "Background color"
 msgstr "Bakgrunnsfarge"
 
@@ -1339,57 +1431,57 @@ msgstr "Lagre endringer"
 msgid "Discard & leave"
 msgstr "Forkast og forlat"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:28
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:29
 msgid "Banner style (editors only)"
 msgstr "Bannerstil (kun for redaktører)"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:36
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:56
 msgid "Show banner"
 msgstr "Vis banner"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:48
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:68
 msgid "Colors"
 msgstr "Farger"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:49
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:69
 msgid "Expand or collapse color options"
 msgstr "Vis eller skjul fargealternativer"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:53
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:73
 msgid "Banner color"
 msgstr "Bannerfarge"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:56
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:76
 msgid "Banner color hex"
 msgstr "Bannerfarge hex"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:57
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:69
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:81
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:77
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:89
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:101
 msgid "Pick a color"
 msgstr "Velg en farge"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:65
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:85
 msgid "Dot color"
 msgstr "Prikkfarge"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:68
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:88
 msgid "Dot color hex"
 msgstr "Prikkfarge hex"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:77
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:97
 msgid "Title text color"
 msgstr "Titteltekstfarge"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:80
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:100
 msgid "Title text color hex"
 msgstr "Titteltekstfarge hex"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:90
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:110
 msgid "Size & Text"
 msgstr "Størrelse og tekst"
 
-#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:91
+#: .\ifi_home_app\templates\info_articles\partials\banner_style_panel.html:111
 msgid "Expand or collapse size options"
 msgstr "Vis eller skjul størrelsesalternativer"
 

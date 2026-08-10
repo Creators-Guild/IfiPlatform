@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/home_base.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_meta.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/union_page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/event_page.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
 {% endblock extra_head %}
 
@@ -90,6 +91,27 @@
                 {% if page.signup_url %}
                     <div class="union-info-box">
                         <a class="union-info-link union-info-link--signup" href="{{ page.signup_url }}" target="_blank" rel="noopener noreferrer">{% trans "Sign up / register interest" %}</a>
+                    </div>
+                {% endif %}
+
+                {% if upcoming_events %}
+                    <div class="union-info-box">
+                        <h2>{% trans "Upcoming Events" %}</h2>
+                        <ul class="event-list">
+                            {% for event in upcoming_events %}
+                                <li>
+                                    <a class="event-list-item" href="{% pageurl event %}">
+                                        <span class="event-type-badge event-type-badge--{{ event.event_type }}">
+                                            {{ event.get_event_type_display }}
+                                        </span>
+                                        <span class="event-list-title">{{ event.title }}</span>
+                                        <span class="event-list-date">
+                                            {{ event.event_date }}{% if event.event_time %} {{ event.event_time|time:"H:i" }}{% endif %}
+                                        </span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 {% endif %}
 

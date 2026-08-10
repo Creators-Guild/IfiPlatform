@@ -1,0 +1,95 @@
+{% extends "home_base.html" %}
+{% load i18n static wagtailcore_tags %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/home_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_meta.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/event_page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/union_card.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
+{% endblock extra_head %}
+
+{% block sidemenu %}
+    {% include "info_articles/partials/article_sidemenu.html" %}
+{% endblock sidemenu %}
+
+{% block maincontent %}
+    {% include "info_articles/partials/article_breadcrumbs.html" %}
+    <div class="event-page">
+        <span class="event-type-badge event-type-badge--{{ page.event_type }}">
+            {{ page.get_event_type_display }}
+        </span>
+        <h1>{{ page.title }}</h1>
+
+        <div class="event-meta">
+            <span>
+                {{ page.event_date }}{% if page.end_date %} &ndash; {{ page.end_date }}{% endif %}
+                {% if page.event_time %} {% trans "at" %} {{ page.event_time|time:"H:i" }}{% endif %}
+            </span>
+            {% if page.location %}<span>{{ page.location }}</span>{% endif %}
+        </div>
+
+        {% if page.info_tags.all %}
+            <div class="event-tag-list">
+                {% for tag in page.info_tags.all %}
+                    <span class="event-tag">{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if page.signup_url %}
+            <a class="event-signup-link" href="{{ page.signup_url }}" target="_blank" rel="noopener noreferrer">{% trans "Sign up" %}</a>
+        {% endif %}
+
+        {% if needs_translation %}
+            <div class="article-meta">
+                {% include "info_articles/partials/translation_warning.html" %}
+            </div>
+        {% endif %}
+
+        {% if page.intro %}
+            <div class="event-page-intro">{{ page.intro|richtext }}</div>
+        {% endif %}
+
+        {% if page.sub_events %}
+            <h2>{% trans "Sub-events" %}</h2>
+            <ul class="event-list">
+                {% for sub_event in page.sub_events %}
+                    <li>
+                        <a class="event-list-item" href="{% pageurl sub_event %}">
+                            <span class="event-type-badge event-type-badge--{{ sub_event.event_type }}">
+                                {{ sub_event.get_event_type_display }}
+                            </span>
+                            <span class="event-list-title">{{ sub_event.title }}</span>
+                            <span class="event-list-date">
+                                {{ sub_event.event_date }}{% if sub_event.event_time %} {{ sub_event.event_time|time:"H:i" }}{% endif %}
+                            </span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if page.related_unions %}
+            <h2>{% trans "Involved Unions" %}</h2>
+            <div class="event-union-list">
+                {% for entry in page.related_unions %}
+                    {% with union=entry.value.union.specific role=entry.value.role %}
+                        {% if union %}
+                            <div class="event-union-entry">
+                                <span class="event-union-role">
+                                    {% if role == "host" %}{% trans "Host" %}
+                                    {% elif role == "contributor" %}{% trans "Contributor" %}
+                                    {% else %}{% trans "Collaborator" %}{% endif %}
+                                </span>
+                                {% include "info_articles/partials/union_card.html" with union=union %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock maincontent %}

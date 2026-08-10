@@ -57,6 +57,12 @@ ifi_api_urlpatterns = [
         article_views.save_banner_style,
         name="page_banner_style",
     ),
+    # not article-specific either -- see EditorModeMixin.can_sync_mirrored_page.
+    path(
+        "api/pages/<int:page_id>/sync-mirrored/",
+        article_views.sync_mirrored_page,
+        name="page_sync_mirrored",
+    ),
 ]
 
 ifi_article_urlpatterns = [

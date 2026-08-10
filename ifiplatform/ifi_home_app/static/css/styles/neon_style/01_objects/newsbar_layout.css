@@ -2,11 +2,144 @@
   margin: 1rem 1em 0;
 }
 
+/* News/Info Articles headings only (not .newsbar-heading--events, the
+homepage events box's own heading in home_layout.css -- that one isn't
+centered) -- matches the .newsbar-layout grid below now centering its
+cards as a group instead of sitting flush-left. */
+.newsbar-heading--news,
+.newsbar-heading--articles {
+  text-align: center;
+  /* Always exactly one line -- reserving room for 2 left a permanent gap
+  under whichever heading only ever needed one, which was most of the
+  time. This way the common case (fits on one line) costs no extra space
+  at all, and on the rare occasion a heading is too long to fit, it
+  truncates with an ellipsis instead of wrapping and pushing the card grid
+  below it down -- same technique already used for each card's own title
+  (see articlecard.css's h3). A JS-driven shrink-to-fit (visually scaling
+  the font down instead of truncating) was tried here and dropped -- it
+  looked jarring in practice, not worth the added complexity. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* "Suggested Info Articles"/"Foreslåtte Infoartikkler" -- full label when
+.articlesbar_container has room, shortened once it doesn't (same full/
+short swap pattern as home_navbar.html's "Student Unions"/"Unions", see
+home_navbar.css). Span default display is already inline, so only the
+short-hidden state needs a base rule here. */
+.newsbar-heading-short {
+  display: none;
+}
+
+/* 26rem matches .newsbar-layout's own card width cap (grid-template-
+columns: minmax(min(22rem, 100%), 26rem)) -- below that, "Foreslåtte
+Infoartikkler" is tight enough to risk the ellipsis truncation above kicking
+in, so it swaps to the shorter "Info Articles"/"Infoartikkler" instead.
+Keyed off .articlesbar_container's own width (container-type:inline-size,
+home_layout.css), not the viewport, since what actually determines whether
+the column has room is the sidebar + events box + viewport together. */
+@container (max-width: 26rem) {
+  .newsbar-heading-full {
+    display: none;
+  }
+
+  .newsbar-heading-short {
+    display: inline;
+  }
+}
+
 .newsbar-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 26rem));
+  /* A *fixed* max (tried at both 26rem and 30rem before this) can never
+  fully avoid dead space -- auto-fit only adds another column once the
+  container is wide enough for one more card at that max width, so at any
+  container width just *below* that threshold, whatever number of cards
+  already fit are stuck at their max size with the remaining leftover
+  width sitting empty beside them. Raising or lowering the max number just
+  moves where that gap falls; it can't remove it. 1fr instead of a fixed
+  rem removes it structurally: auto-fit still decides *how many* columns
+  fit using the minimum (18rem) as usual, but every column that does fit
+  then stretches to evenly fill 100% of the container's width, with
+  nothing left over at any width. The only remaining trade-off is card
+  size varying more across different column counts (a lone card in a very
+  wide column can get quite large) -- accepted here since it's aspect-
+  ratio:5/4-locked (articlecard.css), so it stays proportioned rather than
+  looking stretched/distorted, just bigger. */
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  /* auto-fit's own default (justify-content:start) left leftover column
+  tracks flush-left instead of centered -- most visible with just one card
+  (sits flush-left with a big empty gap beside it), but also matters for
+  a partially-filled last row of several. Centers the whole group of cards
+  as a block; each card's own width inside its track is unaffected. */
+  justify-content: center;
+  /* grid's own default (align-items:stretch) forces every card in a row to
+  match the tallest one, so a card with a short title/intro next to one
+  with a long, wrapping title/intro got stretched taller than its own
+  content needs -- its image (aspect-ratio:8/5, articlecard.css) stayed
+  correctly proportioned regardless, since that ratio is locked to width
+  not to whatever height the row handed it, but the *card* itself no
+  longer matched that shape once stretched. start lets each card size to
+  its own content instead, so width and height move together (the image's
+  locked ratio drives the card's actual shape) rather than height being
+  set independently by row-mates. */
+  align-items: start;
   gap: 1rem;
   padding: 0.5em 0.1em;
+}
+
+/* .articlecard's own height:100% (articlecard.css) is for its *other* use
+inside an editor-set explicit-height body block -- a no-op there until that
+explicit height exists, but within this grid the row's own resolved height
+counts as definite, so 100% would still stretch the card to match it. auto
+here keeps that other usage untouched.
+
+aspect-ratio locks the *whole card's* shape (image + title + meta + intro
+together), not just the image (which already had its own aspect-ratio:8/5,
+articlecard.css) -- so News and Info Articles cards render identically
+sized/shaped as long as their grid tracks are the same width (both columns
+use the same minmax() range), and neither column's cards can end up a
+different shape from the other's just because one title happened to wrap
+differently.
+
+5/4 (wider/shorter than the previous 1/1) is close to the practical limit
+for this stacked image-then-text layout: the image alone (aspect-ratio:8/5)
+already needs close to a full 4/5-shaped card's height at this card's width
+range, leaving very little left for text -- a true "TV" 16:9 wasn't
+achievable without either cropping the image itself or dropping the intro
+entirely (see .articlecard-intro's own line-clamp:1 below, already trimmed
+from 2 lines to make this fit at all). Even at 5/4, overflow:hidden
+(articlecard.css) clips a little more than the "just a sliver" slack the
+previous 1/1 ratio left -- some titles may lose their last couple of px of
+descender, and a one-line intro can occasionally still get its last word or
+two clipped. */
+.newsbar-layout .articlecard {
+  height: auto;
+  /* Grid items get an "automatic minimum size" by default (same idea as
+  flex items) that lets them grow past their own aspect-ratio-computed
+  height to fit their content's min-content size -- which is exactly what
+  was making some cards taller than others despite the locked ratio above
+  (whichever one's title/text needed more room won). 0 here defeats that,
+  so aspect-ratio is actually authoritative and overflow:hidden below
+  clips anything that doesn't fit, instead of the box just growing. */
+  min-height: 0;
+  aspect-ratio: 5 / 4;
+}
+
+/* Shorter than the card's own image aspect-ratio (8/5, articlecard.css) --
+frees up the vertical room within the fixed 5/4 card box that the 2-line
+intro below needs, instead of clipping the intro down to 1 line the way
+the previous version of this rule did. */
+.newsbar-layout .articlecard img {
+  aspect-ratio: 2 / 1;
+}
+
+/* .articlecard--list (narrow-screen/editor "show as list" toggle) drops
+the image and meta down to one compact row -- forcing the same 1/1 shape on
+it here would leave a large blank gap below that short content instead of
+this variant's own intentionally compact height. */
+.newsbar-layout .articlecard--list {
+  aspect-ratio: unset;
 }
 
 @media (max-width: 480px) {
@@ -16,7 +149,10 @@
   }
 
   .newsbar-layout {
-    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 20rem));
+    /* same 1fr reasoning as the base rule above -- a single mobile card
+    was capped at 20rem regardless of how much wider than that its
+    (already narrow) column actually was. */
+    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
     gap: 0.5rem;
     padding: 0.35rem 0.5rem;
   }

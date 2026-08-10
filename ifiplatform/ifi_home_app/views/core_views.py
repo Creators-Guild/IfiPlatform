@@ -1,6 +1,8 @@
 """Views for IFI home page."""
 
+from django.db.models import Q
 from django.shortcuts import render
+from django.utils import timezone
 from wagtail.models import Locale
 from ifi_home_app.models.article_models import (
     ArticlePage,
@@ -9,6 +11,7 @@ from ifi_home_app.models.article_models import (
     UnionPage,
     get_section_index,
 )
+from ifi_home_app.models.event_models import EventIndexPage, EventPage
 
 from ..dummydata import (
     dummy_news_objects,
@@ -59,6 +62,17 @@ def main_view(request):
         if info_articles_index_page
         else ArticlePage.objects.none()
     )
+    # Both columns share the same grid (newsbar_layout.css) at the same
+    # column width, so matching their card *counts* here is what keeps
+    # them the same number of rows tall in the browser -- whichever
+    # category happens to have fewer live articles caps the other one too,
+    # rather than one column trailing on shorter than its neighbour.
+    news_articles = list(news_articles)
+    suggested_articles = list(suggested_articles)
+    shared_article_count = min(len(news_articles), len(suggested_articles))
+    news_articles = news_articles[:shared_article_count]
+    suggested_articles = suggested_articles[:shared_article_count]
+
     unions = StudentUnion.objects.all()
     tools = IfiTool.objects.all()
     board_messages = HomeBoardMessage.objects.filter(
@@ -82,6 +96,20 @@ def main_view(request):
         else []
     )
 
+    today = timezone.localdate()
+    event_index = (
+        EventIndexPage.objects.live().filter(locale=Locale.get_active()).first()
+    )
+    upcoming_events = (
+        EventPage.objects.child_of(event_index)
+        .live()
+        .filter(locale=Locale.get_active(), show_on_homepage=True)
+        .filter(Q(end_date__gte=today) | Q(end_date__isnull=True, event_date__gte=today))
+        .order_by("event_date", "event_time")[:6]
+        if event_index
+        else EventPage.objects.none()
+    )
+
     context = {
         "news_items": news_items,
         "news_articles": news_articles,
@@ -94,6 +122,7 @@ def main_view(request):
         "student_union_children": student_union_children,
         "ifi_tools_cat": ifi_tools_category,
         "ifi_tools_children": ifi_tools_children,
+        "upcoming_events": upcoming_events,
     }
 
     return render(

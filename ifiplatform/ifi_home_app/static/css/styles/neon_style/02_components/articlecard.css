@@ -87,6 +87,21 @@ reads as the same thing wherever it shows up. */
   transition: margin 0.2s ease, gap 0.2s ease, font-size 0.2s ease, color 0.2s ease;
 }
 
+/* separator between the author and date spans (article_card.html) --
+adjacent-sibling selector so it only renders when both spans are actually
+present (whichever one is missing just leaves the other on its own, no
+dangling "· " with nothing before it) instead of needing a third
+template-level element between them. */
+/* margin-right matches the flex row's own column-gap (0.75rem, the gap
+shorthand above) -- that gap already puts 0.75rem between this span and
+the author span before it, so mirroring it here on the other side of the
+"|" is what actually centers the separator between the two words instead
+of it sitting closer to one side. */
+.articlecard-meta > span + span::before {
+  content: "|";
+  margin-right: 0.75rem;
+}
+
 .articlecard-intro {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -191,21 +206,30 @@ itself -- article_list_toggle.js's click handler stops that. */
   align-items: center;
   justify-content: center;
   position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
+  top: 0.5rem;
+  right: 0.5rem;
   z-index: 1;
   width: 1.8rem;
   height: 1.8rem;
-  /* light, card-colored circle with a thin border (same idea as
-     .messageboard-dots' pill) instead of a heavy solid-dark badge --
-     reads as a subtle control rather than dominating the corner of the
-     card, especially over the plain background of a collapsed row. */
-  border: 2px solid var(--color-border);
+  /* A light bg + thin dark border read as a heavy, stark badge sitting on
+  top of the card's own photo (the state you actually see it in most --
+  this shows whenever a card is *expanded*, not just when collapsed to a
+  plain-background list row). A translucent dark backdrop instead just
+  softly floats over whatever's underneath -- image or plain background
+  alike -- same "overlay control on a photo" treatment as e.g. video
+  player buttons, rather than a bordered chip. color-mix() already used
+  the same way elsewhere in this project (profile_dropdown.css). */
+  border: none;
   border-radius: 999px;
-  background-color: var(--color-bg);
-  box-shadow: 0 2px 6px var(--color-shadow);
-  color: var(--color-text);
+  background-color: color-mix(in srgb, var(--color-ink) 55%, transparent);
+  color: var(--color-bright);
   cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.articlecard-toggle:hover,
+.articlecard-toggle:focus-visible {
+  background-color: color-mix(in srgb, var(--color-ink) 75%, transparent);
 }
 
 /* a real SVG chevron (article_card.html), not a border-triangle -- that

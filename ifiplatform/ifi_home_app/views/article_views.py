@@ -22,6 +22,7 @@ from ifi_home_app.models.article_models import (
     PageBannerStyle,
     alignment_capable_block_ids,
 )
+from ifi_home_app.translation_sync import sync_synchronized_fields
 
 # box styling (see BLOCK_STYLE_DEFAULTS["box"]/_effective_box_style() in
 # article_models.py) is available on every block type below, plus "column"
@@ -436,7 +437,15 @@ def publish_page(request, page_id):
     nb is the source of truth, en always follows it. Requires can_publish
     on that nb copy specifically, stricter than the can_edit_style/can_edit
     every other endpoint in this file checks (see ArticlePage.get_context()'s
-    can_publish_page, which gates whether the Publish button even renders)."""
+    can_publish_page, which gates whether the Publish button even renders).
+
+    Also pushes wagtail-localize's synchronized fields (show_in_menu,
+    status, etc.) to the translation, same as wagtail_hooks.py's
+    after_publish_page hook does for a normal wagtail-admin publish -- this
+    view calls Revision.publish() directly rather than going through
+    wagtail-admin's edit view, so that hook never fires for it, and synced
+    fields would otherwise silently stop propagating for anything published
+    this way (see translation_sync.py)."""
     page = get_object_or_404(ArticlePage, pk=page_id).publish_target
 
     if not page.can_publish_in_editor_mode(request.user):
@@ -458,6 +467,12 @@ def publish_page(request, page_id):
             # system-triggered side effect of that action, not a
             # separate action of its own the editor needs permission for.
             translation_revision.publish(user=request.user, skip_permission_checks=True)
+
+    # Runs last so a freshly-synced field value always wins over whatever
+    # the translation_revision.publish() above just put live (that revision
+    # is whichever draft a translator was last working on, unrelated to
+    # synchronized-field freshness).
+    sync_synchronized_fields(page, user=request.user)
 
     return JsonResponse({"ok": True})
 
@@ -484,6 +499,31 @@ def unpublish_page(request, page_id):
         # set), same "already verified against nb, this is just a synced
         # side effect" reasoning as the publish side.
         translation.unpublish(log_action=True)
+
+    return JsonResponse({"ok": True})
+
+
+@require_POST
+def sync_mirrored_page(request, page_id):
+    """Manually push this page's wagtail-localize synchronized fields
+    (show_in_menu, status, etc.) out to its translation right now --
+    "Sync mirrored page" in editor mode. Not ArticlePage-specific (unlike
+    publish_page/unpublish_page above): CategoryPage/ArticleIndexPage/
+    StudentUnionCategoryPage have no publish concept in editor mode at all,
+    but they do have synchronized fields (show_in_menu) that can still drift,
+    so this is a plain Page lookup resolved through style_target rather than
+    ArticlePage's own publish_target. Gated by can_sync_mirrored_page, which
+    already confirms the page is the nb ("OG") copy and there's an existing
+    translation to sync (see EditorModeMixin.can_sync_mirrored_page)."""
+    page = get_object_or_404(Page, pk=page_id).specific.style_target
+
+    if not page.can_sync_mirrored_page(request.user):
+        return JsonResponse(
+            {"error": "You don't have permission to sync this page, or there's nothing to sync."},
+            status=403,
+        )
+
+    sync_synchronized_fields(page, user=request.user)
 
     return JsonResponse({"ok": True})
 
