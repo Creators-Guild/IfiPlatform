@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: IfiPlatform 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-10 01:36+0200\n"
+"POT-Creation-Date: 2026-08-10 02:25+0200\n"
 "PO-Revision-Date: 2026-02-26 13:30+0100\n"
 "Last-Translator: YOUR NAME <you@example.com>\n"
 "Language-Team: English <LL@li.org>\n"
@@ -472,11 +472,17 @@ msgstr "Ifi Homepage"
 msgid "Latest News"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\home_index.html:23
+#: .\ifi_home_app\templates\core\home_index.html:33
 msgid "Suggested Info Articles"
 msgstr ""
 
-#: .\ifi_home_app\templates\core\home_index.html:30
+#: .\ifi_home_app\templates\core\home_index.html:34
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:34
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:34
+msgid "Info Articles"
+msgstr ""
+
+#: .\ifi_home_app\templates\core\home_index.html:42
 #, python-format
 msgid "This month at Ifi &ndash; %(current_month)s"
 msgstr ""
@@ -555,11 +561,6 @@ msgstr ""
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:27
 msgid "No news yet"
-msgstr ""
-
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:34
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:34
-msgid "Info Articles"
 msgstr ""
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:43

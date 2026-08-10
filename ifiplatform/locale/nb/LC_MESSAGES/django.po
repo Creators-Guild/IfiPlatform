@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-10 01:36+0200\n"
+"POT-Creation-Date: 2026-08-10 02:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -527,11 +527,17 @@ msgstr "Ifi Hjem"
 msgid "Latest News"
 msgstr "Siste Nyheter"
 
-#: .\ifi_home_app\templates\core\home_index.html:23
+#: .\ifi_home_app\templates\core\home_index.html:33
 msgid "Suggested Info Articles"
 msgstr "Foreslåtte Infoartikkler"
 
-#: .\ifi_home_app\templates\core\home_index.html:30
+#: .\ifi_home_app\templates\core\home_index.html:34
+#: .\ifi_home_app\templates\core\partials\home_navbar.html:34
+#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:34
+msgid "Info Articles"
+msgstr "Infoartikkler"
+
+#: .\ifi_home_app\templates\core\home_index.html:42
 #, python-format
 msgid "This month at Ifi &ndash; %(current_month)s"
 msgstr ""
@@ -615,11 +621,6 @@ msgstr "Alle"
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:27
 msgid "No news yet"
 msgstr "Ingen nyheter ennå"
-
-#: .\ifi_home_app\templates\core\partials\home_navbar.html:34
-#: .\ifi_home_app\templates\core\partials\home_sidemenu.html:34
-msgid "Info Articles"
-msgstr "Infoartikkler"
 
 #: .\ifi_home_app\templates\core\partials\home_navbar.html:43
 msgid "No categories yet"

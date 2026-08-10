@@ -62,6 +62,17 @@ def main_view(request):
         if info_articles_index_page
         else ArticlePage.objects.none()
     )
+    # Both columns share the same grid (newsbar_layout.css) at the same
+    # column width, so matching their card *counts* here is what keeps
+    # them the same number of rows tall in the browser -- whichever
+    # category happens to have fewer live articles caps the other one too,
+    # rather than one column trailing on shorter than its neighbour.
+    news_articles = list(news_articles)
+    suggested_articles = list(suggested_articles)
+    shared_article_count = min(len(news_articles), len(suggested_articles))
+    news_articles = news_articles[:shared_article_count]
+    suggested_articles = suggested_articles[:shared_article_count]
+
     unions = StudentUnion.objects.all()
     tools = IfiTool.objects.all()
     board_messages = HomeBoardMessage.objects.filter(

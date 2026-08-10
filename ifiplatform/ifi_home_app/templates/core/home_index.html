@@ -20,7 +20,18 @@
                         {% include "core/partials/home_newsbar.html" %}
                     </div>
                     <div class="articlesbar_container">
-                        <h2 class="newsbar-heading newsbar-heading--articles">{% trans "Suggested Info Articles" %}</h2>
+                        <h2 class="newsbar-heading newsbar-heading--articles">
+                            {% comment %}
+                            Full label when the column has room, shortened
+                            once it doesn't -- same full/short swap pattern
+                            as home_navbar.html's "Student Unions"/"Unions"
+                            (see newsbar_layout.css for the container query
+                            driving it, keyed off this column's own actual
+                            width rather than a guessed viewport breakpoint).
+                            {% endcomment %}
+                            <span class="newsbar-heading-full">{% trans "Suggested Info Articles" %}</span>
+                            <span class="newsbar-heading-short">{% trans "Info Articles" %}</span>
+                        </h2>
                         {% include "core/partials/home_articlesbar.html" %}
                     </div>
                 </div>

@@ -2,9 +2,13 @@
 // (.newsbar-layout, shared by home_newsbar.html and home_articlesbar.html --
 // both load this script, hence the double-init guard). Default on load
 // matches the old CSS-only behavior this replaces (every card past the
-// first two starts collapsed), but now each .articlecard-toggle arrow
-// (see article_card.html/articlecard.css) lets a visitor flip that one
-// card between the full and .articlecard--list looks themselves.
+// first two starts collapsed) -- but only on narrow screens, same
+// (max-width: 45rem) breakpoint as .articlecard-toggle's own CSS
+// visibility (newsbar_layout.css/articlecard.css). The toggle arrow that
+// lets a visitor flip a card back to expanded is only ever shown below
+// that width in the first place, so defaulting cards to collapsed above
+// it left them stuck that way with no way to reopen them -- on a normal
+// desktop browser, every card now just starts expanded.
 if (!window.__ifiArticleListToggleInit) {
   window.__ifiArticleListToggleInit = true;
 
@@ -17,10 +21,12 @@ if (!window.__ifiArticleListToggleInit) {
       }
     };
 
+    const isNarrowScreen = window.matchMedia("(max-width: 45rem)").matches;
+
     document.querySelectorAll(".newsbar-layout").forEach((layout) => {
       const cards = Array.from(layout.querySelectorAll(".articlecard"));
       cards.forEach((card, index) => {
-        setCardState(card, index >= 2);
+        setCardState(card, isNarrowScreen && index >= 2);
       });
     });
 
