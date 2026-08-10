@@ -60,6 +60,17 @@ column sized for paragraph text -- see .event-calendar's own comment. */
   margin-bottom: 1rem;
 }
 
+.event-location-map-link {
+  margin-left: 0.4rem;
+  color: var(--color-link);
+  text-decoration: underline;
+}
+
+.event-location-map-link:hover,
+.event-location-map-link:focus-visible {
+  color: var(--color-link-hover);
+}
+
 .event-page-intro {
   max-width: 60rem;
   margin-left: auto;
@@ -814,6 +825,30 @@ body.event-calendar-modal-open {
     background-color: color-mix(in srgb, var(--color-bg) 20%, transparent);
     color: var(--color-bg);
   }
+}
+
+/* EventPage.localized_location_articles (event_page.html) -- same
+centered, wrapping card-grid shape as .event-union-list just below, reusing
+.articlecard (articlecard.css) as-is for each entry. Capped per-card
+(rather than relying on articlecard.css's own sizing, which assumes a
+grid/list container that controls width) since a lone article card outside
+its usual home-page/category-listing grid would otherwise stretch to fill
+this section's full width. */
+.event-location-articles {
+  margin-top: 1.5rem;
+}
+
+.event-location-articles-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.event-location-articles-grid .articlecard {
+  flex: 0 1 18rem;
+  max-width: 18rem;
 }
 
 /* Reuses .union-card (union_card.css) as-is for each entry -- this just

@@ -35,15 +35,20 @@
                         {{ event.event_date|date:"j. F" }}
                     {% endif %}
                 </span>
-                {% if event.related_unions %}
-                    {% with total=event.related_unions|length %}
+                {% with all_related_unions=event.all_related_unions %}
+                {% if all_related_unions %}
+                    {% with total=all_related_unions|length %}
                         {% comment %}
-                        An event with many related_unions (e.g. a whole
-                        week-long event rolled up from every sub-event's own
-                        host, event_models.py's calendar_days) would otherwise
-                        flood this compact row with a wall of tags -- only the
-                        first 2 show by default, same "collapsed unless
-                        expanded" treatment as .home-eventsbox-subevents below
+                        event.all_related_unions, not event.related_unions
+                        directly -- rolls in every sub_event's own
+                        related_unions too (see that property's docstring,
+                        event_models.py), since a week-long event like
+                        Fadderuke rarely has any unions tagged on itself,
+                        only on its individual day-to-day sub-events. An
+                        event with many of these would otherwise flood this
+                        compact row with a wall of tags -- only the first 2
+                        show by default, same "collapsed unless expanded"
+                        treatment as .home-eventsbox-subevents below
                         (tap-to-toggle on touch via dropdown_menu.js's shared
                         setupTapToggle(), :hover reveal on desktop), rather
                         than a second, separately-behaving toggle mechanism.
@@ -53,16 +58,29 @@
                         that at every width this box actually renders at,
                         so there's no need for a separate mobile-only cutoff.
                         {% endcomment %}
+                        {% comment %}
+                        .localized before displaying/linking -- a PageChooserBlock
+                        inside a StreamField isn't auto-translated by wagtail-
+                        localize (Page references are left pointing at the source-
+                        locale page; only the template resolves them at render
+                        time -- see handle_related_object_block() in wagtail_
+                        localize/segments/extract.py). Without this, an English
+                        homepage would show/link to the Norwegian union pages.
+                        {% endcomment %}
                         <span class="home-eventsbox-unions{% if total > 2 %} home-eventsbox-unions--collapsible{% endif %}">
-                            {% for entry in event.related_unions|slice:":2" %}
-                                {% if entry.value.union %}
-                                    <a class="home-eventsbox-union-tag" href="{% pageurl entry.value.union.specific %}">{{ entry.value.union.title }}</a>
+                            {% for entry in all_related_unions|slice:":2" %}
+                                {% if entry.union %}
+                                    {% with union=entry.union.localized %}
+                                        <a class="home-eventsbox-union-tag" href="{% pageurl union.specific %}">{{ union.title }}</a>
+                                    {% endwith %}
                                 {% endif %}
                             {% endfor %}
                             {% if total > 2 %}
-                                {% for entry in event.related_unions|slice:"2:" %}
-                                    {% if entry.value.union %}
-                                        <a class="home-eventsbox-union-tag home-eventsbox-union-tag--extra" href="{% pageurl entry.value.union.specific %}">{{ entry.value.union.title }}</a>
+                                {% for entry in all_related_unions|slice:"2:" %}
+                                    {% if entry.union %}
+                                        {% with union=entry.union.localized %}
+                                            <a class="home-eventsbox-union-tag home-eventsbox-union-tag--extra" href="{% pageurl union.specific %}">{{ union.title }}</a>
+                                        {% endwith %}
                                     {% endif %}
                                 {% endfor %}
                                 <button type="button" class="home-eventsbox-unions-toggle">+{{ total|add:"-2" }}</button>
@@ -70,6 +88,7 @@
                         </span>
                     {% endwith %}
                 {% endif %}
+                {% endwith %}
                 {% with sub_count=event.sub_events.count highlighted=event.highlighted_sub_events %}
                     {% if highlighted %}
                         {% comment %}

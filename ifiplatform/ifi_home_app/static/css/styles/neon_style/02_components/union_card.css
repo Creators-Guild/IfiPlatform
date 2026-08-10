@@ -103,7 +103,7 @@
 /* a union_card block's own width is a free-form rem number (editor picks
 it via width_rem) -- carried in as a --card-width custom property
 (article_body_blocks.html/article_column_content.html) rather than a
-literal inline width, so the 480px override below can win over it at
+literal inline width, so the mobile override below can win over it at
 normal specificity instead of needing !important to beat an inline style.
 .union-card's own "flex: 0 1 14rem" only means anything as a flex *item*
 (inside .union-grid), so standalone it needs its own explicit width
@@ -118,7 +118,17 @@ instead, same pattern as articlecard.css's own .body-article-card. */
   overflow: hidden;
 }
 
-@media (max-width: 480px) {
+/* 45rem, not the 480px this used to be pinned to -- matches the
+breakpoint every other mobile treatment on a page union-card can appear
+on already uses (event_page.css's calendar/day-paging, article_list_
+toggle.js, dropdown_menu.js, ...). At the old, narrower 480px, a page
+like an event's "Involved Unions" section (event_page.html) would
+already be showing its *other* content in mobile layout well before
+union-card followed suit -- e.g. at 600-700px wide, the week-calendar
+above it had already switched to single-day mobile view while these
+cards were still sitting in full desktop grid mode right below it,
+visibly inconsistent on the same page. */
+@media (max-width: 45rem) {
   .body-union-card,
   .body-union-card--fixed-height {
     width: 100%;

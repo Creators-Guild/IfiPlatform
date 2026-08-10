@@ -499,9 +499,14 @@ class Command(BaseCommand):
                     if end_offset_days else None
                 ),
             )
-            self._translate_page(event, en_locale)
             if title == "Fadderuke":
+                # Not translated yet -- _seed_fadderuke_sub_events (below)
+                # sets calendar_legend/related_unions on this nb page and
+                # translates it itself, before creating any sub-event (see
+                # that method's own comment for why the ordering matters).
                 fadderuke = event
+            else:
+                self._translate_page(event, en_locale)
 
         self._seed_fadderuke_sub_events(fadderuke, nb_locale, en_locale, seed_image)
 
@@ -538,6 +543,29 @@ class Command(BaseCommand):
             fadderuke.save_revision().publish()
 
         unions = self._seed_fadderuke_unions(nb_locale, en_locale, seed_image)
+
+        # Fadderstyret hosts the whole week, not just one sub-event -- set
+        # directly on Fadderuke itself so EventPage.all_related_unions has
+        # a real "host" to show at the top level (every other union only
+        # ever hosts one specific sub-event, which all_related_unions caps
+        # down to "collaborator" once rolled up to the parent).
+        if not fadderuke.related_unions:
+            fadderuke.related_unions = [
+                ("union", {"union": unions["Fadderstyret"], "role": "host"}),
+            ]
+            fadderuke.save_revision().publish()
+
+        # Must happen before any sub-event below is translated, not after --
+        # wagtail-localize's Translation.save_target(copy_parent_pages=True)
+        # auto-creates a bare, untranslated copy of a page's parent the
+        # moment a CHILD gets translated and the parent doesn't have a
+        # translation yet (so the child has somewhere to live in the target
+        # locale tree). If that fired first, has_translation(en_locale)
+        # would already be True by the time _translate_page(fadderuke, ...)
+        # ran, and it would skip -- silently leaving Fadderuke's own en
+        # translation as that untranslated auto-copy forever (calendar_legend/
+        # related_unions structurally present, but never actually translated).
+        self._translate_page(fadderuke, en_locale)
 
         for day_offset, title, event_type, start, end, color in FADDERUKE_SUB_EVENT_SPECS:
             event_date = fadderuke.event_date + timedelta(days=day_offset)

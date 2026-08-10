@@ -17,7 +17,7 @@ from wagtail.admin.panels import FieldPanel
 from wagtail.fields import RichTextField, StreamField
 from wagtail.models import Locale, Page
 
-from ifi_home_app.models.article_models import HEX_COLOR_VALIDATOR, TranslationWarningMixin
+from ifi_home_app.models.article_models import HEX_COLOR_VALIDATOR, TranslationWarningMixin, article_card_block
 
 # Same "fixed palette + custom hex fallback" pattern as article_models.py's
 # COLOR_CHOICES (reusing HEX_COLOR_VALIDATOR from there directly), but its
@@ -114,6 +114,37 @@ def calendar_legend_entry_block():
     )
 
 
+def location_map_link_block():
+    """One titled link to a map for one of the event's locations (e.g.
+    "Google Maps" -> a Google Maps URL) -- StructBlock rather than a plain
+    URLBlock so an event spanning several locations can add one of these
+    per location, each with its own clickable label, instead of a single
+    generic "View on map" link. title is optional: event_page.html falls
+    back to a generic "View on map" label when left blank, same as most
+    other optional label-ish fields in this file."""
+    return blocks.StructBlock(
+        [
+            (
+                "title",
+                blocks.CharBlock(
+                    max_length=100,
+                    required=False,
+                    help_text='Optional -- link text, e.g. "Google Maps". Defaults to "View on map" if left blank.',
+                ),
+            ),
+            (
+                "url",
+                blocks.URLBlock(
+                    required=True,
+                    help_text="Link to a map for this location.",
+                ),
+            ),
+        ],
+        icon="site",
+        label="Map Link",
+    )
+
+
 class EventIndexPage(TranslationWarningMixin, Page):
     """Landing page listing all events -- what "Events" in the nav links to
     (see home_sidemenu.html/article_tags.get_event_index)."""
@@ -184,7 +215,33 @@ class EventPage(TranslationWarningMixin, Page):
         blank=True,
         help_text="Optional -- for events spanning more than one day.",
     )
-    location = models.CharField(max_length=200, blank=True)
+    location = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Optional -- where the event takes place, e.g. a building or room name.",
+    )
+    # One or more titled map links (e.g. "Google Maps", "MazeMap") -- a
+    # StreamField rather than a single URLField since an event can span
+    # more than one location, each wanting its own map link.
+    location_map_links = StreamField(
+        [("map_link", location_map_link_block())],
+        use_json_field=True,
+        blank=True,
+        help_text="Optional -- one or more titled links to a map (e.g. Google Maps) for this event's location(s).",
+    )
+    # Links to existing ArticlePages describing the location(s) in more
+    # detail (e.g. an info page about a specific building) -- reuses
+    # article_card_block() as-is (article_models.py) rather than a new
+    # event-specific block, same "StreamField of a single-PageChooserBlock
+    # StructBlock" shape already used for related_unions below via
+    # event_union_block(). A StreamField (not a single FK) since more than
+    # one location article can apply to one event.
+    location_articles = StreamField(
+        [("article", article_card_block())],
+        use_json_field=True,
+        blank=True,
+        help_text="Optional -- links to existing articles with more info about this event's location(s).",
+    )
     intro = RichTextField(blank=True)
     show_on_homepage = models.BooleanField(
         default=True,
@@ -250,6 +307,8 @@ class EventPage(TranslationWarningMixin, Page):
         FieldPanel("calendar_color_custom"),
         FieldPanel("end_date"),
         FieldPanel("location"),
+        FieldPanel("location_map_links"),
+        FieldPanel("location_articles"),
         FieldPanel("intro"),
         FieldPanel("show_on_homepage"),
         FieldPanel("is_highlighted"),
@@ -286,6 +345,69 @@ class EventPage(TranslationWarningMixin, Page):
         shown on its own page (event_page.html) and counted (not listed)
         in the homepage box (home_eventsbox.html)."""
         return EventPage.objects.child_of(self).live().order_by("event_date", "event_time")
+
+    @property
+    def localized_location_articles(self):
+        """The ArticlePages linked in location_articles, already resolved
+        to the active locale (.localized.specific already applied) -- so
+        templates never need to remember to do that themselves.
+        PageChooserBlock references aren't auto-translated by wagtail-
+        localize (a deliberate upstream design choice -- see
+        handle_related_object_block() in wagtail_localize/segments/
+        extract.py -- and it applies the same way to a plain ForeignKey,
+        not just StreamField blocks, so there's no simpler field type that
+        would sidestep this), so resolving it here once is what keeps every
+        future template touching this field from re-discovering that the
+        hard way, the way related_unions did."""
+        return [
+            entry.value["article"].localized.specific
+            for entry in self.location_articles
+            if entry.value["article"] is not None
+        ]
+
+    @property
+    def all_related_unions(self):
+        """This event's own related_unions plus every sub_event's, deduped
+        by union (keeping the highest-priority role seen) -- shown on the
+        event's own page (event_page.html) and the homepage box
+        (home_eventsbox.html) instead of related_unions directly. Without
+        this, a parent event like Fadderuke -- whose own related_unions is
+        typically empty, since in practice a union only ever gets tagged on
+        the specific sub-event it's actually involved in -- would show no
+        involved unions at all despite its sub-events listing plenty.
+
+        "host" is only ever kept for a union tagged as host directly on
+        *this* page -- a union hosting one sub-event (e.g. CYB running a
+        single quiz night) isn't the host of the whole week, so a sub-
+        event's own "host" role is capped down to "collaborator" once
+        rolled up here; "collaborator"/"contributor" from a sub-event carry
+        over unchanged, since neither implies ownership of the whole event
+        the way "host" does.
+
+        Returns plain {"role": ..., "union": ...} dicts rather than raw
+        StreamField block values, since these come from two different
+        StreamFields (this page's own and each sub_event's) glued
+        together, not one real StreamField queryable as-is."""
+        role_priority = {"host": 0, "collaborator": 1, "contributor": 2}
+        best_by_union = {}
+
+        def add_entries(entries, cap_host):
+            for entry in entries:
+                union = entry.value["union"]
+                if union is None:
+                    continue
+                role = entry.value["role"]
+                if cap_host and role == "host":
+                    role = "collaborator"
+                key = union.translation_key
+                if key not in best_by_union or role_priority[role] < role_priority[best_by_union[key][0]]:
+                    best_by_union[key] = (role, union)
+
+        add_entries(self.related_unions, cap_host=False)
+        for sub_event in self.sub_events:
+            add_entries(sub_event.related_unions, cap_host=True)
+
+        return [{"role": role, "union": union} for role, union in best_by_union.values()]
 
     @property
     def highlighted_sub_events(self):
