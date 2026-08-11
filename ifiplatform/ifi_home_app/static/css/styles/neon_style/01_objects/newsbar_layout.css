@@ -182,10 +182,28 @@ this variant's own intentionally compact height. */
   fit it. At this width the grid above is effectively always a single
   column anyway (16rem is close to the practical per-card minimum), so
   there's rarely a row-mate left to visually match in the first place --
-  content-driven height instead. */
+  content-driven height instead.
+
+  Also drops the base rule's own max-width:40rem/justify-self:center (the
+  lone-card-on-a-wide-desktop-screen fix) -- 40rem (640px) is bigger than
+  the viewport itself at this width, so it was never actually clamping
+  anything here, but justify-self:center still switched the card from
+  "stretch to fill its track" to "shrink-to-fit its own content" even
+  though there was nothing left for it to protect against. That shrink-to-
+  fit sizing lets an oversized child (an image whose own intrinsic size
+  exceeds the track -- percentage widths like .articlecard img's own
+  width:100% don't count toward a shrink-to-fit ancestor's own sizing, so
+  they can't cap it) pull the *card* wider than the screen instead of
+  being cropped down to the track's width the way stretch would. Plain
+  stretch has no such failure mode -- the card is always exactly the
+  track's own (already screen-appropriate) width regardless of what's
+  inside it, same as every other narrow-screen card layout in this
+  project. */
   .newsbar-layout .articlecard {
     aspect-ratio: unset;
     height: auto;
+    max-width: none;
+    justify-self: stretch;
   }
 }
 
