@@ -114,6 +114,9 @@ leaving a visible strip of the site's default background there instead.
              data-title-text-color="{{ title_style.text_color }}" data-title-text-custom-color="{{ title_style.text_custom_color }}"
              data-meta-text-color="{{ meta_style.text_color }}" data-meta-text-custom-color="{{ meta_style.text_custom_color }}"
              data-intro-text-color="{{ intro_style.text_color }}" data-intro-text-custom-color="{{ intro_style.text_custom_color }}"
+             data-title-text-shadow-enabled="{{ title_style.text_shadow_enabled|yesno:"true,false" }}" data-title-text-shadow-strength="{{ title_style.text_shadow_strength|unlocalize }}" data-title-text-shadow-color="{{ title_style.text_shadow_color }}" data-title-text-shadow-custom-color="{{ title_style.text_shadow_custom_color }}"
+             data-meta-text-shadow-enabled="{{ meta_style.text_shadow_enabled|yesno:"true,false" }}" data-meta-text-shadow-strength="{{ meta_style.text_shadow_strength|unlocalize }}" data-meta-text-shadow-color="{{ meta_style.text_shadow_color }}" data-meta-text-shadow-custom-color="{{ meta_style.text_shadow_custom_color }}"
+             data-intro-text-shadow-enabled="{{ intro_style.text_shadow_enabled|yesno:"true,false" }}" data-intro-text-shadow-strength="{{ intro_style.text_shadow_strength|unlocalize }}" data-intro-text-shadow-color="{{ intro_style.text_shadow_color }}" data-intro-text-shadow-custom-color="{{ intro_style.text_shadow_custom_color }}"
              {% include "info_articles/partials/_block_box_data_attrs.html" with box=header_style.box %}{% endif %}
              style="--title-alignment: {{ page.style.title_alignment }}; --intro-alignment: {{ page.style.intro_alignment }}; --meta-alignment: {{ page.style.meta_alignment }}; --header-side-padding: {{ page.style.header_side_padding|unlocalize }}rem;
                     --title-font-size: {{ page.style.title_font_size|unlocalize }}rem; --intro-font-size: {{ page.style.intro_font_size|unlocalize }}rem; --meta-font-size: {{ page.style.meta_font_size|unlocalize }}rem;
@@ -125,7 +128,7 @@ leaving a visible strip of the site's default background there instead.
                 data-side-padding="{{ title_style.side_padding|unlocalize }}"
                 data-exclude-from-global-alignment="{{ title_style.exclude_from_global_alignment|yesno:"true,false" }}"
                 {% include "info_articles/partials/_block_box_data_attrs.html" with box=title_style.box %}{% endif %}
-                style="{% include "info_articles/partials/_text_color_style.html" with text_color=title_style.text_color text_custom_color=title_style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=title_style.box side_padding=title_style.side_padding %}">{{ page.title }}
+                style="{% include "info_articles/partials/_text_color_style.html" with text_color=title_style.text_color text_custom_color=title_style.text_custom_color text_shadow_enabled=title_style.text_shadow_enabled text_shadow_offset=title_style.text_shadow_offset text_shadow_blur=title_style.text_shadow_blur text_shadow_color=title_style.text_shadow_color text_shadow_custom_color=title_style.text_shadow_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=title_style.box side_padding=title_style.side_padding %}">{{ page.title }}
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             </h1>
 
@@ -135,7 +138,7 @@ leaving a visible strip of the site's default background there instead.
                      data-side-padding="{{ meta_style.side_padding|unlocalize }}"
                      data-exclude-from-global-alignment="{{ meta_style.exclude_from_global_alignment|yesno:"true,false" }}"
                      {% include "info_articles/partials/_block_box_data_attrs.html" with box=meta_style.box %}{% endif %}
-                     style="{% include "info_articles/partials/_text_color_style.html" with text_color=meta_style.text_color text_custom_color=meta_style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=meta_style.box side_padding=meta_style.side_padding %}">
+                     style="{% include "info_articles/partials/_text_color_style.html" with text_color=meta_style.text_color text_custom_color=meta_style.text_custom_color text_shadow_enabled=meta_style.text_shadow_enabled text_shadow_offset=meta_style.text_shadow_offset text_shadow_blur=meta_style.text_shadow_blur text_shadow_color=meta_style.text_shadow_color text_shadow_custom_color=meta_style.text_shadow_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=meta_style.box side_padding=meta_style.side_padding %}">
                     {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
                     {% if page.display_author_name %}
                         <span class="article-meta-item">{% trans "By" %} {{ page.display_author_name }}</span>
@@ -156,7 +159,7 @@ leaving a visible strip of the site's default background there instead.
                      data-side-padding="{{ intro_style.side_padding|unlocalize }}"
                      data-exclude-from-global-alignment="{{ intro_style.exclude_from_global_alignment|yesno:"true,false" }}"
                      {% include "info_articles/partials/_block_box_data_attrs.html" with box=intro_style.box %}{% endif %}
-                     style="{% include "info_articles/partials/_text_color_style.html" with text_color=intro_style.text_color text_custom_color=intro_style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=intro_style.box side_padding=intro_style.side_padding %}">
+                     style="{% include "info_articles/partials/_text_color_style.html" with text_color=intro_style.text_color text_custom_color=intro_style.text_custom_color text_shadow_enabled=intro_style.text_shadow_enabled text_shadow_offset=intro_style.text_shadow_offset text_shadow_blur=intro_style.text_shadow_blur text_shadow_color=intro_style.text_shadow_color text_shadow_custom_color=intro_style.text_shadow_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=intro_style.box side_padding=intro_style.side_padding %}">
                     {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
                     {{ page.intro|richtext }}
                 </div>

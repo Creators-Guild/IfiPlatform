@@ -14,8 +14,9 @@ Usage: {% include "info_articles/partials/article_column_content.html" with cont
              {% if can_edit_style %}data-block-id="{{ sub.id }}" data-block-type="paragraph"
              data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}" data-alignment="{{ style.alignment }}" data-exclude-from-global-alignment="{{ style.exclude_from_global_alignment|yesno:"true,false" }}"
              data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
+             data-text-shadow-enabled="{{ style.text_shadow_enabled|yesno:"true,false" }}" data-text-shadow-strength="{{ style.text_shadow_strength|unlocalize }}" data-text-shadow-color="{{ style.text_shadow_color }}" data-text-shadow-custom-color="{{ style.text_shadow_custom_color }}"
              {% include "info_articles/partials/_block_box_data_attrs.html" with box=style.box %}{% endif %}
-             style="font-size: {{ style.display_font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ sub.value.text }}
+             style="font-size: {{ style.display_font_size|unlocalize }}rem; {% include "info_articles/partials/_text_color_style.html" with text_color=style.text_color text_custom_color=style.text_custom_color text_shadow_enabled=style.text_shadow_enabled text_shadow_offset=style.text_shadow_offset text_shadow_blur=style.text_shadow_blur text_shadow_color=style.text_shadow_color text_shadow_custom_color=style.text_shadow_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=style.box side_padding=style.side_padding %}">{{ sub.value.text }}
             {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
         </div>
         {% endwith %}

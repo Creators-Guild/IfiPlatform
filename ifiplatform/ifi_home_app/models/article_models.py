@@ -444,6 +444,13 @@ BLOCK_STYLE_DEFAULTS = {
         # the page's normal text color) rather than a real color of its own.
         "text_color": "",
         "text_custom_color": "",
+        # unlike box_shadow_enabled elsewhere in this dict, this defaults
+        # to False -- see ArticleBlockStyle.text_shadow_enabled's own
+        # docstring on why (no prior fixed text-shadow to preserve).
+        "text_shadow_enabled": False,
+        "text_shadow_strength": 1,
+        "text_shadow_color": "",
+        "text_shadow_custom_color": "",
     },
     "paragraph": {
         "side_padding": 1,
@@ -451,6 +458,10 @@ BLOCK_STYLE_DEFAULTS = {
         "font_size": 1,
         "text_color": "",
         "text_custom_color": "",
+        "text_shadow_enabled": False,
+        "text_shadow_strength": 1,
+        "text_shadow_color": "",
+        "text_shadow_custom_color": "",
     },
     "image": {"alignment": "center", "width_rem": 20, "side_padding": 0},
     # an image's own title (alt_text) and caption text -- independent of
@@ -458,8 +469,28 @@ BLOCK_STYLE_DEFAULTS = {
     # below) -- matches article_image.css's own plain defaults (both
     # inherit the figcaption's 0.85rem/center, .image-title's own
     # font-weight:bold stays a fixed CSS rule, not editable here).
-    "image_title": {"alignment": "center", "font_size": 0.85, "side_padding": 0, "text_color": "", "text_custom_color": ""},
-    "image_caption_body": {"alignment": "center", "font_size": 0.85, "side_padding": 0, "text_color": "", "text_custom_color": ""},
+    "image_title": {
+        "alignment": "center",
+        "font_size": 0.85,
+        "side_padding": 0,
+        "text_color": "",
+        "text_custom_color": "",
+        "text_shadow_enabled": False,
+        "text_shadow_strength": 1,
+        "text_shadow_color": "",
+        "text_shadow_custom_color": "",
+    },
+    "image_caption_body": {
+        "alignment": "center",
+        "font_size": 0.85,
+        "side_padding": 0,
+        "text_color": "",
+        "text_custom_color": "",
+        "text_shadow_enabled": False,
+        "text_shadow_strength": 1,
+        "text_shadow_color": "",
+        "text_shadow_custom_color": "",
+    },
     # article/category/union/tool cards -- width/height only (they're a
     # fixed-design card, not built from editable text/box parts like
     # everything else here; height 0 means auto, see ArticleBlockStyle.
@@ -661,6 +692,43 @@ def _effective_heading_style(override, defaults, font_size_multiplier=1.0):
             override.text_custom_color
             if override and override.text_custom_color
             else defaults["text_custom_color"]
+        ),
+        "text_shadow_enabled": (
+            override.text_shadow_enabled
+            if override and override.text_shadow_enabled is not None
+            else defaults["text_shadow_enabled"]
+        ),
+        "text_shadow_strength": (
+            override.text_shadow_strength
+            if override and override.text_shadow_strength is not None
+            else defaults["text_shadow_strength"]
+        ),
+        # offset/blur precomputed here rather than left as a raw multiplier
+        # -- same reasoning as _effective_box_style()'s own shadow_offset/
+        # shadow_blur. 1/2 (not box shadow's own 2/8) is a subtler recipe,
+        # picked fresh since there was no prior fixed text-shadow to match
+        # (see ArticleBlockStyle.text_shadow_enabled's own docstring).
+        "text_shadow_offset": 1
+        * (
+            override.text_shadow_strength
+            if override and override.text_shadow_strength is not None
+            else defaults["text_shadow_strength"]
+        ),
+        "text_shadow_blur": 2
+        * (
+            override.text_shadow_strength
+            if override and override.text_shadow_strength is not None
+            else defaults["text_shadow_strength"]
+        ),
+        "text_shadow_color": (
+            override.text_shadow_color
+            if override and override.text_shadow_color
+            else defaults["text_shadow_color"]
+        ),
+        "text_shadow_custom_color": (
+            override.text_shadow_custom_color
+            if override and override.text_shadow_custom_color
+            else defaults["text_shadow_custom_color"]
         ),
         "box": _effective_box_style(override),
     }
@@ -1147,6 +1215,36 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
                 "text_custom_color": (
                     override.text_custom_color if override and override.text_custom_color else ""
                 ),
+                # blank/False fallbacks written directly here rather than
+                # via a BLOCK_STYLE_DEFAULTS entry, same as text_color just
+                # above -- title/meta/intro have no such entry at all (see
+                # this dict's own surrounding comment).
+                "text_shadow_enabled": bool(override.text_shadow_enabled) if override else False,
+                "text_shadow_strength": (
+                    override.text_shadow_strength
+                    if override and override.text_shadow_strength is not None
+                    else 1
+                ),
+                "text_shadow_offset": 1
+                * (
+                    override.text_shadow_strength
+                    if override and override.text_shadow_strength is not None
+                    else 1
+                ),
+                "text_shadow_blur": 2
+                * (
+                    override.text_shadow_strength
+                    if override and override.text_shadow_strength is not None
+                    else 1
+                ),
+                "text_shadow_color": (
+                    override.text_shadow_color if override and override.text_shadow_color else ""
+                ),
+                "text_shadow_custom_color": (
+                    override.text_shadow_custom_color
+                    if override and override.text_shadow_custom_color
+                    else ""
+                ),
             }
         # the title/meta/intro group as a whole is also independently
         # boxable, same as multi_column's own grid wrapper is on top of
@@ -1455,6 +1553,19 @@ class ArticleBlockStyle(models.Model):
     # isn't part of _effective_box_style()'s own dict.
     text_color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
     text_custom_color = models.CharField(
+        max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
+    )
+    # text shadow -- same shape/reasoning as box_shadow_* above (strength is
+    # a multiplier, not a literal px value; blank color keeps the theme's
+    # own shadow token), but unlike box's shadow this one is genuinely new
+    # (no prior fixed text-shadow existed anywhere), so it defaults to OFF
+    # -- see BLOCK_STYLE_DEFAULTS["heading"]["text_shadow_enabled"] --
+    # instead of box_shadow_enabled's "on, reproducing what was already
+    # there" default.
+    text_shadow_enabled = models.BooleanField(null=True, blank=True)
+    text_shadow_strength = models.FloatField(null=True, blank=True)
+    text_shadow_color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
+    text_shadow_custom_color = models.CharField(
         max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
     )
     box_padding = models.FloatField(null=True, blank=True)

@@ -46,8 +46,19 @@ BOX_FIELDS = {
 
 # not box_* -- applies independent of whether a block's box is enabled (see
 # _effective_heading_style() in article_models.py), available wherever
-# font_size is (or, for title/meta/intro, wherever their own box is).
-TEXT_COLOR_FIELDS = {"text_color", "text_custom_color"}
+# font_size is (or, for title/meta/intro, wherever their own box is). Text
+# shadow rides along in this same set (not its own constant) since it's
+# offered everywhere text_color already is, no exceptions -- same reasoning
+# as BOX_FIELDS above already mixing box_enabled/box_padding/box_shadow_*
+# together instead of splitting shadow out on its own.
+TEXT_COLOR_FIELDS = {
+    "text_color",
+    "text_custom_color",
+    "text_shadow_enabled",
+    "text_shadow_strength",
+    "text_shadow_color",
+    "text_shadow_custom_color",
+}
 
 # alignment-capable types only -- see ArticleBlockStyle.
 # exclude_from_global_alignment and save_quick_style's bulk-overwrite.
@@ -262,6 +273,8 @@ def save_block_style(request, page_id):
             defaults["box_margin"] = float(data["box_margin"])
         if "box_shadow_strength" in allowed_fields and data.get("box_shadow_strength") is not None:
             defaults["box_shadow_strength"] = float(data["box_shadow_strength"])
+        if "text_shadow_strength" in allowed_fields and data.get("text_shadow_strength") is not None:
+            defaults["text_shadow_strength"] = float(data["text_shadow_strength"])
     except (TypeError, ValueError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
@@ -274,6 +287,7 @@ def save_block_style(request, page_id):
         ("width_rem", (4, 60)),
         ("height_rem", (0, 40)),
         ("box_shadow_strength", (0, 3)),
+        ("text_shadow_strength", (0, 3)),
     ):
         value = defaults.get(field_name)
         if value is not None and not bounds[0] <= value <= bounds[1]:
@@ -291,6 +305,8 @@ def save_block_style(request, page_id):
         defaults["box_border_visible"] = bool(data["box_border_visible"])
     if "box_shadow_enabled" in allowed_fields and data.get("box_shadow_enabled") is not None:
         defaults["box_shadow_enabled"] = bool(data["box_shadow_enabled"])
+    if "text_shadow_enabled" in allowed_fields and data.get("text_shadow_enabled") is not None:
+        defaults["text_shadow_enabled"] = bool(data["text_shadow_enabled"])
     if "list_style" in allowed_fields and data.get("list_style") is not None:
         defaults["list_style"] = bool(data["list_style"])
     if "fixed_ratio" in allowed_fields and data.get("fixed_ratio") is not None:
@@ -309,6 +325,7 @@ def save_block_style(request, page_id):
         # "keep using the theme's own shadow color" (see BLOCK_STYLE_
         # DEFAULTS["box"]["shadow_color"]).
         ("box_shadow_color", "box_shadow_custom_color"),
+        ("text_shadow_color", "text_shadow_custom_color"),
     ):
         if color_field in allowed_fields and data.get(color_field) is not None:
             color = data[color_field]

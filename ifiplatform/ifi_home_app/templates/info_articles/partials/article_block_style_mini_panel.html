@@ -252,6 +252,41 @@ with (registerSaveHandler).
                 </div>
             </div>
         </div>
+
+        {% comment %}
+        Applies independent of the block's own box, same as Text color just
+        above -- unlike box's own shadow (BLOCK_STYLE_DEFAULTS["box"]
+        ["shadow_enabled"]), this defaults to off, since there was never a
+        prior fixed text-shadow to preserve (see ArticleBlockStyle.
+        text_shadow_enabled's own docstring). Strength is a multiplier on a
+        subtler recipe (offset 1px/blur 2px at strength=1) than box's own
+        (2px/8px) -- see _effective_heading_style()'s text_shadow_offset/
+        text_shadow_blur.
+        {% endcomment %}
+        <label class="block-style-field block-style-toggle" data-style-field="text_shadow_enabled">
+            <input type="checkbox" id="block-style-text-shadow-enabled">
+            <span>{% trans "Show text shadow" %}</span>
+        </label>
+        <label class="block-style-field" data-style-field="text_shadow_strength">
+            <span>{% trans "Shadow strength" %} (<span id="block-style-text-shadow-strength-value"></span>x)</span>
+            <input type="range" id="block-style-text-shadow-strength" min="0" max="3" step="0.1">
+        </label>
+        <div class="block-style-field" data-style-field="text_shadow_color">
+            <span>{% trans "Shadow color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-text-shadow-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-text-shadow-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-text-shadow-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 
     {% comment %}
@@ -318,6 +353,31 @@ with (registerSaveHandler).
                 </div>
             </div>
         </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="caption_title_text_shadow_enabled">
+            <input type="checkbox" id="block-style-caption-title-shadow-enabled">
+            <span>{% trans "Show text shadow" %}</span>
+        </label>
+        <label class="block-style-field" data-style-field="caption_title_text_shadow_strength">
+            <span>{% trans "Shadow strength" %} (<span id="block-style-caption-title-shadow-strength-value"></span>x)</span>
+            <input type="range" id="block-style-caption-title-shadow-strength" min="0" max="3" step="0.1">
+        </label>
+        <div class="block-style-field" data-style-field="caption_title_text_shadow_color">
+            <span>{% trans "Shadow color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-caption-title-shadow-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-caption-title-shadow-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-caption-title-shadow-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="block-style-field block-style-caption-header" data-style-field="caption_body_label">
@@ -362,6 +422,31 @@ with (registerSaveHandler).
                     <input type="text" class="color-swatch color-swatch--custom" id="block-style-caption-body-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
                     <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
                         <input type="color" id="block-style-caption-body-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="caption_body_text_shadow_enabled">
+            <input type="checkbox" id="block-style-caption-body-shadow-enabled">
+            <span>{% trans "Show text shadow" %}</span>
+        </label>
+        <label class="block-style-field" data-style-field="caption_body_text_shadow_strength">
+            <span>{% trans "Shadow strength" %} (<span id="block-style-caption-body-shadow-strength-value"></span>x)</span>
+            <input type="range" id="block-style-caption-body-shadow-strength" min="0" max="3" step="0.1">
+        </label>
+        <div class="block-style-field" data-style-field="caption_body_text_shadow_color">
+            <span>{% trans "Shadow color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-caption-body-shadow-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-caption-body-shadow-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-caption-body-shadow-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
                     </label>
                 </div>
             </div>
@@ -467,6 +552,31 @@ with (registerSaveHandler).
                 </div>
             </div>
         </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="title_text_shadow_enabled">
+            <input type="checkbox" id="block-style-title-shadow-enabled">
+            <span>{% trans "Show text shadow" %}</span>
+        </label>
+        <label class="block-style-field" data-style-field="title_text_shadow_strength">
+            <span>{% trans "Shadow strength" %} (<span id="block-style-title-shadow-strength-value"></span>x)</span>
+            <input type="range" id="block-style-title-shadow-strength" min="0" max="3" step="0.1">
+        </label>
+        <div class="block-style-field" data-style-field="title_text_shadow_color">
+            <span>{% trans "Shadow color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-title-shadow-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-title-shadow-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-title-shadow-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="block-style-field block-style-caption-header" data-style-field="meta_label">
@@ -510,6 +620,31 @@ with (registerSaveHandler).
                 </div>
             </div>
         </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="meta_text_shadow_enabled">
+            <input type="checkbox" id="block-style-meta-shadow-enabled">
+            <span>{% trans "Show text shadow" %}</span>
+        </label>
+        <label class="block-style-field" data-style-field="meta_text_shadow_strength">
+            <span>{% trans "Shadow strength" %} (<span id="block-style-meta-shadow-strength-value"></span>x)</span>
+            <input type="range" id="block-style-meta-shadow-strength" min="0" max="3" step="0.1">
+        </label>
+        <div class="block-style-field" data-style-field="meta_text_shadow_color">
+            <span>{% trans "Shadow color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-meta-shadow-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-meta-shadow-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-meta-shadow-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="block-style-field block-style-caption-header" data-style-field="intro_label">
@@ -549,6 +684,31 @@ with (registerSaveHandler).
                     <input type="text" class="color-swatch color-swatch--custom" id="block-style-intro-text-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
                     <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
                         <input type="color" id="block-style-intro-text-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="intro_text_shadow_enabled">
+            <input type="checkbox" id="block-style-intro-shadow-enabled">
+            <span>{% trans "Show text shadow" %}</span>
+        </label>
+        <label class="block-style-field" data-style-field="intro_text_shadow_strength">
+            <span>{% trans "Shadow strength" %} (<span id="block-style-intro-shadow-strength-value"></span>x)</span>
+            <input type="range" id="block-style-intro-shadow-strength" min="0" max="3" step="0.1">
+        </label>
+        <div class="block-style-field" data-style-field="intro_text_shadow_color">
+            <span>{% trans "Shadow color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-intro-shadow-color" data-value="">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-intro-shadow-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-intro-shadow-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
                     </label>
                 </div>
             </div>

@@ -51,8 +51,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // center/bottom vertical layout, a different axis entirely), not left/
   // center/right text alignment, so it's deliberately left out here.
   const FIELDS_BY_TYPE = {
-    heading: ["side_padding", "alignment", "exclude_from_global_alignment", "font_size", "text_color"],
-    paragraph: ["side_padding", "alignment", "exclude_from_global_alignment", "font_size", "text_color"],
+    heading: [
+      "side_padding",
+      "alignment",
+      "exclude_from_global_alignment",
+      "font_size",
+      "text_color",
+      "text_shadow_enabled",
+      "text_shadow_strength",
+      "text_shadow_color",
+    ],
+    paragraph: [
+      "side_padding",
+      "alignment",
+      "exclude_from_global_alignment",
+      "font_size",
+      "text_color",
+      "text_shadow_enabled",
+      "text_shadow_strength",
+      "text_shadow_color",
+    ],
     image: ["alignment", "exclude_from_global_alignment", "width_rem", "side_padding"],
     // article/category/union/tool cards -- width/height (a fixed-design
     // card, not built from editable text/box parts like everything else
@@ -96,9 +114,36 @@ document.addEventListener("DOMContentLoaded", () => {
     // ever accepts the full set at once (see headerWrapperEl() below for
     // why these fields are read from/written to the shared .article-header
     // wrapper regardless of which of the three is actually open).
-    title: ["side_padding", "title_alignment", "title_exclude_from_global_alignment", "title_font_size", "title_text_color"],
-    meta: ["side_padding", "meta_alignment", "meta_exclude_from_global_alignment", "meta_font_size", "meta_text_color"],
-    intro: ["side_padding", "intro_alignment", "intro_exclude_from_global_alignment", "intro_font_size", "intro_text_color"],
+    title: [
+      "side_padding",
+      "title_alignment",
+      "title_exclude_from_global_alignment",
+      "title_font_size",
+      "title_text_color",
+      "title_text_shadow_enabled",
+      "title_text_shadow_strength",
+      "title_text_shadow_color",
+    ],
+    meta: [
+      "side_padding",
+      "meta_alignment",
+      "meta_exclude_from_global_alignment",
+      "meta_font_size",
+      "meta_text_color",
+      "meta_text_shadow_enabled",
+      "meta_text_shadow_strength",
+      "meta_text_shadow_color",
+    ],
+    intro: [
+      "side_padding",
+      "intro_alignment",
+      "intro_exclude_from_global_alignment",
+      "intro_font_size",
+      "intro_text_color",
+      "intro_text_shadow_enabled",
+      "intro_text_shadow_strength",
+      "intro_text_shadow_color",
+    ],
     // not a StreamField block -- the title/intro/meta group above the body,
     // wrapped together so they share one trigger for their own side
     // padding + Box (their alignment/font-size/text-color now live on
@@ -363,6 +408,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const textColorGroup = document.getElementById("block-style-text-color");
   const textCustomColorInput = document.getElementById("block-style-text-custom-color");
   const textPickerInput = document.getElementById("block-style-text-picker");
+  // text shadow -- same "outside Box, applies independent of it" reasoning
+  // as text color just above, own dedicated refs since it's a visually/
+  // functionally separate control group in the template even though both
+  // live in the same "Style" section.
+  const textShadowEnabledInput = document.getElementById("block-style-text-shadow-enabled");
+  const textShadowStrengthInput = document.getElementById("block-style-text-shadow-strength");
+  const textShadowStrengthValue = document.getElementById("block-style-text-shadow-strength-value");
+  const textShadowColorGroup = document.getElementById("block-style-text-shadow-color");
+  const textShadowCustomColorInput = document.getElementById("block-style-text-shadow-custom-color");
+  const textShadowPickerInput = document.getElementById("block-style-text-shadow-picker");
   const boxBorderVisibleInput = document.getElementById("block-style-box-border-visible");
   const boxBorderWidthInput = document.getElementById("block-style-box-border-width");
   const boxBorderWidthValue = document.getElementById("block-style-box-border-width-value");
@@ -416,6 +471,12 @@ document.addEventListener("DOMContentLoaded", () => {
       colorGroup: document.getElementById("block-style-caption-title-text-color"),
       customColorInput: document.getElementById("block-style-caption-title-custom-color"),
       pickerInput: document.getElementById("block-style-caption-title-picker"),
+      shadowEnabledInput: document.getElementById("block-style-caption-title-shadow-enabled"),
+      shadowStrengthInput: document.getElementById("block-style-caption-title-shadow-strength"),
+      shadowStrengthValue: document.getElementById("block-style-caption-title-shadow-strength-value"),
+      shadowColorGroup: document.getElementById("block-style-caption-title-shadow-color"),
+      shadowCustomColorInput: document.getElementById("block-style-caption-title-shadow-custom-color"),
+      shadowPickerInput: document.getElementById("block-style-caption-title-shadow-picker"),
     },
     {
       datasetPrefix: "caption",
@@ -432,6 +493,12 @@ document.addEventListener("DOMContentLoaded", () => {
       colorGroup: document.getElementById("block-style-caption-body-text-color"),
       customColorInput: document.getElementById("block-style-caption-body-custom-color"),
       pickerInput: document.getElementById("block-style-caption-body-picker"),
+      shadowEnabledInput: document.getElementById("block-style-caption-body-shadow-enabled"),
+      shadowStrengthInput: document.getElementById("block-style-caption-body-shadow-strength"),
+      shadowStrengthValue: document.getElementById("block-style-caption-body-shadow-strength-value"),
+      shadowColorGroup: document.getElementById("block-style-caption-body-shadow-color"),
+      shadowCustomColorInput: document.getElementById("block-style-caption-body-shadow-custom-color"),
+      shadowPickerInput: document.getElementById("block-style-caption-body-shadow-picker"),
     },
   ];
 
@@ -453,6 +520,12 @@ document.addEventListener("DOMContentLoaded", () => {
       colorGroup: document.getElementById("block-style-title-text-color"),
       customColorInput: document.getElementById("block-style-title-text-custom-color"),
       pickerInput: document.getElementById("block-style-title-text-picker"),
+      shadowEnabledInput: document.getElementById("block-style-title-shadow-enabled"),
+      shadowStrengthInput: document.getElementById("block-style-title-shadow-strength"),
+      shadowStrengthValue: document.getElementById("block-style-title-shadow-strength-value"),
+      shadowColorGroup: document.getElementById("block-style-title-shadow-color"),
+      shadowCustomColorInput: document.getElementById("block-style-title-shadow-custom-color"),
+      shadowPickerInput: document.getElementById("block-style-title-shadow-picker"),
     },
     {
       datasetPrefix: "meta",
@@ -462,6 +535,12 @@ document.addEventListener("DOMContentLoaded", () => {
       colorGroup: document.getElementById("block-style-meta-text-color"),
       customColorInput: document.getElementById("block-style-meta-text-custom-color"),
       pickerInput: document.getElementById("block-style-meta-text-picker"),
+      shadowEnabledInput: document.getElementById("block-style-meta-shadow-enabled"),
+      shadowStrengthInput: document.getElementById("block-style-meta-shadow-strength"),
+      shadowStrengthValue: document.getElementById("block-style-meta-shadow-strength-value"),
+      shadowColorGroup: document.getElementById("block-style-meta-shadow-color"),
+      shadowCustomColorInput: document.getElementById("block-style-meta-shadow-custom-color"),
+      shadowPickerInput: document.getElementById("block-style-meta-shadow-picker"),
     },
     {
       datasetPrefix: "intro",
@@ -471,6 +550,12 @@ document.addEventListener("DOMContentLoaded", () => {
       colorGroup: document.getElementById("block-style-intro-text-color"),
       customColorInput: document.getElementById("block-style-intro-text-custom-color"),
       pickerInput: document.getElementById("block-style-intro-text-picker"),
+      shadowEnabledInput: document.getElementById("block-style-intro-shadow-enabled"),
+      shadowStrengthInput: document.getElementById("block-style-intro-shadow-strength"),
+      shadowStrengthValue: document.getElementById("block-style-intro-shadow-strength-value"),
+      shadowColorGroup: document.getElementById("block-style-intro-shadow-color"),
+      shadowCustomColorInput: document.getElementById("block-style-intro-shadow-custom-color"),
+      shadowPickerInput: document.getElementById("block-style-intro-shadow-picker"),
     },
   ];
 
@@ -616,9 +701,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const headerColorGroup = HEADER_TEXT_COLOR_GROUPS.find((group) => group.blockType === blockType);
     let textColor = visibleFields.includes("text_color") ? textColorGroup.dataset.value : null;
     let textCustomColor = visibleFields.includes("text_color") ? textCustomColorInput.value : null;
+    let textShadowEnabled = visibleFields.includes("text_shadow_enabled") ? textShadowEnabledInput.checked : null;
+    let textShadowStrength = visibleFields.includes("text_shadow_strength") ? textShadowStrengthInput.value : null;
+    let textShadowColor = visibleFields.includes("text_shadow_color") ? textShadowColorGroup.dataset.value : null;
+    let textShadowCustomColor = visibleFields.includes("text_shadow_color")
+      ? textShadowCustomColorInput.value
+      : null;
     if (headerColorGroup) {
       textColor = headerColorGroup.colorGroup.dataset.value;
       textCustomColor = headerColorGroup.customColorInput.value;
+      textShadowEnabled = headerColorGroup.shadowEnabledInput.checked;
+      textShadowStrength = headerColorGroup.shadowStrengthInput.value;
+      textShadowColor = headerColorGroup.shadowColorGroup.dataset.value;
+      textShadowCustomColor = headerColorGroup.shadowCustomColorInput.value;
     }
     return {
       url: panel.dataset.saveUrl,
@@ -637,6 +732,10 @@ document.addEventListener("DOMContentLoaded", () => {
         column_weights: columnWeights,
         text_color: textColor,
         text_custom_color: textCustomColor,
+        text_shadow_enabled: textShadowEnabled,
+        text_shadow_strength: textShadowStrength,
+        text_shadow_color: textShadowColor,
+        text_shadow_custom_color: textShadowCustomColor,
         box_enabled: boxCapable ? boxEnabledInput.checked : null,
         box_bg_color: boxCapable ? boxBgColorGroup.dataset.value : null,
         box_bg_custom_color: boxCapable ? boxBgCustomColorInput.value : null,
@@ -686,6 +785,10 @@ document.addEventListener("DOMContentLoaded", () => {
           font_size: fontSizeInput.value,
           text_color: textColorGroup.dataset.value,
           text_custom_color: textCustomColorInput.value,
+          text_shadow_enabled: textShadowEnabledInput.checked,
+          text_shadow_strength: textShadowStrengthInput.value,
+          text_shadow_color: textShadowColorGroup.dataset.value,
+          text_shadow_custom_color: textShadowCustomColorInput.value,
         },
       });
     }
@@ -711,6 +814,10 @@ document.addEventListener("DOMContentLoaded", () => {
             side_padding: group.paddingInput.value,
             text_color: group.colorGroup.dataset.value,
             text_custom_color: group.customColorInput.value,
+            text_shadow_enabled: group.shadowEnabledInput.checked,
+            text_shadow_strength: group.shadowStrengthInput.value,
+            text_shadow_color: group.shadowColorGroup.dataset.value,
+            text_shadow_custom_color: group.shadowCustomColorInput.value,
           },
         });
       });
@@ -777,6 +884,10 @@ document.addEventListener("DOMContentLoaded", () => {
     fontSize: "titleFontSize",
     textColor: "titleTextColor",
     textCustomColor: "titleTextCustomColor",
+    textShadowEnabled: "titleTextShadowEnabled",
+    textShadowStrength: "titleTextShadowStrength",
+    textShadowColor: "titleTextShadowColor",
+    textShadowCustomColor: "titleTextShadowCustomColor",
   };
   const styleDatasetKey = (key) =>
     targetTypeInput.value === "column" && TITLE_DATASET_KEYS[key] ? TITLE_DATASET_KEYS[key] : key;
@@ -928,6 +1039,35 @@ document.addEventListener("DOMContentLoaded", () => {
         textColor === "custom" ? textCustomColorInput.value || "inherit" : `var(--color-${textColor})`;
     } else {
       target.style.color = "";
+    }
+  };
+
+  // independent of applyBoxStyle/applyTextColor above -- same "outside Box"
+  // reasoning, own toggle. Unlike box's own shadow (which defaults on, to
+  // preserve a prior fixed shadow -- see applyBoxStyle's own comment) this
+  // one defaults off, so an unset target just gets no text-shadow at all
+  // rather than an explicit "none" -- there's nothing here to override.
+  // strength recipe (offset 1px/blur 2px at strength=1) matches
+  // _effective_heading_style()'s own text_shadow_offset/text_shadow_blur.
+  const applyTextShadow = () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    const target = targetTypeInput.value === "column" ? columnTitleEl() : currentBlockEl;
+    if (!target) {
+      return;
+    }
+    if (textShadowEnabledInput.checked) {
+      const shadowStrength = parseFloat(textShadowStrengthInput.value) || 0;
+      const shadowColor = textShadowColorGroup.dataset.value;
+      const resolvedShadowColor = shadowColor
+        ? shadowColor === "custom"
+          ? textShadowCustomColorInput.value || "var(--color-shadow)"
+          : `var(--color-${shadowColor})`
+        : "var(--color-shadow)";
+      target.style.textShadow = `0 ${shadowStrength * 1}px ${shadowStrength * 2}px ${resolvedShadowColor}`;
+    } else {
+      target.style.textShadow = "";
     }
   };
 
@@ -1143,6 +1283,7 @@ document.addEventListener("DOMContentLoaded", () => {
   wireColorGroup(boxBorderColorGroup, "boxBorderColor");
   wireColorGroup(boxShadowColorGroup, "boxShadowColor");
   wireColorGroup(textColorGroup, "textColor", applyTextColor);
+  wireColorGroup(textShadowColorGroup, "textShadowColor", applyTextShadow);
   wireColorGroup(heroBoxColorGroup, "boxColor", applyHeroImageBox);
   wireColorGroup(heroBoxShadowColorGroup, "shadowColor", applyHeroImageBox);
 
@@ -1161,6 +1302,14 @@ document.addEventListener("DOMContentLoaded", () => {
     [boxBorderCustomColorInput, boxBorderPickerInput, boxBorderColorGroup, "boxBorderColor", "boxBorderCustomColor"],
     [boxShadowCustomColorInput, boxShadowPickerInput, boxShadowColorGroup, "boxShadowColor", "boxShadowCustomColor"],
     [textCustomColorInput, textPickerInput, textColorGroup, "textColor", "textCustomColor", applyTextColor],
+    [
+      textShadowCustomColorInput,
+      textShadowPickerInput,
+      textShadowColorGroup,
+      "textShadowColor",
+      "textShadowCustomColor",
+      applyTextShadow,
+    ],
     [heroBoxCustomColorInput, heroBoxPickerInput, heroBoxColorGroup, "boxColor", "boxCustomColor", applyHeroImageBox],
     [
       heroBoxShadowCustomColorInput,
@@ -1340,6 +1489,87 @@ document.addEventListener("DOMContentLoaded", () => {
       currentBlockEl.dataset[customDatasetKey] = group.pickerInput.value;
       selectSwatch(group.colorGroup, group.customColorInput, colorDatasetKey, applyColor);
     });
+
+    // an image title/caption's own text shadow -- currentBlockEl-based
+    // throughout, same as everything else in this group (unlike
+    // HEADER_TEXT_COLOR_GROUPS's own wrapper indirection), so this reuses
+    // the generic wireColorGroup/selectSwatch helpers directly rather than
+    // hand-rolling swatch clicks the way that one has to.
+    const applyShadow = () => {
+      const target = captionTextTargetEl(group);
+      if (!target) {
+        return;
+      }
+      if (group.shadowEnabledInput.checked) {
+        const shadowStrength = parseFloat(group.shadowStrengthInput.value) || 0;
+        const shadowColor = group.shadowColorGroup.dataset.value;
+        const resolvedShadowColor = shadowColor
+          ? shadowColor === "custom"
+            ? group.shadowCustomColorInput.value || "var(--color-shadow)"
+            : `var(--color-${shadowColor})`
+          : "var(--color-shadow)";
+        target.style.textShadow = `0 ${shadowStrength * 1}px ${shadowStrength * 2}px ${resolvedShadowColor}`;
+      } else {
+        target.style.textShadow = "";
+      }
+    };
+    group.applyShadow = applyShadow;
+
+    group.shadowEnabledInput.addEventListener("change", () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      currentBlockEl.dataset[`${group.datasetPrefix}TextShadowEnabled`] = group.shadowEnabledInput.checked
+        ? "true"
+        : "false";
+      applyShadow();
+      recordPendingEdit();
+    });
+    group.shadowStrengthInput.addEventListener("input", () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      currentBlockEl.dataset[`${group.datasetPrefix}TextShadowStrength`] = group.shadowStrengthInput.value;
+      group.shadowStrengthValue.textContent = group.shadowStrengthInput.value;
+      applyShadow();
+      recordPendingEdit();
+    });
+
+    const shadowColorDatasetKey = `${group.datasetPrefix}TextShadowColor`;
+    const shadowCustomDatasetKey = `${group.datasetPrefix}TextShadowCustomColor`;
+    wireColorGroup(group.shadowColorGroup, shadowColorDatasetKey, applyShadow);
+
+    const shadowCustomGroupEl = group.shadowCustomColorInput.closest(".color-swatch-custom-group");
+    shadowCustomGroupEl.addEventListener("mousedown", (event) => {
+      if (!currentBlockEl || group.shadowColorGroup.dataset.value === "custom") {
+        return;
+      }
+      event.preventDefault();
+    });
+    shadowCustomGroupEl.addEventListener("click", (event) => {
+      if (!currentBlockEl || group.shadowColorGroup.dataset.value === "custom") {
+        return;
+      }
+      event.preventDefault();
+      selectSwatch(group.shadowColorGroup, group.shadowCustomColorInput, shadowColorDatasetKey, applyShadow);
+    });
+    group.shadowCustomColorInput.addEventListener("input", () => {
+      const hex = normalizeHex(group.shadowCustomColorInput.value);
+      if (!currentBlockEl || !hex) {
+        return;
+      }
+      setCustomSwatch(group.shadowCustomColorInput, hex, group.shadowPickerInput);
+      currentBlockEl.dataset[shadowCustomDatasetKey] = hex;
+      selectSwatch(group.shadowColorGroup, group.shadowCustomColorInput, shadowColorDatasetKey, applyShadow);
+    });
+    group.shadowPickerInput.addEventListener("input", () => {
+      if (!currentBlockEl) {
+        return;
+      }
+      setCustomSwatch(group.shadowCustomColorInput, group.shadowPickerInput.value, group.shadowPickerInput);
+      currentBlockEl.dataset[shadowCustomDatasetKey] = group.shadowPickerInput.value;
+      selectSwatch(group.shadowColorGroup, group.shadowCustomColorInput, shadowColorDatasetKey, applyShadow);
+    });
   };
   CAPTION_TEXT_GROUPS.forEach(wireCaptionTextGroup);
 
@@ -1423,6 +1653,105 @@ document.addEventListener("DOMContentLoaded", () => {
       setCustomSwatch(group.customColorInput, group.pickerInput.value, group.pickerInput);
       wrapperEl.dataset[customDatasetKey] = group.pickerInput.value;
       selectHeaderSwatch(group.customColorInput);
+    });
+
+    // title/meta/intro's own text shadow -- same wrapper-not-currentBlockEl
+    // reasoning throughout as the color wiring just above.
+    const applyShadow = () => {
+      const wrapperEl = headerWrapperEl();
+      const target = wrapperEl ? wrapperEl.querySelector(group.targetSelector) : null;
+      if (!target) {
+        return;
+      }
+      if (group.shadowEnabledInput.checked) {
+        const shadowStrength = parseFloat(group.shadowStrengthInput.value) || 0;
+        const shadowColor = group.shadowColorGroup.dataset.value;
+        const resolvedShadowColor = shadowColor
+          ? shadowColor === "custom"
+            ? group.shadowCustomColorInput.value || "var(--color-shadow)"
+            : `var(--color-${shadowColor})`
+          : "var(--color-shadow)";
+        target.style.textShadow = `0 ${shadowStrength * 1}px ${shadowStrength * 2}px ${resolvedShadowColor}`;
+      } else {
+        target.style.textShadow = "";
+      }
+    };
+    group.applyShadow = applyShadow;
+
+    const shadowEnabledDatasetKey = `${group.datasetPrefix}TextShadowEnabled`;
+    const shadowStrengthDatasetKey = `${group.datasetPrefix}TextShadowStrength`;
+    const shadowColorDatasetKey = `${group.datasetPrefix}TextShadowColor`;
+    const shadowCustomColorDatasetKey = `${group.datasetPrefix}TextShadowCustomColor`;
+
+    group.shadowEnabledInput.addEventListener("change", () => {
+      const wrapperEl = headerWrapperEl();
+      if (!wrapperEl) {
+        return;
+      }
+      wrapperEl.dataset[shadowEnabledDatasetKey] = group.shadowEnabledInput.checked ? "true" : "false";
+      applyShadow();
+      recordPendingEdit();
+    });
+    group.shadowStrengthInput.addEventListener("input", () => {
+      const wrapperEl = headerWrapperEl();
+      if (!wrapperEl) {
+        return;
+      }
+      wrapperEl.dataset[shadowStrengthDatasetKey] = group.shadowStrengthInput.value;
+      group.shadowStrengthValue.textContent = group.shadowStrengthInput.value;
+      applyShadow();
+      recordPendingEdit();
+    });
+
+    const selectHeaderShadowSwatch = (swatch) => {
+      const wrapperEl = headerWrapperEl();
+      if (!wrapperEl) {
+        return;
+      }
+      group.shadowColorGroup.dataset.value = swatch.dataset.color;
+      wrapperEl.dataset[shadowColorDatasetKey] = swatch.dataset.color;
+      group.shadowColorGroup.querySelectorAll(".color-swatch").forEach((s) => {
+        s.classList.toggle("active", s === swatch);
+      });
+      applyShadow();
+      recordPendingEdit();
+    };
+    group.shadowColorGroup.querySelectorAll("button.color-swatch").forEach((button) => {
+      button.addEventListener("click", () => selectHeaderShadowSwatch(button));
+    });
+
+    const shadowCustomGroupEl = group.shadowCustomColorInput.closest(".color-swatch-custom-group");
+    shadowCustomGroupEl.addEventListener("mousedown", (event) => {
+      if (!headerWrapperEl() || group.shadowColorGroup.dataset.value === "custom") {
+        return;
+      }
+      event.preventDefault();
+    });
+    shadowCustomGroupEl.addEventListener("click", (event) => {
+      if (!headerWrapperEl() || group.shadowColorGroup.dataset.value === "custom") {
+        return;
+      }
+      event.preventDefault();
+      selectHeaderShadowSwatch(group.shadowCustomColorInput);
+    });
+    group.shadowCustomColorInput.addEventListener("input", () => {
+      const hex = normalizeHex(group.shadowCustomColorInput.value);
+      const wrapperEl = headerWrapperEl();
+      if (!wrapperEl || !hex) {
+        return;
+      }
+      setCustomSwatch(group.shadowCustomColorInput, hex, group.shadowPickerInput);
+      wrapperEl.dataset[shadowCustomColorDatasetKey] = hex;
+      selectHeaderShadowSwatch(group.shadowCustomColorInput);
+    });
+    group.shadowPickerInput.addEventListener("input", () => {
+      const wrapperEl = headerWrapperEl();
+      if (!wrapperEl) {
+        return;
+      }
+      setCustomSwatch(group.shadowCustomColorInput, group.shadowPickerInput.value, group.shadowPickerInput);
+      wrapperEl.dataset[shadowCustomColorDatasetKey] = group.shadowPickerInput.value;
+      selectHeaderShadowSwatch(group.shadowCustomColorInput);
     });
   };
   HEADER_TEXT_COLOR_GROUPS.forEach(wireHeaderTextColorGroup);
@@ -1591,7 +1920,15 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
     if (blockType === "column" && blockEl.dataset.titleBlockId) {
-      visibleFields = visibleFields.concat(["alignment", "exclude_from_global_alignment", "font_size", "text_color"]);
+      visibleFields = visibleFields.concat([
+        "alignment",
+        "exclude_from_global_alignment",
+        "font_size",
+        "text_color",
+        "text_shadow_enabled",
+        "text_shadow_strength",
+        "text_shadow_color",
+      ]);
     }
     if (blockType === "image_caption") {
       CAPTION_TEXT_GROUPS.forEach((group) => {
@@ -1603,6 +1940,9 @@ document.addEventListener("DOMContentLoaded", () => {
             `${group.styleFieldPrefix}_font_size`,
             `${group.styleFieldPrefix}_side_padding`,
             `${group.styleFieldPrefix}_text_color`,
+            `${group.styleFieldPrefix}_text_shadow_enabled`,
+            `${group.styleFieldPrefix}_text_shadow_strength`,
+            `${group.styleFieldPrefix}_text_shadow_color`,
           ]);
         }
       });
@@ -1694,6 +2034,22 @@ document.addEventListener("DOMContentLoaded", () => {
       textColorLabel.textContent =
         blockType === "column" ? textColorLabel.dataset.labelTitle : textColorLabel.dataset.labelDefault;
     }
+    if (visibleFields.includes("text_shadow_enabled")) {
+      textShadowEnabledInput.checked = blockEl.dataset[styleDatasetKey("textShadowEnabled")] === "true";
+      const shadowStrengthVal = blockEl.dataset[styleDatasetKey("textShadowStrength")];
+      textShadowStrengthInput.value = shadowStrengthVal;
+      textShadowStrengthValue.textContent = shadowStrengthVal;
+      const shadowColorVal = blockEl.dataset[styleDatasetKey("textShadowColor")] || "";
+      textShadowColorGroup.dataset.value = shadowColorVal;
+      textShadowColorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+        b.classList.toggle("active", b.dataset.color === shadowColorVal);
+      });
+      setCustomSwatch(
+        textShadowCustomColorInput,
+        blockEl.dataset[styleDatasetKey("textShadowCustomColor")],
+        textShadowPickerInput
+      );
+    }
     if (blockType === "image_caption") {
       CAPTION_TEXT_GROUPS.forEach((group) => {
         if (!blockEl.dataset[`${group.datasetPrefix}TextId`]) {
@@ -1720,6 +2076,21 @@ document.addEventListener("DOMContentLoaded", () => {
           group.customColorInput,
           blockEl.dataset[`${group.datasetPrefix}TextCustomColor`],
           group.pickerInput
+        );
+        group.shadowEnabledInput.checked =
+          blockEl.dataset[`${group.datasetPrefix}TextShadowEnabled`] === "true";
+        const shadowStrengthVal = blockEl.dataset[`${group.datasetPrefix}TextShadowStrength`];
+        group.shadowStrengthInput.value = shadowStrengthVal;
+        group.shadowStrengthValue.textContent = shadowStrengthVal;
+        const shadowColorVal = blockEl.dataset[`${group.datasetPrefix}TextShadowColor`] || "";
+        group.shadowColorGroup.dataset.value = shadowColorVal;
+        group.shadowColorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+          b.classList.toggle("active", b.dataset.color === shadowColorVal);
+        });
+        setCustomSwatch(
+          group.shadowCustomColorInput,
+          blockEl.dataset[`${group.datasetPrefix}TextShadowCustomColor`],
+          group.shadowPickerInput
         );
       });
     }
@@ -1834,6 +2205,21 @@ document.addEventListener("DOMContentLoaded", () => {
           headerWrapper.dataset[`${group.datasetPrefix}TextCustomColor`],
           group.pickerInput
         );
+        group.shadowEnabledInput.checked =
+          headerWrapper.dataset[`${group.datasetPrefix}TextShadowEnabled`] === "true";
+        const shadowStrengthVal = headerWrapper.dataset[`${group.datasetPrefix}TextShadowStrength`];
+        group.shadowStrengthInput.value = shadowStrengthVal;
+        group.shadowStrengthValue.textContent = shadowStrengthVal;
+        const shadowColorVal = headerWrapper.dataset[`${group.datasetPrefix}TextShadowColor`] || "";
+        group.shadowColorGroup.dataset.value = shadowColorVal;
+        group.shadowColorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+          b.classList.toggle("active", b.dataset.color === shadowColorVal);
+        });
+        setCustomSwatch(
+          group.shadowCustomColorInput,
+          headerWrapper.dataset[`${group.datasetPrefix}TextShadowCustomColor`],
+          group.shadowPickerInput
+        );
       });
     }
 
@@ -1918,6 +2304,27 @@ document.addEventListener("DOMContentLoaded", () => {
     currentBlockEl.dataset[styleDatasetKey("fontSize")] = fontSizeInput.value;
     fontSizeValue.textContent = fontSizeInput.value;
     positionTextTriggers();
+    recordPendingEdit();
+  });
+
+  textShadowEnabledInput.addEventListener("change", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset[styleDatasetKey("textShadowEnabled")] = textShadowEnabledInput.checked
+      ? "true"
+      : "false";
+    applyTextShadow();
+    recordPendingEdit();
+  });
+
+  textShadowStrengthInput.addEventListener("input", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset[styleDatasetKey("textShadowStrength")] = textShadowStrengthInput.value;
+    textShadowStrengthValue.textContent = textShadowStrengthInput.value;
+    applyTextShadow();
     recordPendingEdit();
   });
 
@@ -2336,6 +2743,14 @@ document.addEventListener("DOMContentLoaded", () => {
       clearColorGroup(headerColorGroup.colorGroup);
       setCustomSwatch(headerColorGroup.customColorInput, "", headerColorGroup.pickerInput);
       headerColorGroup.applyColor();
+      // same blank/off default as text shadow everywhere else -- no prior
+      // fixed text-shadow to reproduce (see ArticleBlockStyle.text_shadow_
+      // enabled's own docstring).
+      applyToggle(headerColorGroup.shadowEnabledInput, false);
+      applySlider(headerColorGroup.shadowStrengthInput, 1);
+      clearColorGroup(headerColorGroup.shadowColorGroup);
+      setCustomSwatch(headerColorGroup.shadowCustomColorInput, "", headerColorGroup.shadowPickerInput);
+      headerColorGroup.applyShadow();
     }
 
     // column/image_caption/title/meta/intro's own side padding -- no
@@ -2357,6 +2772,11 @@ document.addEventListener("DOMContentLoaded", () => {
       clearColorGroup(textColorGroup);
       setCustomSwatch(textCustomColorInput, "", textPickerInput);
       applyTextColor();
+      applyToggle(textShadowEnabledInput, titleDefaults.text_shadow_enabled);
+      applySlider(textShadowStrengthInput, titleDefaults.text_shadow_strength);
+      clearColorGroup(textShadowColorGroup);
+      setCustomSwatch(textShadowCustomColorInput, "", textShadowPickerInput);
+      applyTextShadow();
     }
 
     // an image_caption's own title/caption text share this same trigger/
@@ -2375,6 +2795,11 @@ document.addEventListener("DOMContentLoaded", () => {
         clearColorGroup(group.colorGroup);
         setCustomSwatch(group.customColorInput, "", group.pickerInput);
         group.applyColor();
+        applyToggle(group.shadowEnabledInput, groupDefaults.text_shadow_enabled);
+        applySlider(group.shadowStrengthInput, groupDefaults.text_shadow_strength);
+        clearColorGroup(group.shadowColorGroup);
+        setCustomSwatch(group.shadowCustomColorInput, "", group.shadowPickerInput);
+        group.applyShadow();
       });
     }
 
@@ -2385,6 +2810,16 @@ document.addEventListener("DOMContentLoaded", () => {
       clearColorGroup(textColorGroup);
       setCustomSwatch(textCustomColorInput, "", textPickerInput);
       applyTextColor();
+    }
+
+    // same blank/off default as text color just above -- see
+    // ArticleBlockStyle.text_shadow_enabled's own docstring.
+    if ((FIELDS_BY_TYPE[blockType] || []).includes("text_shadow_enabled")) {
+      applyToggle(textShadowEnabledInput, false);
+      applySlider(textShadowStrengthInput, 1);
+      clearColorGroup(textShadowColorGroup);
+      setCustomSwatch(textShadowCustomColorInput, "", textShadowPickerInput);
+      applyTextShadow();
     }
 
     if (boxCapable) {
