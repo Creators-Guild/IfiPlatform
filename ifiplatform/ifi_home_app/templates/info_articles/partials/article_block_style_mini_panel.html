@@ -91,6 +91,41 @@ with (registerSaveHandler).
         </label>
 
         {% comment %}
+        hero_image's own editable shadow -- same shape/reasoning as the
+        generic Box section's own Shadow subsection below (strength is a
+        multiplier on the box's original fixed shadow shape, blank color
+        keeps the theme's own shadow color), just flat here rather than
+        its own collapsible subsection, matching this block's existing
+        Box/Box color/Box corner rounding fields immediately above (hero_
+        image's own box has no separate collapsible groups the way the
+        generic Box section does).
+        {% endcomment %}
+        <label class="block-style-field block-style-toggle" data-style-field="shadow_enabled">
+            <input type="checkbox" id="block-style-hero-box-shadow-enabled">
+            <span>{% trans "Show shadow" %}</span>
+        </label>
+        <label class="block-style-field" data-style-field="shadow_strength">
+            <span>{% trans "Shadow strength" %} (<span id="block-style-hero-box-shadow-strength-value"></span>x)</span>
+            <input type="range" id="block-style-hero-box-shadow-strength" min="0" max="3" step="0.1">
+        </label>
+        <div class="block-style-field" data-style-field="shadow_color">
+            <span>{% trans "Shadow color" %}</span>
+            <div class="block-style-color-buttons" id="block-style-hero-box-shadow-color">
+                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                <div class="color-swatch-custom-group">
+                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-hero-box-shadow-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                        <input type="color" id="block-style-hero-box-shadow-picker" class="color-swatch-picker-input" tabindex="-1">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        {% comment %}
         Card blocks only (article/category/union/tool) -- 0 means auto (the
         card's own natural, content-driven height). See ArticleBlockStyle.
         height_rem's own docstring.
@@ -373,20 +408,27 @@ with (registerSaveHandler).
     {% comment %}
     Title/Meta/Intro -- in that order, matching the actual page layout
     (see article_page.html's .article-header: h1, then .article-meta, then
-    .intro). The article-header group's own alignment/font-size (see
-    FIELDS_BY_TYPE.article_header in article_block_style.js) plus, now,
-    each one's own text color too -- title/meta/intro each used to have
-    their own individual trigger for this (still do, for Box), but text
-    color specifically moved here, into the shared header editor, so their
-    own private editors only offer Box and nothing else (see FIELDS_BY_TYPE.
-    title/meta/intro, now empty). Three separate collapsible sections, same
-    granularity as Image title/Image caption below, rather than one shared
-    one, since each is independently adjustable and usually only one at a
-    time is what someone's after.
+    .intro). Each one's own alignment/font-size/text color, edited from its
+    own individual trigger -- article_header's shared trigger now only
+    offers Layout (its own side padding) and Box, nothing else (see
+    FIELDS_BY_TYPE.article_header in article_block_style.js); the
+    alignment/font-size fields here still save via the same shared
+    save_header_style request regardless of which of the three triggered
+    it (see recordPendingEdit), since that endpoint only ever accepts the
+    whole title+meta+intro payload at once. Three separate collapsible
+    sections, same granularity as Image title/Image caption below, rather
+    than one shared one, since each is independently adjustable and
+    usually only one at a time is what someone's after. Each one's own
+    section is labeled "Style" (not "Title"/"Meta"/"Intro" again -- the
+    panel's own title, set by openPanelFor() from BLOCK_TYPE_LABELS, already
+    says that), same label and field order (Alignment, Lock alignment, Font
+    size, Text color) as heading/paragraph's own "Style" section above, so
+    editing any of these three feels like the same control set as
+    everywhere else in this panel rather than a one-off.
     {% endcomment %}
     <div class="block-style-field block-style-caption-header" data-style-field="title_label">
-        <p class="block-style-box-subsection-title">{% trans "Title" %}</p>
-        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-header-title-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse title options' %}">&#9662;</button>
+        <p class="block-style-box-subsection-title">{% trans "Style" %}</p>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-header-title-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse style options' %}">&#9662;</button>
     </div>
 
     <div class="block-style-box-fields" id="block-style-header-title-fields" hidden>
@@ -398,6 +440,11 @@ with (registerSaveHandler).
                 <button type="button" data-align="right">{% trans "Right" %}</button>
             </div>
         </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="title_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-title-exclude-global-alignment">
+            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
+        </label>
 
         <label class="block-style-field" data-style-field="title_font_size">
             <span>{% trans "Font size" %} (<span id="block-style-title-font-size-value"></span>rem)</span>
@@ -423,8 +470,8 @@ with (registerSaveHandler).
     </div>
 
     <div class="block-style-field block-style-caption-header" data-style-field="meta_label">
-        <p class="block-style-box-subsection-title">{% trans "Meta" %}</p>
-        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-header-meta-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse meta options' %}">&#9662;</button>
+        <p class="block-style-box-subsection-title">{% trans "Style" %}</p>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-header-meta-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse style options' %}">&#9662;</button>
     </div>
 
     <div class="block-style-box-fields" id="block-style-header-meta-fields" hidden>
@@ -436,6 +483,11 @@ with (registerSaveHandler).
                 <button type="button" data-align="right">{% trans "Right" %}</button>
             </div>
         </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="meta_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-meta-exclude-global-alignment">
+            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
+        </label>
 
         <label class="block-style-field" data-style-field="meta_font_size">
             <span>{% trans "Font size" %} (<span id="block-style-meta-font-size-value"></span>rem)</span>
@@ -461,8 +513,8 @@ with (registerSaveHandler).
     </div>
 
     <div class="block-style-field block-style-caption-header" data-style-field="intro_label">
-        <p class="block-style-box-subsection-title">{% trans "Intro" %}</p>
-        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-header-intro-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse intro options' %}">&#9662;</button>
+        <p class="block-style-box-subsection-title">{% trans "Style" %}</p>
+        <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-header-intro-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse style options' %}">&#9662;</button>
     </div>
 
     <div class="block-style-box-fields" id="block-style-header-intro-fields" hidden>
@@ -474,6 +526,11 @@ with (registerSaveHandler).
                 <button type="button" data-align="right">{% trans "Right" %}</button>
             </div>
         </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="intro_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-intro-exclude-global-alignment">
+            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
+        </label>
 
         <label class="block-style-field" data-style-field="intro_font_size">
             <span>{% trans "Font size" %} (<span id="block-style-intro-font-size-value"></span>rem)</span>
@@ -538,26 +595,47 @@ with (registerSaveHandler).
         on the first click without immediately focusing the hex field or
         opening the picker, same as clicking any other swatch does.
         {% endcomment %}
-        <div class="block-style-field block-style-box-field block-style-box-subsection" data-style-field="box_bg_color">
+        {% comment %}
+        Each of Background/Border/Spacing is its own collapsible subsection
+        now, same caption-header + chevron pattern as Layout/Style/Title/
+        Meta/Intro/etc above -- previously these three were always fully
+        open inside Box, which made Box by far the tallest section in the
+        panel even when someone only wanted to glance at one of them. The
+        generic [data-controls] wiring (article_block_style.js) needs no
+        changes for this -- it already toggles any wrapper by id regardless
+        of nesting depth, and updateBoxFieldVisibility()'s own field lookups
+        are by data-style-field attribute, not by direct-child position, so
+        border width/color still correctly stay hidden until "Show border"
+        is checked even though they're now nested one level deeper.
+        {% endcomment %}
+        <div class="block-style-field block-style-caption-header" data-style-field="box_bg_label">
             <p class="block-style-box-subsection-title">{% trans "Background" %}</p>
-            <div class="block-style-color-buttons" id="block-style-box-bg-color" data-value="">
-                <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
-                <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
-                <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
-                <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
-                <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
-                <div class="color-swatch-custom-group">
-                    <input type="text" class="color-swatch color-swatch--custom" id="block-style-box-bg-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
-                    <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
-                        <input type="color" id="block-style-box-bg-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
-                    </label>
+            <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-box-bg-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse background options' %}">&#9662;</button>
+        </div>
+        <div class="block-style-box-fields block-style-box-subsection" id="block-style-box-bg-fields" hidden>
+            <div class="block-style-field block-style-box-field" data-style-field="box_bg_color">
+                <div class="block-style-color-buttons" id="block-style-box-bg-color" data-value="">
+                    <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                    <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                    <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                    <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                    <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                    <div class="color-swatch-custom-group">
+                        <input type="text" class="color-swatch color-swatch--custom" id="block-style-box-bg-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                        <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                            <input type="color" id="block-style-box-bg-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="block-style-field block-style-box-field block-style-box-subsection" data-style-field="box_border_visible">
+        <div class="block-style-field block-style-caption-header" data-style-field="box_border_label">
             <p class="block-style-box-subsection-title">{% trans "Border" %}</p>
-            <label class="block-style-toggle">
+            <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-box-border-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse border options' %}">&#9662;</button>
+        </div>
+        <div class="block-style-box-fields block-style-box-subsection" id="block-style-box-border-fields" hidden>
+            <label class="block-style-field block-style-toggle" data-style-field="box_border_visible">
                 <input type="checkbox" id="block-style-box-border-visible">
                 <span>{% trans "Show border" %}</span>
             </label>
@@ -587,8 +665,11 @@ with (registerSaveHandler).
             </label>
         </div>
 
-        <div class="block-style-field block-style-box-field block-style-box-subsection" data-style-field="box_padding">
+        <div class="block-style-field block-style-caption-header" data-style-field="box_spacing_label">
             <p class="block-style-box-subsection-title">{% trans "Spacing" %}</p>
+            <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-box-spacing-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse spacing options' %}">&#9662;</button>
+        </div>
+        <div class="block-style-box-fields block-style-box-subsection" id="block-style-box-spacing-fields" hidden>
             <label class="block-style-field block-style-box-field" data-style-field="box_padding">
                 <span>{% trans "Padding inside box" %} (<span id="block-style-box-padding-value"></span>rem)</span>
                 <input type="range" id="block-style-box-padding" min="0" max="6" step="0.25">
@@ -597,6 +678,48 @@ with (registerSaveHandler).
                 <span>{% trans "Margin outside box" %} (<span id="block-style-box-margin-value"></span>rem)</span>
                 <input type="range" id="block-style-box-margin" min="0" max="6" step="0.25">
             </label>
+        </div>
+
+        {% comment %}
+        Editable version of the box-shadow every boxed block always had
+        anyway (see _block_box_style.html) -- shadow_enabled defaults to
+        true so nothing changes visually until an editor actually opens
+        this section. strength is a multiplier on that original shadow's
+        own shape (offset 2px/blur 8px at strength=1), not a literal px
+        value -- see _effective_box_style() in article_models.py. No
+        "default" swatch for color, same as Text color's own swatch group
+        above -- leaving it unselected keeps the theme's own shadow color
+        (var(--color-shadow)), same blank-is-a-real-state convention.
+        {% endcomment %}
+        <div class="block-style-field block-style-caption-header" data-style-field="box_shadow_label">
+            <p class="block-style-box-subsection-title">{% trans "Shadow" %}</p>
+            <button type="button" class="block-style-box-collapse-toggle" data-controls="block-style-box-shadow-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse shadow options' %}">&#9662;</button>
+        </div>
+        <div class="block-style-box-fields block-style-box-subsection" id="block-style-box-shadow-fields" hidden>
+            <label class="block-style-field block-style-toggle" data-style-field="box_shadow_enabled">
+                <input type="checkbox" id="block-style-box-shadow-enabled">
+                <span>{% trans "Show shadow" %}</span>
+            </label>
+            <label class="block-style-field block-style-box-field" data-style-field="box_shadow_strength">
+                <span>{% trans "Strength" %} (<span id="block-style-box-shadow-strength-value"></span>x)</span>
+                <input type="range" id="block-style-box-shadow-strength" min="0" max="3" step="0.1">
+            </label>
+            <div class="block-style-field block-style-box-field" data-style-field="box_shadow_color">
+                <span>{% trans "Color" %}</span>
+                <div class="block-style-color-buttons" id="block-style-box-shadow-color" data-value="">
+                    <button type="button" class="color-swatch color-swatch--bg-light" data-color="bg-light">{% trans "Light" %}</button>
+                    <button type="button" class="color-swatch color-swatch--turq" data-color="turq">{% trans "Turquoise" %}</button>
+                    <button type="button" class="color-swatch color-swatch--pink" data-color="pink">{% trans "Pink" %}</button>
+                    <button type="button" class="color-swatch color-swatch--purple" data-color="purple">{% trans "Purple" %}</button>
+                    <button type="button" class="color-swatch color-swatch--black" data-color="black">{% trans "Black" %}</button>
+                    <div class="color-swatch-custom-group">
+                        <input type="text" class="color-swatch color-swatch--custom" id="block-style-box-shadow-custom-color" data-color="custom" placeholder="#hex" maxlength="7" aria-label="{% trans 'Custom hex color' %}">
+                        <label class="color-swatch-picker" aria-label="{% trans 'Pick a custom color' %}" title="{% trans 'Pick a custom color' %}">
+                            <input type="color" id="block-style-box-shadow-picker" class="color-swatch-picker-input" tabindex="-1" value="#ffffff">
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

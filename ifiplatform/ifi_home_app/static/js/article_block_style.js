@@ -85,35 +85,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // (block_id "<column id>-title", block_type "column_title") alongside
     // the column's own side padding/box.
     column: ["side_padding"],
-    // title/meta/intro (the article-header group) -- side padding plus
-    // box. Alignment/font-size/text-color for these three all live in the
-    // shared header editor instead (see article_header below and
-    // HEADER_TEXT_COLOR_GROUPS) -- their own individual trigger here is
-    // side padding and Box, nothing else.
-    title: ["side_padding"],
-    meta: ["side_padding"],
-    intro: ["side_padding"],
+    // title/meta/intro (the article-header group) -- each fully styleable
+    // from its own individual trigger: side padding/box/text color/the
+    // "lock alignment" opt-out are ArticleBlockStyle rows (same as every
+    // other alignment-capable block), while alignment/font-size are plain
+    // ArticlePage fields saved via save_header_style instead (see
+    // recordPendingEdit's own "article-header-style" pendingEdits entry) --
+    // whichever of the three triggered a save, that request always carries
+    // the *whole* title+meta+intro payload, since save_header_style only
+    // ever accepts the full set at once (see headerWrapperEl() below for
+    // why these fields are read from/written to the shared .article-header
+    // wrapper regardless of which of the three is actually open).
+    title: ["side_padding", "title_alignment", "title_exclude_from_global_alignment", "title_font_size", "title_text_color"],
+    meta: ["side_padding", "meta_alignment", "meta_exclude_from_global_alignment", "meta_font_size", "meta_text_color"],
+    intro: ["side_padding", "intro_alignment", "intro_exclude_from_global_alignment", "intro_font_size", "intro_text_color"],
     // not a StreamField block -- the title/intro/meta group above the body,
-    // wrapped together so they share one trigger (see article_page.html's
-    // .article-header). Alignment/font-size saved via save_header_style,
-    // plain ArticlePage fields; text color for each saved as its own
-    // separate ArticleBlockStyle row instead (block_id "article-title"/
-    // "article-meta"/"article-intro", same rows title/meta/intro's own
-    // individual trigger used to write text_color to -- see
-    // HEADER_TEXT_COLOR_GROUPS/recordPendingEdit below), since that's a
-    // per-block-style concern, not a plain ArticlePage field.
-    article_header: [
-      "side_padding",
-      "title_alignment",
-      "title_font_size",
-      "title_text_color",
-      "meta_alignment",
-      "meta_font_size",
-      "meta_text_color",
-      "intro_alignment",
-      "intro_font_size",
-      "intro_text_color",
-    ],
+    // wrapped together so they share one trigger for their own side
+    // padding + Box (their alignment/font-size/text-color now live on
+    // title/meta/intro's own individual triggers instead, see above).
+    article_header: ["side_padding"],
     // alignment/width/side_padding reuse the exact same generic inputs as
     // "image" -- also not a StreamField block though (hero_image is a set
     // of ArticleStyle fields, see article_models.py), so it needs the same
@@ -122,7 +112,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // controls below (not the generic Box section -- that one saves to a
     // per-block ArticleBlockStyle row, these save to ArticleStyle instead,
     // same endpoint as the other three).
-    hero_image: ["alignment", "width_rem", "side_padding", "boxed", "box_color", "box_custom_color", "box_border_radius"],
+    hero_image: [
+      "alignment",
+      "width_rem",
+      "side_padding",
+      "boxed",
+      "box_color",
+      "box_custom_color",
+      "box_border_radius",
+      "shadow_enabled",
+      "shadow_strength",
+      "shadow_color",
+    ],
     // not a StreamField block either -- there's only ever one
     // table-of-contents icon on the page (ArticlePage.toc_icon_size), same
     // special-cased save endpoint as article_header/hero_image.
@@ -185,6 +186,9 @@ document.addEventListener("DOMContentLoaded", () => {
     "box_radius",
     "box_padding",
     "box_margin",
+    "box_shadow_enabled",
+    "box_shadow_strength",
+    "box_shadow_color",
   ];
   // every box field except box_enabled itself -- hidden until the box is
   // turned on (see updateBoxFieldVisibility()).
@@ -323,6 +327,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const introFontSizeValue = document.getElementById("block-style-intro-font-size-value");
   const metaFontSizeInput = document.getElementById("block-style-meta-font-size");
   const metaFontSizeValue = document.getElementById("block-style-meta-font-size-value");
+  // title/meta/intro's own "lock alignment" opt-out -- unlike alignment/
+  // font-size/text-color above, this one is NOT part of the shared
+  // save_header_style payload: it saves onto each one's own existing
+  // ArticleBlockStyle row (block_id "article-title"/etc, same row side
+  // padding/box already use), read/written directly off currentBlockEl
+  // (the h1/.article-meta/.intro element itself), same as every other
+  // block type's own exclude_from_global_alignment checkbox.
+  const titleExcludeGlobalAlignmentInput = document.getElementById("block-style-title-exclude-global-alignment");
+  const metaExcludeGlobalAlignmentInput = document.getElementById("block-style-meta-exclude-global-alignment");
+  const introExcludeGlobalAlignmentInput = document.getElementById("block-style-intro-exclude-global-alignment");
   const gapInput = document.getElementById("block-style-gap");
   const gapValue = document.getElementById("block-style-gap-value");
   const tocIconSizeInput = document.getElementById("block-style-toc-icon-size");
@@ -361,6 +375,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const boxPaddingValue = document.getElementById("block-style-box-padding-value");
   const boxMarginInput = document.getElementById("block-style-box-margin");
   const boxMarginValue = document.getElementById("block-style-box-margin-value");
+  const boxShadowEnabledInput = document.getElementById("block-style-box-shadow-enabled");
+  const boxShadowStrengthInput = document.getElementById("block-style-box-shadow-strength");
+  const boxShadowStrengthValue = document.getElementById("block-style-box-shadow-strength-value");
+  const boxShadowColorGroup = document.getElementById("block-style-box-shadow-color");
+  const boxShadowCustomColorInput = document.getElementById("block-style-box-shadow-custom-color");
+  const boxShadowPickerInput = document.getElementById("block-style-box-shadow-picker");
+  // hero_image's own separate box shadow -- see FIELDS_BY_TYPE.hero_image's
+  // own comment for why hero_image needs its own dedicated refs/wiring
+  // rather than reusing the generic box* ones above.
+  const heroBoxShadowEnabledInput = document.getElementById("block-style-hero-box-shadow-enabled");
+  const heroBoxShadowStrengthInput = document.getElementById("block-style-hero-box-shadow-strength");
+  const heroBoxShadowStrengthValue = document.getElementById("block-style-hero-box-shadow-strength-value");
+  const heroBoxShadowColorGroup = document.getElementById("block-style-hero-box-shadow-color");
+  const heroBoxShadowCustomColorInput = document.getElementById("block-style-hero-box-shadow-custom-color");
+  const heroBoxShadowPickerInput = document.getElementById("block-style-hero-box-shadow-picker");
 
   // an image_caption's own title (alt_text)/caption text -- see
   // article_image_block.html's data-title-*/data-caption-* attributes and
@@ -406,16 +435,15 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   ];
 
-  // title/meta/intro's own text color -- edited from the shared
-  // article_header panel now (see FIELDS_BY_TYPE.title/meta/intro above,
-  // now empty besides box), but still saved as each one's own separate
-  // ArticleBlockStyle row (block_id "article-title"/"article-meta"/
-  // "article-intro", block_type "title"/"meta"/"intro" -- the exact same
-  // rows their own individual trigger used to write to), alongside
-  // article_header's own save_header_style request -- see
-  // recordPendingEdit below. targetSelector picks the live-preview target
-  // out of currentBlockEl (.article-header while this group is being
-  // edited), same idea as CAPTION_TEXT_GROUPS' spanSelector.
+  // title/meta/intro's own text color -- edited from each one's own
+  // trigger, saved as part of that same trigger's own ArticleBlockStyle
+  // row (block_id "article-title"/"article-meta"/"article-intro", merged
+  // into buildSaveRequest's generic per-block payload -- see its own
+  // comment for why this can't be a separate pendingEdits entry).
+  // targetSelector picks the live-preview target off the shared .article-
+  // header wrapper (headerWrapperEl(), not currentBlockEl directly -- see
+  // that function's own comment), same idea as CAPTION_TEXT_GROUPS'
+  // spanSelector.
   const HEADER_TEXT_COLOR_GROUPS = [
     {
       datasetPrefix: "title",
@@ -449,6 +477,29 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentBlockEl = null;
   let currentTrigger = null;
 
+  // title/meta/intro/article_header's own alignment/font-size/text-color
+  // all render onto the shared .article-header wrapper's own dataset/style
+  // (see article_page.html), regardless of which of the four triggers is
+  // open -- currentBlockEl is whichever one was actually clicked (the
+  // wrapper itself for "article_header", or the h1/.article-meta/.intro
+  // child for "title"/"meta"/"intro"). Every read/write of those specific
+  // fields needs to go through this wrapper rather than currentBlockEl
+  // directly, so the live-preview CSS custom properties (--title-alignment
+  // etc, only consumed by rules scoped to .article-header itself/its
+  // direct children in article_layout.css) land on the right element, and
+  // so switching triggers doesn't lose track of the other two's current
+  // values before a save (see the combined save_header_style payload in
+  // recordPendingEdit). Returns null if no block is open, or the block
+  // open isn't part of the header group at all.
+  const headerWrapperEl = () => {
+    if (!currentBlockEl) {
+      return null;
+    }
+    return currentBlockEl.classList.contains("article-header")
+      ? currentBlockEl
+      : currentBlockEl.closest(".article-header");
+  };
+
   // one shared panel, but edits to *every* block touched since the last
   // save need to survive switching to a different block -- keyed by
   // block_id (a real block's UUID, or the fixed "article-header"/
@@ -470,23 +521,24 @@ document.addEventListener("DOMContentLoaded", () => {
       return null;
     }
 
-    // article_header isn't a StreamField block -- it saves plain ArticlePage
-    // fields via a separate endpoint, not an ArticleBlockStyle row keyed by
-    // block_id.
-    if (blockType === "article_header") {
-      return {
-        url: panel.dataset.headerSaveUrl,
-        payload: {
-          title_alignment: titleAlignmentGroup.dataset.value,
-          intro_alignment: introAlignmentGroup.dataset.value,
-          meta_alignment: metaAlignmentGroup.dataset.value,
-          header_side_padding: paddingInput.value,
-          title_font_size: titleFontSizeInput.value,
-          intro_font_size: introFontSizeInput.value,
-          meta_font_size: metaFontSizeInput.value,
-        },
-      };
-    }
+    // article_header isn't a StreamField block, but unlike hero_image/
+    // toc_icon below it's box-capable and it kept one real generic-path
+    // field of its own (side_padding, for its Layout section) -- so it
+    // falls all the way through to the generic per-block path at the
+    // bottom like every other box-capable type, rather than an early
+    // return here. side_padding itself never actually lands anywhere for
+    // this type (see BLOCK_STYLE_FIELDS["article_header"] in
+    // article_views.py, which omits it -- header's own side padding is a
+    // plain ArticlePage field, save_header_style below, not this row) --
+    // the generic path sends it anyway, harmlessly ignored by the backend,
+    // rather than special-casing it out here too. Its title_alignment/
+    // meta_alignment/intro_alignment/header_side_padding/title_font_size/
+    // meta_font_size/intro_font_size and its own box now save via two
+    // separate manual pendingEdits entries instead of this function's own
+    // return value -- see recordPendingEdit's "article-header-style" block
+    // (this same generic path's return value already covers article_
+    // header's box correctly, so no separate manual box entry is needed
+    // any more either).
 
     // hero_image isn't a StreamField block either -- ArticleStyle fields
     // (hero_image_position/width_rem/side_padding/boxed/box_color/
@@ -503,6 +555,10 @@ document.addEventListener("DOMContentLoaded", () => {
           box_color: heroBoxColorGroup.dataset.value,
           box_custom_color: heroBoxCustomColorInput.value,
           box_border_radius: heroBoxRadiusInput.value,
+          shadow_enabled: heroBoxShadowEnabledInput.checked,
+          shadow_strength: heroBoxShadowStrengthInput.value,
+          shadow_color: heroBoxShadowColorGroup.dataset.value,
+          shadow_custom_color: heroBoxShadowCustomColorInput.value,
         },
       };
     }
@@ -532,6 +588,38 @@ document.addEventListener("DOMContentLoaded", () => {
         .map((input) => parseFloat(input.value));
     }
     const boxCapable = BOX_CAPABLE_TYPES.has(blockType);
+    // title/meta/intro's own "lock alignment" checkbox is a differently-
+    // named field per type (title_exclude_from_global_alignment etc, see
+    // FIELDS_BY_TYPE) since each needs its own dedicated input, but they
+    // all save to the exact same backend column (ArticleBlockStyle.
+    // exclude_from_global_alignment) as every other block type's shared
+    // one -- resolve whichever one actually applies to a single payload
+    // value here.
+    let excludeFromGlobalAlignment = null;
+    if (visibleFields.includes("exclude_from_global_alignment")) {
+      excludeFromGlobalAlignment = excludeGlobalAlignmentInput.checked;
+    } else if (visibleFields.includes("title_exclude_from_global_alignment")) {
+      excludeFromGlobalAlignment = titleExcludeGlobalAlignmentInput.checked;
+    } else if (visibleFields.includes("meta_exclude_from_global_alignment")) {
+      excludeFromGlobalAlignment = metaExcludeGlobalAlignmentInput.checked;
+    } else if (visibleFields.includes("intro_exclude_from_global_alignment")) {
+      excludeFromGlobalAlignment = introExcludeGlobalAlignmentInput.checked;
+    }
+    // title/meta/intro's own text color -- same reasoning as the exclude
+    // flag above (their own dedicated color picker, not the generic Style
+    // section's), but merged into *this* request rather than a separate
+    // pendingEdits entry: this row (block_id "article-title" etc) is the
+    // exact same one side_padding/box above already save to, and a second
+    // pendingEdits.set() call for that identical key would silently
+    // replace this whole request in the map instead of adding to it (see
+    // HEADER_TEXT_COLOR_GROUPS's own comment).
+    const headerColorGroup = HEADER_TEXT_COLOR_GROUPS.find((group) => group.blockType === blockType);
+    let textColor = visibleFields.includes("text_color") ? textColorGroup.dataset.value : null;
+    let textCustomColor = visibleFields.includes("text_color") ? textCustomColorInput.value : null;
+    if (headerColorGroup) {
+      textColor = headerColorGroup.colorGroup.dataset.value;
+      textCustomColor = headerColorGroup.customColorInput.value;
+    }
     return {
       url: panel.dataset.saveUrl,
       payload: {
@@ -539,9 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
         block_type: blockType,
         side_padding: visibleFields.includes("side_padding") ? paddingInput.value : null,
         alignment: visibleFields.includes("alignment") ? alignmentGroup.dataset.value : null,
-        exclude_from_global_alignment: visibleFields.includes("exclude_from_global_alignment")
-          ? excludeGlobalAlignmentInput.checked
-          : null,
+        exclude_from_global_alignment: excludeFromGlobalAlignment,
         font_size: visibleFields.includes("font_size") ? fontSizeInput.value : null,
         width_rem: visibleFields.includes("width_rem") ? widthInput.value : null,
         height_rem: visibleFields.includes("height_rem") ? heightInput.value : null,
@@ -549,8 +635,8 @@ document.addEventListener("DOMContentLoaded", () => {
         fixed_ratio: visibleFields.includes("fixed_ratio") ? fixedRatioInput.checked : null,
         gap: visibleFields.includes("gap") ? gapInput.value : null,
         column_weights: columnWeights,
-        text_color: visibleFields.includes("text_color") ? textColorGroup.dataset.value : null,
-        text_custom_color: visibleFields.includes("text_color") ? textCustomColorInput.value : null,
+        text_color: textColor,
+        text_custom_color: textCustomColor,
         box_enabled: boxCapable ? boxEnabledInput.checked : null,
         box_bg_color: boxCapable ? boxBgColorGroup.dataset.value : null,
         box_bg_custom_color: boxCapable ? boxBgCustomColorInput.value : null,
@@ -561,6 +647,10 @@ document.addEventListener("DOMContentLoaded", () => {
         box_radius: boxCapable ? boxRadiusInput.value : null,
         box_padding: boxCapable ? boxPaddingInput.value : null,
         box_margin: boxCapable ? boxMarginInput.value : null,
+        box_shadow_enabled: boxCapable ? boxShadowEnabledInput.checked : null,
+        box_shadow_strength: boxCapable ? boxShadowStrengthInput.value : null,
+        box_shadow_color: boxCapable ? boxShadowColorGroup.dataset.value : null,
+        box_shadow_custom_color: boxCapable ? boxShadowCustomColorInput.value : null,
       },
     };
   };
@@ -626,47 +716,35 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // title/meta/intro's own text color, edited from this same shared
-    // article_header panel now (see HEADER_TEXT_COLOR_GROUPS above), is
-    // still saved as each one's own separate ArticleBlockStyle row --
-    // block_id "article-title"/"article-meta"/"article-intro", the exact
-    // same rows their own individual trigger used to write text_color to
-    // -- alongside article_header's own save_header_style request above.
-    if (targetTypeInput.value === "article_header") {
-      HEADER_TEXT_COLOR_GROUPS.forEach((group) => {
-        pendingEdits.set(group.blockId, {
-          url: panel.dataset.saveUrl,
-          payload: {
-            block_id: group.blockId,
-            block_type: group.blockType,
-            text_color: group.colorGroup.dataset.value,
-            text_custom_color: group.customColorInput.value,
-          },
-        });
-      });
-
-      // the header group's own box (background/border/radius/padding/
-      // margin, wrapping title+meta+intro together -- see BOX_CAPABLE_
-      // TYPES above) is a fourth, independent ArticleBlockStyle row, same
-      // block_id "article-header" the save_header_style request above
-      // uses -- a distinct pendingEdits *key* ("article-header-box", not
-      // "article-header") so it doesn't overwrite that primary request in
-      // the map, since they go to two different endpoints entirely.
-      pendingEdits.set("article-header-box", {
-        url: panel.dataset.saveUrl,
+    // title/meta/intro's own text color is merged into this function's
+    // primary buildSaveRequest() result above now (see its own comment) --
+    // article_header's box is too, now that article_header falls through
+    // to the same generic per-block path as every other box-capable type
+    // (see buildSaveRequest's own article_header comment) -- so box no
+    // longer needs its own separate manual pendingEdits entry here either.
+    //
+    // What's left, common to all four of title/meta/intro/article_header:
+    // title_alignment/meta_alignment/intro_alignment/header_side_padding/
+    // title_font_size/meta_font_size/intro_font_size, saved together via
+    // save_header_style regardless of which of the four triggered the
+    // save -- that endpoint only ever accepts the whole set at once (see
+    // save_header_style in article_views.py), and headerWrapperEl()'s own
+    // comment covers why these inputs stay correctly populated no matter
+    // which trigger is currently open. Fixed pendingEdits key
+    // ("article-header-style", not any of the four's own block_id) so
+    // opening a second one of the four afterwards updates this same entry
+    // in place instead of creating a duplicate.
+    if (["article_header", "title", "meta", "intro"].includes(targetTypeInput.value)) {
+      pendingEdits.set("article-header-style", {
+        url: panel.dataset.headerSaveUrl,
         payload: {
-          block_id: "article-header",
-          block_type: "article_header",
-          box_enabled: boxEnabledInput.checked,
-          box_bg_color: boxBgColorGroup.dataset.value,
-          box_bg_custom_color: boxBgCustomColorInput.value,
-          box_border_visible: boxBorderVisibleInput.checked,
-          box_border_width: boxBorderWidthInput.value,
-          box_border_color: boxBorderColorGroup.dataset.value,
-          box_border_custom_color: boxBorderCustomColorInput.value,
-          box_radius: boxRadiusInput.value,
-          box_padding: boxPaddingInput.value,
-          box_margin: boxMarginInput.value,
+          title_alignment: titleAlignmentGroup.dataset.value,
+          intro_alignment: introAlignmentGroup.dataset.value,
+          meta_alignment: metaAlignmentGroup.dataset.value,
+          header_side_padding: paddingInput.value,
+          title_font_size: titleFontSizeInput.value,
+          intro_font_size: introFontSizeInput.value,
+          meta_font_size: metaFontSizeInput.value,
         },
       });
     }
@@ -797,7 +875,23 @@ document.addEventListener("DOMContentLoaded", () => {
       currentBlockEl.style.display = "flow-root";
     }
     currentBlockEl.style.borderRadius = `${boxRadiusInput.value}rem`;
-    currentBlockEl.style.boxShadow = "0 2px 8px var(--color-shadow)";
+    if (boxShadowEnabledInput.checked) {
+      // strength is a multiplier on the box's original fixed shadow shape
+      // (offset 2px/blur 8px at strength=1), same recipe as
+      // _effective_box_style()'s own shadow_offset/shadow_blur -- kept in
+      // sync by hand since this is a live client-side preview, not a
+      // render of that server-computed dict.
+      const shadowStrength = parseFloat(boxShadowStrengthInput.value) || 0;
+      const shadowColor = boxShadowColorGroup.dataset.value;
+      const resolvedShadowColor = shadowColor
+        ? shadowColor === "custom"
+          ? boxShadowCustomColorInput.value || "var(--color-shadow)"
+          : `var(--color-${shadowColor})`
+        : "var(--color-shadow)";
+      currentBlockEl.style.boxShadow = `0 ${shadowStrength * 2}px ${shadowStrength * 8}px ${resolvedShadowColor}`;
+    } else {
+      currentBlockEl.style.boxShadow = "none";
+    }
     const bgColor = boxBgColorGroup.dataset.value;
     currentBlockEl.style.backgroundColor =
       bgColor === "custom"
@@ -857,6 +951,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!boxed) {
       currentBlockEl.style.removeProperty("--box-bg");
       currentBlockEl.style.borderRadius = "";
+      currentBlockEl.style.boxShadow = "";
       return;
     }
     const boxColor = heroBoxColorGroup.dataset.value;
@@ -868,6 +963,22 @@ document.addEventListener("DOMContentLoaded", () => {
         : `var(--color-${boxColor})`
     );
     currentBlockEl.style.borderRadius = `${heroBoxRadiusInput.value}rem`;
+    // overrides .image-figure--boxed's own fixed box-shadow (article_image.
+    // css) with the editable one, same recipe as applyBoxStyle's own
+    // (offset/blur = strength * 2/8) -- blank shadow color falls back to
+    // the same var(--color-shadow) token that fixed rule already used.
+    if (heroBoxShadowEnabledInput.checked) {
+      const shadowStrength = parseFloat(heroBoxShadowStrengthInput.value) || 0;
+      const shadowColor = heroBoxShadowColorGroup.dataset.value;
+      const resolvedShadowColor = shadowColor
+        ? shadowColor === "custom"
+          ? heroBoxShadowCustomColorInput.value || "var(--color-shadow)"
+          : `var(--color-${shadowColor})`
+        : "var(--color-shadow)";
+      currentBlockEl.style.boxShadow = `0 ${shadowStrength * 2}px ${shadowStrength * 8}px ${resolvedShadowColor}`;
+    } else {
+      currentBlockEl.style.boxShadow = "none";
+    }
   };
 
   // a collapsible section's own header (see the panel template's "block-
@@ -924,7 +1035,24 @@ document.addEventListener("DOMContentLoaded", () => {
     if (borderColorField) {
       borderColorField.hidden = !enabled || !boxBorderVisibleInput.checked;
     }
+    const shadowStrengthField = panel.querySelector('[data-style-field="box_shadow_strength"]');
+    if (shadowStrengthField) {
+      shadowStrengthField.hidden = !enabled || !boxShadowEnabledInput.checked;
+    }
+    const shadowColorField = panel.querySelector('[data-style-field="box_shadow_color"]');
+    if (shadowColorField) {
+      shadowColorField.hidden = !enabled || !boxShadowEnabledInput.checked;
+    }
     updateSectionHeaders();
+    // checking "Box" (or "Show border") reveals a run of fields the same
+    // way expanding a [data-controls] section does -- same reposition-on-
+    // height-change reasoning as that click handler's own comment. Also
+    // fires once during openPanelFor() itself (harmless -- positionPanel()
+    // is cheap and idempotent, and openPanelFor calls it again anyway once
+    // the panel's fully populated).
+    if (currentTrigger) {
+      positionPanel(currentTrigger);
+    }
   };
 
   // #rgb -> #rrggbb, lowercased; null if `value` isn't valid hex at all.
@@ -1013,8 +1141,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   wireColorGroup(boxBgColorGroup, "boxBgColor");
   wireColorGroup(boxBorderColorGroup, "boxBorderColor");
+  wireColorGroup(boxShadowColorGroup, "boxShadowColor");
   wireColorGroup(textColorGroup, "textColor", applyTextColor);
   wireColorGroup(heroBoxColorGroup, "boxColor", applyHeroImageBox);
+  wireColorGroup(heroBoxShadowColorGroup, "shadowColor", applyHeroImageBox);
 
   // the "Custom" swatch is a plain hex text input (see the mini panel
   // template) -- typing a valid hex both selects "custom" for the group
@@ -1029,8 +1159,17 @@ document.addEventListener("DOMContentLoaded", () => {
   [
     [boxBgCustomColorInput, boxBgPickerInput, boxBgColorGroup, "boxBgColor", "boxBgCustomColor"],
     [boxBorderCustomColorInput, boxBorderPickerInput, boxBorderColorGroup, "boxBorderColor", "boxBorderCustomColor"],
+    [boxShadowCustomColorInput, boxShadowPickerInput, boxShadowColorGroup, "boxShadowColor", "boxShadowCustomColor"],
     [textCustomColorInput, textPickerInput, textColorGroup, "textColor", "textCustomColor", applyTextColor],
     [heroBoxCustomColorInput, heroBoxPickerInput, heroBoxColorGroup, "boxColor", "boxCustomColor", applyHeroImageBox],
+    [
+      heroBoxShadowCustomColorInput,
+      heroBoxShadowPickerInput,
+      heroBoxShadowColorGroup,
+      "shadowColor",
+      "shadowCustomColor",
+      applyHeroImageBox,
+    ],
   ].forEach(([hexInput, pickerInput, group, groupDatasetKey, customDatasetKey, applyFn = applyBoxStyle]) => {
     // custom isn't active yet -- a plain click always immediately focuses a
     // text input (or, for the picker label, forwards straight into opening
@@ -1204,17 +1343,21 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   CAPTION_TEXT_GROUPS.forEach(wireCaptionTextGroup);
 
-  // title/meta/intro's own text color, edited from the shared
-  // article_header panel now (see HEADER_TEXT_COLOR_GROUPS above) --
-  // color-only, so a lighter version of wireCaptionTextGroup above (no
-  // alignment/font-size/padding, those still live on their own dedicated
-  // title_alignment/title_font_size/etc fields elsewhere in this panel).
+  // title/meta/intro's own text color, edited from each one's own trigger
+  // now -- color-only, so a lighter version of wireCaptionTextGroup above
+  // (no alignment/font-size/padding, those still live on their own
+  // dedicated title_alignment/title_font_size/etc fields elsewhere in this
+  // panel). Reads/writes the shared .article-header wrapper via
+  // headerWrapperEl() throughout, not currentBlockEl directly (see that
+  // function's own comment) -- targetSelector (":scope > h1" etc) only
+  // resolves correctly from the wrapper, and the generic wireColorGroup/
+  // selectSwatch helpers used everywhere else in this file hardcode
+  // currentBlockEl for their own dataset write, so the fixed-swatch clicks
+  // below are hand-rolled here instead of reusing them.
   const wireHeaderTextColorGroup = (group) => {
     const applyColor = () => {
-      if (!currentBlockEl) {
-        return;
-      }
-      const target = currentBlockEl.querySelector(group.targetSelector);
+      const wrapperEl = headerWrapperEl();
+      const target = wrapperEl ? wrapperEl.querySelector(group.targetSelector) : null;
       if (!target) {
         return;
       }
@@ -1230,38 +1373,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const colorDatasetKey = `${group.datasetPrefix}TextColor`;
     const customDatasetKey = `${group.datasetPrefix}TextCustomColor`;
-    wireColorGroup(group.colorGroup, colorDatasetKey, applyColor);
+
+    const selectHeaderSwatch = (swatch) => {
+      const wrapperEl = headerWrapperEl();
+      if (!wrapperEl) {
+        return;
+      }
+      group.colorGroup.dataset.value = swatch.dataset.color;
+      wrapperEl.dataset[colorDatasetKey] = swatch.dataset.color;
+      group.colorGroup.querySelectorAll(".color-swatch").forEach((s) => {
+        s.classList.toggle("active", s === swatch);
+      });
+      applyColor();
+      recordPendingEdit();
+    };
+    group.colorGroup.querySelectorAll("button.color-swatch").forEach((button) => {
+      button.addEventListener("click", () => selectHeaderSwatch(button));
+    });
 
     const customGroupEl = group.customColorInput.closest(".color-swatch-custom-group");
     customGroupEl.addEventListener("mousedown", (event) => {
-      if (!currentBlockEl || group.colorGroup.dataset.value === "custom") {
+      if (!headerWrapperEl() || group.colorGroup.dataset.value === "custom") {
         return;
       }
       event.preventDefault();
     });
     customGroupEl.addEventListener("click", (event) => {
-      if (!currentBlockEl || group.colorGroup.dataset.value === "custom") {
+      if (!headerWrapperEl() || group.colorGroup.dataset.value === "custom") {
         return;
       }
       event.preventDefault();
-      selectSwatch(group.colorGroup, group.customColorInput, colorDatasetKey, applyColor);
+      selectHeaderSwatch(group.customColorInput);
     });
     group.customColorInput.addEventListener("input", () => {
       const hex = normalizeHex(group.customColorInput.value);
-      if (!currentBlockEl || !hex) {
+      const wrapperEl = headerWrapperEl();
+      if (!wrapperEl || !hex) {
         return;
       }
       setCustomSwatch(group.customColorInput, hex, group.pickerInput);
-      currentBlockEl.dataset[customDatasetKey] = hex;
-      selectSwatch(group.colorGroup, group.customColorInput, colorDatasetKey, applyColor);
+      wrapperEl.dataset[customDatasetKey] = hex;
+      selectHeaderSwatch(group.customColorInput);
     });
     group.pickerInput.addEventListener("input", () => {
-      if (!currentBlockEl) {
+      const wrapperEl = headerWrapperEl();
+      if (!wrapperEl) {
         return;
       }
       setCustomSwatch(group.customColorInput, group.pickerInput.value, group.pickerInput);
-      currentBlockEl.dataset[customDatasetKey] = group.pickerInput.value;
-      selectSwatch(group.colorGroup, group.customColorInput, colorDatasetKey, applyColor);
+      wrapperEl.dataset[customDatasetKey] = group.pickerInput.value;
+      selectHeaderSwatch(group.customColorInput);
     });
   };
   HEADER_TEXT_COLOR_GROUPS.forEach(wireHeaderTextColorGroup);
@@ -1296,6 +1457,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const expanded = toggle.getAttribute("aria-expanded") === "true";
       toggle.setAttribute("aria-expanded", expanded ? "false" : "true");
       wrapper.hidden = expanded;
+      // expanding a section can make the panel taller than the space
+      // positionPanel() originally found for it when the panel first
+      // opened (that calculation only ever ran once, against whatever
+      // height the panel happened to have at that moment) -- re-run it
+      // now that the panel's actual height has changed, so it re-clamps
+      // to the viewport (flip above the trigger, or pin to the bottom
+      // edge with .block-style-mini-panel's own overflow-y:auto taking
+      // over from there) instead of just growing past the bottom of the
+      // screen with no way to reach Save/Reset below the fold.
+      if (currentTrigger) {
+        positionPanel(currentTrigger);
+      }
     });
   });
 
@@ -1309,11 +1482,22 @@ document.addEventListener("DOMContentLoaded", () => {
     recordPendingEdit();
   });
 
+  boxShadowEnabledInput.addEventListener("change", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset.boxShadowEnabled = boxShadowEnabledInput.checked ? "true" : "false";
+    updateBoxFieldVisibility();
+    applyBoxStyle();
+    recordPendingEdit();
+  });
+
   [
     [boxBorderWidthInput, boxBorderWidthValue, "boxBorderWidth"],
     [boxRadiusInput, boxRadiusValue, "boxRadius"],
     [boxPaddingInput, boxPaddingValue, "boxPadding"],
     [boxMarginInput, boxMarginValue, "boxMargin"],
+    [boxShadowStrengthInput, boxShadowStrengthValue, "boxShadowStrength"],
   ].forEach(([input, valueEl, datasetKey]) => {
     input.addEventListener("input", () => {
       if (!currentBlockEl) {
@@ -1333,13 +1517,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const wireHeaderAlignmentGroup = (group, cssVar, datasetKey) => {
     group.querySelectorAll("button").forEach((button) => {
       button.addEventListener("click", () => {
-        if (!currentBlockEl) {
+        const wrapperEl = headerWrapperEl();
+        if (!wrapperEl) {
           return;
         }
         const value = button.dataset.align;
         group.dataset.value = value;
-        currentBlockEl.dataset[datasetKey] = value;
-        currentBlockEl.style.setProperty(cssVar, value);
+        wrapperEl.dataset[datasetKey] = value;
+        wrapperEl.style.setProperty(cssVar, value);
         group.querySelectorAll("button").forEach((b) => {
           b.classList.toggle("active", b === button);
         });
@@ -1465,12 +1650,33 @@ document.addEventListener("DOMContentLoaded", () => {
       boxPaddingValue.textContent = blockEl.dataset.boxPadding;
       boxMarginInput.value = blockEl.dataset.boxMargin;
       boxMarginValue.textContent = blockEl.dataset.boxMargin;
+      boxShadowEnabledInput.checked = blockEl.dataset.boxShadowEnabled === "true";
+      boxShadowStrengthInput.value = blockEl.dataset.boxShadowStrength;
+      boxShadowStrengthValue.textContent = blockEl.dataset.boxShadowStrength;
+      boxShadowColorGroup.dataset.value = blockEl.dataset.boxShadowColor;
+      boxShadowColorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+        b.classList.toggle("active", b.dataset.color === blockEl.dataset.boxShadowColor);
+      });
+      setCustomSwatch(boxShadowCustomColorInput, blockEl.dataset.boxShadowCustomColor, boxShadowPickerInput);
       updateBoxFieldVisibility();
     }
     if (visibleFields.includes("exclude_from_global_alignment")) {
       excludeGlobalAlignmentInput.checked =
         blockEl.dataset[styleDatasetKey("excludeFromGlobalAlignment")] === "true";
     }
+    // title/meta/intro's own opt-out -- unprefixed data-exclude-from-
+    // global-alignment lives directly on blockEl itself (the h1/.article-
+    // meta/.intro element), not the shared header wrapper -- see this
+    // field's own FIELDS_BY_TYPE comment.
+    [
+      [titleExcludeGlobalAlignmentInput, "title_exclude_from_global_alignment"],
+      [metaExcludeGlobalAlignmentInput, "meta_exclude_from_global_alignment"],
+      [introExcludeGlobalAlignmentInput, "intro_exclude_from_global_alignment"],
+    ].forEach(([input, field]) => {
+      if (visibleFields.includes(field)) {
+        input.checked = blockEl.dataset.excludeFromGlobalAlignment === "true";
+      }
+    });
     if (visibleFields.includes("font_size")) {
       const fontVal = blockEl.dataset[styleDatasetKey("fontSize")];
       fontSizeInput.value = fontVal;
@@ -1545,6 +1751,20 @@ document.addEventListener("DOMContentLoaded", () => {
       heroBoxRadiusInput.value = blockEl.dataset.boxBorderRadius;
       heroBoxRadiusValue.textContent = blockEl.dataset.boxBorderRadius;
     }
+    if (visibleFields.includes("shadow_enabled")) {
+      heroBoxShadowEnabledInput.checked = blockEl.dataset.shadowEnabled === "true";
+    }
+    if (visibleFields.includes("shadow_strength")) {
+      heroBoxShadowStrengthInput.value = blockEl.dataset.shadowStrength;
+      heroBoxShadowStrengthValue.textContent = blockEl.dataset.shadowStrength;
+    }
+    if (visibleFields.includes("shadow_color")) {
+      heroBoxShadowColorGroup.dataset.value = blockEl.dataset.shadowColor;
+      heroBoxShadowColorGroup.querySelectorAll(".color-swatch").forEach((b) => {
+        b.classList.toggle("active", b.dataset.color === blockEl.dataset.shadowColor);
+      });
+      setCustomSwatch(heroBoxShadowCustomColorInput, blockEl.dataset.shadowCustomColor, heroBoxShadowPickerInput);
+    }
     if (visibleFields.includes("gap")) {
       gapInput.value = blockEl.dataset.gap;
       gapValue.textContent = blockEl.dataset.gap;
@@ -1573,40 +1793,45 @@ document.addEventListener("DOMContentLoaded", () => {
         b.classList.toggle("active", b.dataset.align === alignVal);
       });
     }
-    [
-      [titleAlignmentGroup, "title_alignment", "titleAlignment"],
-      [introAlignmentGroup, "intro_alignment", "introAlignment"],
-      [metaAlignmentGroup, "meta_alignment", "metaAlignment"],
-    ].forEach(([group, field, datasetKey]) => {
-      if (!visibleFields.includes(field)) {
-        return;
-      }
-      group.dataset.value = blockEl.dataset[datasetKey];
-      group.querySelectorAll("button").forEach((b) => {
-        b.classList.toggle("active", b.dataset.align === blockEl.dataset[datasetKey]);
+    // title/meta/intro/article_header's own alignment/font-size/text-color
+    // -- read off the shared .article-header wrapper via headerWrapperEl()
+    // rather than blockEl directly (see that function's own comment), and
+    // NOT gated by visibleFields.includes(...) the way every other field on
+    // this panel is: these seven values all travel together in one combined
+    // save_header_style request regardless of which of the four triggers
+    // fires it (see recordPendingEdit), so they need to stay loaded into
+    // their inputs even while only one of the three's own section is
+    // actually visible, or a save from e.g. Title's own trigger would wipe
+    // out Meta/Intro's current alignment/font-size with blank values.
+    const headerWrapper = headerWrapperEl();
+    if (headerWrapper) {
+      [
+        [titleAlignmentGroup, "titleAlignment"],
+        [introAlignmentGroup, "introAlignment"],
+        [metaAlignmentGroup, "metaAlignment"],
+      ].forEach(([group, datasetKey]) => {
+        group.dataset.value = headerWrapper.dataset[datasetKey];
+        group.querySelectorAll("button").forEach((b) => {
+          b.classList.toggle("active", b.dataset.align === headerWrapper.dataset[datasetKey]);
+        });
       });
-    });
-    [
-      [titleFontSizeInput, titleFontSizeValue, "title_font_size", "titleFontSize"],
-      [introFontSizeInput, introFontSizeValue, "intro_font_size", "introFontSize"],
-      [metaFontSizeInput, metaFontSizeValue, "meta_font_size", "metaFontSize"],
-    ].forEach(([input, valueEl, field, datasetKey]) => {
-      if (!visibleFields.includes(field)) {
-        return;
-      }
-      input.value = blockEl.dataset[datasetKey];
-      valueEl.textContent = blockEl.dataset[datasetKey];
-    });
-    if (blockType === "article_header") {
+      [
+        [titleFontSizeInput, titleFontSizeValue, "titleFontSize"],
+        [introFontSizeInput, introFontSizeValue, "introFontSize"],
+        [metaFontSizeInput, metaFontSizeValue, "metaFontSize"],
+      ].forEach(([input, valueEl, datasetKey]) => {
+        input.value = headerWrapper.dataset[datasetKey];
+        valueEl.textContent = headerWrapper.dataset[datasetKey];
+      });
       HEADER_TEXT_COLOR_GROUPS.forEach((group) => {
-        const colorVal = blockEl.dataset[`${group.datasetPrefix}TextColor`] || "";
+        const colorVal = headerWrapper.dataset[`${group.datasetPrefix}TextColor`] || "";
         group.colorGroup.dataset.value = colorVal;
         group.colorGroup.querySelectorAll(".color-swatch").forEach((b) => {
           b.classList.toggle("active", b.dataset.color === colorVal);
         });
         setCustomSwatch(
           group.customColorInput,
-          blockEl.dataset[`${group.datasetPrefix}TextCustomColor`],
+          headerWrapper.dataset[`${group.datasetPrefix}TextCustomColor`],
           group.pickerInput
         );
       });
@@ -1787,6 +2012,24 @@ document.addEventListener("DOMContentLoaded", () => {
     recordPendingEdit();
   });
 
+  // title/meta/intro's own "lock alignment" checkboxes -- same reasoning
+  // as excludeGlobalAlignmentInput above (a meta-flag, no live-preview
+  // visual), but plain currentBlockEl.dataset (not styleDatasetKey, that
+  // helper only ever redirects for the merged column-title panel) since
+  // each of these three always corresponds 1:1 with currentBlockEl being
+  // that exact h1/.article-meta/.intro element.
+  [titleExcludeGlobalAlignmentInput, metaExcludeGlobalAlignmentInput, introExcludeGlobalAlignmentInput].forEach(
+    (input) => {
+      input.addEventListener("change", () => {
+        if (!currentBlockEl) {
+          return;
+        }
+        currentBlockEl.dataset.excludeFromGlobalAlignment = input.checked ? "true" : "false";
+        recordPendingEdit();
+      });
+    }
+  );
+
   // hero_image only -- see applyHeroImageBox's own comment.
   heroBoxedInput.addEventListener("change", () => {
     if (!currentBlockEl) {
@@ -1803,6 +2046,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     currentBlockEl.dataset.boxBorderRadius = heroBoxRadiusInput.value;
     heroBoxRadiusValue.textContent = heroBoxRadiusInput.value;
+    applyHeroImageBox();
+    recordPendingEdit();
+  });
+
+  heroBoxShadowEnabledInput.addEventListener("change", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset.shadowEnabled = heroBoxShadowEnabledInput.checked ? "true" : "false";
+    applyHeroImageBox();
+    recordPendingEdit();
+  });
+
+  heroBoxShadowStrengthInput.addEventListener("input", () => {
+    if (!currentBlockEl) {
+      return;
+    }
+    currentBlockEl.dataset.shadowStrength = heroBoxShadowStrengthInput.value;
+    heroBoxShadowStrengthValue.textContent = heroBoxShadowStrengthInput.value;
     applyHeroImageBox();
     recordPendingEdit();
   });
@@ -1865,11 +2127,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // single element here that all three should apply to.
   const wireHeaderFontSizeInput = (input, valueEl, cssVar, datasetKey) => {
     input.addEventListener("input", () => {
-      if (!currentBlockEl) {
+      const wrapperEl = headerWrapperEl();
+      if (!wrapperEl) {
         return;
       }
-      currentBlockEl.style.setProperty(cssVar, `${input.value}rem`);
-      currentBlockEl.dataset[datasetKey] = input.value;
+      wrapperEl.style.setProperty(cssVar, `${input.value}rem`);
+      wrapperEl.dataset[datasetKey] = input.value;
       valueEl.textContent = input.value;
       recordPendingEdit();
     });
@@ -2041,25 +2304,38 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      applyButtonGroup(titleAlignmentGroup, defaults.title_alignment);
-      applySlider(titleFontSizeInput, defaults.title_font_size);
-      applyButtonGroup(introAlignmentGroup, defaults.intro_alignment);
-      applySlider(introFontSizeInput, defaults.intro_font_size);
-      applyButtonGroup(metaAlignmentGroup, defaults.meta_alignment);
-      applySlider(metaFontSizeInput, defaults.meta_font_size);
     }
 
-    // title/meta/intro's own text color, edited from this same shared
-    // article_header panel now (see HEADER_TEXT_COLOR_GROUPS above) --
-    // every type that offers text color defaults to blank (inherit the
-    // page's normal text color), same as the generic text_color field's
-    // own reset elsewhere.
-    if (blockType === "article_header") {
-      HEADER_TEXT_COLOR_GROUPS.forEach((group) => {
-        clearColorGroup(group.colorGroup);
-        setCustomSwatch(group.customColorInput, "", group.pickerInput);
-        group.applyColor();
-      });
+    // title/meta/intro's own alignment/font-size -- pulled from article_
+    // header's own BLOCK_STYLE_DEFAULTS entry (title/meta/intro have none
+    // of their own, see the fallback below) regardless of whether `defaults`
+    // itself is set, since that's only ever populated for blockType
+    // "article_header" -- and scoped to whichever of the three is actually
+    // open, so resetting Title doesn't also silently reset Meta/Intro's
+    // alignment, and resetting article_header itself (side padding + box
+    // only now) doesn't reach into any of the three at all.
+    const headerDefaults = BLOCK_STYLE_DEFAULTS.article_header || {};
+    if (blockType === "title") {
+      applyButtonGroup(titleAlignmentGroup, headerDefaults.title_alignment);
+      applySlider(titleFontSizeInput, headerDefaults.title_font_size);
+    }
+    if (blockType === "meta") {
+      applyButtonGroup(metaAlignmentGroup, headerDefaults.meta_alignment);
+      applySlider(metaFontSizeInput, headerDefaults.meta_font_size);
+    }
+    if (blockType === "intro") {
+      applyButtonGroup(introAlignmentGroup, headerDefaults.intro_alignment);
+      applySlider(introFontSizeInput, headerDefaults.intro_font_size);
+    }
+
+    // title/meta/intro's own text color -- every type that offers text
+    // color defaults to blank (inherit the page's normal text color), same
+    // as the generic text_color field's own reset below.
+    const headerColorGroup = HEADER_TEXT_COLOR_GROUPS.find((group) => group.blockType === blockType);
+    if (headerColorGroup) {
+      clearColorGroup(headerColorGroup.colorGroup);
+      setCustomSwatch(headerColorGroup.customColorInput, "", headerColorGroup.pickerInput);
+      headerColorGroup.applyColor();
     }
 
     // column/image_caption/title/meta/intro's own side padding -- no
@@ -2122,7 +2398,14 @@ document.addEventListener("DOMContentLoaded", () => {
         applySlider(boxRadiusInput, boxDefaults.radius);
         applySlider(boxPaddingInput, boxDefaults.padding);
         applySlider(boxMarginInput, boxDefaults.margin);
+        applySlider(boxShadowStrengthInput, boxDefaults.shadow_strength);
+        // shadow_color's default is blank (no swatch selected, same as
+        // text_color's own default elsewhere), so clearColorGroup, not
+        // applyColorGroup -- there's no button to click for "".
+        clearColorGroup(boxShadowColorGroup);
+        setCustomSwatch(boxShadowCustomColorInput, boxDefaults.shadow_custom_color, boxShadowPickerInput);
         applyToggle(boxBorderVisibleInput, boxDefaults.border_visible);
+        applyToggle(boxShadowEnabledInput, boxDefaults.shadow_enabled);
         // applied last: its own change handler re-derives box field
         // visibility from every other box field's current value, so it
         // needs to run after they've all already been reset above.
@@ -2138,6 +2421,10 @@ document.addEventListener("DOMContentLoaded", () => {
       applyColorGroup(heroBoxColorGroup, defaults.box_color);
       setCustomSwatch(heroBoxCustomColorInput, defaults.box_custom_color, heroBoxPickerInput);
       applySlider(heroBoxRadiusInput, defaults.box_border_radius);
+      applySlider(heroBoxShadowStrengthInput, defaults.shadow_strength);
+      clearColorGroup(heroBoxShadowColorGroup);
+      setCustomSwatch(heroBoxShadowCustomColorInput, defaults.shadow_custom_color, heroBoxShadowPickerInput);
+      applyToggle(heroBoxShadowEnabledInput, defaults.shadow_enabled);
     }
   });
 });

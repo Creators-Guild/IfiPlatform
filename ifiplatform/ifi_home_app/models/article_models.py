@@ -487,6 +487,11 @@ BLOCK_STYLE_DEFAULTS = {
         "box_color": "bg-light",
         "box_custom_color": "",
         "box_border_radius": 0.75,
+        # see ArticleStyle.hero_image_box_shadow_enabled's own docstring
+        "shadow_enabled": True,
+        "shadow_strength": 1,
+        "shadow_color": "",
+        "shadow_custom_color": "",
     },
     # not a StreamField block or per-block override -- there's only ever one
     # table-of-contents icon on the page (ArticleStyle.toc_icon_size).
@@ -512,6 +517,13 @@ BLOCK_STYLE_DEFAULTS = {
         "bg_custom_color": "",
         "padding": 1,
         "margin": 0,
+        # see ArticleBlockStyle.box_shadow_enabled's own docstring for why
+        # this defaults to True/1/blank -- reproduces the old fixed shadow
+        # exactly until an editor actually touches it.
+        "shadow_enabled": True,
+        "shadow_strength": 1,
+        "shadow_color": "",
+        "shadow_custom_color": "",
     },
 }
 # a multi_column column's own title offers "the same options as a heading"
@@ -568,6 +580,46 @@ def _effective_box_style(override):
         ),
         "margin": (
             override.box_margin if override and override.box_margin is not None else defaults["margin"]
+        ),
+        "shadow_enabled": (
+            override.box_shadow_enabled
+            if override and override.box_shadow_enabled is not None
+            else defaults["shadow_enabled"]
+        ),
+        # the raw multiplier -- kept alongside offset/blur below (not just
+        # those two) since the on-page panel's own strength slider needs
+        # this exact value back, not a derived px number.
+        "shadow_strength": (
+            override.box_shadow_strength
+            if override and override.box_shadow_strength is not None
+            else defaults["shadow_strength"]
+        ),
+        # offset/blur precomputed here (not in the template) rather than
+        # left as a raw multiplier, same reasoning as display_font_size in
+        # _effective_heading_style() below -- 2/8 are the original fixed
+        # shadow's own offset-y/blur-radius (see this field's own docstring
+        # on the model), so strength=1 reproduces that exact shadow.
+        "shadow_offset": 2
+        * (
+            override.box_shadow_strength
+            if override and override.box_shadow_strength is not None
+            else defaults["shadow_strength"]
+        ),
+        "shadow_blur": 8
+        * (
+            override.box_shadow_strength
+            if override and override.box_shadow_strength is not None
+            else defaults["shadow_strength"]
+        ),
+        "shadow_color": (
+            override.box_shadow_color
+            if override and override.box_shadow_color
+            else defaults["shadow_color"]
+        ),
+        "shadow_custom_color": (
+            override.box_shadow_custom_color
+            if override and override.box_shadow_custom_color
+            else defaults["shadow_custom_color"]
         ),
     }
 
@@ -1168,6 +1220,36 @@ class ArticleStyle(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(5)],
         help_text="Box corner rounding, in rem (0 = square corners). Only applies when 'boxed' is enabled.",
     )
+    # editable version of .image-figure--boxed's own fixed "box-shadow: 0
+    # 2px 8px var(--color-shadow);" in article_image.css -- same shape/
+    # defaults as ArticleBlockStyle.box_shadow_* (see that field's own
+    # docstring), a separate set of fields here rather than reusing that
+    # table since hero_image's whole box already lives on this model, not
+    # ArticleBlockStyle (see this class's own docstring on why).
+    hero_image_box_shadow_enabled = models.BooleanField(
+        default=True,
+        help_text="Draw a shadow under the box. Only applies when 'boxed' is enabled.",
+    )
+    hero_image_box_shadow_strength = models.FloatField(
+        default=1,
+        validators=[MinValueValidator(0), MaxValueValidator(3)],
+        help_text=(
+            "Shadow intensity multiplier (1 = the box's original fixed shadow size, 0 = none). "
+            "Only applies when 'boxed' and shadow are enabled."
+        ),
+    )
+    hero_image_box_shadow_color = models.CharField(
+        max_length=20,
+        choices=BOX_COLOR_CHOICES,
+        blank=True,
+        help_text="Shadow color -- blank keeps the page's own theme shadow color.",
+    )
+    hero_image_box_shadow_custom_color = models.CharField(
+        max_length=7,
+        blank=True,
+        validators=[HEX_COLOR_VALIDATOR],
+        help_text="Hex code, e.g. #ff8800. Only used when shadow color is set to 'Custom'.",
+    )
 
     content_side_padding = models.FloatField(
         default=0,
@@ -1269,6 +1351,20 @@ class ArticleStyle(models.Model):
         ),
     )
 
+    # precomputed here (not in the template) rather than left as a raw
+    # multiplier, same reasoning as _effective_box_style()'s own shadow_
+    # offset/shadow_blur in article_models.py -- 2/8 are hero_image's
+    # original fixed shadow's own offset-y/blur-radius (see hero_image_box_
+    # shadow_enabled's own docstring), so strength=1 reproduces that exact
+    # shadow.
+    @property
+    def hero_image_box_shadow_offset(self):
+        return 2 * self.hero_image_box_shadow_strength
+
+    @property
+    def hero_image_box_shadow_blur(self):
+        return 8 * self.hero_image_box_shadow_strength
+
 
 class ArticleBlockStyle(models.Model):
     """A per-block style override (alignment/padding/font-size/gap/column
@@ -1363,6 +1459,27 @@ class ArticleBlockStyle(models.Model):
     )
     box_padding = models.FloatField(null=True, blank=True)
     box_margin = models.FloatField(null=True, blank=True)
+
+    # box shadow -- an editable version of what used to be a single fixed
+    # "box-shadow: 0 2px 8px var(--color-shadow);" baked into every box's
+    # own CSS unconditionally (see _block_box_style.html). shadow_enabled
+    # defaults to True (BLOCK_STYLE_DEFAULTS["box"]) so every box that
+    # already existed before this field keeps looking exactly the same
+    # unless an editor actually changes something. shadow_strength is a
+    # multiplier on that original recipe's own offset(2)/blur(8), not a
+    # literal px value, so "1" always means "the shape this always had" --
+    # see _effective_box_style()'s shadow_offset/shadow_blur. shadow_color
+    # blank (not a fixed default like bg/border above) means "keep using
+    # the page's own theme shadow token (var(--color-shadow))" -- same
+    # blank-is-a-real-state convention as text_color below, not box bg/
+    # border's own hard-coded defaults, since --color-shadow has no
+    # equivalent among the fixed swatch choices.
+    box_shadow_enabled = models.BooleanField(null=True, blank=True)
+    box_shadow_strength = models.FloatField(null=True, blank=True)
+    box_shadow_color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
+    box_shadow_custom_color = models.CharField(
+        max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
+    )
 
     # article_card only -- shows it as a compact list row (title + meta,
     # no image/intro) instead of a full card, same layout that already

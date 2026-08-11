@@ -90,14 +90,20 @@ leaving a visible strip of the site's default background there instead.
         {% endif %}
 
         {% comment %}
-        title_style/meta_style/intro_style are looked up once here (rather
-        than each inside its own element below, as before) so the shared
-        .article-header trigger's own data attributes can expose all three
-        text colors -- title/meta/intro's own individual triggers below
-        still exist for Box, but text color itself now edits from here (see
-        FIELDS_BY_TYPE.article_header/title/meta/intro in
-        article_block_style.js: title/meta/intro no longer list text_color
-        at all, only this shared one does).
+        title_style/meta_style/intro_style/header_style are looked up once
+        here, together, rather than each inside its own element below, so
+        header_style is available for the wrapping .article-header div's own
+        box (its only remaining field -- see FIELDS_BY_TYPE.article_header in
+        article_block_style.js) without a second, separate with block just
+        for it. title_alignment/meta_alignment/intro_alignment/header_side_
+        padding/title_font_size/meta_font_size/intro_font_size below are
+        plain ArticlePage fields (page.style), read directly rather than
+        through *_style, and rendered onto this shared wrapper -- title/
+        meta/intro's own triggers read them back off this same wrapper via
+        .closest(".article-header") in article_block_style.js (openPanelFor/
+        recordPendingEdit) rather than needing their own copies, since
+        there's only one save_header_style row for the whole group
+        regardless of which of the three triggered the save.
         {% endcomment %}
         {% with title_style=block_styles|lookup:"article-title" meta_style=block_styles|lookup:"article-meta" intro_style=block_styles|lookup:"article-intro" header_style=block_styles|lookup:"article-header" %}
         <div class="article-header{% if header_style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
@@ -117,6 +123,7 @@ leaving a visible strip of the site's default background there instead.
             <h1 class="{% if title_style.box.enabled %}block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                 {% if can_edit_style %}data-block-id="article-title" data-block-type="title"
                 data-side-padding="{{ title_style.side_padding|unlocalize }}"
+                data-exclude-from-global-alignment="{{ title_style.exclude_from_global_alignment|yesno:"true,false" }}"
                 {% include "info_articles/partials/_block_box_data_attrs.html" with box=title_style.box %}{% endif %}
                 style="{% include "info_articles/partials/_text_color_style.html" with text_color=title_style.text_color text_custom_color=title_style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=title_style.box side_padding=title_style.side_padding %}">{{ page.title }}
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
@@ -126,6 +133,7 @@ leaving a visible strip of the site's default background there instead.
                 <div class="article-meta{% if meta_style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                      {% if can_edit_style %}data-block-id="article-meta" data-block-type="meta"
                      data-side-padding="{{ meta_style.side_padding|unlocalize }}"
+                     data-exclude-from-global-alignment="{{ meta_style.exclude_from_global_alignment|yesno:"true,false" }}"
                      {% include "info_articles/partials/_block_box_data_attrs.html" with box=meta_style.box %}{% endif %}
                      style="{% include "info_articles/partials/_text_color_style.html" with text_color=meta_style.text_color text_custom_color=meta_style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=meta_style.box side_padding=meta_style.side_padding %}">
                     {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
@@ -146,6 +154,7 @@ leaving a visible strip of the site's default background there instead.
                 <div class="intro{% if intro_style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                      {% if can_edit_style %}data-block-id="article-intro" data-block-type="intro"
                      data-side-padding="{{ intro_style.side_padding|unlocalize }}"
+                     data-exclude-from-global-alignment="{{ intro_style.exclude_from_global_alignment|yesno:"true,false" }}"
                      {% include "info_articles/partials/_block_box_data_attrs.html" with box=intro_style.box %}{% endif %}
                      style="{% include "info_articles/partials/_text_color_style.html" with text_color=intro_style.text_color text_custom_color=intro_style.text_custom_color %} {% include "info_articles/partials/_block_box_style.html" with box=intro_style.box side_padding=intro_style.side_padding %}">
                     {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
@@ -177,8 +186,10 @@ leaving a visible strip of the site's default background there instead.
                 data-alignment="{{ page.style.hero_image_position }}" data-width-rem="{{ page.style.hero_image_width_rem|unlocalize }}"
                 data-side-padding="{{ page.style.hero_image_side_padding|unlocalize }}"
                 data-boxed="{{ page.style.hero_image_boxed|yesno:"true,false" }}" data-box-color="{{ page.style.hero_image_box_color }}"
-                data-box-custom-color="{{ page.style.hero_image_box_custom_color }}" data-box-border-radius="{{ page.style.hero_image_box_border_radius|unlocalize }}"{% endif %}
-                style="width: {{ page.style.hero_image_width_rem|unlocalize }}rem; max-width: 100%; padding-left: {{ page.style.hero_image_side_padding|unlocalize }}rem; padding-right: {{ page.style.hero_image_side_padding|unlocalize }}rem;{% if page.style.hero_image_boxed %} --box-bg: {% if page.style.hero_image_box_color == 'custom' %}{{ page.style.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.style.hero_image_box_color }}){% endif %}; border-radius: {{ page.style.hero_image_box_border_radius|unlocalize }}rem;{% endif %}">
+                data-box-custom-color="{{ page.style.hero_image_box_custom_color }}" data-box-border-radius="{{ page.style.hero_image_box_border_radius|unlocalize }}"
+                data-shadow-enabled="{{ page.style.hero_image_box_shadow_enabled|yesno:"true,false" }}" data-shadow-strength="{{ page.style.hero_image_box_shadow_strength|unlocalize }}"
+                data-shadow-color="{{ page.style.hero_image_box_shadow_color }}" data-shadow-custom-color="{{ page.style.hero_image_box_shadow_custom_color }}"{% endif %}
+                style="width: {{ page.style.hero_image_width_rem|unlocalize }}rem; max-width: 100%; padding-left: {{ page.style.hero_image_side_padding|unlocalize }}rem; padding-right: {{ page.style.hero_image_side_padding|unlocalize }}rem;{% if page.style.hero_image_boxed %} --box-bg: {% if page.style.hero_image_box_color == 'custom' %}{{ page.style.hero_image_box_custom_color|default:'var(--color-bg-light)' }}{% else %}var(--color-{{ page.style.hero_image_box_color }}){% endif %}; border-radius: {{ page.style.hero_image_box_border_radius|unlocalize }}rem; box-shadow: {% if page.style.hero_image_box_shadow_enabled %}0 {{ page.style.hero_image_box_shadow_offset|unlocalize }}px {{ page.style.hero_image_box_shadow_blur|unlocalize }}px {% if page.style.hero_image_box_shadow_color == 'custom' %}{{ page.style.hero_image_box_shadow_custom_color|default:'var(--color-shadow)' }}{% elif page.style.hero_image_box_shadow_color %}var(--color-{{ page.style.hero_image_box_shadow_color }}){% else %}var(--color-shadow){% endif %}{% else %}none{% endif %};{% endif %}">
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
                 <img class="hero-image" src="{{ hero.url }}" alt="{{ page.hero_image_alt|default:page.hero_image.title }}">
                 {% if page.hero_image_title or page.hero_image_caption %}

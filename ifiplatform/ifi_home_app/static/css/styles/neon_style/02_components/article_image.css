@@ -136,14 +136,15 @@ its whole padding (however _block_box_style.html set it) resets safely. */
   }
 }
 
-/* border-radius comes from inline style (box_border_radius, an editor-chosen
-rem number) rather than being fixed here -- see article_image_block.html /
-article_page.html's hero image figure. */
+/* border-radius AND box-shadow both come from inline style now (box_border_
+radius/hero_image_box_shadow_* -- the latter an editor-chosen intensity/
+color, formerly this fixed "0 2px 8px var(--color-shadow)") rather than
+being fixed here -- see article_image_block.html / article_page.html's
+hero image figure. */
 .image-figure--boxed {
   padding: 1rem;
   background-color: var(--box-bg, var(--color-bg));
   border: 2px solid var(--color-border);
-  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 /* keep title/caption readable on a dark box background */

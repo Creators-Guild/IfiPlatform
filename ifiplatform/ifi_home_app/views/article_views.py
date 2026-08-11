@@ -38,6 +38,10 @@ BOX_FIELDS = {
     "box_bg_custom_color",
     "box_padding",
     "box_margin",
+    "box_shadow_enabled",
+    "box_shadow_strength",
+    "box_shadow_color",
+    "box_shadow_custom_color",
 }
 
 # not box_* -- applies independent of whether a block's box is enabled (see
@@ -91,18 +95,19 @@ BLOCK_STYLE_FIELDS = {
     "column_title": {"alignment", "font_size"} | TEXT_COLOR_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
     # title/meta/intro (the article-header group), keyed by fixed pseudo
     # ids ("article-title"/"article-meta"/"article-intro", see
-    # ArticlePage.get_context()). Alignment/font-size for these three
-    # already live on dedicated ArticlePage fields, edited via
-    # save_header_style instead -- side padding/box/text color are saved as
-    # ArticleBlockStyle rows for them (side padding and box from their own
-    # individual trigger, text color from the shared article_header one).
-    "title": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
-    "meta": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
-    "intro": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS,
+    # ArticlePage.get_context()). Alignment/font-size themselves still live
+    # on dedicated ArticlePage fields, edited via save_header_style instead
+    # (see article_block_style.js's own recordPendingEdit) -- side padding/
+    # box/text color/the "lock alignment" opt-out are saved as
+    # ArticleBlockStyle rows for them, same as every other alignment-capable
+    # block type, so save_quick_style's global-alignment bulk-overwrite can
+    # respect it via the exact same exclude_from_global_alignment query.
+    "title": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "meta": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "intro": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
     # the title/meta/intro group as a whole, keyed by the fixed pseudo id
-    # "article-header" -- box only (alignment/font-size are plain
-    # ArticlePage fields, saved via save_header_style instead; side padding
-    # is too, see ArticlePage.get_context()'s own comment on this row).
+    # "article-header" -- box only (side padding is a plain ArticlePage
+    # field like alignment/font-size, saved via save_header_style instead).
     "article_header": set(BOX_FIELDS),
 }
 
@@ -125,7 +130,14 @@ def save_quick_style(request, page_id):
     ArticleBlockStyle row for this article (creating rows that don't exist
     yet), except any block individually opted out via its own
     exclude_from_global_alignment flag -- see alignment_capable_block_ids()
-    in article_models.py. content_font_size_multiplier, in contrast, never
+    in article_models.py -- AND the title/meta/intro header group's own
+    title_alignment/meta_alignment/intro_alignment ArticleStyle fields,
+    same exclude_from_global_alignment opt-out (checked directly on their
+    own "article-title"/"article-meta"/"article-intro" ArticleBlockStyle
+    rows, the same rows their own side padding/box/lock-alignment checkbox
+    already save to -- see BLOCK_STYLE_FIELDS above), since those three
+    aren't part of page.body at all so alignment_capable_block_ids() can
+    never see them. content_font_size_multiplier, in contrast, never
     touches ArticleBlockStyle at all -- it's applied purely at render time
     (see _effective_heading_style's display_font_size)."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
@@ -188,6 +200,19 @@ def save_quick_style(request, page_id):
             update_fields=["alignment"],
         )
 
+        header_alignment_fields = {
+            "article-title": "title_alignment",
+            "article-meta": "meta_alignment",
+            "article-intro": "intro_alignment",
+        }
+        style_changed = False
+        for header_block_id, style_field in header_alignment_fields.items():
+            if header_block_id not in excluded_ids:
+                setattr(style, style_field, alignment)
+                style_changed = True
+        if style_changed:
+            style.save()
+
     return JsonResponse({"ok": True})
 
 
@@ -235,6 +260,8 @@ def save_block_style(request, page_id):
             defaults["box_padding"] = float(data["box_padding"])
         if "box_margin" in allowed_fields and data.get("box_margin") is not None:
             defaults["box_margin"] = float(data["box_margin"])
+        if "box_shadow_strength" in allowed_fields and data.get("box_shadow_strength") is not None:
+            defaults["box_shadow_strength"] = float(data["box_shadow_strength"])
     except (TypeError, ValueError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
@@ -243,7 +270,11 @@ def save_block_style(request, page_id):
     # POST to this endpoint from setting an arbitrary value otherwise, and an
     # oversized width/height here is exactly the kind of editor-set value the
     # mobile CSS resets (article_multicolumn.css et al) can't fully undo.
-    for field_name, bounds in (("width_rem", (4, 60)), ("height_rem", (0, 40))):
+    for field_name, bounds in (
+        ("width_rem", (4, 60)),
+        ("height_rem", (0, 40)),
+        ("box_shadow_strength", (0, 3)),
+    ):
         value = defaults.get(field_name)
         if value is not None and not bounds[0] <= value <= bounds[1]:
             return JsonResponse({"error": f"Invalid {field_name}."}, status=400)
@@ -258,6 +289,8 @@ def save_block_style(request, page_id):
         defaults["box_enabled"] = bool(data["box_enabled"])
     if "box_border_visible" in allowed_fields and data.get("box_border_visible") is not None:
         defaults["box_border_visible"] = bool(data["box_border_visible"])
+    if "box_shadow_enabled" in allowed_fields and data.get("box_shadow_enabled") is not None:
+        defaults["box_shadow_enabled"] = bool(data["box_shadow_enabled"])
     if "list_style" in allowed_fields and data.get("list_style") is not None:
         defaults["list_style"] = bool(data["list_style"])
     if "fixed_ratio" in allowed_fields and data.get("fixed_ratio") is not None:
@@ -272,6 +305,10 @@ def save_block_style(request, page_id):
         # fallback color of its own, "" means "leave the text color alone"
         # (see BLOCK_STYLE_DEFAULTS["heading"]["text_color"]).
         ("text_color", "text_custom_color"),
+        # same blank-is-real-state reasoning as text_color above -- "" means
+        # "keep using the theme's own shadow color" (see BLOCK_STYLE_
+        # DEFAULTS["box"]["shadow_color"]).
+        ("box_shadow_color", "box_shadow_custom_color"),
     ):
         if color_field in allowed_fields and data.get(color_field) is not None:
             color = data[color_field]
@@ -338,10 +375,11 @@ def save_header_style(request, page_id):
 def save_hero_image_style(request, page_id):
     """Save hero_image_position/hero_image_width_rem/hero_image_side_padding
     plus the box fields (hero_image_boxed/hero_image_box_color/
-    hero_image_box_custom_color/hero_image_box_border_radius, formerly
-    Wagtail-admin-only fields, now on-page like everything else) -- a
-    plain upsert onto the page's shared ArticleStyle row, same pattern as
-    save_quick_style."""
+    hero_image_box_custom_color/hero_image_box_border_radius/hero_image_box_
+    shadow_enabled/hero_image_box_shadow_strength/hero_image_box_shadow_color/
+    hero_image_box_shadow_custom_color, formerly Wagtail-admin-only fields,
+    now on-page like everything else) -- a plain upsert onto the page's
+    shared ArticleStyle row, same pattern as save_quick_style."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.can_edit_in_editor_mode(request.user):
@@ -356,6 +394,14 @@ def save_hero_image_style(request, page_id):
         box_color = data["box_color"]
         box_custom_color = data.get("box_custom_color") or ""
         box_border_radius = float(data["box_border_radius"])
+        shadow_enabled = bool(data["shadow_enabled"])
+        shadow_strength = float(data["shadow_strength"])
+        # blank is a real value here, same as box_color/box_custom_color
+        # above never being blank vs. text/box-shadow colors elsewhere in
+        # this codebase that can be -- see ArticleStyle.hero_image_box_
+        # shadow_color's own docstring on why blank means "theme default".
+        shadow_color = data.get("shadow_color") or ""
+        shadow_custom_color = data.get("shadow_custom_color") or ""
     except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
@@ -377,6 +423,18 @@ def save_hero_image_style(request, page_id):
     if not 0 <= box_border_radius <= 5:
         return JsonResponse({"error": "Invalid box_border_radius."}, status=400)
 
+    if not 0 <= shadow_strength <= 3:
+        return JsonResponse({"error": "Invalid shadow_strength."}, status=400)
+
+    if shadow_color and shadow_color not in dict(BOX_COLOR_CHOICES):
+        return JsonResponse({"error": "Invalid shadow_color."}, status=400)
+
+    if shadow_custom_color:
+        try:
+            HEX_COLOR_VALIDATOR(shadow_custom_color)
+        except ValidationError:
+            return JsonResponse({"error": "Invalid shadow_custom_color."}, status=400)
+
     style = page.style
     style.hero_image_position = alignment
     style.hero_image_width_rem = width_rem
@@ -385,6 +443,10 @@ def save_hero_image_style(request, page_id):
     style.hero_image_box_color = box_color
     style.hero_image_box_custom_color = box_custom_color
     style.hero_image_box_border_radius = box_border_radius
+    style.hero_image_box_shadow_enabled = shadow_enabled
+    style.hero_image_box_shadow_strength = shadow_strength
+    style.hero_image_box_shadow_color = shadow_color
+    style.hero_image_box_shadow_custom_color = shadow_custom_color
     style.save()
 
     return JsonResponse({"ok": True})
