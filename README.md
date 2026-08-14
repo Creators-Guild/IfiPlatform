@@ -7,6 +7,7 @@ Goals:
 - One place to find IFI-tools (ex. Peoply, Trix, IFI Rom etc.)
 - A growing student library with study-resources made by IFI-students with main focus on IFI-subjects (based on IFI curriculum) and reuse
 - A collection of study tools to build and represent study-resources (ex. flashcards, multiple choice, mock exam etc.)
+- A low-threshold way for students — including those with little to no development experience — to contribute to and help shape the platform, building an open community around it
 
 Note: the site is bilingual (Norwegian Bokmål + English) via wagtail-localize — new content pages generally need both locales.
 
