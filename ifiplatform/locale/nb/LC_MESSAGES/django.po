@@ -540,7 +540,7 @@ msgstr "Infoartikkler"
 #: .\ifi_home_app\templates\core\home_index.html:42
 #, python-format
 msgid "This month at Ifi &ndash; %(current_month)s"
-msgstr ""
+msgstr "Denne måneden på Ifi &ndash; %(current_month)s"
 
 #: .\ifi_home_app\templates\core\partials\home_articlesbar.html:13
 msgid "No articles yet or something is broken ;_;"
