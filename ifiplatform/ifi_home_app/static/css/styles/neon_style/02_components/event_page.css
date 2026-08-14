@@ -77,6 +77,23 @@ column sized for paragraph text -- see .event-calendar's own comment. */
   margin-right: auto;
 }
 
+/* Back to the full events overview (events/event_index_page.html) -- same
+understated link treatment as .event-location-map-link above. */
+.event-overview-link {
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+.event-overview-link a {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+
+.event-overview-link a:hover,
+.event-overview-link a:focus-visible {
+  color: var(--color-link-hover);
+}
+
 /* Freeform info tags (EventPage.info_tags -- audience/program, food,
 alcohol, etc., see event_models.py's own docstring on why these are plain
 django-taggit tags rather than a fixed choices list). Same pill shape as

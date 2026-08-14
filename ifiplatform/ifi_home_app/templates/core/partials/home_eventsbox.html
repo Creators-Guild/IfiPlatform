@@ -1,4 +1,4 @@
-{% load i18n static wagtailcore_tags %}
+{% load i18n static wagtailcore_tags article_tags %}
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/event_page.css' %}">
   <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/home_eventsbox.css' %}">
@@ -237,6 +237,17 @@
     {% endcomment %}
     <button type="button" class="home-eventsbox-more">{% trans "See more events" %}</button>
     <button type="button" class="home-eventsbox-close" aria-label="{% trans "Close" %}">&times;</button>
+{% endif %}
+{% get_event_index as event_index_page %}
+{% if event_index_page %}
+    {% comment %}
+    This box only ever shows a handful of upcoming events (core_views.
+    main_view caps it at 6) -- this is the way to the full semester
+    overview (events/event_index_page.html), always visible (unlike
+    .home-eventsbox-more above, which is mobile-only and just reveals the
+    rest of *this* same short list).
+    {% endcomment %}
+    <a class="home-eventsbox-view-all" href="{% pageurl event_index_page %}">{% trans "See all events" %}</a>
 {% endif %}
 <script src="{% static 'js/home_eventsbox.js' %}" defer></script>
 <script src="{% static 'js/dropdown_menu.js' %}" defer></script>

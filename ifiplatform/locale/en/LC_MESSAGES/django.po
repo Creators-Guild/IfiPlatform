@@ -508,6 +508,14 @@ msgstr[1] ""
 msgid "No upcoming events."
 msgstr ""
 
+#: .\ifi_home_app\templates\core\partials\home_eventsbox.html:112
+msgid "See all events"
+msgstr ""
+
+#: .\ifi_home_app\templates\events\event_page.html:63
+msgid "See every event this semester"
+msgstr ""
+
 #: .\ifi_home_app\templates\core\partials\home_messageboard.html:29
 msgid "View full message"
 msgstr ""

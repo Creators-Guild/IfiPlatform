@@ -561,7 +561,15 @@ msgstr[1] ""
 
 #: .\ifi_home_app\templates\core\partials\home_eventsbox.html:100
 msgid "No upcoming events."
-msgstr ""
+msgstr "Ingen kommende arrangementer."
+
+#: .\ifi_home_app\templates\core\partials\home_eventsbox.html:112
+msgid "See all events"
+msgstr "Se alle arrangementer"
+
+#: .\ifi_home_app\templates\events\event_page.html:63
+msgid "See every event this semester"
+msgstr "Se alle arrangementer dette semesteret"
 
 #: .\ifi_home_app\templates\core\partials\home_messageboard.html:29
 #, fuzzy

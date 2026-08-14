@@ -1,5 +1,5 @@
 {% extends "home_base.html" %}
-{% load i18n static wagtailcore_tags %}
+{% load i18n static wagtailcore_tags article_tags %}
 
 {% block title %}{{ page.title }}{% endblock %}
 
@@ -54,6 +54,13 @@
         {% endif %}
         {% if page.signup_url %}
             <a class="event-signup-link" href="{{ page.signup_url }}" target="_blank" rel="noopener noreferrer">{% trans "Sign up" %}</a>
+        {% endif %}
+
+        {% get_event_index as event_index_page %}
+        {% if event_index_page %}
+            <p class="event-overview-link">
+                <a href="{% pageurl event_index_page %}">{% trans "See every event this semester" %}</a>
+            </p>
         {% endif %}
 
         {% if needs_translation %}

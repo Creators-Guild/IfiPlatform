@@ -61,14 +61,16 @@
         <div class="drop-content">
             <a class="drop-option drop-option--all" href="{% pageurl event_index_page %}">{% trans "All" %}</a>
             {% comment %}
-            "This Month"/"Always at Ifi" would need real filtering logic
-            (query params on EventIndexPage) that's out of scope for the
-            initial events feature -- left as stubs for now, same as before.
+            "This Month"/"Always at Ifi" would ideally deep-link into a
+            specific month on the events page (query params on
+            EventIndexPage) -- out of scope for now, so both just point at
+            the same full, month-grouped overview
+            (events/event_index_page.html) rather than staying dead links.
             {% endcomment %}
-            <a href="">
+            <a href="{% pageurl event_index_page %}">
                 {% trans "This Month" %}
             </a>
-            <a href="">
+            <a href="{% pageurl event_index_page %}">
                 {% trans "Always at Ifi" %}
             </a>
         </div>

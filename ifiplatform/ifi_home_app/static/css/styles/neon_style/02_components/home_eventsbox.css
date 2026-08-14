@@ -419,6 +419,28 @@ to fit like it would for any other in-flow content, no clipping/drift risk. */
   color: var(--color-text-muted);
 }
 
+/* Link to the full events overview (events/event_index_page.html) --
+always visible, unlike .home-eventsbox-more below (mobile-only, and only
+ever reveals the rest of this same short list). Same understated
+"text link, not a button" treatment as .home-eventsbox-more itself. */
+.home-eventsbox-view-all {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+  text-align: center;
+}
+
+.home-eventsbox-view-all:hover,
+.home-eventsbox-view-all:focus-visible {
+  color: var(--color-text);
+}
+
 /* unscoped defaults -- keeps both hidden regardless of viewport, same
 convention as .messageboard-expand's own unscoped display:none
 (messageboard.css); the media query below is what actually turns either
