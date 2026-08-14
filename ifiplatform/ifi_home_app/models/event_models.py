@@ -6,6 +6,9 @@ plug into; add it later if that changes. TranslationWarningMixin is kept
 since it's free and these pages need nb/en translations like everything else
 on this bilingual site."""
 
+from datetime import date, datetime, time, timedelta
+from zoneinfo import ZoneInfo
+
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -18,6 +21,21 @@ from wagtail.fields import RichTextField, StreamField
 from wagtail.models import Locale, Page
 
 from ifi_home_app.models.article_models import HEX_COLOR_VALIDATOR, TranslationWarningMixin, article_card_block
+
+# event_time/event_end_time are plain (non-tz-aware) TimeFields, entered and
+# displayed as-is with no conversion -- editors enter them as Oslo wall-clock
+# (this is a Ifi/UiO site; that's where the events actually happen), same as
+# every other clock time already shown on the site (event_page.html etc).
+# settings.TIME_ZONE is "UTC" though (storage/bookkeeping convention, not a
+# site-content one), and nothing activates a per-request timezone -- so
+# timezone.localtime() on its own returns UTC wall-clock, not Oslo's. Needed
+# only where a clock *time* is compared against event_time (EventPage.
+# live_sub_events below) -- the plain calendar-day comparisons elsewhere
+# (is_happening_now, timezone.localdate()) don't need it: UTC and Oslo only
+# ever disagree on which *day* it is within an hour or two of midnight,
+# already an existing, pre-existing-elsewhere edge case, not one this
+# introduces.
+SITE_TIMEZONE = ZoneInfo("Europe/Oslo")
 
 # Same "fixed palette + custom hex fallback" pattern as article_models.py's
 # COLOR_CHOICES (reusing HEX_COLOR_VALIDATOR from there directly), but its
@@ -285,9 +303,20 @@ class EventPage(TranslationWarningMixin, Page):
         help_text="Optional -- explains what each sub-event calendar color means (e.g. \"Blue = Study-relevant\"), shown above the week-calendar.",
     )
 
+    # The event's Peoply page -- almost every event links here, so it's the
+    # primary/expected field (was called signup_url before Peoply became
+    # the norm; see signup_url below for the now-secondary, genuinely
+    # optional case).
+    peoply_url = models.URLField(
+        blank=True,
+        help_text="Optional -- link to this event's page on Peoply.",
+    )
+    # A separate signup/registration link, only for the rare event that
+    # doesn't use Peoply for signup (e.g. an external form). Most events
+    # should use Peoply link above instead.
     signup_url = models.URLField(
         blank=True,
-        help_text="Optional -- link to a signup/registration form for this event.",
+        help_text="Optional -- link to a signup/registration form for this event, if not using Peoply.",
     )
     # See EventPageTag above for why this is a real ClusterTaggableManager
     # rather than a StreamField of freeform text blocks (like related_unions
@@ -314,6 +343,7 @@ class EventPage(TranslationWarningMixin, Page):
         FieldPanel("is_highlighted"),
         FieldPanel("related_unions"),
         FieldPanel("calendar_legend"),
+        FieldPanel("peoply_url"),
         FieldPanel("signup_url"),
         FieldPanel("info_tags"),
     ]
@@ -340,11 +370,59 @@ class EventPage(TranslationWarningMixin, Page):
         return True
 
     @property
+    def is_happening_now(self):
+        """True on any day this event is actually in progress -- from
+        event_date through end_date inclusive for a multi-day event (e.g.
+        Fadderuke), just event_date for a single-day one. Powers the
+        homepage box's "Happening now" callout (home_eventsbox.html/
+        core_views.py), which can list more than one of these at once when
+        several top-level events overlap.
+        """
+        today = timezone.localdate()
+        return self.event_date <= today <= (self.end_date or self.event_date)
+
+    @property
     def sub_events(self):
         """This event's own live sub-events (if any), in date order --
         shown on its own page (event_page.html) and counted (not listed)
         in the homepage box (home_eventsbox.html)."""
         return EventPage.objects.child_of(self).live().order_by("event_date", "event_time")
+
+    @property
+    def live_sub_events(self):
+        """This event's own sub-events actually happening at this exact
+        moment -- in progress today (is_happening_now above) AND, for a
+        timed sub-event, whose own [event_time, event_end_time] window
+        covers the current clock time too (an untimed sub-event has no
+        window to check, so it counts as live for its whole day). Shown
+        indented under this event in the homepage box's "Happening now"
+        callout (home_eventsbox.html) -- much narrower than
+        highlighted_sub_events below (today's whole programme, curated
+        fallback included), since this is meant to answer "what's on
+        *right now*", not "what's on today". SITE_TIMEZONE (Europe/Oslo),
+        not the bare timezone.localtime() every other date/time check in
+        this file uses -- see that constant's own comment above."""
+        current_time = timezone.localtime(timezone=SITE_TIMEZONE).time()
+
+        def is_live(sub_event):
+            if not sub_event.is_happening_now:
+                return False
+            if not sub_event.event_time:
+                return True
+            start = sub_event.event_time
+            end = sub_event.event_end_time
+            if end is None or end <= start:
+                # No stored end, or one that'd wrap past midnight -- same
+                # nominal-1-hour fallback calendar_days below uses, just
+                # clamped to the same day rather than replicating its
+                # minutes-since-midnight math for what's meant to be a
+                # quick "is it live right now" check.
+                end = (datetime.combine(date.min, start) + timedelta(hours=1)).time()
+                if end < start:
+                    end = time(23, 59, 59)
+            return start <= current_time <= end
+
+        return [sub_event for sub_event in self.sub_events if is_live(sub_event)]
 
     @property
     def localized_location_articles(self):

@@ -163,17 +163,29 @@ what actually keeps it hidden outside mobile. */
   border-radius: 999px;
 }
 
-/* on a narrow card there isn't room for the centered dots and the
-   right-aligned signature to share a row without colliding -- make both
-   normal flow instead of absolutely positioned, so they stack (signature,
-   then the prev/dots/next controls row) as regular block content below
-   the body text rather than floating on top of it or each other.
+/* 72rem, not a narrower phone-only width -- matches home_layout.css's own
+stacking breakpoint (.content-row goes flex-direction:column there, and
+.eventsbox_container switches to its own compact/collapsed mobile look at
+the same width, home_eventsbox.css). Below that breakpoint this box sits
+directly above the events box in a single narrow column, so it needs this
+same compact treatment throughout that whole range -- not just once an
+actual phone width, or the two would visibly mismatch (this one still
+desktop-sized while Events had already gone compact) anywhere from 480px
+up to 72rem. messageboard.js's own MOBILE_QUERY has to stay in sync with
+this value (kept in sync by eye, same as home_eventsbox.css's own
+reference to the 72rem breakpoint it doesn't own).
 
-   Height switches from a fixed size to auto + max-height: a short message
-   should stay compact instead of leaving a big empty gap, while a long
-   one can grow up to the cap before its body text starts scrolling
-   internally (see .messageboard-body below). */
-@media (max-width: 480px) {
+There isn't room for the centered dots and the right-aligned signature to
+share a row without colliding at these widths -- make both normal flow
+instead of absolutely positioned, so they stack (signature, then the
+prev/dots/next controls row) as regular block content below the body text
+rather than floating on top of it or each other.
+
+Height switches from a fixed size to auto + max-height: a short message
+should stay compact instead of leaving a big empty gap, while a long one
+can grow up to the cap before its body text starts scrolling internally
+(see .messageboard-body below). */
+@media (max-width: 72rem) {
   .messageboard {
     height: auto;
     max-height: 34rem;

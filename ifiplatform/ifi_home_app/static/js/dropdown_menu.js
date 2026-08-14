@@ -90,6 +90,16 @@ if (!window.__ifiTapToggleMenusInit) {
       window.addEventListener("resize", positionPanel);
     });
 
+    // Same collapsed-by-default treatment for an event with more than 2
+    // related_unions (home_eventsbox.html/.css) -- harmless to call this
+    // for every .home-eventsbox-unions row regardless of whether it
+    // actually has a toggle button; setupTapToggle just no-ops (returns
+    // early) on the ones that don't. Unlike the rest of this file, this one
+    // runs on every device, not just touch: it's click-only everywhere (no
+    // CSS :hover reveal, see home_eventsbox.css), since hovering the row to
+    // just read the date/tags was revealing the extra tags too easily.
+    setupTapToggle(".home-eventsbox-unions", "button.home-eventsbox-unions-toggle");
+
     if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
       return; // devices with real mouse hover keep the existing CSS :hover behavior
     }
@@ -105,12 +115,6 @@ if (!window.__ifiTapToggleMenusInit) {
     // flow sidesteps that entirely: it just grows the row, same as any
     // other in-flow content would.
     setupTapToggle(".home-eventsbox-subevents", "button.home-eventsbox-subevents-toggle");
-    // Same collapsed-by-default treatment for an event with more than 3
-    // related_unions (home_eventsbox.html/.css) -- harmless to call this
-    // for every .home-eventsbox-unions row regardless of whether it
-    // actually has a toggle button; setupTapToggle just no-ops (returns
-    // early) on the ones that don't.
-    setupTapToggle(".home-eventsbox-unions", "button.home-eventsbox-unions-toggle");
 
     // The sidebar rail itself: tapping .sidemenu-header expands it (this is
     // what makes the submenus above visible/reachable at all on touch --

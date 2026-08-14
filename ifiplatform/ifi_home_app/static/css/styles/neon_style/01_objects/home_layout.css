@@ -88,14 +88,16 @@ override here. Width is a clamp() rather than a fixed value -- gives it a
 share of extra space on a wide screen (independent of whether the card
 columns are using theirs or not -- see newsbar_layout.css's own cap-raise
 for how *they* get first claim on it) instead of always sitting at exactly
-the same width regardless of how much room the page actually has. 16rem
-floor stays close to the old fixed 18rem so it isn't noticeably tighter
-near the 72rem stacking breakpoint below (full-width once stacked anyway);
-20vw scales it with viewport width; 26rem ceiling stops it growing
-unbounded on an ultrawide monitor. flex-shrink is 1 (was 0) so it can still
-give a little back if the row is ever genuinely tight, though the 72rem
-breakpoint already stacks it to full-width before that would normally
-matter.
+the same width regardless of how much room the page actually has. 18rem
+floor / 30rem ceiling (raised from 16rem/26rem -- the old ceiling was
+cramped enough that a full row of union tags or the "N sub-events" toggle
+text routinely needed more room than it had, see the min-width:0 fixes in
+home_eventsbox.css) give its actual content enough width to wrap onto its
+own lines comfortably instead of staying uncomfortably tight; 20vw scales
+it with viewport width in between. flex-shrink is 1 (was 0) so it can
+still give a little back if the row is ever genuinely tight, though the
+72rem breakpoint already stacks it to full-width before that would
+normally matter.
 
 The row's overall height still comes from .content-main (the taller sibling in
 practice, once it has a few news/article cards), so the space below a short
@@ -104,7 +106,12 @@ events box stays reserved/blank rather than being handed back to
 any more. overflow-y:auto is a safety net, not the normal case: it only
 matters if the box's own content somehow exceeds .content-row's height
 (nothing currently constrains that from happening, but this is harmless
-either way).
+either way). overflow-x is explicitly hidden alongside it -- setting only
+overflow-y to a non-visible value makes the CSS overflow spec force
+overflow-x to auto too (the same quirk noted in dropdown_menu.js's own
+comment re: .nav_links), which was producing a horizontal scrollbar on any
+content a hair too wide instead of wrapping the way home_eventsbox.css
+already intends everything in here to.
 
 Box styling (border/radius/shadow/margin) deliberately copies .messageboard
 (messageboard.css) verbatim -- same "card" look, and the matching
@@ -112,8 +119,9 @@ margin-top:1rem is what actually lines their top edges up: without it this
 box sits flush with .content-row's own top (level with home_navbar), while
 .messageboard's own margin-top pushes it down 1rem first. */
 .home-layout .maincontent .content-row > .eventsbox_container {
-    flex: 0 1 clamp(16rem, 20vw, 26rem);
+    flex: 0 1 clamp(18rem, 20vw, 30rem);
     overflow-y: auto;
+    overflow-x: hidden;
     box-sizing: border-box;
     margin: 1rem 0;
     padding: 1.25rem 1.5rem;
@@ -150,12 +158,74 @@ two 22rem card columns + gap) even with Events still present:
         align-items: stretch;
     }
 
+    /* display:contents un-boxes .content-main -- its own children
+    (.messageboard, .suggestions-row) become direct flex items of
+    .content-row alongside .eventsbox_container instead of staying nested
+    inside a separate flex container of their own, which is what lets the
+    `order` below reach across what used to be that boundary. Message
+    board, then Events, then News/Articles was the actual goal here (not
+    "Events last, after everything else in .content-main" like plain DOM
+    order gave stacked); box-level properties on .content-main itself
+    (flex, min-width, its own display:flex) all stop applying once it's
+    display:contents, but none of them were meaningful once it no longer
+    generates a box anyway. */
+    .home-layout .maincontent .content-row > .content-main {
+        display: contents;
+    }
+
     .home-layout .maincontent .content-row > .eventsbox_container {
         flex: 0 0 auto;
-        /* stacked layout has no shared row height to stretch to any more --
-        cap the box's own height instead so a long events list doesn't push
-        the rest of the page far down. */
-        max-height: 20rem;
+        /* No more max-height/overflow-y here -- stacked layout used to cap
+        this at 20rem and scroll internally, but home_eventsbox.css now
+        collapses the list itself down to just the "Happening now" callout
+        plus the first upcoming event at this breakpoint, so the box is
+        already short and needs neither. ".home-eventsbox-more" (below) is
+        how the rest becomes reachable instead. */
+        /* Right under the message board, above News/Articles -- .messageboard
+        keeps the default order:0 (nothing to override), .suggestions-row
+        gets order:2 below so it lands after this. */
+        order: 1;
+    }
+
+    /* Not `.content-row > .suggestions-row` -- display:contents above only
+    stops .content-main from generating its own box, it doesn't change the
+    DOM, so .suggestions-row's actual parent for selector-matching purposes
+    is still .content-main. `order` itself works fine across that (a flex
+    item's `order` is about its position among the flattened box tree's
+    siblings, not the DOM), it's specifically the child-combinator match
+    that needs the real DOM relationship. */
+    .home-layout .maincontent .content-main > .suggestions-row {
+        order: 2;
+    }
+
+    /* Full-screen-ish takeover once ".home-eventsbox-more" is tapped
+    (home_eventsbox.html/.js) -- same "tap to see everything, scrollable"
+    card look as .messageboard-modal-panel (messageboard.css: border,
+    radius, shadow), just expanding this box itself in place
+    (position:fixed) instead of cloning its content into a separate dialog,
+    since the list has real interactive state of its own (union tag
+    toggles, sub-event toggles, links) a clone would have to duplicate.
+    inset:0.5rem rather than flush 0 -- small enough to still read as
+    "fills the screen", but enough of a gap for the border/radius/shadow to
+    actually show as a floating card rather than being clipped flat against
+    the viewport edge; border/border-radius themselves fall through
+    unchanged from the base (non-expanded) rule above, since they're the
+    same 2px/12px either way -- only the shadow gets bumped up here to
+    something more clearly "modal-like" now that this is covering most of
+    the screen. Deliberately not capped to a small centered dialog the way
+    .messageboard-modal-panel is (max-width:26rem) -- more screen for an
+    events *list* to actually be useful pays off more than it does for a
+    single message's few paragraphs. z-index:1000 matches every other
+    full-page overlay on the site (.messageboard-modal, .tool-lightbox,
+    event_page.css's own lightbox). */
+    .home-layout .maincontent .content-row > .eventsbox_container.is-expanded {
+        position: fixed;
+        inset: 0.5rem;
+        z-index: 1000;
+        max-height: none;
+        height: auto;
+        margin: 0;
+        box-shadow: 0 8px 24px var(--color-shadow);
     }
 }
 

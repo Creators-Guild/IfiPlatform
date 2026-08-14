@@ -79,13 +79,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return update;
   };
 
-  // Mobile only (see .messageboard-body's line-clamp in messageboard.css) --
-  // reveals "View full message" only once the clamp has actually truncated
-  // the text, so a short message that already fits in full doesn't get an
-  // offer to view more of nothing. scrollHeight still measures the full
-  // (unclamped) content height even with -webkit-line-clamp applied, so
-  // comparing it to clientHeight remains a reliable truncation check.
-  const MOBILE_QUERY = window.matchMedia("(max-width: 480px)");
+  // 1152px = 72rem, messageboard.css's own compact-mobile-layout breakpoint
+  // (kept in sync by eye -- see that media query's own comment for why it's
+  // 72rem and not a narrower phone-only width). Reveals "View full message"
+  // only once the clamp has actually truncated the text, so a short message
+  // that already fits in full doesn't get an offer to view more of nothing.
+  // scrollHeight still measures the full (unclamped) content height even
+  // with -webkit-line-clamp applied, so comparing it to clientHeight
+  // remains a reliable truncation check.
+  const MOBILE_QUERY = window.matchMedia("(max-width: 1152px)");
 
   const setupExpand = (slide) => {
     const body = slide.querySelector(".messageboard-body");

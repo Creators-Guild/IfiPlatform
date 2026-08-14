@@ -4,6 +4,47 @@
   <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/home_eventsbox.css' %}">
 {% endblock %}
 
+{% if happening_now_events %}
+    {% comment %}
+    Callout for whatever's actually in progress today (e.g. day 3 of a
+    week-long event like Fadderuke) -- a subset of upcoming_events
+    (EventPage.is_happening_now, event_models.py), surfaced here instead of
+    left to blend into the dated list below. The label is its own line
+    above the list (a section title, not trailing inline after the first
+    event's name) since more than one top-level event can be happening at
+    once. Each event's own live_sub_events (event_models.py) -- the ones
+    actually in progress right now, not just today's curated highlights --
+    are listed indented underneath it, same border-left "expanded menu"
+    indent as .home-eventsbox-subevents-list below, just always shown
+    rather than toggle-revealed.
+    {% endcomment %}
+    <div class="home-eventsbox-live">
+        <span class="home-eventsbox-live-label">{% trans "Happening now" %}</span>
+        <ul class="home-eventsbox-live-list">
+            {% for event in happening_now_events %}
+                <li>
+                    <a href="{% pageurl event %}">{{ event.title }}</a>
+                    {% with live_subs=event.live_sub_events %}
+                    {% if live_subs %}
+                        <ul class="home-eventsbox-live-sublist">
+                            {% for sub_event in live_subs %}
+                                <li>
+                                    <a href="{% pageurl sub_event %}">
+                                        {% if sub_event.event_time %}
+                                            <span class="home-eventsbox-subevent-time">{{ sub_event.event_time|time:"H:i" }}</span>
+                                        {% endif %}
+                                        {{ sub_event.title }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% endwith %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
 <ul class="home-eventsbox-list">
     {% for event in upcoming_events %}
         <li>
@@ -62,11 +103,13 @@
                         only on its individual day-to-day sub-events. An
                         event with many of these would otherwise flood this
                         compact row with a wall of tags -- only the first 2
-                        show by default, same "collapsed unless expanded"
-                        treatment as .home-eventsbox-subevents below
-                        (tap-to-toggle on touch via dropdown_menu.js's shared
-                        setupTapToggle(), :hover reveal on desktop), rather
-                        than a second, separately-behaving toggle mechanism.
+                        show by default, expanded by clicking the +N toggle
+                        below (dropdown_menu.js's shared setupTapToggle(),
+                        unconditionally here -- unlike .home-eventsbox-
+                        subevents below, this one is click-only on every
+                        device, not just touch, since a hover reveal made
+                        the extra tags too easy to trigger by accident while
+                        just scanning the row).
                         2 rather than 3: this column is narrow enough on a
                         phone that even 3 short tags plus a toggle button
                         can wrap awkwardly -- 2 stays comfortably clear of
@@ -82,7 +125,7 @@
                         localize/segments/extract.py). Without this, an English
                         homepage would show/link to the Norwegian union pages.
                         {% endcomment %}
-                        <span class="home-eventsbox-unions{% if total > 2 %} home-eventsbox-unions--collapsible{% endif %}">
+                        <span class="home-eventsbox-unions">
                             {% for entry in all_related_unions|slice:":2" %}
                                 {% if entry.union %}
                                     {% with union=entry.union.localized %}
@@ -98,7 +141,18 @@
                                         {% endwith %}
                                     {% endif %}
                                 {% endfor %}
-                                <button type="button" class="home-eventsbox-unions-toggle">+{{ total|add:"-2" }}</button>
+                                {% comment %}
+                                Two labels, CSS-swapped on .home-eventsbox-
+                                unions.is-open (home_eventsbox.css) rather
+                                than one static "+N" -- once the extra tags
+                                are showing, "+N" no longer describes what
+                                clicking the button does (there's nothing
+                                left to add), so it switches to "Close".
+                                {% endcomment %}
+                                <button type="button" class="home-eventsbox-unions-toggle">
+                                    <span class="home-eventsbox-unions-toggle-more">+{{ total|add:"-2" }}</span>
+                                    <span class="home-eventsbox-unions-toggle-close">{% trans "Close" %}</span>
+                                </button>
                             {% endif %}
                         </span>
                     {% endwith %}
@@ -166,4 +220,23 @@
         <li class="home-eventsbox-empty">{% trans "No upcoming events." %}</li>
     {% endfor %}
 </ul>
+{% if upcoming_events|length > 1 %}
+    {% comment %}
+    Mobile only (home_eventsbox.css/home_layout.css) -- past that breakpoint
+    the collapsed box only shows "Happening now" plus the first upcoming
+    event, no internal scroll any more. This button (and the close button
+    below, home_eventsbox.js) is how the rest becomes reachable: tapping it
+    expands .eventsbox_container itself to fill the screen, scrollable, same
+    "tap to see everything" idea as .messageboard-expand's "View full
+    message" (home_messageboard.html/messageboard.js) -- just expanding this
+    box in place rather than cloning its content into a separate modal,
+    since the list has real interactive state (union tag toggles, sub-event
+    toggles, links) a clone would have to duplicate. Only rendered at all
+    when there's more than one event -- with just one (or zero, the empty-
+    state message), there's nothing this would actually reveal.
+    {% endcomment %}
+    <button type="button" class="home-eventsbox-more">{% trans "See more events" %}</button>
+    <button type="button" class="home-eventsbox-close" aria-label="{% trans "Close" %}">&times;</button>
+{% endif %}
+<script src="{% static 'js/home_eventsbox.js' %}" defer></script>
 <script src="{% static 'js/dropdown_menu.js' %}" defer></script>

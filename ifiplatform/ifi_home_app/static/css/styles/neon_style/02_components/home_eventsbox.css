@@ -14,6 +14,103 @@ horizontal padding needed here). */
   gap: 0.5rem;
 }
 
+/* Callout above .home-eventsbox-list for whatever's happening today
+(home_eventsbox.html/EventPage.is_happening_now) -- --color-cta rather than
+--color-accent, since the latter is already .event-type-badge--social's
+color (event_page.css) and would read as "this is a social event" instead
+of "this is live right now". The label is a block on its own line (a
+section title above the list) rather than an inline-flex row alongside it
+-- with more than one event possibly happening at once, "Happening now"
+reads as a heading introducing all of them, not a badge stuck to the
+first one's name. */
+.home-eventsbox-live {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.home-eventsbox-live-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: fit-content;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.2rem 0.6rem;
+  margin-bottom: 0.5rem;
+  border-radius: 999px;
+  color: var(--color-on-accent);
+  background-color: var(--color-cta);
+}
+
+/* Pulsing dot -- the label text alone ("Happening now") doesn't read as
+distinctly "live" at a glance the way a small animated indicator does. */
+.home-eventsbox-live-label::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background-color: var(--color-on-accent);
+  animation: home-eventsbox-live-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes home-eventsbox-live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.home-eventsbox-live-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+}
+
+.home-eventsbox-live-list > li > a {
+  font-weight: bold;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.home-eventsbox-live-list > li > a:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+/* This event's own sub-events actually in progress right now
+(EventPage.live_sub_events) -- same border-left "expanded menu" indent as
+.home-eventsbox-subevents-list below, just always shown here rather than
+toggle-revealed, since everything in this callout is already "live". */
+.home-eventsbox-live-sublist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0.3rem 0 0;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--color-border);
+  min-width: 0;
+}
+
+.home-eventsbox-live-sublist a {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.home-eventsbox-live-sublist a:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
 .home-eventsbox-item {
   position: relative;
   display: flex;
@@ -98,24 +195,20 @@ drops to its own line below the date, rather than trailing after it. */
 }
 
 /* Hidden past the first 2 tags (home_eventsbox.html) until
-.home-eventsbox-unions gets .is-open (tap, dropdown_menu.js's shared
-setupTapToggle) or is hovered on a real-mouse device below -- a plain
-display:none/inline-block toggle rather than the max-height/opacity
-animation .home-eventsbox-subevents-list uses, since these are individual
-inline pills wrapping in a flex row, not a block list that needs to grow
-smoothly. */
+.home-eventsbox-unions gets .is-open (click, on every device -- dropdown_
+menu.js's shared setupTapToggle called unconditionally for this one, see
+its own comment there) -- a plain display:none/inline-block toggle rather
+than the max-height/opacity animation .home-eventsbox-subevents-list uses,
+since these are individual inline pills wrapping in a flex row, not a block
+list that needs to grow smoothly. Deliberately no CSS :hover reveal (unlike
+.home-eventsbox-subevents below): hovering this row just to read the date
+was popping the extra tags open too easily. */
 .home-eventsbox-union-tag--extra {
   display: none;
 }
 
 .home-eventsbox-unions.is-open .home-eventsbox-union-tag--extra {
   display: inline-block;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .home-eventsbox-unions--collapsible:hover .home-eventsbox-union-tag--extra {
-    display: inline-block;
-  }
 }
 
 .home-eventsbox-unions-toggle {
@@ -138,6 +231,21 @@ smoothly. */
 .home-eventsbox-unions-toggle:hover {
   color: var(--color-text);
   border-color: var(--color-accent-hover);
+}
+
+/* "+N" swaps to "Close" once open (home_eventsbox.html) -- CSS-only, keyed
+off the same .is-open class dropdown_menu.js's setupTapToggle already puts
+on the container, same mechanism as the sub-events caret flip below. */
+.home-eventsbox-unions-toggle-close {
+  display: none;
+}
+
+.home-eventsbox-unions.is-open .home-eventsbox-unions-toggle-more {
+  display: none;
+}
+
+.home-eventsbox-unions.is-open .home-eventsbox-unions-toggle-close {
+  display: inline;
 }
 
 /* flex-basis:100% so this drops to its own line, same as .home-eventsbox-
@@ -170,20 +278,34 @@ subcount below, so it sits on its own row above the sub-event count/list. */
 
 /* Same flex-basis:100%-drops-to-its-own-line treatment as .home-eventsbox-
 subcount above, since this replaces it whenever there's at least one
-highlighted sub-event. */
+highlighted sub-event. min-width:0 overrides the flex-item default of
+min-width:auto (same fix as .maincontent in home_layout.css) -- without it,
+a flex item containing a white-space:nowrap descendant (.home-eventsbox-
+subevents-list a below) can't shrink narrower than that descendant's full
+text width, which was pushing .eventsbox_container wider than its own
+column and forcing a horizontal scrollbar instead of the intended ellipsis
+truncation. */
 .home-eventsbox-subevents {
   flex-basis: 100%;
+  min-width: 0;
 }
 
 .home-eventsbox-subevents-toggle {
   /* position:relative + z-index puts this above .home-eventsbox-title-
   link's stretched ::after overlay, so it toggles the list below instead of
-  the click falling through to the row's own link. */
+  the click falling through to the row's own link. flex-wrap:wrap -- an
+  inline-flex container's own items (the count text and the hint span)
+  never wrap relative to each other by default, so a long translated
+  string here could force the same kind of overflow min-width:0 above
+  fixes for the sub-events list; wrapping the two onto a second line
+  instead keeps it contained. */
   position: relative;
   z-index: 1;
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.3rem;
+  max-width: 100%;
   background: none;
   border: none;
   padding: 0;
@@ -269,6 +391,11 @@ to fit like it would for any other in-flow content, no clipping/drift risk. */
   position: relative;
   z-index: 1;
   display: block;
+  /* .home-eventsbox-subevents-list is itself display:flex (column), so
+  each <a> is its own flex item subject to the same min-width:auto trap as
+  .home-eventsbox-subevents above -- needs its own reset for the ellipsis
+  below to actually engage instead of overflowing. */
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -290,4 +417,109 @@ to fit like it would for any other in-flow content, no clipping/drift risk. */
 
 .home-eventsbox-empty {
   color: var(--color-text-muted);
+}
+
+/* unscoped defaults -- keeps both hidden regardless of viewport, same
+convention as .messageboard-expand's own unscoped display:none
+(messageboard.css); the media query below is what actually turns either
+one on. */
+.home-eventsbox-more {
+  display: none;
+}
+
+.home-eventsbox-close {
+  display: none;
+}
+
+/* Same 72rem breakpoint home_layout.css stacks Events under the message
+board at (.eventsbox_container.is-expanded's position:fixed takeover lives
+there, alongside the rest of this box's outer sizing) -- kept in sync by
+eye since a shared variable isn't available between two plain CSS files. */
+@media (max-width: 72rem) {
+  /* Collapsed (not .is-expanded, toggled by home_eventsbox.js): only the
+  "Happening now" callout above (already meant to stay fully visible -- a
+  compact spotlight, not what's being trimmed here) plus the very first
+  upcoming event. Reaching the rest -- the remaining <li>s, and whatever
+  union-tag/sub-event toggles they carry -- is what .home-eventsbox-more is
+  for. No max-height/overflow-y needed any more (see home_layout.css) since
+  this alone already keeps the collapsed box short. */
+  .eventsbox_container:not(.is-expanded) .home-eventsbox-list li:not(:first-child) {
+    display: none;
+  }
+
+  /* Same understated "text link, not a button" treatment as
+  .messageboard-expand (messageboard.css) -- this box's own "see more". */
+  .home-eventsbox-more {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0 0;
+    padding-top: 0.5rem;
+    border: none;
+    border-top: 1px solid var(--color-border);
+    background: none;
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .eventsbox_container.is-expanded .home-eventsbox-more {
+    display: none;
+  }
+
+  /* position:fixed, not absolute -- .eventsbox_container is itself both
+  what scrolls (overflow-y:auto) and what's position:fixed here
+  (home_layout.css), so an absolutely-positioned child would scroll away
+  with the list underneath it instead of staying put on screen. Same
+  filled-circle "x" treatment as .messageboard-modal-close
+  (messageboard.css). */
+  .eventsbox_container.is-expanded .home-eventsbox-close {
+    display: block;
+    position: fixed;
+    /* box's own inset is 0.5rem (home_layout.css) -- offset a bit further
+    than that so the button sits inside the card with its own breathing
+    room, not flush against the border. */
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 1;
+    width: 2.4rem;
+    height: 2.4rem;
+    border: none;
+    border-radius: 999px;
+    background-color: color-mix(in srgb, var(--color-text) 12%, transparent);
+    color: var(--color-text);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+}
+
+/* Same body-scroll lock as messageboard.css's body.messageboard-modal-open
+-- .eventsbox_container.is-expanded covers the viewport, but without this
+the page underneath can still be scrolled behind it (two-finger trackpad
+scroll etc. doesn't stop just because something fixed is drawn on top).
+Toggled by home_eventsbox.js alongside .is-expanded itself. */
+body.eventsbox-expanded {
+  overflow: hidden;
+}
+
+/* Same dark backdrop as .messageboard-modal (messageboard.css, same
+color-mix formula) -- .eventsbox_container.is-expanded only insets 0.5rem
+(home_layout.css), not a full flush 0, specifically so its border/radius/
+shadow read as a floating card; without a backdrop behind it, that thin
+gap just showed the page underneath (the sidemenu's teal) bleeding through
+around the edges instead of a deliberate dimmed frame. A separate
+body::before rather than a pseudo-element on the card itself -- the card
+is position:fixed with its own z-index:1000 stacking context, and a
+negative-z-index pseudo-child there paints behind the card's *own*
+background too, not just behind the card as a whole; a sibling layer at a
+lower z-index (999) avoids that entirely. */
+body.eventsbox-expanded::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: color-mix(in srgb, var(--color-text) 88%, transparent);
 }

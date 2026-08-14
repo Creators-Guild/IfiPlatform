@@ -49,6 +49,9 @@
             </div>
         {% endif %}
 
+        {% if page.peoply_url %}
+            <a class="event-signup-link" href="{{ page.peoply_url }}" target="_blank" rel="noopener noreferrer">{% trans "Peoply" %}</a>
+        {% endif %}
         {% if page.signup_url %}
             <a class="event-signup-link" href="{{ page.signup_url }}" target="_blank" rel="noopener noreferrer">{% trans "Sign up" %}</a>
         {% endif %}
