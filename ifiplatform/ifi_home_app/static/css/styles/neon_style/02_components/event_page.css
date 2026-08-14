@@ -136,6 +136,21 @@ component's own --accent-color custom property. */
   background-color: var(--color-secondary-hover);
 }
 
+/* Events index page only (event_index_page.html) -- current semester
+label shown under the page's own editable title, and a heading per
+month_groups entry (EventIndexPage.get_context) above that month's own
+.event-list, so a semester spanning several months reads as one
+sub-section per month rather than one long undifferentiated list. */
+.event-index-semester {
+  color: var(--color-text-muted);
+  font-weight: bold;
+  margin: 0.25rem 0 0;
+}
+
+.event-index-month-heading {
+  margin: 1.5rem 0 0;
+}
+
 .event-list {
   list-style: none;
   padding: 0;

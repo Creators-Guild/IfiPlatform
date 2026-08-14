@@ -17,6 +17,13 @@
     {% include "info_articles/partials/article_breadcrumbs.html" %}
     <div class="event-index-page">
         <h1>{{ page.title }}</h1>
+        <p class="event-index-semester">
+            {% if is_spring_semester %}
+                {% blocktrans with year=current_semester_year %}Spring semester {{ year }}{% endblocktrans %}
+            {% else %}
+                {% blocktrans with year=current_semester_year %}Fall semester {{ year }}{% endblocktrans %}
+            {% endif %}
+        </p>
         {% if page.intro %}<div class="event-page-intro">{{ page.intro|richtext }}</div>{% endif %}
 
         {% if needs_translation %}
@@ -25,22 +32,29 @@
             </div>
         {% endif %}
 
-        <ul class="event-list">
-            {% for event in events %}
-                <li>
-                    <a class="event-list-item" href="{% pageurl event %}">
-                        <span class="event-type-badge event-type-badge--{{ event.event_type }}">
-                            {{ event.get_event_type_display }}
-                        </span>
-                        <span class="event-list-title">{{ event.title }}</span>
-                        <span class="event-list-date">
-                            {{ event.event_date }}{% if event.event_time %} {{ event.event_time|time:"H:i" }}{% endif %}
-                        </span>
-                    </a>
-                </li>
-            {% empty %}
-                <li class="event-list-empty">{% trans "No upcoming events yet." %}</li>
+        {% if month_groups %}
+            {% for group in month_groups %}
+                <h2 class="event-index-month-heading">{{ group.month|date:"F Y" }}</h2>
+                <ul class="event-list">
+                    {% for event in group.events %}
+                        <li>
+                            <a class="event-list-item" href="{% pageurl event %}">
+                                <span class="event-type-badge event-type-badge--{{ event.event_type }}">
+                                    {{ event.get_event_type_display }}
+                                </span>
+                                <span class="event-list-title">{{ event.title }}</span>
+                                <span class="event-list-date">
+                                    {{ event.event_date }}{% if event.event_time %} {{ event.event_time|time:"H:i" }}{% endif %}
+                                </span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
             {% endfor %}
-        </ul>
+        {% else %}
+            <ul class="event-list">
+                <li class="event-list-empty">{% trans "No upcoming events yet." %}</li>
+            </ul>
+        {% endif %}
     </div>
 {% endblock maincontent %}

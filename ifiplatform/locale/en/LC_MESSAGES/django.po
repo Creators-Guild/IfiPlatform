@@ -688,7 +688,17 @@ msgstr ""
 msgid "Vaktsentralen"
 msgstr ""
 
-#: .\ifi_home_app\templates\events\event_index_page.html:42
+#: .\ifi_home_app\templates\events\event_index_page.html:22
+#, python-format
+msgid "Spring semester %(year)s"
+msgstr ""
+
+#: .\ifi_home_app\templates\events\event_index_page.html:24
+#, python-format
+msgid "Fall semester %(year)s"
+msgstr ""
+
+#: .\ifi_home_app\templates\events\event_index_page.html:56
 msgid "No upcoming events yet."
 msgstr ""
 

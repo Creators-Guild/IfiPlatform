@@ -7,6 +7,7 @@ since it's free and these pages need nb/en translations like everything else
 on this bilingual site."""
 
 from datetime import date, datetime, time, timedelta
+from itertools import groupby
 from zoneinfo import ZoneInfo
 
 from django.db import models
@@ -179,12 +180,27 @@ class EventIndexPage(TranslationWarningMixin, Page):
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
-        context["events"] = (
+        events = list(
             EventPage.objects.child_of(self)
             .live()
             .filter(locale=Locale.get_active())
             .order_by("event_date", "event_time")
         )
+        context["events"] = events
+        # Grouped by calendar month (not just a flat list) so a semester's
+        # worth of events -- spanning several months -- reads as one page
+        # per month instead of one long undifferentiated list. groupby only
+        # merges *consecutive* equal keys, which is safe here since events
+        # is already sorted by event_date above.
+        context["month_groups"] = [
+            {"month": month, "events": list(month_events)}
+            for month, month_events in groupby(
+                events, key=lambda event: event.event_date.replace(day=1)
+            )
+        ]
+        today = timezone.localdate()
+        context["current_semester_year"] = today.year
+        context["is_spring_semester"] = today.month <= 6
         return context
 
 
