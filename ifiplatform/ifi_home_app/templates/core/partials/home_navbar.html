@@ -100,25 +100,26 @@
                 </div>
             </div>
         {% endif %}
-    <div class="dropdown-menu">
-        <button class="link">
-            <a class="drop-option" href="">{% trans "New Student?" %}</a>
-        </button>
-        <div class="drop-content">
-            <a class="drop-option drop-option--all" href="">{% trans "All" %}</a>
-            <a class="drop-option" href="">
-                {% trans "Starter Kit" %}
-            </a>
-            <a class="drop-option" href="">
-                {% trans "Student Life" %}
-            </a>
-            <a class="drop-option" href="">
-                {% trans "Tips n Tricks" %}
-            </a>
-            <a class="drop-option" href="">
-                {% trans "Apps n Links" %}
-            </a>
-        </div>
-    </div>
+    {% if new_student_cat %}
+        <div class="dropdown-menu">
+                <button class="link">
+                    <a class="drop-option" href="{% pageurl new_student_cat %}">{% trans "New Student?" %}</a>
+                </button>
+                <div class="drop-content">
+                    <a class="drop-option drop-option--all" href="{% pageurl new_student_cat %}">{% trans "All" %}</a>
+                    {% for child in new_student_children %}
+                        <a class="drop-option" href="{% pageurl child %}">
+                            {% if child.hero_image %}
+                                {% image child.hero_image fill-60x60 as child_thumb %}
+                                <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.title }}">
+                            {% endif %}
+                            {{ child.title }}
+                        </a>
+                    {% empty %}
+                        <a class="drop-option-empty" href="">{% trans "No articles yet" %}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
 </div>
 <script src="{% static 'js/dropdown_menu.js' %}" defer></script>

@@ -96,6 +96,13 @@ def main_view(request):
         else []
     )
 
+    new_student_category = _get_localized_category("ny-ifi-student", "nb")
+    new_student_children = (
+        new_student_category.get_children().live().specific()
+        if new_student_category
+        else []
+    )
+
     today = timezone.localdate()
     event_index = (
         EventIndexPage.objects.live().filter(locale=Locale.get_active()).first()
@@ -128,6 +135,8 @@ def main_view(request):
         "student_union_children": student_union_children,
         "ifi_tools_cat": ifi_tools_category,
         "ifi_tools_children": ifi_tools_children,
+        "new_student_cat": new_student_category,
+        "new_student_children": new_student_children,
         "upcoming_events": upcoming_events,
         "happening_now_events": happening_now_events,
     }
