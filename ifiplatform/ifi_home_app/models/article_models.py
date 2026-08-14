@@ -1715,6 +1715,23 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
         help_text="Show this category in dropdown/sidemenu navigation.",
     )
 
+    # Off by default -- a category with its own subcategories (e.g.
+    # "Verktøy" -> "UIO Verktøy"/"Ifi Verktøy") otherwise only ever lists
+    # its own *direct* child tools here, leaving every tool that actually
+    # lives one or more levels down in a subcategory invisible on this
+    # page (still reachable by clicking into that subcategory itself,
+    # just not from here). Turning this on instead lists every ToolPage
+    # anywhere below this category -- children, grandchildren, etc. -- as
+    # one flat list (see get_context below).
+    show_nested_tools = models.BooleanField(
+        default=False,
+        help_text=(
+            "Show tools from every subcategory below this one here too "
+            "(children, grandchildren, ...), not just this category's own "
+            "direct tools."
+        ),
+    )
+
     content_panels = Page.content_panels + [
         FieldPanel("intro"),
         FieldPanel("general_info"),
@@ -1722,6 +1739,7 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
         FieldPanel("active_from"),
         FieldPanel("active_until"),
         FieldPanel("show_in_menu"),
+        FieldPanel("show_nested_tools"),
     ]
 
     parent_page_types = ["ifi_home_app.ArticleIndexPage", "ifi_home_app.CategoryPage"]
@@ -1788,11 +1806,13 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
         context["articles"] = _articles_including_drafts_for_editor(
             articles, self, request.user
         ).order_by("-published_date")
+        tools_query = (
+            ToolPage.objects.descendant_of(self)
+            if self.show_nested_tools
+            else ToolPage.objects.child_of(self)
+        )
         context["tools"] = (
-            ToolPage.objects.child_of(self)
-            .live()
-            .filter(locale=Locale.get_active())
-            .order_by("title")
+            tools_query.live().filter(locale=Locale.get_active()).order_by("title")
         )
         return context
 

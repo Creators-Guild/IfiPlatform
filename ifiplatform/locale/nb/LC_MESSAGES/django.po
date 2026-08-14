@@ -788,7 +788,11 @@ msgstr "Skjer nå"
 msgid "Limited time"
 msgstr "Begrenset tid"
 
-#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:90
+#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:99
+msgid "In"
+msgstr "I"
+
+#: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:103
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:93
 #: .\ifi_home_app\templates\info_articles\pages\article_page.html:137
 #: .\ifi_home_app\templates\info_articles\partials\tool_card.html:18

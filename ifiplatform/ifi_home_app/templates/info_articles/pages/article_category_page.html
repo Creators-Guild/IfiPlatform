@@ -86,6 +86,19 @@
                         {% endif %}
                         <div class="tool-card-body">
                             <h3>{{ tool.title }}</h3>
+                            {% with tool_parent=tool.get_parent %}
+                                {% if tool_parent.id != page.id %}
+                                    {% comment %}
+                                    Only when this card isn't a direct child of the
+                                    category being viewed -- i.e. it was pulled in
+                                    from a subcategory by show_nested_tools
+                                    (article_models.py). A direct child is already
+                                    obviously "in" this category (you're looking at
+                                    it), so the label would just be noise there.
+                                    {% endcomment %}
+                                    <span class="tool-card-category">{% trans "In" %} {{ tool_parent.title }}</span>
+                                {% endif %}
+                            {% endwith %}
                             {% if tool.made_by %}
                                 <span class="tool-card-maker">{% trans "By" %} {{ tool.made_by }}</span>
                             {% endif %}

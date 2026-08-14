@@ -84,6 +84,16 @@
   overflow-wrap: break-word;
 }
 
+/* This tool's own direct parent category (tool.get_parent.title) -- mainly
+useful once CategoryPage.show_nested_tools (article_models.py) pulls tools
+from several different subcategories into one flat grid, where it's
+otherwise not obvious which one a given card actually lives in. */
+.tool-card-category {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
 .tool-card-maker {
   font-size: 0.75rem;
   color: var(--color-text-muted);
