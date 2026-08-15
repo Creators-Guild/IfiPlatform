@@ -26,7 +26,7 @@ Note: the site is bilingual (Norwegian Bokmål + English) via wagtail-localize �
 
 >Steps also reference the `ifiplatform/` subdirectory inside it (likely named `ifiplatform`, lowercase (*not to be confused with `ifiplatform/ifiplatform_project/`, which is just the Django settings package*) — that's where manage.py, `.env` and all the Django apps actually live. Steps say which one they're relative to.
 
-### Set up Virtual Environment
+### 1. Set up Virtual Environment
 #### Windows (PowerShell)
 ```bash
 py -m venv venv
@@ -42,19 +42,19 @@ Run this command from the Command Palette:
 ```bash
 Python: Create Environment
 ```
-### Install dependencies
+### 2. Install dependencies
 Run from the repo root:
 ```bash
 pip install -r requirements.txt
 ```
 
-### Move into the ifiplatform/ folder
+### 3. Move into the ifiplatform/ folder
 manage.py, `.env` and all the Django apps live in `ifiplatform/`. Every command from here on assumes you're inside it:
 ```bash
 cd ifiplatform
 ```
 
-### Create .env for Secrets
+### 4. Create .env for Secrets
 Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
@@ -65,18 +65,18 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 ```
 *Editing remaining if necessary. For just development, add SecretKey and leave Debug=True. Ignore the rest*
 
-### Run Migrations
+### 5. Run Migrations
 ```bash
 py manage.py migrate
 ```
 
-### Fill database with dummy data(recommended)
+### 6. Fill database with dummy data(recommended)
 ```bash
 py manage.py seed_dev_data
 ```
 Fills your local database with a dummy article tree (index pages, categories, a test article, a test student union and a test tool) so you're not starting from a blank site. Safe to re-run — it skips anything that already exists instead of duplicating it.
 
-### Run website on localhost
+### 7. Run website on localhost
 ```bash
 py manage.py runserver
 ```
@@ -85,7 +85,33 @@ Once running, open your browser and go to:
 http://localhost:8000
 ```
 
+#### Access from your phone (same Wi-Fi)
+Useful for testing responsive/mobile layout on a real device.
+
+1. Start the server bound to all network interfaces, not just localhost:
+   ```bash
+   py manage.py runserver 0.0.0.0:8000
+   ```
+2. Find your computer's local IP address:
+   - **Windows:** run `ipconfig` in a terminal, look for `IPv4 Address` under your active adapter (e.g. `192.168.1.23`)
+   - **macOS:** `ipconfig getifaddr en0` (or check System Settings → Wi-Fi → Details)
+   - **Linux:** `hostname -I` or `ip addr`
+3. Add that IP to `DJANGO_ALLOWED_HOSTS` in your `.env` (comma-separated, no spaces), then restart the server:
+   ```
+   DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost,192.168.1.23
+   ```
+   Without this, Django rejects the request with a 400 `DisallowedHost` error — `ALLOWED_HOSTS` is read straight from this env var (`settings.py`), it isn't relaxed just because `DEBUG=True`.
+4. On your phone, connected to the **same Wi-Fi network**, open:
+   ```
+   http://192.168.1.23:8000
+   ```
+   (use your own IP from step 2, not this example one)
+
+If it still doesn't load, your computer's firewall may be blocking incoming connections on port 8000 — Windows will usually prompt to allow this the first time; allow it for at least "Private networks."
+
 ### Often used commands and actions
+For a full list and explanation of this project's custom `manage.py` commands (beyond the built-in Django ones below), see [docs/management_commands.md](docs/management_commands.md).
+
 #### If you change a model (i.e. need a new migration)
 ```bash
 py manage.py makemigrations
@@ -100,7 +126,7 @@ Fill out the terminal's questions
 ```bash
 py manage.py test
 ```
-CI runs this on every push/PR (`.github/workflows/django.yml`) across Python 3.12–3.14, so it's worth running locally before opening a PR.
+CI runs this on every push/PR (`.github/workflows/ci-deploy.yml`) across Python 3.12–3.14, so it's worth running locally before opening a PR.
 #### If you change translatable text (`{% trans %}` / `_(...)`)
 Update the `.po` files with the new/changed strings:
 ```bash
@@ -114,12 +140,7 @@ If that fails because `msgfmt` (part of GNU gettext) isn't installed — common 
 ```bash
 py manage.py compile_translations
 ```
-Same effect, no system dependency. Only compiles this project's own `.po` files (`ifiplatform/locale/`), not any third-party package's.
-#### Delete unverified accounts (GDPR storage limitation)
-```bash
-py manage.py cleanup_unverified_accounts
-```
-Deletes signups that never confirmed their email address once they're older than `UNVERIFIED_ACCOUNT_RETENTION_DAYS` (7 days by default, see settings.py). Use `--dry-run` to list what would be deleted without deleting anything. No task scheduler is set up in this project -- run this periodically yourself (host cron, or your platform's own scheduled-job feature) if you want it enforced automatically.
+See [docs/management_commands.md](docs/management_commands.md#compile_translations) for why this exists.
 #### Log in on admin interface or wagtail-admin interface
 Log in via a superuser you have created.
 ```
@@ -154,6 +175,8 @@ IfiPlatform/
 ## Architecture
 - Feature concept map: see [docs/architecture/eraser_links.md](docs/architecture/eraser_links.md)
 - UI/design references: see [docs/design/figma_links.md](docs/design/figma_links.md)
+- Working with Claude (or another AI agent) in this repo? See [docs/claude_context/readme_claude.md](docs/claude_context/readme_claude.md) for where implementation-level design rationale lives (kept out of code comments to keep the code itself readable).
+- Picking up an AI-drafted doc to finish by hand? See [docs/claude_references/readme.md](docs/claude_references/readme.md) — those are starting points, not final docs.
 
 ## Tutorials
 Check out [TUTORIALS.md](TUTORIALS.md) for more about Django Framework and other dependencies used in this project.

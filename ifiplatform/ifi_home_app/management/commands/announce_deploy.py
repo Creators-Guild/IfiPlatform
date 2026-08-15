@@ -1,6 +1,7 @@
-"""Sets the shared "a deploy is imminent" flag that ifi_home_app.deploy_notice
-(the context processor powering partials/deploy_notice.html, included in
-every page via ifi_base.html) reads to show a site-wide countdown banner.
+"""Sets the shared "a deploy is imminent" flag that
+ifi_home_app.infra.deploy_notice (the context processor powering
+partials/deploy_notice.html, included in every page via ifi_base.html) reads
+to show a site-wide countdown banner.
 
 Meant to be run by the deploy script (.github/workflows/ci-deploy.yml)
 *before* the actual git reset/migrate/restart steps, against whatever code
@@ -28,7 +29,7 @@ import time
 from django.core.cache import cache
 from django.core.management.base import BaseCommand
 
-from ifi_home_app.deploy_notice import DEPLOY_NOTICE_CACHE_KEY
+from ifi_home_app.infra.deploy_notice import DEPLOY_NOTICE_CACHE_KEY
 
 
 class Command(BaseCommand):

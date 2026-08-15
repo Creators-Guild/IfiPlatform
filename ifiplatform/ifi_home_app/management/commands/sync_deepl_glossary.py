@@ -1,15 +1,15 @@
-"""Pushes ifi_home_app/deepl_glossary_terms.py's nb -> en term list to DeepL
-as a glossary, so DeepL honours those exact translations (or "don't
+"""Pushes ifi_home_app/translation/glossary_terms.py's nb -> en term list to
+DeepL as a glossary, so DeepL honours those exact translations (or "don't
 translate this") on every machine-translation call this project makes --
 the single-page "Machine Translate" button, the API, and the
-"Machine-translate subtree" bulk action (translation_views.py) all go
+"Machine-translate subtree" bulk action (translation/views.py) all go
 through the same wagtail-localize DeepLTranslator, so one glossary covers
 all three.
 
 DeepL's v2 glossaries are immutable once created (no "update entries"
 endpoint) -- this command deletes any existing glossary with the same name
 before creating a fresh one from the current term list, so it's safe to
-re-run whenever deepl_glossary_terms.py changes.
+re-run whenever glossary_terms.py changes.
 
 One-time manual step after running this: copy the printed glossary_id into
 DEEPL_GLOSSARY_ID in .env (same copy-paste flow as DJANGO_SECRET_KEY in
@@ -24,7 +24,7 @@ import requests
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from ifi_home_app.deepl_glossary_terms import GLOSSARY_TERMS
+from ifi_home_app.translation.glossary_terms import GLOSSARY_TERMS
 from ifi_home_app.models import GlossarySyncState
 
 GLOSSARY_NAME = "ifiplatform-nb-en"
