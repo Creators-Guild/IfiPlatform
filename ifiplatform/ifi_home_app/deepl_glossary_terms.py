@@ -19,5 +19,6 @@ GLOSSARY_TERMS = {
     # rather than translated (e.g. NOT "Godparent week").
     "Fadderuke": "Orientation Week",
     "Fadder":"Buddy",
+    "Fadderbarn":"Buddychild", # please find a better translation ahah
     "Fadderstyret":"The Buddy Council(Fadderstyret)",
 }
