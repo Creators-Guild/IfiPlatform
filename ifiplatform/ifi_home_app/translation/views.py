@@ -1,14 +1,7 @@
-"""wagtail-admin view for machine-translating an entire nb page subtree into
-English in one action -- unlike wagtail-localize's own "Translate" button
-(creates empty translations, one page or one subtree at a time, with no
-content) and "Machine Translate" button (fills in DeepL content, but only for
-whichever single page's translation editor you're currently in), this walks
-`page` and every descendant, creates/updates each one's English translation,
-fills it in via DeepL, and publishes it -- all from one confirm screen.
+"""wagtail-admin view for machine-translating an entire nb page subtree
+into English in one action, from one confirm screen.
 
-Registered as a wagtail-admin URL (see wagtail_hooks.py's register_admin_urls
-hook) rather than under ifi_home_app/urls.py, so it inherits wagtail-admin's
-own login/session handling the same way wagtail_localize's own views do."""
+Design rationale/history: docs/claude_context/translation_views.md"""
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -25,12 +18,12 @@ from wagtail_localize.models import StringTranslation
 from wagtail_localize.operations import TranslationCreator
 from wagtail_localize.views.edit_translation import apply_machine_translation
 
-from .deepl_glossary_terms import GLOSSARY_TERMS
-from .models import GlossarySyncState
-from .translation_sync import SOURCE_LANGUAGE_CODE
+from .glossary_terms import GLOSSARY_TERMS
+from ..models import GlossarySyncState
+from .sync import SOURCE_LANGUAGE_CODE
 
-# The only other locale this bilingual site has -- see translation_sync.py's
-# own SOURCE_LANGUAGE_CODE comment for why nb is the anchor.
+# The only other locale this bilingual site has -- see sync.py's own
+# SOURCE_LANGUAGE_CODE comment for why nb is the anchor.
 TARGET_LANGUAGE_CODE = "en"
 
 
@@ -96,28 +89,14 @@ def _translate_and_publish_subtree(pages, target_locale, machine_translator, use
 
 
 def _clear_stale_glossary_translations(translation):
-    """apply_machine_translation() skips any segment that already has a
-    StringTranslation, which is normally right -- an unchanged nb sentence
-    keeps its existing machine translation instead of burning DeepL quota
-    re-translating something that would come back identical (segments are
-    content-addressed by wagtail-localize, so a sentence that DID change on
-    the nb side already gets a fresh segment and isn't affected by any of
-    this).
-
-    The one case that skip is wrong for: a sentence containing a glossary
-    term (see deepl_glossary_terms.py), translated *before* the glossary
-    last changed -- DeepL would now translate it differently. Delete just
-    those specific, still-stale, machine-made translations so
-    apply_machine_translation() re-does them; everything else (including
-    any human-corrected translation, regardless of glossary terms) is left
-    untouched."""
+    """Deletes machine translations of segments containing a glossary term
+    that predate the glossary's last sync, so apply_machine_translation()
+    redoes them with the current glossary. See
+    docs/claude_context/translation_views.md."""
     synced_at = GlossarySyncState.last_synced_at()
     if synced_at is None or not GLOSSARY_TERMS:
         return
 
-    # Case-insensitive to match DeepL's own glossary matching (confirmed
-    # empirically: "Fadderuke"/"fadderuke"/"FADDERUKE" in source text all
-    # get matched and normalised to the glossary's defined casing).
     lower_terms = [term.lower() for term in GLOSSARY_TERMS]
     affected = [
         (segment.string_id, segment.context_id)

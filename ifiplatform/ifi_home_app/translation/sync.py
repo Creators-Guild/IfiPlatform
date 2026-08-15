@@ -4,10 +4,11 @@ see wagtail_localize/fields.py) from an nb/"OG" page to its existing
 translations. Shared by:
 - wagtail_hooks.sync_synchronized_fields_to_translations (automatic, on
   every nb page publish through wagtail-admin)
-- article_views.sync_mirrored_page (the manual "Sync mirrored page" editor-
-  mode button)
-- article_views.publish_page (ArticlePage's own editor-mode Publish button,
-  which bypasses wagtail-admin entirely and so never fires the hook above)
+- views/article_views.sync_mirrored_page (the manual "Sync mirrored page"
+  editor-mode button)
+- views/article_views.publish_page (ArticlePage's own editor-mode Publish
+  button, which bypasses wagtail-admin entirely and so never fires the hook
+  above)
 - management/commands/sync_translated_page_fields.py (one-off catch-up for
   pages that drifted before any of this existed)
 
@@ -20,7 +21,7 @@ from wagtail_localize.models import TranslationSource
 
 SOURCE_LANGUAGE_CODE = "nb"  # the anchor/"OG" locale every other locale
                               # mirrors -- matches ifi_home_app/views/
-                              # core_views.py's _get_localized_category()
+                              # home_views.py's _get_localized_category()
                               # lookups and ArticlePage.SOURCE_LANGUAGE_CODE
 
 

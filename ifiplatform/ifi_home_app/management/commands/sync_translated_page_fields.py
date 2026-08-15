@@ -14,7 +14,7 @@ from django.core.management.base import BaseCommand
 from wagtail.models import Locale
 from wagtail_localize.models import TranslationSource
 
-from ifi_home_app.translation_sync import sync_synchronized_fields
+from ifi_home_app.translation.sync import sync_synchronized_fields
 
 
 class Command(BaseCommand):

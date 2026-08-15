@@ -3,7 +3,7 @@
 from django.urls import path, include
 from wagtail import urls as wagtail_urls
 
-from .deploy_notice import deploy_notice_status_view
+from .infra.deploy_notice import deploy_notice_status_view
 from .views import home_views
 from .views import article_views
 
