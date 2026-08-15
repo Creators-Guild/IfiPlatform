@@ -37,7 +37,7 @@ Concretely: spell out acronyms/jargon the first time (or link to where they're e
 
 - Root-level docs (`README.md`, `CONTRIBUTING.md`, `TUTORIALS.md`) — things every contributor needs, regardless of what they're working on.
 - `docs/architecture/`, `docs/design/` — technical/visual references tied to a specific area.
-- `docs/claude_references/` — AI-drafted starting points kept as inspiration, not meant to be the final, authoritative version of anything. If you rewrite one into something real, move the result out of that folder.
+- `docs/claude_references/` — AI-drafted starting points kept as inspiration, not meant to be the final, authoritative version of anything. If you rewrite one into something real, move the result out of that folder. See [readme.md](readme.md) in this folder for the full convention.
 - New top-level topic docs go directly under `docs/`.
 
 ## File naming

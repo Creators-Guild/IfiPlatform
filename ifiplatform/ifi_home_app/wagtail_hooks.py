@@ -2,7 +2,7 @@
 
 The nb -> en synchronized-field auto-sync (see the function docstring below)
 plus the "Machine-translate subtree" admin button/URL (see
-translation_views.py) -- add further hooks here rather than starting new
+translation/views.py) -- add further hooks here rather than starting new
 files, unless a hook is specific enough to a single feature area to warrant
 its own module."""
 
@@ -11,8 +11,8 @@ from wagtail import hooks
 from wagtail.admin.widgets.button import Button
 from wagtail_localize.machine_translators import get_machine_translator
 
-from . import translation_views
-from .translation_sync import SOURCE_LANGUAGE_CODE, sync_synchronized_fields
+from .translation import views as translation_views
+from .translation.sync import SOURCE_LANGUAGE_CODE, sync_synchronized_fields
 
 
 @hooks.register("register_admin_urls")
@@ -27,7 +27,7 @@ def register_admin_urls():
 
 
 def _machine_translate_subtree_button(page, user, view_name=None, next_url=None):
-    """Shown on nb pages with descendants -- see translation_views.py."""
+    """Shown on nb pages with descendants -- see translation/views.py."""
     if (
         page.is_root()
         or page.locale.language_code != SOURCE_LANGUAGE_CODE
@@ -55,18 +55,13 @@ hooks.register(
 
 @hooks.register("after_publish_page")
 def sync_synchronized_fields_to_translations(request, page):
-    """Whenever an nb page with existing translations is published, push its
-    wagtail-localize SynchronizedFields (show_in_menu, status, and any other
-    plain non-text field wagtail-localize auto-classifies as synchronized --
-    see get_translatable_fields()) out to every enabled translation, so they
-    never silently drift the way UnionPage.show_in_menu did (nb toggled it,
-    English never picked it up because nothing triggered wagtail-localize's
-    sync outside its own manual "Sync translated pages" admin action).
-    See translation_sync.py for the shared implementation (also used by the
-    "Sync mirrored page" editor-mode button and publish_page, since both of
-    those bypass this hook entirely -- they publish directly via
-    Revision.publish() rather than through wagtail-admin's edit view, which
-    is the only place after_publish_page actually gets fired from)."""
+    """On every nb page publish through wagtail-admin, push its
+    wagtail-localize SynchronizedFields (show_in_menu, status, etc.) out to
+    every enabled translation, so they don't silently drift (see
+    translation/sync.py). Doesn't cover publishes that bypass wagtail-admin
+    (article_views.publish_page, sync_mirrored_page) -- those call
+    sync_synchronized_fields directly instead, since this hook only fires
+    from wagtail-admin's own edit view."""
     page = page.specific
     if page.locale.language_code != SOURCE_LANGUAGE_CODE:
         return

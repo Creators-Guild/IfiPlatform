@@ -23,7 +23,7 @@ from django.conf.urls.i18n import i18n_patterns
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.contrib.sitemaps.views import sitemap as wagtail_sitemap_view
 
-from ifi_home_app.sitemaps import IfiPlatformSitemap
+from ifi_home_app.infra.sitemaps import IfiPlatformSitemap
 
 # language selection
 urlpatterns = [

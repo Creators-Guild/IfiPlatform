@@ -96,7 +96,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "ifi_home_app.deploy_notice.deploy_notice",
+                "ifi_home_app.infra.deploy_notice.deploy_notice",
             ],
         },
     },
@@ -192,7 +192,7 @@ LOCALE_PATHS = [
 ]
 
 # Sections not built yet are shown a placeholder instead of their real
-# views/urls -- see ifi_home_app.under_development.
+# views/urls -- see ifi_home_app.infra.under_development.
 APPS_UNDER_DEVELOPMENT = {
     "study_app": True,
     "yourpage_app": True,
