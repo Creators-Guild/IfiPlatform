@@ -67,18 +67,18 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 
 ### 5. Run Migrations
 ```bash
-py manage.py migrate
+python manage.py migrate
 ```
 
 ### 6. Fill database with dummy data(recommended)
 ```bash
-py manage.py seed_dev_data
+python manage.py seed_dev_data
 ```
 Fills your local database with a dummy article tree (index pages, categories, a test article, a test student union and a test tool) so you're not starting from a blank site. Safe to re-run — it skips anything that already exists instead of duplicating it.
 
 ### 7. Run website on localhost
 ```bash
-py manage.py runserver
+python manage.py runserver
 ```
 Once running, open your browser and go to:
 ```
@@ -90,7 +90,7 @@ Useful for testing responsive/mobile layout on a real device.
 
 1. Start the server bound to all network interfaces, not just localhost:
    ```bash
-   py manage.py runserver 0.0.0.0:8000
+   python manage.py runserver 0.0.0.0:8000
    ```
 2. Find your computer's local IP address:
    - **Windows:** run `ipconfig` in a terminal, look for `IPv4 Address` under your active adapter (e.g. `192.168.1.23`)
@@ -114,31 +114,38 @@ For a full list and explanation of this project's custom `manage.py` commands (b
 
 #### If you change a model (i.e. need a new migration)
 ```bash
-py manage.py makemigrations
-py manage.py migrate
+python manage.py makemigrations
+python manage.py migrate
 ```
 #### To create superuser/admin user
 ```bash
-py manage.py createsuperuser
+python manage.py createsuperuser
 ```
 Fill out the terminal's questions
 #### Running tests
 ```bash
-py manage.py test
+python manage.py test core_app ifi_home_app account_app study_app yourpage_app
 ```
-CI runs this on every push/PR (`.github/workflows/ci-deploy.yml`) across Python 3.12–3.14, so it's worth running locally before opening a PR.
+Explicit app labels, not a bare `manage.py test` — this project's own apps live grouped under `apps/` (see Project Structure below), and Django's default filesystem-based test discovery silently skips anything nested under a directory without an `__init__.py`, so a bare `manage.py test` would only run `core_app`'s tests. If you add a new app, add its label here too.
+
+CI runs this same command on every push/PR (`.github/workflows/ci-deploy.yml`) across Python 3.12–3.14, so it's worth running locally before opening a PR.
+
+To skip the slow whole-site crawler test (`core_app.tests.SiteCrawlTests`, tagged `slow` — it seeds a full page tree and makes real HTTP requests to every page on the site) for a quicker loop while iterating:
+```bash
+python manage.py test core_app ifi_home_app account_app study_app yourpage_app --exclude-tag=slow
+```
 #### If you change translatable text (`{% trans %}` / `_(...)`)
 Update the `.po` files with the new/changed strings:
 ```bash
-py manage.py makemessages -l nb -l en
+python manage.py makemessages -l nb -l en
 ```
 Then compile them so Django actually picks up the changes:
 ```bash
-py manage.py compilemessages
+python manage.py compilemessages
 ```
 If that fails because `msgfmt` (part of GNU gettext) isn't installed — common on Windows, and it needs admin rights to install via `choco install gettext` — use this project's pure-Python fallback instead:
 ```bash
-py manage.py compile_translations
+python manage.py compile_translations
 ```
 See [docs/management_commands.md](docs/management_commands.md#compile_translations) for why this exists.
 #### Log in on admin interface or wagtail-admin interface
@@ -164,10 +171,12 @@ IfiPlatform/
     ├── manage.py
     ├── .env                  # secrets
     ├── ifiplatform_project/  # settings, urls
-    ├── ifi_home_app/         # articles, categories, homepage
-    ├── study_app/
-    ├── account_app/
-    ├── yourpage_app/
+    ├── core_app/             # cross-app infrastructure: deploy notice, sitemap,
+    ├── apps/                 # this project's own content/feature apps
+    │   ├── ifi_home_app/     # articles, categories, homepage
+    │   ├── study_app/
+    │   ├── account_app/
+    │   └── yourpage_app/
     ├── locale/               # i18n .po/.mo files
     └── static/ & templates/
 ```

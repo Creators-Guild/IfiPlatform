@@ -1,7 +1,0 @@
-.account_layout {
-    display: flex;
-    height: 100%;
-    padding: 2rem;
-    flex-direction: column;
-    align-items: center;
-}

@@ -6,3 +6,4 @@ __pycache__/
 ifiplatform/media/
 ifiplatform/db.sqlite3
 ifiplatform/django_cache/
+ifiplatform/staticfiles/
