@@ -47,6 +47,37 @@ unlikely to need it unless you're working with a database seeded before
 that hook was added. Safe to re-run: re-syncing an already-synced page is
 a no-op. `--dry-run` lists what would be synced without changing anything.
 
+## link_peoply_organizations
+
+```bash
+py manage.py link_peoply_organizations [--apply]
+```
+
+One-off/occasional helper for setting `peoply_organization_id` across
+*every* real `UnionPage` at once, rather than one at a time in
+wagtail-admin. For each live nb union missing the field, queries Peoply's
+own name search and only accepts an **exact** case-insensitive match
+against the org's display name or its `urlId` (Peoply's own shorthand,
+e.g. `cyb` for "Cybernetisk Selskab") — confirmed the hard way that
+Peoply's search is substring-based, not exact (querying `FU` returns
+`FUI`, a real but unrelated union), so a naive first-result match risks
+silently linking a union to someone else's events. Anything without an
+exact match is reported, not guessed at — look those up by hand on
+peoply.app.
+
+**Dry run by default** — unlike most of this project's commands, this one
+flips that default deliberately, since a wrong automated match has real
+consequences (a union's page would start showing another union's events).
+Pass `--apply` to actually write the matches. A match is applied to every
+locale of that union, not just nb.
+
+Not something a fresh local dev database needs — `seed_dev_data`
+deliberately only sets `peoply_organization_id` on 2 example unions
+(`FADDERUKE_UNION_PEOPLY_IDS` in `seed_dev_data/constants.py`), so a
+tester running `sync_peoply_events` locally only ever hits Peoply's real
+API for a couple of unions, not dozens. This command is for getting a
+*real* environment (production) fully covered, once.
+
 ## sync_peoply_events
 
 ```bash
@@ -56,7 +87,8 @@ py manage.py sync_peoply_events [--after YYYY-MM-DD]
 Creates `EventPage`s from [Peoply](https://peoply.app) (the event platform
 IFI's student unions actually use), one per `UnionPage` that has a
 `peoply_organization_id` set (found in the union's own Peoply page URL —
-edit the union in wagtail-admin to set it, enabling sync for that union).
+edit the union in wagtail-admin to set it, or run
+`link_peoply_organizations` above to set it for every union at once).
 
 `--after` limits the sync to events starting on/after that date; defaults
 to today, so a plain run only ever picks up upcoming events.

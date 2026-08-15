@@ -290,6 +290,7 @@ class EventPage(TranslationWarningMixin, Page):
         help_text="Optional -- link to this event's page on Peoply.",
     )
     signup_url = models.URLField(
+        max_length=500,
         blank=True,
         help_text="Optional -- link to a signup/registration form for this event, if not using Peoply.",
     )

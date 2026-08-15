@@ -11,7 +11,7 @@ a way to keep an event's details live-updated, just to catch new ones.
 Run manually, or wire into a schedule later (ci-deploy.yml already has a
 nightly cron for deploys as a precedent) once that's actually wanted."""
 
-from datetime import datetime, timezone as dt_timezone
+from datetime import datetime, time, timedelta, timezone as dt_timezone
 from html import escape
 
 from django.core.management.base import BaseCommand, CommandError
@@ -118,10 +118,39 @@ class Command(BaseCommand):
                     "external_source": "peoply",
                     "external_uid": event["id"],
                     "peoply_url": f"https://peoply.app/events/{event['urlId']}",
+                    # Only ever set when Peoply's own registrationMode is
+                    # "EXTERNAL" -- confirmed empirically (99 real events
+                    # sampled) that "PEOPLY"-mode events always have a null
+                    # externalUrl, and every "EXTERNAL"-mode one has a real
+                    # one. Left blank for "PEOPLY" mode -- event_page.html
+                    # uses that (blank signup_url on a peoply-sourced event)
+                    # to tell "sign up on Peoply itself" apart from "sign up
+                    # somewhere else", rather than needing a separate field.
+                    "signup_url": event.get("externalUrl") or "",
                     "related_unions": [("union", {"union": union, "role": "host"})],
                 }
                 if end is not None:
-                    if end.date() == start.date():
+                    # end_date means "still happening" for every hour of
+                    # that whole day too (EventPage.is_happening_now checks
+                    # calendar dates, not clock time) -- correct for a
+                    # genuine multi-day event, but wrong for a normal party
+                    # that just runs past local midnight: Peoply's own UTC
+                    # timestamps are same-day (e.g. 16:00-23:00 UTC), and
+                    # only *look* cross-day after converting to Oslo time
+                    # (CEST is UTC+2, so 23:00 UTC becomes 01:00 the next
+                    # local day). Confirmed against real synced data -- a
+                    # CYB event stored this way showed as "happening now"
+                    # for nearly 24h after it had actually ended. A
+                    # same-day end before this cutoff is assumed to be that
+                    # kind of overflow, not a real multi-day event; treated
+                    # as ending within the start day for is_happening_now's
+                    # purposes, even though the clock time is technically
+                    # past midnight.
+                    next_day_early_morning = (
+                        end.date() == start.date() + timedelta(days=1)
+                        and end.time() < time(6, 0)
+                    )
+                    if end.date() == start.date() or next_day_early_morning:
                         page_kwargs["event_end_time"] = end.time()
                     else:
                         page_kwargs["end_date"] = end.date()

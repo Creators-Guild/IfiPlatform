@@ -567,6 +567,10 @@ msgstr "Ingen kommende arrangementer."
 msgid "See all events"
 msgstr "Se alle arrangementer"
 
+#: .\ifi_home_app\templates\events\event_page.html:62
+msgid "Signup at Peoply"
+msgstr "Meld deg på via Peoply"
+
 #: .\ifi_home_app\templates\events\event_page.html:63
 msgid "See every event this semester"
 msgstr "Se alle arrangementer dette semesteret"
