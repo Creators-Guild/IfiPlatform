@@ -4,7 +4,7 @@ from django import template
 from wagtail.models import Locale
 
 from ifi_home_app.models.article_models import get_section_categories, get_section_index
-from ifi_home_app.models.event_models import EventIndexPage
+from ifi_home_app.models.event_models import EventIndexPage, PeoplySyncState
 
 register = template.Library()
 
@@ -38,3 +38,12 @@ def get_event_index():
     """Return the site's EventIndexPage, used to build links to it (e.g. the
     sidemenu's "Events" entry)."""
     return EventIndexPage.objects.live().filter(locale=Locale.get_active()).first()
+
+
+@register.simple_tag
+def get_peoply_last_synced():
+    """When sync_peoply_events last ran successfully -- None if it's never
+    run. Site-wide, not per-event: shown on Peoply-sourced event pages so
+    visitors know how fresh the data is, even though the event's own page
+    itself may have been created long ago (sync is create-only)."""
+    return PeoplySyncState.last_synced_at()

@@ -74,6 +74,11 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         blank=True,
         help_text="Optional -- link to a membership/interest sign-up form (e.g. a Google Form to join or register interest).",
     )
+    peoply_organization_id = models.CharField(
+        max_length=64,
+        blank=True,
+        help_text="Optional -- this union's organization ID on Peoply (from its Peoply page URL). Setting this enables automatic event sync via sync_peoply_events.",
+    )
 
     SOCIAL_PLATFORM_CHOICES = [
         ("facebook", "Facebook"),
@@ -154,6 +159,7 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         FieldPanel("vedtekter_url"),
         FieldPanel("website_url"),
         FieldPanel("signup_url"),
+        FieldPanel("peoply_organization_id"),
         FieldPanel("social_links"),
         FieldPanel("member_count_sitting"),
         FieldPanel("member_count_intern"),

@@ -24,6 +24,7 @@
             {{ page.get_event_type_display }}
         </span>
         <h1>{{ page.title }}</h1>
+        {% include "events/partials/peoply_sync_button.html" %}
 
         <div class="event-meta">
             <span>
@@ -51,6 +52,7 @@
 
         {% if page.peoply_url %}
             <a class="event-signup-link" href="{{ page.peoply_url }}" target="_blank" rel="noopener noreferrer">{% trans "Peoply" %}</a>
+            {% include "events/partials/peoply_badge.html" with event=page show_sync_time=True %}
         {% endif %}
         {% if page.signup_url %}
             <a class="event-signup-link" href="{{ page.signup_url }}" target="_blank" rel="noopener noreferrer">{% trans "Sign up" %}</a>
@@ -208,4 +210,7 @@
     </div>
 
     <script src="{% static 'js/event_calendar.js' %}" defer></script>
+    {% if request.user.is_staff %}
+        <script src="{% static 'js/peoply_sync_button.js' %}" defer></script>
+    {% endif %}
 {% endblock maincontent %}

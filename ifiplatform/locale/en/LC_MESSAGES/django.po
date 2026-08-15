@@ -698,6 +698,27 @@ msgstr ""
 msgid "Fall semester %(year)s"
 msgstr ""
 
+#: .\ifi_home_app\templates\events\event_index_page.html:45
+msgid "Past events"
+msgstr ""
+
+#: .\ifi_home_app\templates\events\partials\peoply_badge.html:4
+msgid "data from peoply"
+msgstr ""
+
+#: .\ifi_home_app\templates\events\partials\peoply_badge.html:8
+#, python-format
+msgid "(last synced %(time)s)"
+msgstr ""
+
+#: .\ifi_home_app\templates\events\partials\peoply_sync_button.html:6
+msgid "Sync Peoply now"
+msgstr ""
+
+#: .\ifi_home_app\templates\events\partials\peoply_sync_button.html:7
+msgid "Don't spam!"
+msgstr ""
+
 #: .\ifi_home_app\templates\events\event_index_page.html:56
 msgid "No upcoming events yet."
 msgstr ""

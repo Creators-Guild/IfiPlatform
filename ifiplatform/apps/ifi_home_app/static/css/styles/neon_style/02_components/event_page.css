@@ -47,6 +47,68 @@ column sized for paragraph text -- see .event-calendar's own comment. */
   background-color: var(--color-cta);
 }
 
+/* Peoply-sourced provenance note (events/partials/peoply_badge.html) --
+plain text, not a badge/pill like .event-type-badge above, since this is
+metadata about where the data came from, not a category a visitor
+scans/filters by. flex-basis:100% forces it onto its own line at the
+bottom of the flex-wrap containers it lives in (.event-list-item,
+.home-eventsbox-item, same trick .home-eventsbox-title already uses) --
+harmless where the parent isn't flex (event_page.html), display:block
+alone puts it on its own line there anyway. --compact is for the
+week-calendar's small absolutely-positioned blocks
+(event_calendar_grid.html). */
+.event-peoply-note {
+  display: block;
+  flex-basis: 100%;
+  text-align: center;
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.event-peoply-note--compact {
+  font-size: 0.6rem;
+}
+
+/* Staff-only "Sync Peoply now" button (events/partials/
+peoply_sync_button.html) -- deliberately understated (outline, small text)
+since it's an admin tool a visitor never sees, not a visitor-facing call
+to action like .event-signup-link above. */
+.peoply-sync-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+.peoply-sync-warning {
+  font-size: 0.65rem;
+  font-style: italic;
+  color: var(--color-error);
+}
+
+.peoply-sync-button {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.peoply-sync-button:hover,
+.peoply-sync-button:focus-visible {
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+}
+
+.peoply-sync-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .event-page h1 {
   margin-top: 0.5rem;
 }
@@ -122,7 +184,7 @@ category -- the flat tag list carries no category metadata to color by. */
 component's own --accent-color custom property. */
 .event-signup-link {
   display: inline-block;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   padding: 0.5rem 1.25rem;
   border-radius: 8px;
   font-weight: 700;
@@ -207,6 +269,23 @@ sub-section per month rather than one long undifferentiated list. */
 }
 
 .event-list-empty {
+  color: var(--color-text-muted);
+}
+
+/* Past events (EventIndexPage.get_context's past_month_groups) collapsed
+by default behind a native <details> toggle, same pattern as
+account_settings.html's "Delete my account" -- keeps the page opening on
+what's actually upcoming instead of burying it under everything that's
+already happened. */
+.event-index-past {
+  margin-top: 2rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 1rem;
+}
+
+.event-index-past-toggle {
+  cursor: pointer;
+  font-weight: bold;
   color: var(--color-text-muted);
 }
 

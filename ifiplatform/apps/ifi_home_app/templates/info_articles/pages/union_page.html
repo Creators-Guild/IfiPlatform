@@ -108,6 +108,7 @@
                                         <span class="event-list-date">
                                             {{ event.event_date }}{% if event.event_time %} {{ event.event_time|time:"H:i" }}{% endif %}
                                         </span>
+                                        {% include "events/partials/peoply_badge.html" %}
                                     </a>
                                 </li>
                             {% endfor %}

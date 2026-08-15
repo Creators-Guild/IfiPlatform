@@ -6,6 +6,7 @@ from datetime import date, datetime, time, timedelta
 from itertools import groupby
 from zoneinfo import ZoneInfo
 
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -119,6 +120,46 @@ def location_map_link_block():
     )
 
 
+class PeoplySyncState(models.Model):
+    """Singleton row (always pk=1) -- see touch()/last_synced_at(). Mirrors
+    GlossarySyncState's own pattern (glossary_models.py)."""
+
+    synced_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def touch(cls):
+        """Call after a successful sync_peoply_events run."""
+        obj, _created = cls.objects.get_or_create(pk=1)
+        obj.save()  # bumps synced_at via auto_now even if just created
+        return obj.synced_at
+
+    @classmethod
+    def last_synced_at(cls):
+        """None if sync_peoply_events has never run successfully."""
+        obj = cls.objects.filter(pk=1).first()
+        return obj.synced_at if obj else None
+
+
+class PeoplySyncLog(models.Model):
+    """One row per click of the "Sync Peoply now" button (events/partials/
+    peoply_sync_button.html, event_views.force_sync_peoply_events) -- who
+    triggered a manual sync and when, so repeated/spammy use is
+    attributable to a specific person. Superuser-only in Django admin, see
+    PeoplySyncLogAdmin (admin.py); nothing here creates or edits rows by
+    hand."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
+    )
+    triggered_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-triggered_at"]
+
+    def __str__(self):
+        return f"{self.user} at {self.triggered_at}"
+
+
 class EventIndexPage(TranslationWarningMixin, Page):
     """Landing page listing all events."""
 
@@ -140,16 +181,29 @@ class EventIndexPage(TranslationWarningMixin, Page):
             .filter(locale=Locale.get_active())
             .order_by("event_date", "event_time")
         )
-        context["events"] = events
-        # groupby only merges *consecutive* equal keys -- safe since events
-        # is already sorted by event_date above.
-        context["month_groups"] = [
-            {"month": month, "events": list(month_events)}
-            for month, month_events in groupby(
-                events, key=lambda event: event.event_date.replace(day=1)
-            )
-        ]
         today = timezone.localdate()
+        # Same "still going" rule as is_happening_now: an event only counts
+        # as past once its last day (end_date if set, else event_date) is
+        # behind us -- a week-long event isn't "past" on day 2.
+        upcoming_events = [e for e in events if (e.end_date or e.event_date) >= today]
+        past_events = [e for e in events if (e.end_date or e.event_date) < today]
+
+        def month_groups(events_list):
+            # groupby only merges *consecutive* equal keys -- safe since
+            # events_list stays in whatever sorted-by-event_date order it
+            # was given in (ascending for upcoming, reversed for past).
+            return [
+                {"month": month, "events": list(month_events)}
+                for month, month_events in groupby(
+                    events_list, key=lambda event: event.event_date.replace(day=1)
+                )
+            ]
+
+        context["events"] = events
+        context["month_groups"] = month_groups(upcoming_events)
+        # Most-recently-past month first, since that's the one someone
+        # skimming "past events" is most likely looking for.
+        context["past_month_groups"] = month_groups(list(reversed(past_events)))
         context["current_semester_year"] = today.year
         context["is_spring_semester"] = today.month <= 6
         return context

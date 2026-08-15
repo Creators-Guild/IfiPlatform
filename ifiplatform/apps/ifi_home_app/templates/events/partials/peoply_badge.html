@@ -1,0 +1,12 @@
+{% load i18n article_tags %}
+{% if event.external_source == "peoply" %}
+    <span class="event-peoply-note{% if compact %} event-peoply-note--compact{% endif %}">
+        {% trans "data from peoply" %}
+        {% if show_sync_time %}
+            {% get_peoply_last_synced as last_synced %}
+            {% if last_synced %}
+                {% blocktrans with time=last_synced|date:"j. F Y, H:i" %}(last synced {{ time }}){% endblocktrans %}
+            {% endif %}
+        {% endif %}
+    </span>
+{% endif %}
