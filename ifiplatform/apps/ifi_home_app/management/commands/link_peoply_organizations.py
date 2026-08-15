@@ -34,7 +34,8 @@ PEOPLY_ORGANIZATIONS_URL = "https://api.peoply.app/organizations"
 def _find_exact_match(title, candidates):
     title_lower = title.lower()
     for org in candidates:
-        if org["name"].lower() == title_lower or org["urlId"].lower() == title_lower:
+        url_id = org["urlId"]
+        if org["name"].lower() == title_lower or (url_id and url_id.lower() == title_lower):
             return org
     return None
 
