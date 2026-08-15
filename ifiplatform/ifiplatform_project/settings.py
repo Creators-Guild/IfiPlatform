@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 from dotenv import load_dotenv
 
 # reads .env and loads it into environment variables
@@ -20,18 +21,27 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# This project's own Django apps (ifi_home_app, study_app, account_app,
+# yourpage_app) live grouped under apps/ for easier navigation -- apps/
+# itself is a plain directory, not a Python package (no __init__.py), so
+# putting it on sys.path keeps every app importable by its bare name
+# (`ifi_home_app.models`, not `apps.ifi_home_app.models`). This is the only
+# place that needs to know about the apps/ grouping: INSTALLED_APPS below,
+# and every existing absolute import across the codebase, stay unchanged.
+sys.path.insert(0, str(BASE_DIR / "apps"))
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # See README.md #Setup for more information
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") # check .env
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = os.environ.get("DEBUG", "False") == "True" # check .env
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') # check .env
 
 SITE_ID = 1
 
@@ -46,6 +56,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "django.contrib.sitemaps",
+    "core_app.apps.CoreAppConfig",
     "ifi_home_app.apps.IfiHomeAppConfig",
     "study_app.apps.StudyAppConfig",
     "account_app.apps.AccountAppConfig",
@@ -96,7 +107,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "ifi_home_app.infra.deploy_notice.deploy_notice",
+                "core_app.deploy_notice.deploy_notice",
             ],
         },
     },
@@ -143,7 +154,8 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    
+
+# check .env  
 CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o]
 
 
@@ -192,7 +204,7 @@ LOCALE_PATHS = [
 ]
 
 # Sections not built yet are shown a placeholder instead of their real
-# views/urls -- see ifi_home_app.infra.under_development.
+# views/urls -- see core_app.under_development.
 APPS_UNDER_DEVELOPMENT = {
     "study_app": True,
     "yourpage_app": True,
@@ -205,6 +217,41 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
+# Content-hashed static filenames (e.g. article_page.a1b2c3.css) so a
+# visitor's browser fetches the new version of a changed file after a
+# deploy automatically, instead of keeping an old cached copy under the
+# same never-changing URL indefinitely. Only takes effect when DEBUG=False
+# -- Django's own {% static %} deliberately returns the plain, unhashed
+# URL whenever DEBUG=True regardless of manifest state, so local dev needs
+# no extra setup step (no collectstatic required) and is unaffected either
+# way. core_app.storage's manifest_strict=False subclass only matters in
+# production: a file that exists on disk but has no manifest entry yet
+# (e.g. a file added since the last collectstatic run) falls back to
+# hashing it fresh instead of raising a hard error on every page that
+# references it -- a genuinely missing file still raises either way, that
+# part isn't suppressed.
+#
+# `manage.py test` is a separate case from local dev: Django's test runner
+# always forces DEBUG=False for the duration of the run (regardless of
+# .env), so without this override every {% static %} tag hit by a test
+# would try to hash-lookup files in STATIC_ROOT and hard-fail, since
+# nothing has run collectstatic there. Plain StaticFilesStorage sidesteps
+# hashing entirely, which is fine -- tests don't care about cache-busted
+# filenames, only that the tag resolves to *a* URL.
+RUNNING_TESTS = "test" in sys.argv
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if RUNNING_TESTS
+            else "core_app.storage.LenientManifestStaticFilesStorage"
+        ),
+    },
+}
+
 # Media files (user uploads, e.g. Wagtail images)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -213,7 +260,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 # console backend (prints emails to the server log instead of sending them),
 # so local dev works with no setup. Set EMAIL_HOST in .env to switch to real
 # SMTP once there's a relay/provider to send through.
-if os.environ.get("EMAIL_HOST"):
+if os.environ.get("EMAIL_HOST"): # check .env
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_HOST = os.environ.get("EMAIL_HOST")
     EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
@@ -223,7 +270,7 @@ if os.environ.get("EMAIL_HOST"):
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@ifiplatfform.no")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@ifiplatfform.no") # check .env
 
 # File-based so the cache is shared across gunicorn worker processes --
 # the default LocMemCache is per-process, so e.g. Wagtail's site-root-paths
@@ -264,10 +311,10 @@ WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
 WAGTAILLOCALIZE_MACHINE_TRANSLATOR = {
     "CLASS": "wagtail_localize.machine_translators.deepl.DeepLTranslator",
     "OPTIONS": {
-        "AUTH_KEY": os.environ.get("DEEPL_API_KEY"),
+        "AUTH_KEY": os.environ.get("DEEPL_API_KEY"), # check .env
         # Set by `manage.py sync_deepl_glossary` -- see that command and
         # ifi_home_app/deepl_glossary_terms.py. Left unset, DeepL just
         # translates freely (a plain warning gets logged, not an error).
-        "GLOSSARY_IDS": {("NB", "EN"): os.environ.get("DEEPL_GLOSSARY_ID")},
+        "GLOSSARY_IDS": {("NB", "EN"): os.environ.get("DEEPL_GLOSSARY_ID")}, # check .env
     },
 }
