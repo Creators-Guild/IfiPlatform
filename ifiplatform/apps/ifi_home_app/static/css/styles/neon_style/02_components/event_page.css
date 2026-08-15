@@ -321,6 +321,61 @@ a second, separately maintained copy of the same color mapping. */
   flex-shrink: 0;
 }
 
+/* UnionPage's own week-calendar (union_page.html/union_calendar_panel.html,
+union_calendar context from UnionPage.get_context) -- reuses
+events/partials/event_calendar_grid.html and the .event-calendar-* rules
+below as-is, but navigates via union_calendar.js fetching
+?calendar_partial=1 and swapping the panel in place rather than
+event_calendar.js's day pager, so it gets its own always-visible nav row
+instead of reusing .event-calendar-pager (which is display:none outside
+that JS's mobile paging mode). */
+.union-calendar-nav {
+  display: grid;
+  /* Fixed-width columns throughout, not flex + justify-content:center or
+  a 1fr center column -- the label's text (a date range) varies in width
+  week to week, and either of those would shift the arrows along with it
+  (1fr especially: it'd stretch to the full width of .event-calendar-
+  section, planting the arrows way out at its edges, far from the label
+  they control). 19rem comfortably fits the longest realistic label
+  (measured: nb's "1. september - 7. september 2026" is ~17.6rem) with
+  room to spare, so the arrows stay both close to the label and pinned in
+  place regardless of which week/locale is showing. width:fit-content +
+  margin:auto centers this fixed-size block within the wider section
+  instead of stretching to it. */
+  grid-template-columns: 1.5rem 19rem 1.5rem;
+  width: fit-content;
+  margin: 0.5rem auto 1rem;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.union-calendar-nav a {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-text);
+  text-decoration: none;
+  justify-self: center;
+}
+
+.union-calendar-nav a:hover,
+.union-calendar-nav a:focus-visible {
+  color: var(--color-accent-hover);
+}
+
+/* UnionPage.get_context fixes this union's calendar to one hour range for
+its whole semester (event_models.py's hour_range_for_events, derived from
+this union's own earliest/latest timed event that semester, 9:00-01:00
+fallback if it has none) rather than each week resizing around whatever
+happens to fall in it -- so --ec-hour-height needs its own smaller value:
+the default 3.75rem below is sized for a typical single event's narrower
+hour span, and would make a semester-wide range (often most of a day, and
+mostly empty on any given week) too tall. */
+.union-calendar-section .event-calendar {
+  --ec-hour-height: 2.75rem;
+}
+
 /* Week-calendar view of a parent event's timed sub_events (event_page.html,
 positions/sizes computed by EventPage.calendar_days) -- sits outside
 .event-page-prose's 50rem reading column on purpose (see that class's own
@@ -796,6 +851,15 @@ body.event-calendar-modal-open {
     days/. event-calendar-header can no longer squeeze these down to fit,
     so their combined width (5 * 8rem) overflows .event-calendar instead. */
     flex: 0 0 8rem;
+  }
+
+  /* 19rem's own comment (above, desktop rule) is sized for the longest
+  label with room to spare -- too wide a fixed column on a narrow phone
+  screen, so it shrinks here. Still fixed-width, not auto/1fr: the whole
+  point is the arrows don't move week to week, just at a size that fits. */
+  .union-calendar-nav {
+    grid-template-columns: 1.5rem 13rem 1.5rem;
+    font-size: 0.8rem;
   }
 
   .event-calendar-header-day {

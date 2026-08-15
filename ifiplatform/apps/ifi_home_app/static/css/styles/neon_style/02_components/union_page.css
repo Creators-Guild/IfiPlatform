@@ -41,6 +41,18 @@
   margin-top: 1.5rem;
 }
 
+.union-main {
+  /* .union-layout's own minmax(0, 1fr) sets the *track's* minimum to 0,
+  but a grid *item* still defaults to min-width:auto (effectively its
+  content's min-content size) unless overridden here -- without this, the
+  union-calendar-section's wide .event-calendar (event_page.css, day
+  columns meant to horizontal-scroll within their own overflow-x:auto)
+  pushed .union-main itself wider than the viewport instead of actually
+  scrolling internally, since .union-main is the item whose min-width was
+  the thing left unconstrained. */
+  min-width: 0;
+}
+
 .union-main h2 {
   margin-top: 2rem;
 }
