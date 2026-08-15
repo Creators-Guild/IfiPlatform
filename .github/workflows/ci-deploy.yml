@@ -53,7 +53,12 @@ jobs:
           pip install -r requirements.txt
       - name: Run Tests
         run: |
-          python ifiplatform/manage.py test
+          # Explicit app labels, not bare `test` -- this project's apps live
+          # grouped under ifiplatform/apps/, and Django's filesystem-based
+          # test discovery silently skips anything nested under a directory
+          # without an __init__.py, so a bare `manage.py test` would only
+          # run core_app's tests. Add new apps here too.
+          python ifiplatform/manage.py test core_app ifi_home_app account_app study_app yourpage_app
 
   lint:
     runs-on: ubuntu-latest
@@ -178,6 +183,11 @@ jobs:
             python manage.py migrate
             python manage.py collectstatic --noinput --clear
             sudo systemctl restart gunicorn
+            # After the restart (not before) so nothing repopulates it with
+            # a value computed under the old code -- see clear_cache's own
+            # docstring for the site-root-paths staleness bug this guards
+            # against (every Page.url silently going None after a deploy).
+            python manage.py clear_cache
             # Clears the banner immediately rather than waiting for its own
             # timeout to eventually expire -- deploy_notice.js reloads each
             # visitor's page shortly after its countdown hits zero, and by
