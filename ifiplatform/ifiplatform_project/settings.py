@@ -155,6 +155,39 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
+    # Django's own default LOGGING sends unhandled view exceptions to a
+    # "console" handler that's filtered to only fire when DEBUG=True, and a
+    # "mail_admins" handler that only fires when DEBUG=False -- but ADMINS
+    # is never set below, so that one silently no-ops. Net effect: with
+    # DEBUG off, a 500 error is dropped by both, nowhere to be seen. This
+    # replaces that with a plain console handler with no DEBUG filter,
+    # errors only, so they print to stdout -- gunicorn's own stdout here,
+    # i.e. `journalctl -u gunicorn`. Not needed when DEBUG=True: Django's
+    # own debug error page already shows the full traceback in the browser.
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "verbose": {
+                "format": "{levelname} {asctime} {name} {message}",
+                "style": "{",
+            },
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "verbose",
+            },
+        },
+        "loggers": {
+            "django": {
+                "handlers": ["console"],
+                "level": "ERROR",
+                "propagate": False,
+            },
+        },
+    }
+
 # check .env  
 CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o]
 

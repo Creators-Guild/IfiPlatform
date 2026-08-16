@@ -175,6 +175,7 @@ jobs:
                 cd ..
               fi
             fi
+            OLD_SHA=$(git rev-parse HEAD)
             git fetch origin main
             git reset --hard origin/main
             # Keeps /etc/systemd/system/ in sync with whatever's checked into
@@ -195,6 +196,22 @@ jobs:
             cd ifiplatform
             python manage.py migrate
             python manage.py collectstatic --noinput --clear
+            # Only re-syncs (and rewrites DEEPL_GLOSSARY_ID in .env) when
+            # glossary_terms.py actually changed in this deploy -- avoids
+            # rotating the glossary_id (DeepL glossaries are immutable, so
+            # this is always a delete+recreate) and burning a DeepL API call
+            # on every deploy when nothing about the glossary changed. Not
+            # wrapped in script_stop's usual all-or-nothing failure: a
+            # transient DeepL API hiccup here shouldn't block the rest of
+            # the deploy, so it just warns and leaves the previous
+            # DEEPL_GLOSSARY_ID in place instead of aborting.
+            if ! git diff --quiet "$OLD_SHA" HEAD -- apps/ifi_home_app/translation/glossary_terms.py; then
+              if python manage.py sync_deepl_glossary --write-env; then
+                echo "Glossary re-synced and DEEPL_GLOSSARY_ID updated in .env."
+              else
+                echo "sync_deepl_glossary failed -- leaving the existing DEEPL_GLOSSARY_ID in .env. Machine translation may be using a stale/deleted glossary until this is fixed manually."
+              fi
+            fi
             sudo systemctl restart gunicorn
             # After the restart (not before) so nothing repopulates it with
             # a value computed under the old code -- see clear_cache's own

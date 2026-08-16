@@ -21,4 +21,5 @@ GLOSSARY_TERMS = {
     "Fadder":"Buddy",
     "Fadderbarn":"Buddychild", # please find a better translation ahah
     "Fadderstyret":"The Buddy Council(Fadderstyret)",
+    "dagen@ifi": "dagen@ifi",
 }

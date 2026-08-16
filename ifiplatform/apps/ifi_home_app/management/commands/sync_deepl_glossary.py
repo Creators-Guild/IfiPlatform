@@ -11,10 +11,13 @@ endpoint) -- this command deletes any existing glossary with the same name
 before creating a fresh one from the current term list, so it's safe to
 re-run whenever glossary_terms.py changes.
 
-One-time manual step after running this: copy the printed glossary_id into
+By default, just prints the new glossary_id -- copy it into
 DEEPL_GLOSSARY_ID in .env (same copy-paste flow as DJANGO_SECRET_KEY in
-README.md's setup steps) -- settings.py reads it from there into
-WAGTAILLOCALIZE_MACHINE_TRANSLATOR's GLOSSARY_IDS option.
+README.md's setup steps) and restart the server; settings.py reads it from
+there into WAGTAILLOCALIZE_MACHINE_TRANSLATOR's GLOSSARY_IDS option.
+--write-env does that .env edit itself instead -- used by ci-deploy.yml so
+production never needs that manual step (a stale DEEPL_GLOSSARY_ID is what
+caused a real KeyError: 'translations' machine-translation outage once).
 
 Also records the sync time via GlossarySyncState, so translation_views.py
 knows which existing machine translations predate this glossary version and
@@ -37,8 +40,18 @@ class Command(BaseCommand):
         "Pushes deepl_glossary_terms.py's nb -> en term list to DeepL as a "
         "glossary (deleting and recreating any existing one with the same "
         "name, since DeepL glossaries can't be edited in place). Prints the "
-        "resulting glossary_id -- copy it into DEEPL_GLOSSARY_ID in .env."
+        "resulting glossary_id -- copy it into DEEPL_GLOSSARY_ID in .env, "
+        "or pass --write-env to have this command do that edit itself."
     )
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--write-env",
+            action="store_true",
+            help="Rewrite DEEPL_GLOSSARY_ID in .env to the new glossary_id "
+                 "instead of just printing it. Still requires a server "
+                 "restart to take effect.",
+        )
 
     def handle(self, *args, **options):
         auth_key = settings.WAGTAILLOCALIZE_MACHINE_TRANSLATOR["OPTIONS"].get(
@@ -82,6 +95,28 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"Created glossary {glossary_id} with {len(GLOSSARY_TERMS)} term(s)."
         ))
-        self.stdout.write(
-            f"Now set DEEPL_GLOSSARY_ID={glossary_id} in .env and restart the server."
-        )
+
+        if options["write_env"]:
+            self._write_env(glossary_id)
+            self.stdout.write(self.style.SUCCESS(
+                "DEEPL_GLOSSARY_ID updated in .env -- restart the server to pick it up."
+            ))
+        else:
+            self.stdout.write(
+                f"Now set DEEPL_GLOSSARY_ID={glossary_id} in .env and restart the server."
+            )
+
+    def _write_env(self, glossary_id):
+        env_path = settings.BASE_DIR / ".env"
+        if not env_path.exists():
+            raise CommandError(f"--write-env: no .env file found at {env_path}")
+
+        lines = env_path.read_text(encoding="utf-8").splitlines(keepends=True)
+        new_line = f"DEEPL_GLOSSARY_ID={glossary_id}\n"
+        for i, line in enumerate(lines):
+            if line.startswith("DEEPL_GLOSSARY_ID="):
+                lines[i] = new_line
+                break
+        else:
+            lines.append(new_line)
+        env_path.write_text("".join(lines), encoding="utf-8")
