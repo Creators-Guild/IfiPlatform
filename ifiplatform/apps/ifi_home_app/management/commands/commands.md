@@ -40,12 +40,20 @@ py manage.py sync_translated_page_fields [--dry-run]
 ```
 
 Re-syncs wagtail-localize `SynchronizedField`s (`show_in_menu`, `status`,
-etc.) from every nb page to its existing English translation. This is a
-one-off catch-up command for pages that drifted out of sync *before* the
-automatic sync hook (`ifi_home_app/wagtail_hooks.py`) existed — you're
-unlikely to need it unless you're working with a database seeded before
-that hook was added. Safe to re-run: re-syncing an already-synced page is
-a no-op. `--dry-run` lists what would be synced without changing anything.
+etc.) from every nb page to its existing English translation. One-off,
+historical catch-up only — `ifi_home_app/wagtail_hooks.py`'s auto-sync
+listens on Wagtail's `page_published` *signal* (not the `after_publish_page`
+*hook*), which is dispatched from `Page.publish()` itself, so it fires for
+every publish path uniformly: single-page admin edits, the page-listing
+bulk "Publish" action, and script-based
+`page.save_revision().publish()` calls alike (e.g. `sync_peoply_events`,
+`seed_dev_data`). Nothing should drift going forward, on any of those
+paths. This command is only for data that drifted before that switch (or
+before the sync existed at all) — a genuinely one-time cleanup, not
+something to re-run periodically.
+
+Safe to re-run: re-syncing an already-synced page is a no-op. `--dry-run`
+lists what would be synced without changing anything.
 
 ## link_peoply_organizations
 
@@ -108,6 +116,30 @@ to `"company"` when the title contains "Bedriftspresentasjon"; anything
 else (deadline, academic) needs manual correction, since Peoply doesn't
 expose a comparable category itself.
 
+After creating pages, the command also runs `sync_locale_trees`
+(wagtail-localize's own command) and clears Wagtail's site-root-paths
+cache, itself — every caller (the scheduled timer, a local dev running it
+by hand, the "Sync Peoply now" admin button) gets both for free, nothing
+extra to run afterwards:
+
+- **`sync_locale_trees`**: creates each newly-synced event's English alias
+  page. `sync_peoply_events` creates pages via `add_child()`/
+  `save_revision().publish()` directly, which bypasses wagtail-admin's
+  `after_create_page` hook — the one thing that would otherwise create
+  that alias automatically. Without it, a synced event has no English URL
+  at all, and switching language on its page silently lands on the events
+  overview instead (the nearest translated ancestor — see
+  `site_tags.translated_page_url`). Safe to run every time:
+  `sync_locale_trees` only ever creates an alias for a page that has
+  neither a real translation nor an alias yet, so it's a no-op for
+  anything already caught up.
+- **cache clear**: bulk page creation/deletion like this doesn't trigger
+  Wagtail's own site-root-paths cache invalidation (that only listens for
+  `Site` row changes, not ordinary page churn), so without this, links
+  across the whole site can start resolving to `href="None"` until the
+  cache happens to expire or get cleared some other way — confirmed the
+  hard way once, see `clear_cache`'s own docstring for the full story.
+
 ### Automatic scheduling
 
 A systemd timer runs this automatically on the production server — every 6
@@ -118,26 +150,13 @@ this one doesn't need to be invoked from an external scheduler by hand —
 the unit files live in [deploy/systemd/](../../../../../deploy/systemd/)
 and are checked into the repo.
 
-The service also runs `sync_locale_trees` (wagtail-localize's own command)
-right after, to create each newly-synced event's English alias page.
-`sync_peoply_events` creates pages via `add_child()`/`save_revision().
-publish()` directly, which bypasses wagtail-admin's `after_create_page`
-hook — the one thing that would otherwise create that alias automatically.
-Without it, a synced event has no English URL at all, and switching
-language on its page silently lands on the events overview instead (the
-nearest translated ancestor — see `site_tags.translated_page_url`). Safe
-to run every time: `sync_locale_trees` only ever creates an alias for a
-page that has neither a real translation nor an alias yet, so it's a
-no-op for anything already caught up.
-
 No manual server-side setup needed — `.github/workflows/ci-deploy.yml`'s
 deploy job copies `deploy/systemd/*` into `/etc/systemd/system/` and runs
-`daemon-reload` + `enable --now` on every deploy. All three are idempotent
-(a no-op once nothing's changed), so this runs unconditionally on every
-deploy rather than needing its own separate first-time step, and any
-future change to these unit files takes effect on the next deploy
-automatically. To do the same thing by hand (e.g. testing a unit-file
-change before it's merged):
+`daemon-reload` + `enable --now` on every deploy. This runs unconditionally
+on every deploy rather than needing its own separate first-time step
+(idempotent, a no-op once nothing's changed), and any future change to
+these unit files takes effect on the next deploy automatically. To do the
+same thing by hand (e.g. testing a unit-file change before it's merged):
 ```bash
 sudo cp deploy/systemd/sync-peoply-events.* /etc/systemd/system/
 sudo systemctl daemon-reload

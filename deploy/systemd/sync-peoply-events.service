@@ -1,5 +1,5 @@
 [Unit]
-Description=Sync EventPages from Peoply, then create any missing English aliases
+Description=Sync EventPages from Peoply
 After=network-online.target
 Wants=network-online.target
 
@@ -7,15 +7,7 @@ Wants=network-online.target
 Type=oneshot
 User=ubuntu
 WorkingDirectory=/home/ubuntu/IfiPlatform/ifiplatform
+# sync_peoply_events also runs sync_locale_trees (creates each new event's
+# English alias) and clears the site-root-paths cache itself now -- see its
+# own docstring. No second ExecStart= needed here anymore.
 ExecStart=/home/ubuntu/IfiPlatform/venv/bin/python manage.py sync_peoply_events
-# sync_peoply_events creates pages via add_child()/save_revision().publish()
-# directly, bypassing wagtail-admin's own after_create_page hook -- the one
-# thing that would otherwise auto-create each new page's English alias.
-# Without this, a newly synced event has no English URL at all, and
-# switching language on its (Norwegian-only) page silently falls back to
-# the nearest translated ancestor (the events overview) instead -- see
-# site_tags.translated_page_url. sync_locale_trees is Wagtail's own
-# command for this, and is safe to run every time: it only ever creates an
-# alias for a page that has neither a real translation nor an alias yet,
-# so it's a no-op for everything already caught up.
-ExecStart=/home/ubuntu/IfiPlatform/venv/bin/python manage.py sync_locale_trees

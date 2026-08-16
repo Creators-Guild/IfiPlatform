@@ -17,7 +17,8 @@
 
         <form method="POST">
             {% csrf_token %}
-            <input type="submit" value="Translate and publish" class="button" />
+            <input type="submit" name="dry_run" value="Preview (dry run)" class="button button-secondary" />
+            <input type="submit" name="confirm" value="Translate and publish" class="button" />
             <a href="{% url 'wagtailadmin_pages:edit' page.id %}" class="button button-secondary">Cancel</a>
         </form>
     </div>
