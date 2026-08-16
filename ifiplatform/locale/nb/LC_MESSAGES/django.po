@@ -567,6 +567,10 @@ msgstr "Ingen kommende arrangementer."
 msgid "See all events"
 msgstr "Se alle arrangementer"
 
+#: .\ifi_home_app\templates\events\event_page.html:62
+msgid "Signup at Peoply"
+msgstr "Meld deg på via Peoply"
+
 #: .\ifi_home_app\templates\events\event_page.html:63
 msgid "See every event this semester"
 msgstr "Se alle arrangementer dette semesteret"
@@ -748,6 +752,27 @@ msgstr "Vår semester %(year)s"
 #, python-format
 msgid "Fall semester %(year)s"
 msgstr "Høst semester %(year)s"
+
+#: .\ifi_home_app\templates\events\event_index_page.html:45
+msgid "Past events"
+msgstr "Tidligere arrangementer"
+
+#: .\ifi_home_app\templates\events\partials\peoply_badge.html:4
+msgid "data from peoply"
+msgstr "data fra peoply"
+
+#: .\ifi_home_app\templates\events\partials\peoply_badge.html:8
+#, python-format
+msgid "(last synced %(time)s)"
+msgstr "(sist synkronisert %(time)s)"
+
+#: .\ifi_home_app\templates\events\partials\peoply_sync_button.html:6
+msgid "Sync Peoply now"
+msgstr "Synkroniser Peoply nå"
+
+#: .\ifi_home_app\templates\events\partials\peoply_sync_button.html:7
+msgid "Don't spam!"
+msgstr "Ikke spam!"
 
 #: .\ifi_home_app\templates\events\event_index_page.html:56
 msgid "No upcoming events yet."

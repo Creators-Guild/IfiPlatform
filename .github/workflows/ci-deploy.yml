@@ -177,6 +177,19 @@ jobs:
             fi
             git fetch origin main
             git reset --hard origin/main
+            # Keeps /etc/systemd/system/ in sync with whatever's checked into
+            # deploy/systemd/ -- a plain git reset only updates the repo's own
+            # copy of these files, not the one systemd actually reads, so
+            # without this a unit-file change here would silently never take
+            # effect on the server. cp + daemon-reload + enable --now are all
+            # idempotent (a no-op when nothing changed), so this is safe to
+            # run on every single deploy, including ones that don't touch
+            # deploy/systemd/ at all. enable --now also means the very first
+            # deploy after a new timer is added installs and starts it with
+            # no manual server-side step required.
+            sudo cp deploy/systemd/*.service deploy/systemd/*.timer /etc/systemd/system/
+            sudo systemctl daemon-reload
+            sudo systemctl enable --now sync-peoply-events.timer
             source venv/bin/activate
             pip install -r requirements.txt
             cd ifiplatform

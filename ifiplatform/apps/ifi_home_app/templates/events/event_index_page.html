@@ -24,6 +24,7 @@
                 {% blocktrans with year=current_semester_year %}Fall semester {{ year }}{% endblocktrans %}
             {% endif %}
         </p>
+        {% include "events/partials/peoply_sync_button.html" %}
         {% if page.intro %}<div class="event-page-intro">{{ page.intro|richtext }}</div>{% endif %}
 
         {% if needs_translation %}
@@ -33,28 +34,21 @@
         {% endif %}
 
         {% if month_groups %}
-            {% for group in month_groups %}
-                <h2 class="event-index-month-heading">{{ group.month|date:"F Y" }}</h2>
-                <ul class="event-list">
-                    {% for event in group.events %}
-                        <li>
-                            <a class="event-list-item" href="{% pageurl event %}">
-                                <span class="event-type-badge event-type-badge--{{ event.event_type }}">
-                                    {{ event.get_event_type_display }}
-                                </span>
-                                <span class="event-list-title">{{ event.title }}</span>
-                                <span class="event-list-date">
-                                    {{ event.event_date }}{% if event.event_time %} {{ event.event_time|time:"H:i" }}{% endif %}
-                                </span>
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% endfor %}
+            {% include "events/partials/event_month_groups.html" with groups=month_groups %}
         {% else %}
             <ul class="event-list">
                 <li class="event-list-empty">{% trans "No upcoming events yet." %}</li>
             </ul>
         {% endif %}
+
+        {% if past_month_groups %}
+            <details class="event-index-past">
+                <summary class="event-index-past-toggle">{% trans "Past events" %}</summary>
+                {% include "events/partials/event_month_groups.html" with groups=past_month_groups %}
+            </details>
+        {% endif %}
     </div>
+    {% if request.user.is_staff %}
+        <script src="{% static 'js/peoply_sync_button.js' %}" defer></script>
+    {% endif %}
 {% endblock maincontent %}

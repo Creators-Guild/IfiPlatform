@@ -1,0 +1,163 @@
+# pylint: disable=C0114,C0115,C0116
+from datetime import datetime, timezone as dt_timezone
+from unittest.mock import Mock, patch
+
+import requests
+from django.core.management import call_command
+from django.test import TestCase
+
+from wagtail.models import Locale, Page
+
+from ifi_home_app.integrations.peoply_api import get_events
+from ifi_home_app.models.article.unions import UnionPage
+from ifi_home_app.models.event_models import EventIndexPage, EventPage
+
+SAMPLE_EVENT = {
+    "id": "d01f8be8-6bd0-40ff-850d-7e3ccc04d8f5",
+    "urlId": "TNMRSSQR",
+    "title": "Semesterstartfest",
+    "description": "Line one.\r\nLine two.\r\n\r\nNew paragraph.",
+    "startDate": "2026-01-16T19:00:00.000Z",  # 20:00 Europe/Oslo (CET, UTC+1 in January)
+    "endDate": None,
+    "locationName": "Escape",
+    "freeformAddress": "Gaustadalléen 23B, 0373 Oslo",
+}
+
+
+def _fake_response(json_data, status_code=200):
+    response = Mock()
+    response.json.return_value = json_data
+    response.status_code = status_code
+    if status_code >= 400:
+        response.raise_for_status.side_effect = requests.HTTPError(f"{status_code} error")
+    return response
+
+
+def _make_union(**kwargs):
+    root = Page.get_first_root_node()
+    nb_locale, _ = Locale.objects.get_or_create(language_code="nb")
+    kwargs.setdefault("title", "Test Union")
+    kwargs.setdefault("slug", "test-union")
+    kwargs.setdefault("locale", nb_locale)
+    union = UnionPage(**kwargs)
+    root.add_child(instance=union)
+    union.save_revision().publish()
+    return union
+
+
+def _make_event_index(**kwargs):
+    root = Page.get_first_root_node()
+    nb_locale, _ = Locale.objects.get_or_create(language_code="nb")
+    kwargs.setdefault("title", "Events")
+    kwargs.setdefault("slug", "events")
+    kwargs.setdefault("locale", nb_locale)
+    index = EventIndexPage(**kwargs)
+    root.add_child(instance=index)
+    index.save_revision().publish()
+    return index
+
+
+class GetEventsTests(TestCase):
+    """peoply_api.get_events's pagination stitching and error handling."""
+
+    @patch("ifi_home_app.integrations.peoply_api.requests.get")
+    def test_stitches_multiple_pages(self, mock_get):
+        full_page = [{"id": i} for i in range(500)]
+        last_page = [{"id": 500}]
+        mock_get.side_effect = [_fake_response(full_page), _fake_response(last_page)]
+
+        events = get_events("union-id", datetime.now(dt_timezone.utc))
+
+        self.assertEqual(len(events), 501)
+        self.assertEqual(mock_get.call_count, 2)
+
+    @patch("ifi_home_app.integrations.peoply_api.requests.get")
+    def test_single_short_page_stops_immediately(self, mock_get):
+        mock_get.side_effect = [_fake_response([{"id": 1}])]
+
+        events = get_events("union-id", datetime.now(dt_timezone.utc))
+
+        self.assertEqual(len(events), 1)
+        self.assertEqual(mock_get.call_count, 1)
+
+    @patch("ifi_home_app.integrations.peoply_api.requests.get")
+    def test_raises_on_error_response(self, mock_get):
+        mock_get.return_value = _fake_response([], status_code=500)
+
+        with self.assertRaises(requests.HTTPError):
+            get_events("union-id", datetime.now(dt_timezone.utc))
+
+
+class SyncPeoplyEventsTests(TestCase):
+    """The sync_peoply_events management command."""
+
+    def setUp(self):
+        self.union = _make_union(peoply_organization_id="test-org-id")
+        self.event_index = _make_event_index()
+
+    @patch("ifi_home_app.management.commands.sync_peoply_events.get_events")
+    def test_creates_event_page_with_expected_fields(self, mock_get_events):
+        mock_get_events.return_value = [SAMPLE_EVENT]
+
+        call_command("sync_peoply_events")
+
+        page = EventPage.objects.get(
+            external_source="peoply", external_uid=SAMPLE_EVENT["id"]
+        )
+        self.assertEqual(page.title, "Semesterstartfest")
+        self.assertEqual(page.get_parent().specific, self.event_index)
+        self.assertTrue(page.live)
+        self.assertEqual(page.event_type, "social")
+        self.assertEqual(page.peoply_url, "https://peoply.app/events/TNMRSSQR")
+        self.assertEqual(page.location, "Gaustadalléen 23B, 0373 Oslo")
+        self.assertIn("<br>", page.intro)  # single newline -> <br>
+        self.assertIn("</p><p>", page.intro)  # blank line -> paragraph break
+
+        related = page.related_unions[0].value
+        self.assertEqual(related["union"].pk, self.union.pk)
+        self.assertEqual(related["role"], "host")
+
+    @patch("ifi_home_app.management.commands.sync_peoply_events.get_events")
+    def test_bedriftspresentasjon_title_is_tagged_company(self, mock_get_events):
+        company_event = {**SAMPLE_EVENT, "id": "other-id", "title": "Bedriftspresentasjon med DNB"}
+        mock_get_events.return_value = [company_event]
+
+        call_command("sync_peoply_events")
+
+        page = EventPage.objects.get(external_uid="other-id")
+        self.assertEqual(page.event_type, "company")
+
+    @patch("ifi_home_app.management.commands.sync_peoply_events.get_events")
+    def test_converts_utc_start_to_local_date_and_time(self, mock_get_events):
+        mock_get_events.return_value = [SAMPLE_EVENT]
+
+        call_command("sync_peoply_events")
+
+        page = EventPage.objects.get(external_uid=SAMPLE_EVENT["id"])
+        self.assertEqual(page.event_date.isoformat(), "2026-01-16")
+        self.assertEqual(page.event_time.strftime("%H:%M"), "20:00")
+
+    @patch("ifi_home_app.management.commands.sync_peoply_events.get_events")
+    def test_rerun_does_not_duplicate(self, mock_get_events):
+        mock_get_events.return_value = [SAMPLE_EVENT]
+
+        call_command("sync_peoply_events")
+        call_command("sync_peoply_events")
+
+        self.assertEqual(
+            EventPage.objects.filter(
+                external_source="peoply", external_uid=SAMPLE_EVENT["id"]
+            ).count(),
+            1,
+        )
+
+    @patch("ifi_home_app.management.commands.sync_peoply_events.get_events")
+    def test_union_without_peoply_id_is_skipped(self, mock_get_events):
+        mock_get_events.return_value = []
+        _make_union(title="No Peoply", slug="no-peoply", peoply_organization_id="")
+
+        call_command("sync_peoply_events")
+
+        # Only the one union with an id set should have triggered a call.
+        mock_get_events.assert_called_once()
+        self.assertEqual(mock_get_events.call_args[0][0], "test-org-id")

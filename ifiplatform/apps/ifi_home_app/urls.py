@@ -6,6 +6,7 @@ from wagtail import urls as wagtail_urls
 from core_app.deploy_notice import deploy_notice_status_view
 from .views import home_views
 from .views import article_views
+from .views import event_views
 
 ifi_home_urlpatterns = [path("", home_views.main_view, name="ifi_home")]
 
@@ -62,6 +63,13 @@ ifi_api_urlpatterns = [
         "api/pages/<int:page_id>/sync-mirrored/",
         article_views.sync_mirrored_page,
         name="page_sync_mirrored",
+    ),
+    # Not page-scoped -- triggers the site-wide sync_peoply_events command,
+    # see event_views.force_sync_peoply_events.
+    path(
+        "api/peoply/force-sync/",
+        event_views.force_sync_peoply_events,
+        name="force_sync_peoply_events",
     ),
 ]
 

@@ -28,6 +28,7 @@
                                     {{ block.event.event_time|time:"H:i" }}{% if block.event.event_end_time %}&ndash;{{ block.event.event_end_time|time:"H:i" }}{% endif %}
                                 </span>
                                 <span class="event-calendar-block-hint">{% trans "Tap again to open" %}</span>
+                                {% include "events/partials/peoply_badge.html" with event=block.event compact=True %}
                             </span>
                         </a>
                     {% endfor %}

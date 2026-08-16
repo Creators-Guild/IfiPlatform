@@ -107,6 +107,17 @@ FADDERUKE_UNION_SPECS = [
     "Sonen", "FIFI", "Digitus", "Navet", "Fadderstyret", "Dagen@ifi",
 ]
 
+# Real Peoply organization IDs, deliberately set on just these two (not
+# every union above) -- a tester running seed_dev_data + sync_peoply_events
+# locally should only ever hit Peoply's real API for a couple of unions,
+# not every one of them. Production sets every real union's own ID by hand
+# in wagtail-admin (see the link_peoply_organizations command for finding
+# them), independent of this seed data entirely.
+FADDERUKE_UNION_PEOPLY_IDS = {
+    "Defi": "319a8d34-10c5-486d-81df-ee7ffaf7d1cd",
+    "Navet": "94c34eb0-7de0-404a-b7af-595a2e54777d",
+}
+
 # Sub-event title -> [(union title, role), ...] for EventPage.related_unions
 # -- "host" for the union directly named in the sub-event's own title,
 # "contributor"/"collaborator" used on a couple of entries (Foreningstorg,

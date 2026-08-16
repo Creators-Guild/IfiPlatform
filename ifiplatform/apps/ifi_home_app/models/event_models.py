@@ -6,6 +6,7 @@ from datetime import date, datetime, time, timedelta
 from itertools import groupby
 from zoneinfo import ZoneInfo
 
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -119,6 +120,46 @@ def location_map_link_block():
     )
 
 
+class PeoplySyncState(models.Model):
+    """Singleton row (always pk=1) -- see touch()/last_synced_at(). Mirrors
+    GlossarySyncState's own pattern (glossary_models.py)."""
+
+    synced_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def touch(cls):
+        """Call after a successful sync_peoply_events run."""
+        obj, _created = cls.objects.get_or_create(pk=1)
+        obj.save()  # bumps synced_at via auto_now even if just created
+        return obj.synced_at
+
+    @classmethod
+    def last_synced_at(cls):
+        """None if sync_peoply_events has never run successfully."""
+        obj = cls.objects.filter(pk=1).first()
+        return obj.synced_at if obj else None
+
+
+class PeoplySyncLog(models.Model):
+    """One row per click of the "Sync Peoply now" button (events/partials/
+    peoply_sync_button.html, event_views.force_sync_peoply_events) -- who
+    triggered a manual sync and when, so repeated/spammy use is
+    attributable to a specific person. Superuser-only in Django admin, see
+    PeoplySyncLogAdmin (admin.py); nothing here creates or edits rows by
+    hand."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
+    )
+    triggered_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-triggered_at"]
+
+    def __str__(self):
+        return f"{self.user} at {self.triggered_at}"
+
+
 class EventIndexPage(TranslationWarningMixin, Page):
     """Landing page listing all events."""
 
@@ -140,16 +181,18 @@ class EventIndexPage(TranslationWarningMixin, Page):
             .filter(locale=Locale.get_active())
             .order_by("event_date", "event_time")
         )
-        context["events"] = events
-        # groupby only merges *consecutive* equal keys -- safe since events
-        # is already sorted by event_date above.
-        context["month_groups"] = [
-            {"month": month, "events": list(month_events)}
-            for month, month_events in groupby(
-                events, key=lambda event: event.event_date.replace(day=1)
-            )
-        ]
         today = timezone.localdate()
+        # Same "still going" rule as is_happening_now: an event only counts
+        # as past once its last day (end_date if set, else event_date) is
+        # behind us -- a week-long event isn't "past" on day 2.
+        upcoming_events = [e for e in events if (e.end_date or e.event_date) >= today]
+        past_events = [e for e in events if (e.end_date or e.event_date) < today]
+
+        context["events"] = events
+        context["month_groups"] = group_events_by_month(upcoming_events)
+        # Most-recently-past month first, since that's the one someone
+        # skimming "past events" is most likely looking for.
+        context["past_month_groups"] = group_events_by_month(list(reversed(past_events)))
         context["current_semester_year"] = today.year
         context["is_spring_semester"] = today.month <= 6
         return context
@@ -236,6 +279,7 @@ class EventPage(TranslationWarningMixin, Page):
         help_text="Optional -- link to this event's page on Peoply.",
     )
     signup_url = models.URLField(
+        max_length=500,
         blank=True,
         help_text="Optional -- link to a signup/registration form for this event, if not using Peoply.",
     )
@@ -365,64 +409,161 @@ class EventPage(TranslationWarningMixin, Page):
     def calendar_days(self):
         """This event's sub_events laid out for a week-calendar view -- see
         docs/claude_context/event_models.md for the full layout algorithm."""
-        timed = [e for e in self.sub_events if e.event_time]
-        untimed = [e for e in self.sub_events if not e.event_time]
+        return build_calendar_days(self.sub_events)
 
-        if not timed:
-            return {
-                "hour_start": 0, "hour_end": 0, "hour_marks": [], "hour_count": 0,
-                "days": [], "untimed": untimed,
-            }
 
-        def start_minutes(event):
-            return event.event_time.hour * 60 + event.event_time.minute
+def _event_start_minutes(event):
+    return event.event_time.hour * 60 + event.event_time.minute
 
-        def end_minutes(event):
-            if event.event_end_time:
-                return event.event_end_time.hour * 60 + event.event_end_time.minute
-            return start_minutes(event) + 60
 
+def _event_end_minutes(event):
+    if not event.event_end_time:
+        return _event_start_minutes(event) + 60
+    end = event.event_end_time.hour * 60 + event.event_end_time.minute
+    if end <= _event_start_minutes(event):
+        # Wraps past midnight (e.g. 22:00-00:30) -- same "ends earlier than
+        # it starts means it's actually the next day" reading
+        # live_sub_events already uses. +24h puts it in the small-hours
+        # tail of the day instead of producing a negative-height block.
+        end += 24 * 60
+    return end
+
+
+MIN_CALENDAR_HOUR_SPAN = 4
+
+
+def hour_range_for_events(events):
+    """(hour_start, hour_end) spanning every timed event in `events`, or
+    None if none of them are timed. Used to fix UnionPage's calendar to one
+    hour axis for its whole semester (see UnionPage.get_context) rather
+    than recomputing it -- and so potentially reshuffling it -- week to
+    week."""
+    timed = [e for e in events if e.event_time]
+    if not timed:
+        return None
+    hour_start = min(_event_start_minutes(e) for e in timed) // 60
+    hour_end = max(-(-_event_end_minutes(e) // 60) for e in timed)  # ceil-div
+    hour_end = max(hour_end, hour_start + 1)
+
+    # A union with only one or two events close together (e.g. every
+    # meeting at 16:00-18:00) would otherwise get a cramped 1-2 hour-tall
+    # grid -- pad out to a sane minimum, spread before/after evenly so
+    # those events land roughly centered rather than pinned to the top.
+    span = hour_end - hour_start
+    if span < MIN_CALENDAR_HOUR_SPAN:
+        deficit = MIN_CALENDAR_HOUR_SPAN - span
+        extend_before = min(deficit // 2, hour_start)  # never push below 0
+        hour_start -= extend_before
+        hour_end += deficit - extend_before
+
+    return hour_start, hour_end
+
+
+def build_calendar_days(events, day_range=None, hour_range=None):
+    """Lays `events` out for a week-calendar view -- see
+    docs/claude_context/event_models.md for the full layout algorithm.
+
+    `day_range`, if given, is an explicit list of dates (e.g. a fixed
+    Mon-Sun week) to always produce a column for, even ones with no events
+    -- without it, only dates that actually have a timed event get a
+    column (EventPage.calendar_days' original behavior).
+
+    `hour_range`, if given, is an explicit (hour_start, hour_end) to use
+    for the hour axis instead of deriving it from `events` -- UnionPage
+    passes one fixed range (see hour_range_for_events) covering its whole
+    semester, so every week renders the same hours rather than resizing
+    around whichever events happen to fall in that particular week."""
+    timed = [e for e in events if e.event_time]
+    untimed = [e for e in events if not e.event_time]
+
+    if not timed and day_range is None and hour_range is None:
+        return {
+            "hour_start": 0, "hour_end": 0, "hour_marks": [], "hour_count": 0,
+            "days": [], "untimed": untimed,
+        }
+
+    start_minutes = _event_start_minutes
+    end_minutes = _event_end_minutes
+
+    if hour_range is not None:
+        hour_start, hour_end = hour_range
+    elif day_range is not None:
+        hour_start, hour_end = 9, 25  # fallback: 9:00 to 01:00 the next day
+    else:
+        # timed is non-empty here -- the only other case (day_range is
+        # None and not timed) already returned above.
         hour_start = min(start_minutes(e) for e in timed) // 60
         hour_end = max(-(-end_minutes(e) // 60) for e in timed)  # ceil-div
         hour_end = max(hour_end, hour_start + 1)
-        total_minutes = (hour_end - hour_start) * 60
+    total_minutes = (hour_end - hour_start) * 60
 
-        days = []
-        for day_date in sorted({e.event_date for e in timed}):
-            day_events = sorted(
-                (e for e in timed if e.event_date == day_date),
-                key=lambda e: (start_minutes(e), end_minutes(e)),
-            )
-            blocks = []
-            for cluster in _cluster_overlapping(day_events, start_minutes, end_minutes):
-                columns = _assign_columns(cluster, start_minutes, end_minutes)
-                for event in cluster:
-                    col, col_count = columns[event]
-                    color_key, color_hex = _resolve_calendar_color(event)
-                    blocks.append({
-                        "event": event,
-                        "top_pct": _pct(start_minutes(event) - hour_start * 60, total_minutes),
-                        "height_pct": _pct(end_minutes(event) - start_minutes(event), total_minutes),
-                        "left_pct": _pct(col, col_count),
-                        "width_pct": _pct(1, col_count),
-                        "color_key": color_key,
-                        "color_hex": color_hex,
-                    })
-            days.append({"date": day_date, "events": blocks})
+    days = []
+    for day_date in day_range if day_range is not None else sorted({e.event_date for e in timed}):
+        day_events = sorted(
+            (e for e in timed if e.event_date == day_date),
+            key=lambda e: (start_minutes(e), end_minutes(e)),
+        )
+        blocks = []
+        for cluster in _cluster_overlapping(day_events, start_minutes, end_minutes):
+            columns = _assign_columns(cluster, start_minutes, end_minutes)
+            for event in cluster:
+                col, col_count = columns[event]
+                color_key, color_hex = _resolve_calendar_color(event)
+                blocks.append({
+                    "event": event,
+                    "top_pct": _pct(start_minutes(event) - hour_start * 60, total_minutes),
+                    "height_pct": _pct(end_minutes(event) - start_minutes(event), total_minutes),
+                    "left_pct": _pct(col, col_count),
+                    "width_pct": _pct(1, col_count),
+                    "color_key": color_key,
+                    "color_hex": color_hex,
+                })
+        days.append({"date": day_date, "events": blocks})
 
-        hour_marks = [
-            {"hour": h, "top_pct": _pct(h * 60 - hour_start * 60, total_minutes)}
-            for h in range(hour_start, hour_end + 1)
-        ]
+    hour_marks = [
+        # h % 24 for display only -- top_pct still needs the raw,
+        # un-wrapped h to land in the right place past the 24:00 mark.
+        {"hour": h % 24, "top_pct": _pct(h * 60 - hour_start * 60, total_minutes)}
+        for h in range(hour_start, hour_end + 1)
+    ]
 
-        return {
-            "hour_start": hour_start,
-            "hour_end": hour_end,
-            "hour_marks": hour_marks,
-            "hour_count": hour_end - hour_start,
-            "days": days,
-            "untimed": untimed,
-        }
+    return {
+        "hour_start": hour_start,
+        "hour_end": hour_end,
+        "hour_marks": hour_marks,
+        "hour_count": hour_end - hour_start,
+        "days": days,
+        "untimed": untimed,
+    }
+
+
+def group_events_by_month(events_list):
+    """[{"month": date(...), "events": [...]}, ...], consumed by
+    events/partials/event_month_groups.html (EventIndexPage's own upcoming/
+    past listings, and UnionPage's). groupby only merges *consecutive*
+    equal keys -- safe since events_list is expected to already be sorted
+    by event_date (ascending for upcoming, reversed for past)."""
+    return [
+        {"month": month, "events": list(month_events)}
+        for month, month_events in groupby(
+            events_list, key=lambda event: event.event_date.replace(day=1)
+        )
+    ]
+
+
+def week_bounds(day):
+    """(monday, sunday) of the calendar week containing `day`."""
+    monday = day - timedelta(days=day.weekday())
+    return monday, monday + timedelta(days=6)
+
+
+def semester_bounds(day):
+    """(start, end) of the semester containing `day` -- same Jan-Jun /
+    Jul-Dec split EventIndexPage.get_context already uses for its
+    is_spring_semester label, generalized into an actual date range."""
+    if day.month <= 6:
+        return date(day.year, 1, 1), date(day.year, 6, 30)
+    return date(day.year, 7, 1), date(day.year, 12, 31)
 
 
 _AUTO_CALENDAR_COLOR_BY_EVENT_TYPE = {
@@ -486,6 +627,19 @@ def _assign_columns(cluster, start_minutes, end_minutes):
     return {event: (col, column_count) for event, col in column_of.items()}
 
 
+def _tags_union(event, union):
+    """Whether `event`'s own related_unions (regardless of role) tags
+    `union` directly -- doesn't roll up sub-events, see
+    EventPage.all_related_unions for that. Compares by translation_key so
+    an event in one locale still matches a union viewed in another."""
+    return any(
+        entry.value["union"] is not None
+        and entry.value["union"].translation_key == union.translation_key
+        for entry in event.related_unions
+        if entry.block_type == "union"
+    )
+
+
 def upcoming_events_for_union(union):
     """Live, still-upcoming events tagging `union` in related_unions,
     regardless of role. See docs/claude_context/event_models.md."""
@@ -499,13 +653,22 @@ def upcoming_events_for_union(union):
         )
         .order_by("event_date", "event_time")
     )
-    return [
-        event
-        for event in candidates
-        if any(
-            entry.value["union"] is not None
-            and entry.value["union"].translation_key == union.translation_key
-            for entry in event.related_unions
-            if entry.block_type == "union"
+    return [event for event in candidates if _tags_union(event, union)]
+
+
+def events_for_union_between(union, start_date, end_date):
+    """Live EventPages tagging `union` (including sub-events -- live()
+    isn't tree-depth-filtered, so a union tagged only on one sub-event of a
+    bigger event is matched directly here, same as upcoming_events_for_union)
+    whose date falls in [start_date, end_date]."""
+    candidates = (
+        EventPage.objects.live()
+        .filter(locale=union.locale_id)
+        .filter(event_date__lte=end_date)
+        .filter(
+            models.Q(end_date__gte=start_date)
+            | models.Q(end_date__isnull=True, event_date__gte=start_date)
         )
-    ]
+        .order_by("event_date", "event_time")
+    )
+    return [event for event in candidates if _tags_union(event, union)]

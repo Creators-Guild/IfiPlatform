@@ -4,7 +4,10 @@ Article/Category cluster in pages.py beyond one-directional queries.
 
 Design rationale/history: docs/claude_context/article_unions.md"""
 
+from datetime import date, timedelta
+
 from django.db import models
+from django.utils import timezone
 from wagtail import blocks
 from wagtail.admin.panels import FieldPanel
 from wagtail.fields import RichTextField, StreamField
@@ -73,6 +76,22 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
     signup_url = models.URLField(
         blank=True,
         help_text="Optional -- link to a membership/interest sign-up form (e.g. a Google Form to join or register interest).",
+    )
+    peoply_organization_id = models.CharField(
+        max_length=64,
+        blank=True,
+        help_text="Optional -- this union's organization ID on Peoply (from its Peoply page URL). Setting this enables automatic event sync via sync_peoply_events.",
+    )
+    CALENDAR_VISIBILITY_CHOICES = [
+        ("auto", "Automatic -- hide when there are 4 or fewer events this semester"),
+        ("always", "Always show"),
+        ("never", "Never show"),
+    ]
+    calendar_visibility = models.CharField(
+        max_length=10,
+        choices=CALENDAR_VISIBILITY_CHOICES,
+        default="auto",
+        help_text="Whether to show this union's events calendar on its page.",
     )
 
     SOCIAL_PLATFORM_CHOICES = [
@@ -154,6 +173,8 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         FieldPanel("vedtekter_url"),
         FieldPanel("website_url"),
         FieldPanel("signup_url"),
+        FieldPanel("peoply_organization_id"),
+        FieldPanel("calendar_visibility"),
         FieldPanel("social_links"),
         FieldPanel("member_count_sitting"),
         FieldPanel("member_count_intern"),
@@ -168,14 +189,92 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         """The StudentUnionCategoryPage this union lives under."""
         return self.get_parent().specific
 
+    # Below this many events in the current semester, "auto" visibility
+    # hides the calendar rather than showing a mostly-empty grid.
+    CALENDAR_AUTO_MIN_EVENTS = 4
+
+    def get_template(self, request, *args, **kwargs):
+        """?calendar_partial=1 (union_calendar.js's Previous/Next fetch)
+        renders just the calendar panel, no page chrome -- avoids a full
+        reload, which on this site loses scroll position (html/body is its
+        own scroll box, see elements.css; window.scrollY never reflects it,
+        so a reload has nothing reliable to restore scroll from). Doesn't
+        re-check "auto" mode's event count here -- if this URL is being
+        fetched at all, the calendar was already showing when the page
+        that holds the link was rendered, so only calendar_visibility
+        being explicitly "never" is worth a cheap check before get_context
+        makes the real (count-aware) decision."""
+        if request.GET.get("calendar_partial") and self.calendar_visibility != "never":
+            return "info_articles/partials/union_calendar_panel.html"
+        return super().get_template(request, *args, **kwargs)
+
     def get_context(self, request, *args, **kwargs):
-        """Add upcoming_events: live, still-upcoming EventPages tagging
-        this union. Imported locally to avoid a circular import -- see
+        """Add upcoming_events (live, still-upcoming EventPages tagging
+        this union, grouped by month into upcoming_event_month_groups for
+        the template -- same events/partials/event_month_groups.html
+        listing EventIndexPage uses) and union_calendar (this week's events
+        on the reusable week-calendar grid, navigable via ?calendar_date=).
+        Imported locally to avoid a circular import -- see
         docs/claude_context/article_unions.md."""
         context = super().get_context(request, *args, **kwargs)
-        from ifi_home_app.models.event_models import upcoming_events_for_union
+        from ifi_home_app.models.event_models import (
+            build_calendar_days,
+            events_for_union_between,
+            group_events_by_month,
+            hour_range_for_events,
+            semester_bounds,
+            upcoming_events_for_union,
+            week_bounds,
+        )
 
         context["upcoming_events"] = upcoming_events_for_union(self)
+        context["upcoming_event_month_groups"] = group_events_by_month(context["upcoming_events"])
+
+        # Needed either way: "auto" uses its count to decide visibility,
+        # and (once shown) every mode uses it to fix the calendar's hour
+        # axis for the whole semester.
+        semester_start, semester_end = semester_bounds(timezone.localdate())
+        semester_events = events_for_union_between(self, semester_start, semester_end)
+
+        if self.calendar_visibility == "always":
+            show_calendar = True
+        elif self.calendar_visibility == "never":
+            show_calendar = False
+        else:
+            show_calendar = len(semester_events) > self.CALENDAR_AUTO_MIN_EVENTS
+
+        context["union_calendar"] = None
+        if show_calendar:
+            calendar_date_param = request.GET.get("calendar_date")
+            try:
+                calendar_date = date.fromisoformat(calendar_date_param) if calendar_date_param else timezone.localdate()
+            except ValueError:
+                calendar_date = timezone.localdate()
+
+            monday, sunday = week_bounds(calendar_date)
+            week_events = events_for_union_between(self, monday, sunday)
+            day_range = [monday + timedelta(days=i) for i in range(7)]
+
+            # One fixed hour axis for every week this semester, derived
+            # from this union's own earliest/latest timed event in it --
+            # so paging through weeks doesn't reshuffle the grid's hours
+            # each time (a 9:00-01:00 fallback, not the semester's own
+            # full span, is used when this union has nothing timed
+            # scheduled at all this semester to derive a range from).
+            hour_range = hour_range_for_events(semester_events) or (9, 25)
+
+            context["union_calendar"] = {
+                "grid": build_calendar_days(week_events, day_range=day_range, hour_range=hour_range),
+                # Raw dates, not a pre-built label string -- formatted with
+                # Django's |date filter in the template so it stays locale-aware
+                # (nb/en), same convention as event_list-style dates elsewhere.
+                "week_start": monday,
+                "week_end": sunday,
+                # union_calendar.js intercepts clicks on these and fetches
+                # &calendar_partial=1 instead of following them.
+                "prev_url": f"?calendar_date={(monday - timedelta(days=7)).isoformat()}",
+                "next_url": f"?calendar_date={(monday + timedelta(days=7)).isoformat()}",
+            }
         return context
 
 

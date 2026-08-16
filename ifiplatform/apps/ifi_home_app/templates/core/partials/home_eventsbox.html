@@ -40,6 +40,7 @@
                         </ul>
                     {% endif %}
                     {% endwith %}
+                    {% include "events/partials/peoply_badge.html" with compact=True %}
                 </li>
             {% endfor %}
         </ul>
@@ -214,6 +215,7 @@
                         </span>
                     {% endif %}
                 {% endwith %}
+                {% include "events/partials/peoply_badge.html" with compact=True %}
             </div>
         </li>
     {% empty %}
@@ -249,5 +251,9 @@
     {% endcomment %}
     <a class="home-eventsbox-view-all" href="{% pageurl event_index_page %}">{% trans "See all events" %}</a>
 {% endif %}
+{% include "events/partials/peoply_sync_button.html" %}
 <script src="{% static 'js/home_eventsbox.js' %}" defer></script>
 <script src="{% static 'js/dropdown_menu.js' %}" defer></script>
+{% if request.user.is_staff %}
+    <script src="{% static 'js/peoply_sync_button.js' %}" defer></script>
+{% endif %}

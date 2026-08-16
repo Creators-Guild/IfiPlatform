@@ -3,7 +3,7 @@ Fadderuke-hosting union roster used by events.py's sub-event seeding."""
 
 from ifi_home_app.models.article_models import StudentUnionCategoryPage, UnionPage
 
-from .constants import FADDERUKE_UNION_SPECS
+from .constants import FADDERUKE_UNION_PEOPLY_IDS, FADDERUKE_UNION_SPECS
 
 
 class UnionSeedMixin:
@@ -56,6 +56,7 @@ class UnionSeedMixin:
                 logo=seed_image,
                 purpose="En studentforening ved Ifi generert av seed-scriptet.",
                 union_type="general",
+                peoply_organization_id=FADDERUKE_UNION_PEOPLY_IDS.get(title, ""),
             )
             self._translate_page(union, en_locale)
             unions[title] = union

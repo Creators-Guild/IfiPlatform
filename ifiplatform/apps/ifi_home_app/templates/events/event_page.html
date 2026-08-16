@@ -24,6 +24,7 @@
             {{ page.get_event_type_display }}
         </span>
         <h1>{{ page.title }}</h1>
+        {% include "events/partials/peoply_sync_button.html" %}
 
         <div class="event-meta">
             <span>
@@ -50,17 +51,22 @@
         {% endif %}
 
         {% if page.peoply_url %}
-            <a class="event-signup-link" href="{{ page.peoply_url }}" target="_blank" rel="noopener noreferrer">{% trans "Peoply" %}</a>
+            {% if page.external_source == "peoply" and not page.signup_url %}
+                {% comment %}
+                No signup_url means Peoply's own registrationMode was
+                "PEOPLY" at sync time (sync_peoply_events only ever fills
+                signup_url for "EXTERNAL" mode) -- registering *is* clicking
+                through to Peoply, so the button says so instead of just
+                naming the site.
+                {% endcomment %}
+                <a class="event-signup-link" href="{{ page.peoply_url }}" target="_blank" rel="noopener noreferrer">{% trans "Signup at Peoply" %}</a>
+            {% else %}
+                <a class="event-signup-link" href="{{ page.peoply_url }}" target="_blank" rel="noopener noreferrer">{% trans "Peoply" %}</a>
+            {% endif %}
+            {% include "events/partials/peoply_badge.html" with event=page show_sync_time=True %}
         {% endif %}
         {% if page.signup_url %}
             <a class="event-signup-link" href="{{ page.signup_url }}" target="_blank" rel="noopener noreferrer">{% trans "Sign up" %}</a>
-        {% endif %}
-
-        {% get_event_index as event_index_page %}
-        {% if event_index_page %}
-            <p class="event-overview-link">
-                <a href="{% pageurl event_index_page %}">{% trans "See every event this semester" %}</a>
-            </p>
         {% endif %}
 
         {% if needs_translation %}
@@ -205,7 +211,17 @@
             </div>
         {% endif %}
         {% endwith %}
+
+        {% get_event_index as event_index_page %}
+        {% if event_index_page %}
+            <p class="event-overview-link">
+                <a href="{% pageurl event_index_page %}">{% trans "See every event this semester" %}</a>
+            </p>
+        {% endif %}
     </div>
 
     <script src="{% static 'js/event_calendar.js' %}" defer></script>
+    {% if request.user.is_staff %}
+        <script src="{% static 'js/peoply_sync_button.js' %}" defer></script>
+    {% endif %}
 {% endblock maincontent %}
