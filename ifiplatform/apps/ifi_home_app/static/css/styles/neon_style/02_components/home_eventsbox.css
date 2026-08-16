@@ -460,12 +460,12 @@ eye since a shared variable isn't available between two plain CSS files. */
 @media (max-width: 72rem) {
   /* Collapsed (not .is-expanded, toggled by home_eventsbox.js): only the
   "Happening now" callout above (already meant to stay fully visible -- a
-  compact spotlight, not what's being trimmed here) plus the very first
-  upcoming event. Reaching the rest -- the remaining <li>s, and whatever
+  compact spotlight, not what's being trimmed here) plus the first 4
+  upcoming events. Reaching the rest -- the remaining <li>s, and whatever
   union-tag/sub-event toggles they carry -- is what .home-eventsbox-more is
   for. No max-height/overflow-y needed any more (see home_layout.css) since
   this alone already keeps the collapsed box short. */
-  .eventsbox_container:not(.is-expanded) .home-eventsbox-list li:not(:first-child) {
+  .eventsbox_container:not(.is-expanded) .home-eventsbox-list li:nth-child(n+5) {
     display: none;
   }
 

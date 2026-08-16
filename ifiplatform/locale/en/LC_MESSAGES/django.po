@@ -652,9 +652,13 @@ msgid "About"
 msgstr ""
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:23
-#: .\templates\ifi_base.html:8 .\templates\partials\top_header.html:8
+#: .\templates\ifi_base.html:8
 msgid "Ifi Platform"
 msgstr "Ifi Platform"
+
+#: .\templates\partials\top_header.html:8
+msgid "Ifi Platform Beta"
+msgstr "Ifi Platform Beta"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:26
 #: .\templates\partials\bottom_header.html:5

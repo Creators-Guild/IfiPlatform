@@ -1,7 +1,8 @@
 """Template tags for small site-wide content, e.g. the rotating header message."""
 
+import random
+
 from django import template
-from django.utils import timezone
 from wagtail.models import Locale
 
 from ..models.site_models import HeaderMessage
@@ -11,16 +12,16 @@ register = template.Library()
 
 @register.simple_tag
 def get_header_message():
-    """Return today's header message, cycling through active messages once per day."""
+    """Return a random active header message -- a fresh pick on every page
+    load, since this is called from top_header.html on every render."""
     messages = list(
         HeaderMessage.objects.filter(
             is_active=True, locale=Locale.get_active()
-        ).order_by("pk")
+        )
     )
     if not messages:
         return None
-    index = timezone.now().date().toordinal() % len(messages)
-    return messages[index]
+    return random.choice(messages)
 
 
 @register.simple_tag(takes_context=True)

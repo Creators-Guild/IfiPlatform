@@ -113,6 +113,10 @@
   color: var(--color-accent);
 }
 
+.header-message a {
+  text-decoration: none;
+}
+
 .nav_link {
   flex-shrink: 0; /* keep natural size in the nowrap row -- .nav_links scrolls instead of squishing them */
   display: inline-flex;

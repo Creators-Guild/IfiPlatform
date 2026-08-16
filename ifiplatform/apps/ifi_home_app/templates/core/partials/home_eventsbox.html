@@ -222,11 +222,11 @@
         <li class="home-eventsbox-empty">{% trans "No upcoming events." %}</li>
     {% endfor %}
 </ul>
-{% if upcoming_events|length > 1 %}
+{% if upcoming_events|length > 4 %}
     {% comment %}
     Mobile only (home_eventsbox.css/home_layout.css) -- past that breakpoint
-    the collapsed box only shows "Happening now" plus the first upcoming
-    event, no internal scroll any more. This button (and the close button
+    the collapsed box only shows "Happening now" plus the first 4 upcoming
+    events, no internal scroll any more. This button (and the close button
     below, home_eventsbox.js) is how the rest becomes reachable: tapping it
     expands .eventsbox_container itself to fill the screen, scrollable, same
     "tap to see everything" idea as .messageboard-expand's "View full
@@ -234,8 +234,8 @@
     box in place rather than cloning its content into a separate modal,
     since the list has real interactive state (union tag toggles, sub-event
     toggles, links) a clone would have to duplicate. Only rendered at all
-    when there's more than one event -- with just one (or zero, the empty-
-    state message), there's nothing this would actually reveal.
+    when there are more than 4 events -- with 4 or fewer, the collapsed view
+    above already shows everything, so there's nothing left to reveal.
     {% endcomment %}
     <button type="button" class="home-eventsbox-more">{% trans "See more events" %}</button>
     <button type="button" class="home-eventsbox-close" aria-label="{% trans "Close" %}">&times;</button>
