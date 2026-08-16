@@ -14,6 +14,12 @@
             fill in any missing text via DeepL, and publish{% if descendant_count %} each of them{% endif %} immediately.
         </p>
         <p>Segments that already have a translation are left untouched.</p>
+        <p>
+            Runs in the background rather than blocking this page -- for a
+            large subtree this can take a while. You'll get a "started"
+            message immediately; check <code>journalctl -t machine-translate-subtree</code>
+            on the server for progress and the final result.
+        </p>
 
         <form method="POST">
             {% csrf_token %}
