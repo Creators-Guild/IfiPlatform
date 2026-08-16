@@ -1793,9 +1793,11 @@ msgstr "Norsk"
 msgid "Home"
 msgstr "Hjem"
 
+#: .\ifi_home_app\templates\core\home_index.html:4
+#: .\ifi_home_app\templates\home_base.html:4
 #: .\templates\partials\top_header.html:23
-msgid "Ifi Homepage"
-msgstr "Ifi Hjemmesiden"
+msgid "Ifi Home"
+msgstr "Ifi Hjem"
 
 #: .\templates\partials\top_header.html:32
 msgid "Ifi Study"

@@ -463,10 +463,9 @@ msgstr ""
 
 #: .\ifi_home_app\templates\core\home_index.html:4
 #: .\ifi_home_app\templates\home_base.html:4
-#, fuzzy
-#| msgid "Ifi Homepage"
+#: .\templates\partials\top_header.html:23
 msgid "Ifi Home"
-msgstr "Ifi Homepage"
+msgstr "Ifi Home"
 
 #: .\ifi_home_app\templates\core\home_index.html:19
 msgid "Latest News"
@@ -1758,10 +1757,6 @@ msgstr ""
 #: .\templates\partials\top_header.html:24
 msgid "Home"
 msgstr "Home"
-
-#: .\templates\partials\top_header.html:23
-msgid "Ifi Homepage"
-msgstr "Ifi Homepage"
 
 #: .\templates\partials\top_header.html:32
 msgid "Ifi Study"

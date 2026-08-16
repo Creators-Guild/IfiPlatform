@@ -56,13 +56,6 @@
   padding: 20px 0;
   display: flex;
   flex-direction: column;
-  transition:
-    background-color 0.15s ease,
-    transform 0.05s ease;
-}
-
-.ifiplatform-logo-box:hover {
-  transform: translateY(-1px);
 }
 
 .ifiplatform-logo-box h1 {
@@ -72,12 +65,15 @@
 }
 
 .ifiplatform-logo {
+  display: inline-block;
   text-decoration: none;
   color: var(--color-accent);
+  transition: color 0.15s ease, transform 0.05s ease;
 }
 
 .ifiplatform-logo:hover {
   color: var(--color-accent-hover);
+  transform: translateY(-1px);
 }
 
 .header-message {
@@ -114,7 +110,15 @@
 }
 
 .header-message a {
+  display: inline-block;
   text-decoration: none;
+  color: var(--color-accent);
+  transition: color 0.15s ease, transform 0.05s ease;
+}
+
+.header-message a:hover {
+  color: var(--color-accent-hover);
+  transform: translateY(-1px);
 }
 
 .nav_link {
