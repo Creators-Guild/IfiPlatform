@@ -3,35 +3,41 @@ into English in one action, from one confirm screen.
 
 Design rationale/history: docs/claude_context/translation_views.md"""
 
+import shutil
+import subprocess
+import sys
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.db import transaction
-from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
-from wagtail.models import Locale, Page
+from wagtail.models import Page
 
 from wagtail_localize.machine_translators import get_machine_translator
-from wagtail_localize.models import StringTranslation
-from wagtail_localize.operations import TranslationCreator
-from wagtail_localize.views.edit_translation import apply_machine_translation
 
-from .glossary_terms import GLOSSARY_TERMS
-from ..models import GlossarySyncState
 from .sync import SOURCE_LANGUAGE_CODE
 
 # The only other locale this bilingual site has -- see sync.py's own
 # SOURCE_LANGUAGE_CODE comment for why nb is the anchor.
 TARGET_LANGUAGE_CODE = "en"
 
+# journalctl -t <this> -f shows progress -- see machine_translate_subtree
+# management command (the actual implementation, run as a background
+# process by this view) and docs/claude_context/translation_views.md.
+JOURNAL_TAG = "machine-translate-subtree"
+
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def machine_translate_subtree(request, page_id):
-    """GET shows a confirm screen (page + descendant count); POST runs the
-    translation and redirects back to the page's edit view."""
+    """GET shows a confirm screen (page + descendant count); POST launches
+    the actual translation as a detached background process (see
+    machine_translate_subtree management command) and redirects back to
+    the page's edit view immediately -- a real subtree is too slow for any
+    request/response cycle, see docs/claude_context/translation_views.md."""
     if not request.user.has_perms(["wagtail_localize.submit_translation"]):
         raise PermissionDenied
 
@@ -42,7 +48,6 @@ def machine_translate_subtree(request, page_id):
             "mass machine-translated."
         )
 
-    target_locale = get_object_or_404(Locale, language_code=TARGET_LANGUAGE_CODE)
     machine_translator = get_machine_translator()
     if machine_translator is None:
         messages.error(request, "No machine translator is configured.")
@@ -53,10 +58,10 @@ def machine_translate_subtree(request, page_id):
     if request.method == "POST":
         if "dry_run" in request.POST:
             # No TranslationCreator, no machine_translator call, no DB
-            # writes -- just reports the same page list _translate_and_
-            # publish_subtree would act on, so you can sanity-check scope
-            # (and avoid burning DeepL quota on a subtree that's bigger
-            # than intended) before actually committing to it.
+            # writes -- just reports the same page list the background
+            # command would act on, so you can sanity-check scope (and
+            # avoid burning DeepL quota on a subtree that's bigger than
+            # intended) before actually committing to it.
             titles = [str(p) for p in pages]
             shown = ", ".join(titles[:10])
             if len(titles) > 10:
@@ -67,12 +72,43 @@ def machine_translate_subtree(request, page_id):
             )
             return redirect(reverse("wagtailadmin_pages:edit", args=[page.id]))
 
-        translated_count = _translate_and_publish_subtree(
-            pages, target_locale, machine_translator, request.user
-        )
+        # start_new_session=True detaches the child into its own session,
+        # so it survives independently of gunicorn's process group -- a
+        # plain background thread would die the moment this worker gets
+        # recycled or the service restarts (e.g. the next deploy), silently
+        # losing all in-progress translation. On the real server, systemd-cat
+        # routes its stdout/stderr into the journal under JOURNAL_TAG, since
+        # it's no longer a gunicorn child and so no longer shows up under
+        # `journalctl -u gunicorn`. systemd-cat doesn't exist on local dev
+        # (e.g. Windows) -- fall back to plain inheritance there, so
+        # progress still shows up directly in the runserver terminal.
+        base_command = [
+            sys.executable, "manage.py", "machine_translate_subtree",
+            str(page.id), str(request.user.id),
+        ]
+        systemd_cat = shutil.which("systemd-cat")
+        if systemd_cat:
+            subprocess.Popen(
+                [systemd_cat, "-t", JOURNAL_TAG, *base_command],
+                cwd=settings.BASE_DIR,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+            progress_hint = f"check progress with journalctl -t {JOURNAL_TAG}"
+        else:
+            subprocess.Popen(
+                base_command,
+                cwd=settings.BASE_DIR,
+                stdin=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+            progress_hint = "check the runserver terminal for progress"
         messages.success(
             request,
-            f"Machine-translated and published {translated_count} page(s) into English.",
+            f"Started machine-translating {len(pages)} page(s) in the background -- "
+            f"{progress_hint}.",
         )
         return redirect(reverse("wagtailadmin_pages:edit", args=[page.id]))
 
@@ -81,61 +117,3 @@ def machine_translate_subtree(request, page_id):
         "translation/machine_translate_subtree_confirm.html",
         {"page": page, "descendant_count": len(pages) - 1},
     )
-
-
-@transaction.atomic
-def _translate_and_publish_subtree(pages, target_locale, machine_translator, user):
-    """Creates/updates an English translation for every page in `pages`,
-    fills each one in via `machine_translator`, and publishes it -- matching
-    the live status of its nb source page, same as
-    WAGTAILLOCALIZE_SYNC_LIVE_STATUS_ON_TRANSLATE's own default behaviour."""
-    creator = TranslationCreator(user, [target_locale])
-    for page in pages:
-        creator.create_translations(page)
-
-    total = len(creator.mappings)
-    translated_count = 0
-    for i, (source, translations) in enumerate(creator.mappings.items(), start=1):
-        source_instance = source.get_source_instance()
-        # One DeepL call per page, with nothing else printed to the
-        # runserver terminal in between -- a big subtree can take minutes
-        # with no feedback at all otherwise. Just a progress signal, not
-        # real logging.
-        print(f"  machine-translating {i}/{total}: {source_instance}")
-        publish = source_instance.live
-        for translation in translations:
-            _clear_stale_glossary_translations(translation)
-            apply_machine_translation(translation.id, user, machine_translator)
-            translation.save_target(user=user, publish=publish)
-            translated_count += 1
-    return translated_count
-
-
-def _clear_stale_glossary_translations(translation):
-    """Deletes machine translations of segments containing a glossary term
-    that predate the glossary's last sync, so apply_machine_translation()
-    redoes them with the current glossary. See
-    docs/claude_context/translation_views.md."""
-    synced_at = GlossarySyncState.last_synced_at()
-    if synced_at is None or not GLOSSARY_TERMS:
-        return
-
-    lower_terms = [term.lower() for term in GLOSSARY_TERMS]
-    affected = [
-        (segment.string_id, segment.context_id)
-        for segment in translation.source.stringsegment_set.select_related("string")
-        if any(term in segment.string.data.lower() for term in lower_terms)
-    ]
-    if not affected:
-        return
-
-    pair_filter = Q()
-    for string_id, context_id in affected:
-        pair_filter |= Q(translation_of_id=string_id, context_id=context_id)
-
-    StringTranslation.objects.filter(
-        pair_filter,
-        locale=translation.target_locale,
-        translation_type=StringTranslation.TRANSLATION_TYPE_MACHINE,
-        updated_at__lt=synced_at,
-    ).delete()

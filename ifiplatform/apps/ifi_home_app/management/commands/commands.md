@@ -16,6 +16,41 @@ seeding dummy data into what looks like a real (non-local) database.
 `--force` overrides that check — mainly useful in tests, since Django's
 test runner always forces `DEBUG=False` regardless of `.env`.
 
+## machine_translate_subtree
+
+```bash
+python manage.py machine_translate_subtree <page_id> <user_id>
+```
+
+Not meant to be run by hand — this is the real implementation behind the
+"Translate and publish" button on the wagtail-admin "Machine-translate
+subtree" screen (`translation/views.py`). The view only validates the
+request and launches this command as a **detached background process**
+(`subprocess.Popen(..., start_new_session=True)`), returning immediately —
+a real subtree does one DeepL API call per page, which for anything but a
+tiny subtree is far too slow for any request/response cycle (a 164-page
+subtree once took a gunicorn worker down with it via `WORKER TIMEOUT`
+before this existed).
+
+Each page gets its own transaction and a `time.sleep(DEEPL_CALL_DELAY_SECONDS)`
+gap before the next DeepL call (stops requests firing back-to-back, which
+is what tripped DeepL's own rate limiting the one time this got tested at
+real scale). A single page failing (DeepL rate limit, network hiccup,
+whatever) is logged and skipped, not fatal to the rest of the run —
+`apply_machine_translation()` only ever skips segments that already have a
+translation, so simply re-running this later picks up exactly the pages
+that failed or were never reached, at zero extra DeepL cost for anything
+already done.
+
+Progress and the final "N translated, M failed" summary go to stdout — on
+the real server, the view wraps this in `systemd-cat -t
+machine-translate-subtree`, so check `journalctl -t
+machine-translate-subtree -f`. Locally (no `systemd-cat`, e.g. Windows) it
+just inherits the runserver terminal's stdout instead.
+
+See `docs/claude_context/translation_views.md` for the full history of why
+this moved out of the request cycle.
+
 ## sync_deepl_glossary
 
 ```bash

@@ -341,8 +341,10 @@ WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
     ("nb", "Norwegian Bokmål"),
 ]
 # Machine translation setup
+# CLASS points at ifi_home_app's own subclass (adds raise_for_status() --
+# see translation/deepl.py), not wagtail_localize's stock one.
 WAGTAILLOCALIZE_MACHINE_TRANSLATOR = {
-    "CLASS": "wagtail_localize.machine_translators.deepl.DeepLTranslator",
+    "CLASS": "ifi_home_app.translation.deepl.DeepLTranslator",
     "OPTIONS": {
         "AUTH_KEY": os.environ.get("DEEPL_API_KEY"), # check .env
         # Set by `manage.py sync_deepl_glossary` -- see that command and
