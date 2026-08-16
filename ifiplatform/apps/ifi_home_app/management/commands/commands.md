@@ -3,7 +3,7 @@
 ## seed_dev_data
 
 ```bash
-py manage.py seed_dev_data [--force]
+python manage.py seed_dev_data [--force]
 ```
 
 Fills a fresh local database with a dummy article tree (index pages,
@@ -19,7 +19,7 @@ test runner always forces `DEBUG=False` regardless of `.env`.
 ## sync_deepl_glossary
 
 ```bash
-py manage.py sync_deepl_glossary
+python manage.py sync_deepl_glossary [--write-env]
 ```
 
 Pushes `ifi_home_app/translation/glossary_terms.py`'s nb → en term list to
@@ -36,7 +36,7 @@ running it:** copy the printed `glossary_id` into `DEEPL_GLOSSARY_ID` in
 ## sync_translated_page_fields
 
 ```bash
-py manage.py sync_translated_page_fields [--dry-run]
+python manage.py sync_translated_page_fields [--dry-run]
 ```
 
 Re-syncs wagtail-localize `SynchronizedField`s (`show_in_menu`, `status`,
@@ -58,7 +58,7 @@ lists what would be synced without changing anything.
 ## link_peoply_organizations
 
 ```bash
-py manage.py link_peoply_organizations [--apply]
+python manage.py link_peoply_organizations [--apply]
 ```
 
 One-off/occasional helper for setting `peoply_organization_id` across
@@ -89,7 +89,7 @@ API for a couple of unions, not dozens. This command is for getting a
 ## sync_peoply_events
 
 ```bash
-py manage.py sync_peoply_events [--after YYYY-MM-DD]
+python manage.py sync_peoply_events [--after YYYY-MM-DD]
 ```
 
 Creates `EventPage`s from [Peoply](https://peoply.app) (the event platform
