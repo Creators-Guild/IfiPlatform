@@ -451,8 +451,9 @@ def publish_page(request, page_id):
         if translation_revision is not None:
             translation_revision.publish(user=request.user, skip_permission_checks=True)
 
-    # Runs last -- see docs/claude_context/article_views.md.
-    sync_synchronized_fields(page, user=request.user)
+    # SynchronizedFields are synced automatically by the page_published
+    # signal handler (wagtail_hooks.py) fired from revision.publish() above
+    # -- no explicit call needed here.
 
     return JsonResponse({"ok": True})
 

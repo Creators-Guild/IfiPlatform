@@ -51,6 +51,22 @@ def machine_translate_subtree(request, page_id):
     pages = [page, *page.get_descendants()]
 
     if request.method == "POST":
+        if "dry_run" in request.POST:
+            # No TranslationCreator, no machine_translator call, no DB
+            # writes -- just reports the same page list _translate_and_
+            # publish_subtree would act on, so you can sanity-check scope
+            # (and avoid burning DeepL quota on a subtree that's bigger
+            # than intended) before actually committing to it.
+            titles = [str(p) for p in pages]
+            shown = ", ".join(titles[:10])
+            if len(titles) > 10:
+                shown += f", and {len(titles) - 10} more"
+            messages.info(
+                request,
+                f"Dry run: would machine-translate and publish {len(pages)} page(s) -- {shown}",
+            )
+            return redirect(reverse("wagtailadmin_pages:edit", args=[page.id]))
+
         translated_count = _translate_and_publish_subtree(
             pages, target_locale, machine_translator, request.user
         )
@@ -77,9 +93,16 @@ def _translate_and_publish_subtree(pages, target_locale, machine_translator, use
     for page in pages:
         creator.create_translations(page)
 
+    total = len(creator.mappings)
     translated_count = 0
-    for source, translations in creator.mappings.items():
-        publish = source.get_source_instance().live
+    for i, (source, translations) in enumerate(creator.mappings.items(), start=1):
+        source_instance = source.get_source_instance()
+        # One DeepL call per page, with nothing else printed to the
+        # runserver terminal in between -- a big subtree can take minutes
+        # with no feedback at all otherwise. Just a progress signal, not
+        # real logging.
+        print(f"  machine-translating {i}/{total}: {source_instance}")
+        publish = source_instance.live
         for translation in translations:
             _clear_stale_glossary_translations(translation)
             apply_machine_translation(translation.id, user, machine_translator)

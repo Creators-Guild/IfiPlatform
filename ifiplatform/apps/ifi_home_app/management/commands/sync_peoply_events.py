@@ -8,18 +8,26 @@ sync only ever adds, it never overwrites or removes. A later resync won't
 pick up a changed venue/time on Peoply's side either; re-running this isn't
 a way to keep an event's details live-updated, just to catch new ones.
 
-Run manually, or wire into a schedule later (ci-deploy.yml already has a
-nightly cron for deploys as a precedent) once that's actually wanted."""
+After creating pages, also runs sync_locale_trees (creates each new event's
+English alias -- pages here are created via add_child()/save_revision().
+publish() directly, which bypasses the admin-only hook that would otherwise
+do this) and clears Wagtail's site-root-paths cache (bulk page-tree churn
+like this doesn't trigger Wagtail's own cache invalidation, which only
+listens for Site row changes -- confirmed the hard way once, see
+clear_cache's own docstring). Both make every caller -- the scheduled
+systemd timer, a local dev running this by hand, and the "Sync Peoply now"
+admin button -- self-contained, with nothing extra to run afterwards."""
 
 from datetime import datetime, time, timedelta, timezone as dt_timezone
 from html import escape
 
+from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from django.utils.text import slugify
 
 from wagtail.coreutils import find_available_slug
-from wagtail.models import Locale
+from wagtail.models import Locale, Site
 
 from ifi_home_app.integrations.peoply_api import get_events
 from ifi_home_app.models.article.unions import UnionPage
@@ -160,6 +168,9 @@ class Command(BaseCommand):
                 page.save_revision().publish()
                 created_count += 1
                 self.stdout.write(f"  created EventPage: {event['title']}")
+
+        call_command("sync_locale_trees")
+        Site.clear_site_root_paths_cache()
 
         PeoplySyncState.touch()
         self.stdout.write(self.style.SUCCESS(
