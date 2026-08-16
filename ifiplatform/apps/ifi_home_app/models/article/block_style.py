@@ -5,11 +5,17 @@ Design rationale/history: docs/claude_context/article_block_style.md"""
 from django.db import models
 
 from .constants import COLOR_CHOICES, CONTENT_ALIGNMENT_CHOICES, HEX_COLOR_VALIDATOR
+from .typography_defaults import (
+    ARTICLE_ALIGNMENT,
+    ARTICLE_HERO_IMAGE,
+    ARTICLE_SIDE_PADDING,
+    ARTICLE_TYPOGRAPHY,
+)
 
 BLOCK_STYLE_DEFAULTS = {
     "heading": {
         "alignment": "center",
-        "font_size": 1.5,
+        "font_size": 2,
         "side_padding": 0,
         "text_color": "",
         "text_custom_color": "",
@@ -21,7 +27,7 @@ BLOCK_STYLE_DEFAULTS = {
     "paragraph": {
         "side_padding": 1,
         "alignment": "center",
-        "font_size": 1,
+        "font_size": ARTICLE_TYPOGRAPHY["paragraph"],
         "text_color": "",
         "text_custom_color": "",
         "text_shadow_enabled": False,
@@ -58,24 +64,24 @@ BLOCK_STYLE_DEFAULTS = {
     "tool_card": {"width_rem": 20, "height_rem": 0},
     "multi_column": {"side_padding": 1, "gap": 2, "column_weight": 1},
     "article_header": {
-        "side_padding": 0,
-        "title_alignment": "left",
-        "title_font_size": 2,
-        "intro_alignment": "left",
-        "intro_font_size": 1,
-        "meta_alignment": "left",
-        "meta_font_size": 0.9,
+        "side_padding": ARTICLE_SIDE_PADDING["header"],
+        "title_alignment": ARTICLE_ALIGNMENT["title"],
+        "title_font_size": ARTICLE_TYPOGRAPHY["title"],
+        "intro_alignment": ARTICLE_ALIGNMENT["intro"],
+        "intro_font_size": ARTICLE_TYPOGRAPHY["intro"],
+        "meta_alignment": ARTICLE_ALIGNMENT["meta"],
+        "meta_font_size": ARTICLE_TYPOGRAPHY["meta"],
     },
     "hero_image": {
-        "alignment": "right",
-        "width_rem": 18,
-        "side_padding": 0,
-        "boxed": False,
-        "box_color": "bg-light",
+        "alignment": ARTICLE_HERO_IMAGE["position"],
+        "width_rem": ARTICLE_HERO_IMAGE["width_rem"],
+        "side_padding": ARTICLE_SIDE_PADDING["hero_image"],
+        "boxed": ARTICLE_HERO_IMAGE["boxed"],
+        "box_color": ARTICLE_HERO_IMAGE["box_color"],
         "box_custom_color": "",
-        "box_border_radius": 0.75,
-        "shadow_enabled": True,
-        "shadow_strength": 1,
+        "box_border_radius": ARTICLE_HERO_IMAGE["box_border_radius"],
+        "shadow_enabled": ARTICLE_HERO_IMAGE["shadow_enabled"],
+        "shadow_strength": ARTICLE_HERO_IMAGE["shadow_strength"],
         "shadow_color": "",
         "shadow_custom_color": "",
     },
@@ -97,8 +103,42 @@ BLOCK_STYLE_DEFAULTS = {
         "shadow_custom_color": "",
     },
 }
-# Alias, not a copy -- see docs/claude_context/article_block_style.md.
-BLOCK_STYLE_DEFAULTS["column_title"] = BLOCK_STYLE_DEFAULTS["heading"]
+
+# A fresh heading block's default font_size, keyed by its level (h2-h5, see
+# article/blocks.py's heading block), from ARTICLE_TYPOGRAPHY (typography_
+# defaults.py) -- so an untouched heading's size already reflects its
+# nesting depth instead of every level rendering at the same flat
+# BLOCK_STYLE_DEFAULTS["heading"]["font_size"]. An explicit per-block
+# override (ArticleBlockStyle.font_size) still always wins over this --
+# see _effective_heading_style.
+HEADING_LEVEL_FONT_SIZES = {
+    "h2": ARTICLE_TYPOGRAPHY["h2"],
+    "h3": ARTICLE_TYPOGRAPHY["h3"],
+    "h4": ARTICLE_TYPOGRAPHY["h4"],
+    "h5": ARTICLE_TYPOGRAPHY["h5"],
+}
+
+
+def _heading_defaults(level):
+    """BLOCK_STYLE_DEFAULTS['heading'] with font_size swapped for the
+    level-appropriate default (falls back to the flat h2 value for an
+    unrecognized level, which shouldn't happen given the block's own
+    ChoiceBlock choices)."""
+    return {
+        **BLOCK_STYLE_DEFAULTS["heading"],
+        "font_size": HEADING_LEVEL_FONT_SIZES.get(level, BLOCK_STYLE_DEFAULTS["heading"]["font_size"]),
+    }
+
+
+# Not an alias any more -- a multi_column column's title always renders as
+# an h3 (see article_body_blocks.html), so it needs h3's own default, not
+# whatever level a plain heading block happens to default to.
+BLOCK_STYLE_DEFAULTS["column_title"] = _heading_defaults("h3")
+# Exposed to the editor's "Reset to default" button via the same
+# json_script that already serializes BLOCK_STYLE_DEFAULTS (see
+# article_block_style.js) -- BLOCK_STYLE_DEFAULTS["heading"]["font_size"]
+# alone isn't level-aware, so that button needs this too.
+BLOCK_STYLE_DEFAULTS["heading_font_size_by_level"] = HEADING_LEVEL_FONT_SIZES
 
 
 def _effective_box_style(override):
@@ -258,9 +298,13 @@ def _effective_block_styles(body_stream, overrides_by_block_id, font_size_multip
     for block in body_stream:
         block_id = str(block.id)
         override = overrides_by_block_id.get(block_id)
-        if block.block_type in ("heading", "paragraph"):
+        if block.block_type == "heading":
             styles[block_id] = _effective_heading_style(
-                override, BLOCK_STYLE_DEFAULTS[block.block_type], font_size_multiplier
+                override, _heading_defaults(block.value["level"]), font_size_multiplier
+            )
+        elif block.block_type == "paragraph":
+            styles[block_id] = _effective_heading_style(
+                override, BLOCK_STYLE_DEFAULTS["paragraph"], font_size_multiplier
             )
         elif block.block_type == "image":
             defaults = BLOCK_STYLE_DEFAULTS["image"]
@@ -352,7 +396,9 @@ def _effective_block_styles(body_stream, overrides_by_block_id, font_size_multip
                 }
                 title_id = f"{column_id}-title"
                 styles[title_id] = _effective_heading_style(
-                    overrides_by_block_id.get(title_id), BLOCK_STYLE_DEFAULTS["heading"], font_size_multiplier
+                    # Always h3 (article_body_blocks.html) -- not
+                    # BLOCK_STYLE_DEFAULTS["heading"]'s own flat value.
+                    overrides_by_block_id.get(title_id), BLOCK_STYLE_DEFAULTS["column_title"], font_size_multiplier
                 )
                 styles.update(
                     _effective_block_styles(

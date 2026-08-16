@@ -81,4 +81,96 @@
   --color-event-green: var(--color-pastel-green);
   --color-event-purple: var(--color-pastel-purple);
   --color-event-text: var(--color-ink);
+
+  /* ---- 4. Typography -- sitewide font-size/alignment defaults.
+     h1-h6 had no global rule before this (elements.css wires these up) --
+     values below match the browser's own default UA-stylesheet ratios
+     closely enough that adding them doesn't visibly change any existing
+     page, while making each size independently controllable here. ---- */
+  --font-size-base: 1rem;
+  --font-size-h1: 2rem;
+  --font-size-h2: 1.5rem;
+  --font-size-h3: 1.25rem;
+  --font-size-h4: 1.1rem;
+  --font-size-h5: 1rem;
+  --font-size-h6: 0.875rem;
+
+  /* No --font-size-paragraph/--font-size-article-intro here on purpose --
+     the Wagtail article-editor's own paragraph/intro/title/meta/heading
+     defaults live entirely in Python (ARTICLE_TYPOGRAPHY,
+     apps/ifi_home_app/models/article/typography_defaults.py). That's a
+     deliberately separate system from the h1-h6 chrome scale above (plain
+     template headings with no per-block editing) -- the two should never
+     need to interact, so there's no CSS token for the Python side to try
+     to stay in sync with. */
+
+  --text-align-body: left;
+  --text-align-heading: left;
+
+  /* ---- 5. Static-page title/content alignment -- CategoryPage,
+     ArticleIndexPage, StudentUnionCategoryPage (the listing),
+     ToolPage and UnionPage (an individual union's own page) have no
+     per-page style editor yet ("editors later"), so these tokens are
+     the only knob for now. TEMPORARY: a stand-in for real per-page
+     alignment control, not a permanent design decision -- once each
+     page type gets its own on-page editor (matching ArticlePage's
+     quick-style system), that editor's own per-page value should
+     become the actual source of truth and these tokens should either
+     turn into that system's own defaults (same move ARTICLE_TYPOGRAPHY/
+     BANNER_STYLE_DEFAULTS already made) or be removed outright. Each
+     page type gets its own pair rather than sharing one or reusing
+     --text-align-heading/-body above -- none of these five templates
+     share anything with each other or with ArticlePage's own
+     quick-style system, same "systems shouldn't interact" reasoning as
+     ARTICLE_TYPOGRAPHY (typography_defaults.py). Defaults match each
+     page's own actual current rendered alignment (verified live, not
+     assumed -- title is "left" everywhere via inheritance from
+     --text-align-heading above; content is "center" for the four with
+     their own explicit rule, "left" for UnionPage's .prose, which has
+     none) -- adding these tokens doesn't visibly change anything on
+     its own. ---- */
+  --text-align-category-title: left;
+  --text-align-category-content: center;
+  --text-align-indexpage-title: left;
+  --text-align-indexpage-content: center;
+  --text-align-studentunion-listing-title: left;
+  --text-align-studentunion-listing-content: center;
+  --text-align-tool-title: left;
+  --text-align-tool-content: center;
+  --text-align-union-title: left;
+  --text-align-union-content: left;
+
+  /* ---- 6. Layout -- sitewide spacing/width defaults ---- */
+  /* .home-layout .maincontent's own horizontal padding (home_layout.css)
+     -- the actual sitewide side-gutter, since every page renders through
+     that one shared wrapper (home_base.html). */
+  --side-padding: 2rem;
+  --side-padding-mobile: 0.75rem;
+  /* Prose-reading-width column, matching the value .event-page-prose
+     (event_page.css) already used before this token existed -- opt-in via
+     .content-column (elements.css) for anything that wants that same
+     centered-column treatment, not applied automatically anywhere. */
+  --content-max-width: 50rem;
+}
+
+/* Mobile gets its own smaller type scale, not just whatever the desktop
+   sizes above happen to shrink to -- redefining the same custom
+   properties here (rather than a separate --font-size-h1-mobile set)
+   means every var(--font-size-h1) reference site-wide picks this up
+   automatically, no per-usage media query needed. 45rem matches this
+   codebase's existing mobile breakpoint (event_page.css,
+   article_layout.css, ...). This intentionally does NOT touch any
+   individual component's own mobile-specific heading override (e.g.
+   .newsbar-heading's own font-size at this same breakpoint) -- those stay
+   in full control of their own elements; this only changes what
+   *unstyled* headings fall back to. */
+@media (max-width: 45rem) {
+  :root {
+    --font-size-h1: 1.6rem;
+    --font-size-h2: 1.3rem;
+    --font-size-h3: 1.1rem;
+    --font-size-h4: 1rem;
+    --font-size-h5: 0.95rem;
+    --font-size-h6: 0.85rem;
+  }
 }

@@ -13,3 +13,49 @@ html, body {
      boundary, so it doesn't introduce a new one. */
   overflow-x: hidden;
 }
+
+/* .maincontent (home_base.html) is the one wrapper every Wagtail page's
+   own content renders into -- scoped here, not on html/body or a bare
+   h1-h6, so these tokens only ever affect actual page content, never site
+   chrome (navbar, sidemenu, modals) outside that wrapper. */
+.maincontent {
+  font-size: var(--font-size-base);
+  text-align: var(--text-align-body);
+}
+
+/* :where(.maincontent), not a plain .maincontent prefix -- that would add
+   a class to every selector's specificity (0,0,1,1), which beats several
+   existing single-class heading overrides elsewhere (.section-heading's
+   text-align:left, .newsbar-heading's own mobile font-size, ...) that
+   only have specificity (0,0,1,0) -- silently undoing them. :where()
+   carries zero specificity, so these behave exactly like plain h1-h6
+   rules would: a default any component-level class can still cleanly
+   override, mobile-specific or not. The mobile scale itself lives in the
+   --font-size-h* tokens (tokens.css), not here -- so it applies
+   automatically without a second copy of these rules under a media query. */
+:where(.maincontent) h1,
+:where(.maincontent) h2,
+:where(.maincontent) h3,
+:where(.maincontent) h4,
+:where(.maincontent) h5,
+:where(.maincontent) h6 {
+  text-align: var(--text-align-heading);
+}
+
+:where(.maincontent) h1 { font-size: var(--font-size-h1); }
+:where(.maincontent) h2 { font-size: var(--font-size-h2); }
+:where(.maincontent) h3 { font-size: var(--font-size-h3); }
+:where(.maincontent) h4 { font-size: var(--font-size-h4); }
+:where(.maincontent) h5 { font-size: var(--font-size-h5); }
+:where(.maincontent) h6 { font-size: var(--font-size-h6); }
+
+/* Opt-in centered prose column -- add this class to anything inside
+   .maincontent that wants the same "readable width, centered" treatment
+   .event-page-prose (event_page.css) already hand-rolls with the same
+   50rem value (--content-max-width). Not applied anywhere automatically:
+   most of this site's layouts (grids, sidebars, the full-width event
+   calendar) deliberately use the page's whole given width instead. */
+.content-column {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}

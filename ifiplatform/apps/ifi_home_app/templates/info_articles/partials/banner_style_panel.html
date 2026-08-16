@@ -22,8 +22,8 @@ with (registerSaveHandler), same pattern as quick-style-panel.html.
 <form class="quick-style-panel" id="banner-style-panel"
       data-banner-style-url="{% url 'page_banner_style' page.id %}"
       data-sync-mirrored-url="{% url 'page_sync_mirrored' page.id %}"
-      data-default-banner-color="#197dc4" data-default-dot-color="#ffffff" data-default-text-color="#fffff9"
-      data-default-width="60" data-default-height="14" data-default-font-size="2.75">
+      data-default-banner-color="{{ page.banner_defaults.color }}" data-default-dot-color="{{ page.banner_defaults.dot_color }}" data-default-text-color="{{ page.banner_defaults.text_color }}"
+      data-default-width="{{ page.banner_defaults.width_rem|unlocalize }}" data-default-height="{{ page.banner_defaults.height_rem|unlocalize }}" data-default-font-size="{{ page.banner_defaults.font_size|unlocalize }}">
     {% csrf_token %}
     <div class="quick-style-panel-header">
         <p class="quick-style-panel-title">{% trans "Banner style (editors only)" %}</p>
@@ -73,7 +73,7 @@ with (registerSaveHandler), same pattern as quick-style-panel.html.
                         <div class="color-swatch-custom-group">
                             <input type="text" class="color-swatch color-swatch--custom" id="banner-style-color" placeholder="#hex" maxlength="7" value="{{ page.banner_style.banner_color }}" aria-label="{% trans 'Banner color hex' %}">
                             <label class="color-swatch-picker" aria-label="{% trans 'Pick a color' %}" title="{% trans 'Pick a color' %}">
-                                <input type="color" id="banner-style-color-picker" class="color-swatch-picker-input" tabindex="-1" value="{{ page.banner_style.banner_color|default:'#197dc4' }}">
+                                <input type="color" id="banner-style-color-picker" class="color-swatch-picker-input" tabindex="-1" value="{{ page.banner_style.banner_color|default:page.banner_defaults.color }}">
                             </label>
                         </div>
                     </div>
@@ -85,7 +85,7 @@ with (registerSaveHandler), same pattern as quick-style-panel.html.
                         <div class="color-swatch-custom-group">
                             <input type="text" class="color-swatch color-swatch--custom" id="banner-style-dot-color" placeholder="#hex" maxlength="7" value="{{ page.banner_style.banner_dot_color }}" aria-label="{% trans 'Dot color hex' %}">
                             <label class="color-swatch-picker" aria-label="{% trans 'Pick a color' %}" title="{% trans 'Pick a color' %}">
-                                <input type="color" id="banner-style-dot-color-picker" class="color-swatch-picker-input" tabindex="-1" value="{{ page.banner_style.banner_dot_color|default:'#ffffff' }}">
+                                <input type="color" id="banner-style-dot-color-picker" class="color-swatch-picker-input" tabindex="-1" value="{{ page.banner_style.banner_dot_color|default:page.banner_defaults.dot_color }}">
                             </label>
                         </div>
                     </div>
@@ -97,7 +97,7 @@ with (registerSaveHandler), same pattern as quick-style-panel.html.
                         <div class="color-swatch-custom-group">
                             <input type="text" class="color-swatch color-swatch--custom" id="banner-style-text-color" placeholder="#hex" maxlength="7" value="{{ page.banner_style.banner_text_color }}" aria-label="{% trans 'Title text color hex' %}">
                             <label class="color-swatch-picker" aria-label="{% trans 'Pick a color' %}" title="{% trans 'Pick a color' %}">
-                                <input type="color" id="banner-style-text-color-picker" class="color-swatch-picker-input" tabindex="-1" value="{{ page.banner_style.banner_text_color|default:'#fffff9' }}">
+                                <input type="color" id="banner-style-text-color-picker" class="color-swatch-picker-input" tabindex="-1" value="{{ page.banner_style.banner_text_color|default:page.banner_defaults.text_color }}">
                             </label>
                         </div>
                     </div>
@@ -110,18 +110,18 @@ with (registerSaveHandler), same pattern as quick-style-panel.html.
             </div>
             <div class="block-style-box-fields" id="banner-style-size-fields" hidden>
                 <label class="quick-style-field">
-                    <span>{% trans "Width" %} (<span id="banner-style-width-value">{{ page.banner_style.banner_width_rem|default:60|unlocalize }}</span>rem)</span>
-                    <input type="range" id="banner-style-width" min="10" max="100" step="1" value="{{ page.banner_style.banner_width_rem|default:60|unlocalize }}">
+                    <span>{% trans "Width" %} (<span id="banner-style-width-value">{{ page.banner_style.banner_width_rem|default:page.banner_defaults.width_rem|unlocalize }}</span>rem)</span>
+                    <input type="range" id="banner-style-width" min="10" max="100" step="1" value="{{ page.banner_style.banner_width_rem|default:page.banner_defaults.width_rem|unlocalize }}">
                 </label>
 
                 <label class="quick-style-field">
-                    <span>{% trans "Height" %} (<span id="banner-style-height-value">{{ page.banner_style.banner_height_rem|default:14|unlocalize }}</span>rem)</span>
-                    <input type="range" id="banner-style-height" min="4" max="40" step="0.5" value="{{ page.banner_style.banner_height_rem|default:14|unlocalize }}">
+                    <span>{% trans "Height" %} (<span id="banner-style-height-value">{{ page.banner_style.banner_height_rem|default:page.banner_defaults.height_rem|unlocalize }}</span>rem)</span>
+                    <input type="range" id="banner-style-height" min="4" max="40" step="0.5" value="{{ page.banner_style.banner_height_rem|default:page.banner_defaults.height_rem|unlocalize }}">
                 </label>
 
                 <label class="quick-style-field">
-                    <span>{% trans "Title font size" %} (<span id="banner-style-font-size-value">{{ page.banner_style.banner_font_size|default:2.75|unlocalize }}</span>rem)</span>
-                    <input type="range" id="banner-style-font-size" min="0.5" max="6" step="0.05" value="{{ page.banner_style.banner_font_size|default:2.75|unlocalize }}">
+                    <span>{% trans "Title font size" %} (<span id="banner-style-font-size-value">{{ page.banner_style.banner_font_size|default:page.banner_defaults.font_size|unlocalize }}</span>rem)</span>
+                    <input type="range" id="banner-style-font-size" min="0.5" max="6" step="0.05" value="{{ page.banner_style.banner_font_size|default:page.banner_defaults.font_size|unlocalize }}">
                 </label>
             </div>
         </div>

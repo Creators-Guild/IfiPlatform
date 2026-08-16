@@ -17,7 +17,7 @@
 
 {% block maincontent %}
     {% include "info_articles/partials/article_breadcrumbs.html" %}
-    <div class="union-page" style="--accent-color: var(--color-purple)">
+    <div class="union-page" style="--accent-color: var(--color-purple); --title-align: var(--text-align-union-title); --content-align: var(--text-align-union-content);">
         <div class="union-header">
             {% if page.logo %}
                 {% image page.logo fill-160x160 as logo_img %}

@@ -21,6 +21,18 @@
   margin: 0 0 0.5rem;
   border-bottom: 4px solid var(--accent-color, var(--color-border));
   padding-bottom: 0.3rem;
+  /* --title-align (--text-align-union-title, tokens.css), own
+  independently-tunable default instead of just inheriting the sitewide
+  --text-align-heading (elements.css). */
+  text-align: var(--title-align);
+}
+
+/* .purpose/.activities/.vedtekter's own richtext body (union_page.html) --
+--content-align (--text-align-union-content, tokens.css), own
+independently-tunable default instead of just inheriting the sitewide
+--text-align-body (elements.css). */
+.union-main .prose {
+  text-align: var(--content-align);
 }
 
 .union-type-badge {

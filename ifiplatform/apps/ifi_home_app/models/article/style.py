@@ -11,6 +11,12 @@ from .constants import (
     HEX_COLOR_VALIDATOR,
     TITLE_ALIGNMENT_CHOICES,
 )
+from .typography_defaults import (
+    ARTICLE_ALIGNMENT,
+    ARTICLE_HERO_IMAGE,
+    ARTICLE_SIDE_PADDING,
+    ARTICLE_TYPOGRAPHY,
+)
 
 
 class ArticleStyle(models.Model):
@@ -29,24 +35,24 @@ class ArticleStyle(models.Model):
     hero_image_position = models.CharField(
         max_length=20,
         choices=HERO_POSITION_CHOICES,
-        default="right",
+        default=ARTICLE_HERO_IMAGE["position"],
     )
     hero_image_width_rem = models.FloatField(
-        default=18,
+        default=ARTICLE_HERO_IMAGE["width_rem"],
         help_text="Width, in rem.",
     )
     hero_image_side_padding = models.FloatField(
-        default=0,
+        default=ARTICLE_SIDE_PADDING["hero_image"],
         help_text="Left/right padding, in rem (0 = none).",
     )
     hero_image_boxed = models.BooleanField(
-        default=False,
+        default=ARTICLE_HERO_IMAGE["boxed"],
         help_text="Draw a border/box around the image, title and description.",
     )
     hero_image_box_color = models.CharField(
         max_length=20,
         choices=BOX_COLOR_CHOICES,
-        default="bg-light",
+        default=ARTICLE_HERO_IMAGE["box_color"],
         help_text="Box background color (only applies when 'boxed' is enabled).",
     )
     hero_image_box_custom_color = models.CharField(
@@ -56,18 +62,18 @@ class ArticleStyle(models.Model):
         help_text="Hex code, e.g. #ff8800. Only used when color is set to 'Custom'.",
     )
     hero_image_box_border_radius = models.FloatField(
-        default=0.75,
+        default=ARTICLE_HERO_IMAGE["box_border_radius"],
         validators=[MinValueValidator(0), MaxValueValidator(5)],
         help_text="Box corner rounding, in rem (0 = square corners). Only applies when 'boxed' is enabled.",
     )
     # editable version of .image-figure--boxed's own fixed shadow in
     # article_image.css.
     hero_image_box_shadow_enabled = models.BooleanField(
-        default=True,
+        default=ARTICLE_HERO_IMAGE["shadow_enabled"],
         help_text="Draw a shadow under the box. Only applies when 'boxed' is enabled.",
     )
     hero_image_box_shadow_strength = models.FloatField(
-        default=1,
+        default=ARTICLE_HERO_IMAGE["shadow_strength"],
         validators=[MinValueValidator(0), MaxValueValidator(3)],
         help_text=(
             "Shadow intensity multiplier (1 = the box's original fixed shadow size, 0 = none). "
@@ -143,35 +149,35 @@ class ArticleStyle(models.Model):
     title_alignment = models.CharField(
         max_length=20,
         choices=TITLE_ALIGNMENT_CHOICES,
-        default="left",
+        default=ARTICLE_ALIGNMENT["title"],
         help_text="Alignment for the article title.",
     )
     title_font_size = models.FloatField(
-        default=2,
+        default=ARTICLE_TYPOGRAPHY["title"],
         help_text="Font size for the article title, in rem. Independent from the body's own font size.",
     )
     intro_alignment = models.CharField(
         max_length=20,
         choices=TITLE_ALIGNMENT_CHOICES,
-        default="left",
+        default=ARTICLE_ALIGNMENT["intro"],
         help_text="Alignment for the intro paragraph.",
     )
     intro_font_size = models.FloatField(
-        default=1,
+        default=ARTICLE_TYPOGRAPHY["intro"],
         help_text="Font size for the intro paragraph, in rem. Independent from the body's own font size.",
     )
     meta_alignment = models.CharField(
         max_length=20,
         choices=TITLE_ALIGNMENT_CHOICES,
-        default="left",
+        default=ARTICLE_ALIGNMENT["meta"],
         help_text="Alignment for the byline/date meta row.",
     )
     meta_font_size = models.FloatField(
-        default=0.9,
+        default=ARTICLE_TYPOGRAPHY["meta"],
         help_text="Font size for the byline/date meta row, in rem. Independent from the body's own font size.",
     )
     header_side_padding = models.FloatField(
-        default=0,
+        default=ARTICLE_SIDE_PADDING["header"],
         help_text=(
             "Left/right padding around the title/meta/intro block, in rem "
             "(0 = none). Independent from the body's own side padding."

@@ -40,10 +40,16 @@
   color: var(--color-on-accent);
   border: none;
   padding: 0;
+  /* --title-align (--text-align-tool-title, tokens.css) -- explicit here
+  since this h1 sits inside .tool-hero-overlay, not .tool-header below, so
+  it needs its own copy of the same rule rather than inheriting one. */
+  text-align: var(--title-align);
 }
 
 .tool-header {
-  text-align: center;
+  /* --title-align (--text-align-tool-title, tokens.css), own
+  independently-tunable default instead of a hardcoded center. */
+  text-align: var(--title-align);
   margin-bottom: 1.5rem;
 }
 
@@ -65,7 +71,9 @@
 .tool-body {
   max-width: 42rem;
   margin: 0 auto;
-  text-align: center;
+  /* --content-align (--text-align-tool-content, tokens.css), own
+  independently-tunable default instead of a hardcoded center. */
+  text-align: var(--content-align);
 }
 
 .tool-cta {

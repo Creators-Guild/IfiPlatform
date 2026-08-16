@@ -30,7 +30,11 @@ Sidemenu hover mdoifer will still enlarge menu */
     min-width: 0;
     display: flex;
     flex-direction: column;
-    padding: 1rem 2rem;
+    /* --side-padding (tokens.css) -- the sitewide side-gutter, since every
+    page renders through this one shared wrapper (home_base.html). Vertical
+    padding stays a plain value; only the side gutter is meant to be a
+    single controllable constant. */
+    padding: 1rem var(--side-padding);
 }
 
 .home-layout .maincontent .top {
@@ -257,7 +261,10 @@ is accurate again -- this is unchanged from before Events existed. */
 
 @media (max-width: 480px) {
     .home-layout .maincontent {
-        padding: 0.75rem 0.75rem;
+        /* --side-padding-mobile (tokens.css) -- vertical stays the same
+        0.75rem value as the side gutter here, unlike the desktop rule
+        above where the two differ, so this one constant covers both. */
+        padding: var(--side-padding-mobile);
     }
 
     /* locked to the collapsed width, regardless of .sidemenu's own current

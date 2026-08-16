@@ -42,6 +42,11 @@ ifi_api_urlpatterns = [
         name="article_toc_icon_style",
     ),
     path(
+        "api/articles/<int:page_id>/reset-style/",
+        article_views.reset_article_style,
+        name="article_reset_style",
+    ),
+    path(
         "api/articles/<int:page_id>/publish/",
         article_views.publish_page,
         name="article_publish",

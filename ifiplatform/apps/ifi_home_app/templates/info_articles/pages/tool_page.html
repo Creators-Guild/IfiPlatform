@@ -16,7 +16,7 @@
 
 {% block maincontent %}
     {% include "info_articles/partials/article_breadcrumbs.html" %}
-    <div class="tool-page">
+    <div class="tool-page" style="--title-align: var(--text-align-tool-title); --content-align: var(--text-align-tool-content);">
         {% if page.image %}
             {% image page.image fill-1200x400 as tool_hero %}
             <div class="tool-hero">

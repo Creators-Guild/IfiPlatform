@@ -288,38 +288,27 @@ document.addEventListener("DOMContentLoaded", () => {
     window.ifiUnsavedChanges.markDirty("quickStyle");
   });
 
-  // sets each field to its default and replays the same input/click each
-  // one already listens for, rather than duplicating what those listeners
-  // do -- same trick as article_block_style.js's own reset button.
+  // Goes through the same server-side reset_article_style endpoint (and
+  // the same runPublishAction confirm/fetch/reload-on-success helper
+  // Publish/Unpublish/Sync already use below) rather than just resetting
+  // this panel's own fields client-side -- it resets every block's own
+  // style and the header's title/intro/meta too, except anything
+  // individually locked via its own exclude_from_global_alignment
+  // checkbox, so a client-side-only reset (which used to just replay this
+  // panel's own input/click handlers) would leave every other block
+  // exactly as it was, contradicting what the button now actually says it
+  // does. Reloading is what actually shows the result -- see
+  // reset_article_style.
   const resetButton = document.getElementById("quick-style-reset");
-  resetButton.addEventListener("click", () => {
-    if (!window.confirm("Reset the global style to its default values? Unsaved changes will be lost.")) {
-      return;
-    }
-
-    paddingInput.value = panel.dataset.defaultPadding;
-    paddingInput.dispatchEvent(new Event("input"));
-
-    fontSizeInput.value = panel.dataset.defaultFontSize;
-    fontSizeInput.dispatchEvent(new Event("input"));
-
-    const defaultAlignButton = alignmentGroup.querySelector(
-      `button[data-align="${panel.dataset.defaultAlignment}"]`
+  if (resetButton) {
+    runPublishAction(
+      resetButton,
+      panel.dataset.resetAllUrl,
+      "Reset this article's whole style to site defaults? This resets the Global editor's own fields, every block's own style, and the header's title/intro/meta -- except any block you've individually locked. Unsaved changes will be lost.",
+      "Resetting...",
+      "Reset to default"
     );
-    if (defaultAlignButton) {
-      defaultAlignButton.click();
-    }
-
-    setCustomSwatch(null);
-    const defaultBgButton = bgColorGroup.querySelector(
-      `button[data-color="${panel.dataset.defaultBgColor}"]`
-    );
-    if (defaultBgButton) {
-      defaultBgButton.click();
-    }
-    bgEnabledInput.checked = false;
-    bgEnabledInput.dispatchEvent(new Event("change"));
-  });
+  }
 
   // returns a Promise<{ok, error}> -- this panel has no Save button of its
   // own, so the only way this ever runs is via registerSaveHandler below,

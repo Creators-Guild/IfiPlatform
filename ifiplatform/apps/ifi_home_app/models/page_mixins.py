@@ -99,6 +99,25 @@ class EditorModeMixin:
         return source is not None and source.translations.filter(enabled=True).exists()
 
 
+# The single source of truth for PageBannerStyle's own "blank means what"
+# fallback values -- every field below is nullable/blank with no Django-
+# level default= (there's no meaningful "auto" for a banner, unlike
+# ArticleBlockStyle.width_rem/height_rem), so the fallback used to live as
+# a hardcoded literal repeated across page_title_banner.html (the render)
+# and banner_style_panel.html (the editor's sliders/swatches AND its
+# data-default-* Reset-to-default attributes) -- 3+ separate copies of
+# each value. BannerStyleMixin.banner_defaults below exposes this same
+# dict to both templates via `page`, already in their context either way.
+BANNER_STYLE_DEFAULTS = {
+    "color": "#197dc4",
+    "dot_color": "#ffffff",
+    "text_color": "#fffff9",
+    "width_rem": 60,
+    "height_rem": 14,
+    "font_size": 2.75,
+}
+
+
 class PageBannerStyle(models.Model):
     """Optional decorative banner behind a page's title. Used by
     CategoryPage and ArticleIndexPage (see BannerStyleMixin), edited
@@ -113,8 +132,9 @@ class PageBannerStyle(models.Model):
     banner_dot_color = models.CharField(max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR])
     banner_text_color = models.CharField(max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR])
 
-    # blank falls back to a fixed default (60/14rem in the templates) --
-    # no meaningful "auto" here, unlike ArticleBlockStyle.width_rem/height_rem.
+    # blank falls back to BANNER_STYLE_DEFAULTS (width_rem/height_rem/
+    # font_size) -- no meaningful "auto" here, unlike ArticleBlockStyle.
+    # width_rem/height_rem.
     banner_width_rem = models.FloatField(null=True, blank=True)
     banner_height_rem = models.FloatField(null=True, blank=True)
     banner_font_size = models.FloatField(null=True, blank=True)
@@ -123,8 +143,16 @@ class PageBannerStyle(models.Model):
 class BannerStyleMixin:
     """Adds .banner_style (get-or-create PageBannerStyle row, keyed by this
     page's translation_key) to any Page subclass that mixes this in.
-    Currently CategoryPage and ArticleIndexPage."""
+    Currently CategoryPage, ArticleIndexPage and StudentUnionCategoryPage."""
 
     @cached_property
     def banner_style(self):
         return PageBannerStyle.objects.get_or_create(translation_key=self.translation_key)[0]
+
+    @property
+    def banner_defaults(self):
+        """BANNER_STYLE_DEFAULTS, for templates -- `page` (this) is already
+        in context wherever page_title_banner.html/banner_style_panel.html
+        are included, so this avoids threading it through every page
+        type's own get_context()."""
+        return BANNER_STYLE_DEFAULTS

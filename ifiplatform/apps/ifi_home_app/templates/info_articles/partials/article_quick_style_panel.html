@@ -19,16 +19,22 @@ instead, see their own comment below. Alignment is the one field here
 that's destructive to save: it overwrites every alignment-capable
 block's own alignment throughout the article (see save_quick_style's
 apply_alignment_to_blocks), gated by a confirm dialog in
-article_quick_style.js's save(). Anyone without edit rights on this page
-never gets this block rendered at all -- the save/publish/unpublish
-endpoints each enforce the same permission checks independently, so this
-is UX, not the security boundary.
+article_quick_style.js's save(). "Reset to default" (see the Style
+section below) is similarly destructive but goes further: it resets this
+panel's own fields AND every block's own style AND the header's title/
+intro/meta, all in one shot (article_views.reset_article_style), except
+any block individually locked via its own exclude_from_global_alignment
+checkbox -- gated by its own confirm dialog, reloads on success. Anyone
+without edit rights on this page never gets this block rendered at all --
+the save/publish/unpublish/reset endpoints each enforce the same
+permission checks independently, so this is UX, not the security boundary.
 {% endcomment %}
 <form class="quick-style-panel" id="quick-style-panel"
       data-quick-style-url="{% url 'article_quick_style' page.id %}"
       data-publish-url="{% url 'article_publish' page.id %}"
       data-unpublish-url="{% url 'article_unpublish' page.id %}"
       data-sync-mirrored-url="{% url 'page_sync_mirrored' page.id %}"
+      data-reset-all-url="{% url 'article_reset_style' page.id %}"
       data-default-padding="0" data-default-alignment="left" data-default-font-size="1"
       data-default-bg-color="bg-light">
     {% csrf_token %}

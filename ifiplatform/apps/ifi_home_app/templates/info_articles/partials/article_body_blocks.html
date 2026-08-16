@@ -22,7 +22,7 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
         {% endcomment %}
         {% if block.value.level == "h3" %}
             <h3 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
-                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
+                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading" data-level="{{ block.value.level }}"
                 data-alignment="{{ style.alignment }}" data-exclude-from-global-alignment="{{ style.exclude_from_global_alignment|yesno:"true,false" }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
                 data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
                 data-text-shadow-enabled="{{ style.text_shadow_enabled|yesno:"true,false" }}" data-text-shadow-strength="{{ style.text_shadow_strength|unlocalize }}" data-text-shadow-color="{{ style.text_shadow_color }}" data-text-shadow-custom-color="{{ style.text_shadow_custom_color }}"
@@ -32,7 +32,7 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
             </h3>
         {% elif block.value.level == "h4" %}
             <h4 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
-                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
+                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading" data-level="{{ block.value.level }}"
                 data-alignment="{{ style.alignment }}" data-exclude-from-global-alignment="{{ style.exclude_from_global_alignment|yesno:"true,false" }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
                 data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
                 data-text-shadow-enabled="{{ style.text_shadow_enabled|yesno:"true,false" }}" data-text-shadow-strength="{{ style.text_shadow_strength|unlocalize }}" data-text-shadow-color="{{ style.text_shadow_color }}" data-text-shadow-custom-color="{{ style.text_shadow_custom_color }}"
@@ -42,7 +42,7 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
             </h4>
         {% elif block.value.level == "h5" %}
             <h5 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
-                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
+                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading" data-level="{{ block.value.level }}"
                 data-alignment="{{ style.alignment }}" data-exclude-from-global-alignment="{{ style.exclude_from_global_alignment|yesno:"true,false" }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
                 data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
                 data-text-shadow-enabled="{{ style.text_shadow_enabled|yesno:"true,false" }}" data-text-shadow-strength="{{ style.text_shadow_strength|unlocalize }}" data-text-shadow-color="{{ style.text_shadow_color }}" data-text-shadow-custom-color="{{ style.text_shadow_custom_color }}"
@@ -52,7 +52,7 @@ Usage: {% include "info_articles/partials/article_body_blocks.html" with blocks=
             </h5>
         {% else %}
             <h2 id="{{ block.value.text|slugify }}" class="heading--align-{{ style.alignment }}{% if style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
-                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading"
+                {% if can_edit_style %}data-block-id="{{ block.id }}" data-block-type="heading" data-level="{{ block.value.level }}"
                 data-alignment="{{ style.alignment }}" data-exclude-from-global-alignment="{{ style.exclude_from_global_alignment|yesno:"true,false" }}" data-font-size="{{ style.font_size|unlocalize }}" data-side-padding="{{ style.side_padding|unlocalize }}"
                 data-text-color="{{ style.text_color }}" data-text-custom-color="{{ style.text_custom_color }}"
                 data-text-shadow-enabled="{{ style.text_shadow_enabled|yesno:"true,false" }}" data-text-shadow-strength="{{ style.text_shadow_strength|unlocalize }}" data-text-shadow-color="{{ style.text_shadow_color }}" data-text-shadow-custom-color="{{ style.text_shadow_custom_color }}"

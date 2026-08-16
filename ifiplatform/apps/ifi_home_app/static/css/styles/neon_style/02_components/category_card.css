@@ -10,10 +10,18 @@ info, card grids), so one shared rule covers both wrapper classes. */
 /* bigger than the shared .category-page h1/.article-page h1 rule below
 gives it (plain ~2rem browser default) -- landing-page-sized title, unlike
 ArticlePage's own h1 which is governed by ArticleStyle.title_font_size
-instead (left untouched here). */
+instead (left untouched here). text-align: var(--title-align) here (not
+left to the generic :where(.maincontent) h1 default, elements.css) is
+what gives CategoryPage/ArticleIndexPage/StudentUnionCategoryPage (also
+.category-page, see studentunion_category_page.html) their own
+independently-tunable title alignment (--text-align-category-title etc.,
+tokens.css) instead of sharing the sitewide heading default. Matches
+both #page-title-plain and .title-banner's own h1 (page_title_banner.html)
+since both are plain h1s under this same wrapper. */
 .category-page h1,
 .article-index-page h1 {
   font-size: 2.75rem;
+  text-align: var(--title-align);
 }
 
 /* #page-title-plain (see page_title_banner.html) needs this explicitly:
@@ -133,16 +141,21 @@ yet another top margin on top of the row's own gap above. */
 
 /* intro reads as the page's lead paragraph; general info is a smaller,
 secondary note underneath it -- see CategoryPage.general_info/
-ArticleIndexPage.general_info's own help_text. */
+ArticleIndexPage.general_info's own help_text. text-align: var(--content-
+align) (instead of just inheriting the wrapper's own text-align below)
+gives each page type its own independently-tunable content alignment
+(--text-align-category-content etc., tokens.css). */
 .category-page .intro,
 .article-index-page .intro {
   font-size: 1.15rem;
+  text-align: var(--content-align);
 }
 
 .category-page .general-info,
 .article-index-page .general-info {
   font-size: 0.95rem;
   color: var(--color-text-muted);
+  text-align: var(--content-align);
 }
 
 /* "Subcategories"/"Categories"/"Suggested Articles"/"Tools" section

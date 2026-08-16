@@ -2690,7 +2690,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (defaults) {
       applySlider(paddingInput, defaults.side_padding);
       applyButtonGroup(alignmentGroup, defaults.alignment);
-      applySlider(fontSizeInput, defaults.font_size);
+      // A plain heading block's default font_size depends on its own
+      // level (h2-h5), not one flat value -- BLOCK_STYLE_DEFAULTS.heading
+      // alone doesn't know that, so look it up by the level this
+      // particular block was actually saved with (column_title, which is
+      // always an h3, already gets the right value straight off `defaults`
+      // itself -- see HEADING_LEVEL_FONT_SIZES/_heading_defaults, block_style.py).
+      let headingFontSize = defaults.font_size;
+      if (blockType === "heading") {
+        const blockEl =
+          currentBlockEl || document.querySelector(`[data-block-id="${CSS.escape(targetIdInput.value)}"]`);
+        const level = blockEl ? blockEl.dataset.level : null;
+        const byLevel = BLOCK_STYLE_DEFAULTS.heading_font_size_by_level || {};
+        if (level && byLevel[level] !== undefined) {
+          headingFontSize = byLevel[level];
+        }
+      }
+      applySlider(fontSizeInput, headingFontSize);
       applySlider(widthInput, defaults.width_rem);
       applySlider(heightInput, defaults.height_rem);
       if (defaults.list_style !== undefined) {

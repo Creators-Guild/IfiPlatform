@@ -19,6 +19,7 @@ from ifi_home_app.models.article_models import (
     HEX_COLOR_VALIDATOR,
     ArticleBlockStyle,
     ArticlePage,
+    ArticleStyle,
     PageBannerStyle,
     alignment_capable_block_ids,
 )
@@ -162,6 +163,63 @@ def save_quick_style(request, page_id):
                 style_changed = True
         if style_changed:
             style.save()
+
+    return JsonResponse({"ok": True})
+
+
+@require_POST
+def reset_article_style(request, page_id):
+    """Resets this whole article's on-page style back to site defaults in
+    one shot: the Global editor's own content_* fields, every block's own
+    ArticleBlockStyle override (deleting the row is enough --
+    _effective_block_styles falls back to BLOCK_STYLE_DEFAULTS/
+    HEADING_LEVEL_FONT_SIZES for anything with no row at all), and the
+    header's title/intro/meta alignment+font-size+header_side_padding --
+    except any block individually locked via exclude_from_global_alignment,
+    the same opt-out apply_alignment_to_blocks (save_quick_style, above)
+    already respects. Triggered by quick-style-panel's "Reset to default"
+    button (article_quick_style.js)."""
+    page = get_object_or_404(ArticlePage, pk=page_id).style_target
+
+    if not page.can_edit_in_editor_mode(request.user):
+        return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
+
+    excluded_ids = set(
+        ArticleBlockStyle.objects.filter(
+            translation_key=page.translation_key, exclude_from_global_alignment=True
+        ).values_list("block_id", flat=True)
+    )
+
+    ArticleBlockStyle.objects.filter(translation_key=page.translation_key).exclude(
+        block_id__in=excluded_ids
+    ).delete()
+
+    style = page.style
+    fresh = ArticleStyle()  # unsaved -- every field at its own model default
+
+    # No per-field exclusion concept for these -- they're the Global
+    # editor's own fields, not any one block's.
+    style.content_side_padding = fresh.content_side_padding
+    style.content_alignment = fresh.content_alignment
+    style.content_font_size_multiplier = fresh.content_font_size_multiplier
+    style.content_bg_enabled = fresh.content_bg_enabled
+    style.content_bg_color = fresh.content_bg_color
+    style.content_bg_custom_color = fresh.content_bg_custom_color
+
+    header_fields = {
+        "article-title": ("title_alignment", "title_font_size"),
+        "article-meta": ("meta_alignment", "meta_font_size"),
+        "article-intro": ("intro_alignment", "intro_font_size"),
+    }
+    for header_block_id, field_names in header_fields.items():
+        if header_block_id in excluded_ids:
+            continue
+        for field_name in field_names:
+            setattr(style, field_name, getattr(fresh, field_name))
+    if "article-header" not in excluded_ids:
+        style.header_side_padding = fresh.header_side_padding
+
+    style.save()
 
     return JsonResponse({"ok": True})
 
