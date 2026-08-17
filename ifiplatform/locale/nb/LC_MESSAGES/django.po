@@ -809,8 +809,8 @@ msgstr "Underkategorier"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:61
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:59
-msgid "Happening now"
-msgstr "Skjer nå"
+msgid "Happening today"
+msgstr "Skjer idag"
 
 #: .\ifi_home_app\templates\info_articles\pages\article_category_page.html:65
 #: .\ifi_home_app\templates\info_articles\pages\article_index_page.html:63
