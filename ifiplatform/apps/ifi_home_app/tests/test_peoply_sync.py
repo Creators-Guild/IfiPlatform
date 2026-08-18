@@ -1,16 +1,18 @@
 # pylint: disable=C0114,C0115,C0116
 from datetime import datetime, timezone as dt_timezone
+from io import StringIO
 from unittest.mock import Mock, patch
 
 import requests
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test import TestCase
 
 from wagtail.models import Locale, Page
 
 from ifi_home_app.integrations.peoply_api import get_events
-from ifi_home_app.models.article.unions import UnionPage
-from ifi_home_app.models.event_models import EventIndexPage, EventPage
+from ifi_home_app.models.article.unions import StudentUnionCategoryPage, UnionPage
+from ifi_home_app.models.event_models import EventIndexPage, EventPage, PeoplyUnionMismatch
 
 SAMPLE_EVENT = {
     "id": "d01f8be8-6bd0-40ff-850d-7e3ccc04d8f5",
@@ -57,6 +59,26 @@ def _make_event_index(**kwargs):
     return index
 
 
+def _make_union_category(**kwargs):
+    root = Page.get_first_root_node()
+    nb_locale, _ = Locale.objects.get_or_create(language_code="nb")
+    kwargs.setdefault("title", "Studentforeninger")
+    kwargs.setdefault("slug", "studentforeninger")
+    kwargs.setdefault("locale", nb_locale)
+    category = StudentUnionCategoryPage(**kwargs)
+    root.add_child(instance=category)
+    category.save_revision().publish()
+    return category
+
+
+def _fake_org(**kwargs):
+    kwargs.setdefault("id", "org-id")
+    kwargs.setdefault("name", "Test Org")
+    kwargs.setdefault("urlId", "testorg")
+    kwargs.setdefault("websiteUrl", None)
+    return kwargs
+
+
 class GetEventsTests(TestCase):
     """peoply_api.get_events's pagination stitching and error handling."""
 
@@ -94,6 +116,16 @@ class SyncPeoplyEventsTests(TestCase):
     def setUp(self):
         self.union = _make_union(peoply_organization_id="test-org-id")
         self.event_index = _make_event_index()
+        # sync_peoply_events runs check_peoply_union_matches automatically
+        # at the end of every sync (see that command's own docstring) --
+        # stub its organizations fetch so these tests don't hit the real
+        # Peoply API just to exercise event syncing.
+        patcher = patch(
+            "ifi_home_app.management.commands.check_peoply_union_matches.get_organizations",
+            return_value=[],
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     @patch("ifi_home_app.management.commands.sync_peoply_events.get_events")
     def test_creates_event_page_with_expected_fields(self, mock_get_events):
@@ -161,3 +193,138 @@ class SyncPeoplyEventsTests(TestCase):
         # Only the one union with an id set should have triggered a call.
         mock_get_events.assert_called_once()
         self.assertEqual(mock_get_events.call_args[0][0], "test-org-id")
+
+
+class CheckPeoplyUnionMatchesTests(TestCase):
+    """The check_peoply_union_matches management command."""
+
+    def _patch_organizations(self, orgs):
+        patcher = patch(
+            "ifi_home_app.management.commands.check_peoply_union_matches.get_organizations",
+            return_value=orgs,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_matched_id_produces_no_warnings(self):
+        _make_union(peoply_organization_id="org-1")
+        self._patch_organizations([_fake_org(id="org-1")])
+
+        out = StringIO()
+        call_command("check_peoply_union_matches", stdout=out)
+
+        self.assertIn("Every union and Peoply organization matches up", out.getvalue())
+
+    def test_union_with_no_id_and_no_name_match_is_reported_unlinked(self):
+        _make_union(title="Mystery Union", slug="mystery-union")
+        self._patch_organizations([_fake_org(id="org-1", name="Unrelated Org", urlId="unrelated")])
+
+        out = StringIO()
+        call_command("check_peoply_union_matches", stdout=out)
+
+        self.assertIn("Mystery Union", out.getvalue())
+        self.assertIn("no matching Peoply organization", out.getvalue())
+
+    def test_union_with_no_id_but_exact_name_match_is_not_reported(self):
+        _make_union(title="CYB", slug="cyb")
+        self._patch_organizations([_fake_org(id="org-1", name="CYB", urlId="cyb")])
+
+        out = StringIO()
+        call_command("check_peoply_union_matches", stdout=out)
+
+        self.assertIn("Every union and Peoply organization matches up", out.getvalue())
+
+    def test_stale_peoply_id_is_reported(self):
+        union = _make_union(peoply_organization_id="gone-id")
+        self._patch_organizations([_fake_org(id="org-1")])
+
+        out = StringIO()
+        call_command("check_peoply_union_matches", stdout=out)
+
+        self.assertIn(union.title, out.getvalue())
+        self.assertIn("no longer recognizes", out.getvalue())
+
+    def test_org_with_no_union_is_reported_and_not_created_by_default(self):
+        self._patch_organizations([_fake_org(id="org-1", name="New Org")])
+
+        out = StringIO()
+        call_command("check_peoply_union_matches", stdout=out)
+
+        self.assertIn("New Org", out.getvalue())
+        self.assertIn("no matching union on this site", out.getvalue())
+        self.assertFalse(UnionPage.objects.filter(title="New Org").exists())
+
+    def test_create_missing_creates_draft_stub_under_sole_category(self):
+        category = _make_union_category()
+        self._patch_organizations([
+            _fake_org(id="org-1", name="New Org", websiteUrl="https://neworg.example")
+        ])
+
+        out = StringIO()
+        call_command("check_peoply_union_matches", "--create-missing", stdout=out)
+
+        stub = UnionPage.objects.get(title="New Org")
+        self.assertEqual(stub.get_parent().specific, category)
+        self.assertEqual(stub.peoply_organization_id, "org-1")
+        self.assertEqual(stub.website_url, "https://neworg.example")
+        self.assertFalse(stub.live)  # draft only, not published
+
+    def test_create_missing_without_a_category_raises(self):
+        self._patch_organizations([_fake_org(id="org-1", name="New Org")])
+
+        with self.assertRaises(CommandError):
+            call_command("check_peoply_union_matches", "--create-missing")
+
+    def test_first_sighting_is_persisted_and_reported_new(self):
+        self._patch_organizations([_fake_org(id="org-1", name="New Org")])
+
+        out = StringIO()
+        call_command("check_peoply_union_matches", stdout=out)
+
+        self.assertIn("NEW:", out.getvalue())
+        record = PeoplyUnionMismatch.objects.get(kind="missing_org", identifier="org-1")
+        self.assertIsNone(record.resolved_at)
+        self.assertEqual(record.label, "New Org (testorg)")
+
+    def test_repeat_sighting_is_reported_already_known_not_new(self):
+        self._patch_organizations([_fake_org(id="org-1", name="New Org")])
+        call_command("check_peoply_union_matches", stdout=StringIO())  # first sighting
+
+        out = StringIO()
+        call_command("check_peoply_union_matches", stdout=out)
+
+        self.assertNotIn("NEW:", out.getvalue())
+        self.assertIn("(already known)", out.getvalue())
+        self.assertEqual(
+            PeoplyUnionMismatch.objects.filter(kind="missing_org", identifier="org-1").count(), 1
+        )
+
+    def test_mismatch_no_longer_present_is_marked_resolved(self):
+        self._patch_organizations([_fake_org(id="org-1", name="New Org")])
+        call_command("check_peoply_union_matches", stdout=StringIO())  # first sighting
+
+        self._patch_organizations([])  # org-1 gone (e.g. someone linked/created the union)
+        out = StringIO()
+        call_command("check_peoply_union_matches", stdout=out)
+
+        self.assertIn("marked resolved", out.getvalue())
+        record = PeoplyUnionMismatch.objects.get(kind="missing_org", identifier="org-1")
+        self.assertIsNotNone(record.resolved_at)
+
+    def test_resolved_mismatch_reappearing_reopens_same_row_as_new(self):
+        self._patch_organizations([_fake_org(id="org-1", name="New Org")])
+        call_command("check_peoply_union_matches", stdout=StringIO())  # first sighting
+
+        self._patch_organizations([])
+        call_command("check_peoply_union_matches", stdout=StringIO())  # resolved
+
+        self._patch_organizations([_fake_org(id="org-1", name="New Org")])
+        out = StringIO()
+        call_command("check_peoply_union_matches", stdout=out)  # reappears
+
+        self.assertIn("NEW:", out.getvalue())
+        self.assertEqual(
+            PeoplyUnionMismatch.objects.filter(kind="missing_org", identifier="org-1").count(), 1
+        )
+        record = PeoplyUnionMismatch.objects.get(kind="missing_org", identifier="org-1")
+        self.assertIsNone(record.resolved_at)

@@ -20,6 +20,36 @@ GLOSSARY_TERMS = {
     "Fadderuke": "Orientation Week",
     "Fadder":"Buddy",
     "Fadderbarn":"Buddychild", # please find a better translation ahah
+    "fadderbarna":"buddychildren",
     "Fadderstyret":"The Buddy Council(Fadderstyret)",
     "dagen@ifi": "dagen@ifi",
+    "Dagen@ifi": "Dagen@ifi",
+    "pub crawl": "pub til pub",
+    "worky": "worky",
+    # Student union / linjeforening names -- proper nouns DeepL otherwise
+    # tends to guess-translate. Homepage widget unions (see
+    # ifi_home_app/dummydata/dummy_studentunions_objects.py):
+    "ProgSys": "ProgSys",
+    "PiTCH": "PiTCH",
+    "IFI Rastløs": "IFI Rastløs",
+    "Ifi Pitbulls": "Ifi Pitbulls",
+    # Fadderuke sub-event host unions (see ifi_home_app/management/
+    # seed_dev_data/constants.py's FADDERUKE_UNION_SPECS):
+    "CYB": "CYB",
+    "FUI": "FUI",
+    "Progsys": "Progsys",
+    "MAKI": "MAKI",
+    "MA:KI": "MA:KI",
+    "VIFI": "VIFI",
+    "FU": "FU",
+    "Mikro": "Mikro",
+    "Defi": "Defi",
+    "Sonen": "Sonen",
+    "FIFI": "FIFI",
+    "Digitus": "Digitus",
+    "Navet": "Navet",
+    # The guild that builds/maintains IfiPlatform itself (see
+    # templates/partials/bottom_header.html and home_sidemenu.html) --
+    # renamed from "Ifi-Guild of Creators".
+    "Ifi-Creators' Guild": "Ifi-Creators' Guild",
 }
