@@ -214,3 +214,79 @@ To trigger a run immediately, independent of the schedule:
 ```bash
 sudo systemctl start sync-peoply-events.service
 ```
+
+## check_peoply_union_matches
+
+```bash
+python manage.py check_peoply_union_matches [--create-missing] [--parent-slug SLUG]
+```
+
+Cross-checks every live nb `UnionPage` against Peoply's *entire* organization
+roster (`GET /organizations`, paginated the same skip/take way as
+`get_events`) — unlike `link_peoply_organizations` above, which only ever
+looks at unions missing a `peoply_organization_id` one at a time via
+Peoply's name search, this fetches everything and reports both directions:
+
+- site unions with no corresponding Peoply organization at all (no id set,
+  and no exact name/`urlId` match either — same exact-match rule as
+  `link_peoply_organizations`, see its section above for why).
+- site unions whose `peoply_organization_id` no longer matches any org
+  Peoply currently returns (a **stale link**) — `sync_peoply_events` would
+  silently sync nothing for these, since Peoply's `/events` just returns no
+  rows for an unknown `organizationId` rather than erroring, so this is the
+  only thing that would ever surface it.
+- Peoply organizations with no matching `UnionPage` here at all.
+
+Read-only by default — only `--create-missing` writes anything, and even
+then it only ever creates a **draft** (`live=False`) `UnionPage` stub per
+unmatched Peoply organization, pre-filled with its `peoply_organization_id`
+and website, for an editor to review, fill in, and publish by hand rather
+than going live unattended. Stubs are created under the site's single live
+nb `StudentUnionCategoryPage`; pass `--parent-slug` if more than one exists.
+
+**Warnings, not logs**: like every other command here, this uses
+`self.stdout.write`/`self.style.WARNING`, not Python's `logging` module —
+this project has no logger config, file handler, or Sentry wired up outside
+Django's own `django.*` namespace (see `settings.py`'s `LOGGING`), so a
+custom logger wouldn't actually go anywhere `self.stdout` doesn't already.
+`sync_peoply_events` runs this automatically at the end of every sync (see
+that command), so these warnings land in the same terminal/`journalctl -u
+sync-peoply-events.service` output its own systemd timer already produces
+every 6 hours — no second schedule needed. A failure fetching Peoply's
+organizations there is reported, not left to fail the event sync that
+already ran.
+
+**Persisted, not just printed**: every mismatch found is also reconciled
+against the `PeoplyUnionMismatch` model (`event_models.py`) — keyed by
+`(kind, identifier)` (a union's `translation_key`, or a Peoply org's own
+id), so the exact same gap isn't rediscovered as "new" on every one of the
+scheduled run's 6-hourly checks. A mismatch not seen before is printed as
+`NEW: ...` (`self.style.ERROR`, to stand out); one already on file is
+printed as `(already known) ...` (`self.style.WARNING`); one that was on
+file but no longer shows up this run (a union got linked, a stub got
+created, Peoply's data changed) is marked `resolved_at` and called out
+separately. Read-only in the sense that this bookkeeping isn't gated by
+`--create-missing` — it happens on every run, including a plain dry
+report, since it's the "did we already know about this" answer the dry
+report itself depends on.
+
+**Three separate logs in Django admin, not one combined list** — each of
+the model's three `kind`s (`unlinked_union`, `stale_link`, `missing_org`)
+gets its own proxy model and sidebar entry
+(`UnionsWithoutPeoplyOrg`/`UnionsWithStalePeoplyLink`/
+`PeoplyOrgsWithoutUnion`, `event_models.py`), each backed by a manager
+that filters the shared table down to just that kind, rather than one
+`PeoplyUnionMismatch` listing filtered by a `kind` dropdown — the three
+read as distinct problems needing distinct fixes (never linked vs. a
+broken existing link vs. a Peoply org this site doesn't know about yet).
+All three are read-only and superuser-only, same lockdown as
+`PeoplySyncLog`. `PeoplyOrgsWithoutUnion` is the only one with an admin
+action attached — **"Create a draft UnionPage for the selected
+mismatch(es)"**, selectable for one or many rows from that log's Action
+dropdown — the admin-side equivalent of `--create-missing` above, without
+needing shell access. It re-fetches Peoply's current organization list at
+click time (so a mismatch that's since vanished from Peoply is skipped,
+not force-created from stale data) and marks each mismatch it acts on
+`resolved_at` immediately, rather than waiting for the next scheduled
+`check_peoply_union_matches` run to notice the new `UnionPage` and
+resolve it on its own.

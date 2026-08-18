@@ -715,8 +715,8 @@ msgstr "Ifi Plattform Beta"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:26
 #: .\templates\partials\bottom_header.html:5
-msgid "Ifi-Guild of Creators"
-msgstr "Ifi-Guild of Creators"
+msgid "Ifi-Creators' Guild"
+msgstr "Ifi-Creators' Guild"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:60
 #: .\ifi_home_app\templates\events\event_index_page.html:4

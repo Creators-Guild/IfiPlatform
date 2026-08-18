@@ -160,6 +160,113 @@ class PeoplySyncLog(models.Model):
         return f"{self.user} at {self.triggered_at}"
 
 
+class PeoplyUnionMismatch(models.Model):
+    """One durable row per UnionPage<->Peoply-organization mismatch the
+    check_peoply_union_matches command has ever found -- so a discovery
+    survives past whatever single terminal/journalctl output printed it,
+    and repeated scheduled runs (see sync_peoply_events, which runs that
+    command automatically every 6 hours) don't have to re-announce the same
+    already-known gap forever.
+
+    (kind, identifier) is the stable identity of one mismatch: identifier
+    is the union's translation_key for "unlinked_union"/"stale_link" (nb/en
+    both share it, and it survives a slug/title change), or Peoply's own
+    organization id for "missing_org". first_seen_at is set once;
+    last_seen_at is bumped every run the mismatch is still present;
+    resolved_at is set the first run it's no longer found (e.g. someone
+    linked/created the union, or Peoply's data changed) and cleared again
+    if it ever comes back, rather than creating a second row for the same
+    (kind, identifier)."""
+
+    KIND_CHOICES = [
+        ("unlinked_union", "Site union has no matching Peoply organization"),
+        ("stale_link", "Site union's peoply_organization_id no longer matches any Peoply organization"),
+        ("missing_org", "Peoply organization has no matching UnionPage here"),
+    ]
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES)
+    identifier = models.CharField(
+        max_length=64,
+        help_text="UnionPage.translation_key for unlinked_union/stale_link, Peoply organization id for missing_org.",
+    )
+    label = models.CharField(max_length=255, help_text="Human-readable description, refreshed on every sighting.")
+    first_seen_at = models.DateTimeField(auto_now_add=True)
+    last_seen_at = models.DateTimeField(auto_now=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["kind", "identifier"], name="unique_peoply_union_mismatch"),
+        ]
+        ordering = ["-last_seen_at"]
+
+    def __str__(self):
+        return f"{self.get_kind_display()}: {self.label}"
+
+
+class _SingleKindMismatchManager(models.Manager):
+    """Backs each PeoplyUnionMismatch proxy below -- restricts the default
+    manager to just that proxy's own kind, so e.g. PeoplyOrgsWithoutUnion's
+    admin changelist (get_queryset() included) only ever shows "missing_org"
+    rows, never the other two kinds sharing the same underlying table."""
+
+    def __init__(self, kind):
+        super().__init__()
+        self._kind = kind
+
+    def get_queryset(self):
+        return super().get_queryset().filter(kind=self._kind)
+
+
+class UnionsWithoutPeoplyOrg(PeoplyUnionMismatch):
+    """Proxy over PeoplyUnionMismatch, scoped to kind="unlinked_union" --
+    site UnionPages with no peoply_organization_id and no exact Peoply
+    name/urlId match either. A separate admin entry from
+    PeoplyOrgsWithoutUnion (the reverse direction) and
+    UnionsWithStalePeoplyLink (a union that *did* have a link, now broken)
+    rather than one combined filterable list, since the three read as
+    distinct problems needing distinct fixes -- see
+    check_peoply_union_matches's own docstring."""
+
+    objects = _SingleKindMismatchManager("unlinked_union")
+
+    class Meta:
+        proxy = True
+        verbose_name = "site union without a Peoply organization"
+        verbose_name_plural = "Site unions without a Peoply organization"
+
+
+class UnionsWithStalePeoplyLink(PeoplyUnionMismatch):
+    """Proxy over PeoplyUnionMismatch, scoped to kind="stale_link" -- site
+    UnionPages whose peoply_organization_id no longer matches any
+    organization Peoply currently returns. See UnionsWithoutPeoplyOrg's own
+    docstring on why this is a separate admin entry rather than folded into
+    that one, even though both describe "this union has no working Peoply
+    match right now": this one had a real link that broke, which usually
+    means "fix the id" rather than "find/create the union on Peoply"."""
+
+    objects = _SingleKindMismatchManager("stale_link")
+
+    class Meta:
+        proxy = True
+        verbose_name = "site union with a stale Peoply link"
+        verbose_name_plural = "Site unions with a stale Peoply link"
+
+
+class PeoplyOrgsWithoutUnion(PeoplyUnionMismatch):
+    """Proxy over PeoplyUnionMismatch, scoped to kind="missing_org" --
+    Peoply organizations with no matching UnionPage here at all. The only
+    one of the three with an admin action attached
+    (create_union_pages_for_missing_orgs, admin.py) -- creating a stub only
+    makes sense in this direction."""
+
+    objects = _SingleKindMismatchManager("missing_org")
+
+    class Meta:
+        proxy = True
+        verbose_name = "Peoply organization without a site union"
+        verbose_name_plural = "Peoply organizations without a site union"
+
+
 class EventIndexPage(TranslationWarningMixin, Page):
     """Landing page listing all events."""
 

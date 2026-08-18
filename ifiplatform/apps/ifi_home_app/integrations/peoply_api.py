@@ -1,6 +1,7 @@
-"""Thin client for Peoply's public events API (api.peoply.app) -- fetches a
-student union's upcoming events, paginated. See sync_peoply_events for what
-consumes this."""
+"""Thin client for Peoply's public API (api.peoply.app) -- fetches a
+student union's upcoming events, and Peoply's full organization roster,
+both paginated. See sync_peoply_events and check_peoply_union_matches for
+what consumes this."""
 
 import requests
 
@@ -36,3 +37,48 @@ def get_events(union_id, after_date):
         offset +=take # used to figure out next pagenr
 
     return events
+
+
+def get_organizations():
+    """Every organization registered on Peoply (not just IFI's own unions --
+    Peoply is shared across student orgs), paginated the same skip/take way
+    as get_events. Unlike get_events, nothing in this project called the
+    unfiltered form of this endpoint before check_peoply_union_matches --
+    link_peoply_organizations only ever used ?name=<title> per union, which
+    Peoply happens to page internally too (confirmed by hand against the
+    live API), so the same skip/take loop applies here."""
+    organizations = []
+
+    offset = 0
+    while True:
+        response = requests.get(
+            url + "/organizations",
+            params={"skip": offset, "take": 500},
+            timeout=10,
+        )
+        response.raise_for_status()
+
+        page = response.json()
+        organizations += page
+        take = len(page)
+        if take < 500:
+            break
+
+        offset += take
+
+    return organizations
+
+
+def find_exact_match(title, candidates):
+    """title against each candidate org's name or urlId (Peoply's own
+    shorthand, e.g. "cyb" for "Cybernetisk Selskab"), case-insensitive --
+    shared by link_peoply_organizations and check_peoply_union_matches, both
+    of which need Peoply's own name-search to only ever count as a match
+    when it's exact (see link_peoply_organizations's docstring for why: its
+    search is substring-based, e.g. "FU" matches "FUI")."""
+    title_lower = title.lower()
+    for org in candidates:
+        url_id = org["urlId"]
+        if org["name"].lower() == title_lower or (url_id and url_id.lower() == title_lower):
+            return org
+    return None

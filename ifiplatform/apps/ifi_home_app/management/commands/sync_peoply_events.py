@@ -176,3 +176,15 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"Done: {created_count} event(s) created, {skipped_count} already existed."
         ))
+
+        # Read-only (never passes --create-missing here) -- just so the
+        # union/organization mismatch warnings reach the same
+        # terminal/journalctl output this command's own systemd timer
+        # already produces every 6 hours, without a second schedule. A
+        # failure here (e.g. Peoply's own API being down) shouldn't undo
+        # the event sync that already succeeded above, so it's reported
+        # rather than left to blow up the whole run.
+        try:
+            call_command("check_peoply_union_matches")
+        except CommandError as exc:
+            self.stderr.write(f"check_peoply_union_matches failed: {exc}")

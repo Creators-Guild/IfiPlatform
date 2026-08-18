@@ -661,7 +661,7 @@ msgstr "Ifi Platform Beta"
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:26
 #: .\templates\partials\bottom_header.html:5
-msgid "Ifi-Guild of Creators"
+msgid "Ifi-Creators' Guild"
 msgstr ""
 
 #: .\ifi_home_app\templates\core\partials\home_sidemenu.html:60

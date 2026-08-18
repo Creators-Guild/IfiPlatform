@@ -26,18 +26,10 @@ write peoply_organization_id."""
 import requests
 from django.core.management.base import BaseCommand
 
+from ifi_home_app.integrations.peoply_api import find_exact_match
 from ifi_home_app.models.article.unions import UnionPage
 
 PEOPLY_ORGANIZATIONS_URL = "https://api.peoply.app/organizations"
-
-
-def _find_exact_match(title, candidates):
-    title_lower = title.lower()
-    for org in candidates:
-        url_id = org["urlId"]
-        if org["name"].lower() == title_lower or (url_id and url_id.lower() == title_lower):
-            return org
-    return None
 
 
 class Command(BaseCommand):
@@ -73,7 +65,7 @@ class Command(BaseCommand):
                 unmatched.append(union.title)
                 continue
 
-            org = _find_exact_match(union.title, response.json())
+            org = find_exact_match(union.title, response.json())
             if org:
                 matched.append((union, org))
             else:
