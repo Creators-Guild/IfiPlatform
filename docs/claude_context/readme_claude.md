@@ -56,3 +56,21 @@ should read first.
 - If a note here goes stale (the code it describes changed and the
   rationale no longer applies), fix or delete it — a wrong note is worse
   than no note.
+- Not everything moves here. A short comment that's genuinely necessary
+  to understand non-obvious or complicated logic right where it happens —
+  a tricky edge case, a non-obvious ordering requirement, a gotcha —
+  still belongs in the code itself. This folder is for the longer *why*
+  and history that isn't needed just to read and safely modify the code;
+  it isn't a place to default every comment to.
+
+## Running the test suite
+
+Don't reflexively run `manage.py test` after every change. For a small or
+purely cosmetic edit — CSS (spacing, alignment, color), copy/text changes,
+comment/docstring-only edits, template markup that doesn't touch template
+logic — running the full suite (or even a scoped one) burns real time and
+resources for a change the suite was never going to catch anything in.
+Save it for changes that could actually break something: model/field
+changes, template *logic* (a new `{% if %}`, a changed queryset/property),
+view/command behavior, migrations. When in doubt, running one quick,
+narrowly-scoped test is cheaper than the full suite.

@@ -73,9 +73,26 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
     )
 
     website_url = models.URLField(blank=True)
-    signup_url = models.URLField(
+    union_links = StreamField(
+        [
+            (
+                "link",
+                blocks.StructBlock(
+                    [
+                        (
+                            "label",
+                            blocks.CharBlock(
+                                help_text="e.g. \"Bli medlem\", \"Meld interesse\", \"Søk verv\"."
+                            ),
+                        ),
+                        ("url", blocks.URLBlock()),
+                    ]
+                ),
+            ),
+        ],
+        use_json_field=True,
         blank=True,
-        help_text="Optional -- link to a membership/interest sign-up form (e.g. a Google Form to join or register interest).",
+        help_text="Optional -- one or more sign-up/interest links, each with its own label (e.g. a membership form, a volunteer sign-up).",
     )
     peoply_organization_id = models.CharField(
         max_length=64,
@@ -124,11 +141,6 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         blank=True,
     )
 
-    member_count_sitting = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        help_text="Number of sitting board members. Leave blank to hide.",
-    )
     member_count_intern = models.PositiveIntegerField(
         null=True,
         blank=True,
@@ -141,7 +153,13 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
                 "member",
                 blocks.StructBlock(
                     [
-                        ("name", blocks.CharBlock()),
+                        (
+                            "name",
+                            blocks.CharBlock(
+                                required=False,
+                                help_text="Leave blank for a vacant position -- see UnionPage.open_positions.",
+                            ),
+                        ),
                         (
                             "role",
                             blocks.CharBlock(
@@ -149,10 +167,43 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
                             ),
                         ),
                         (
+                            "role_nickname",
+                            blocks.CharBlock(
+                                required=False,
+                                help_text="Optional informal name for the role, e.g. \"Guild Master\" for \"Leader\".",
+                            ),
+                        ),
+                        (
                             "school_email",
                             blocks.EmailBlock(required=False),
                         ),
                         ("picture", ImageChooserBlock(required=False)),
+                        (
+                            "description",
+                            blocks.RichTextBlock(
+                                required=False,
+                                help_text="Requirements/description of this position.",
+                            ),
+                        ),
+                        (
+                            "availability",
+                            blocks.ChoiceBlock(
+                                choices=[
+                                    ("filled", "Filled"),
+                                    ("open", "Open now"),
+                                    ("opening_soon", "Opening soon"),
+                                ],
+                                default="filled",
+                                help_text="\"Open now\"/\"Opening soon\" also list this position under Open Positions, even if it has a sitting member too.",
+                            ),
+                        ),
+                        (
+                            "availability_note",
+                            blocks.CharBlock(
+                                required=False,
+                                help_text="Optional -- shown next to the Open Positions badge, e.g. \"After the next general assembly (generalforsamling)\".",
+                            ),
+                        ),
                     ]
                 ),
             ),
@@ -172,11 +223,10 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         FieldPanel("vedtekter"),
         FieldPanel("vedtekter_url"),
         FieldPanel("website_url"),
-        FieldPanel("signup_url"),
+        FieldPanel("union_links"),
         FieldPanel("peoply_organization_id"),
         FieldPanel("calendar_visibility"),
         FieldPanel("social_links"),
-        FieldPanel("member_count_sitting"),
         FieldPanel("member_count_intern"),
         FieldPanel("sitting_members"),
     ]
@@ -188,6 +238,29 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
     def union_category(self):
         """The StudentUnionCategoryPage this union lives under."""
         return self.get_parent().specific
+
+    @property
+    def filled_positions(self):
+        """sitting_members entries with a name to show."""
+        return [block for block in self.sitting_members if block.value.get("name")]
+
+    @property
+    def open_positions(self):
+        """sitting_members entries flagged open/opening_soon -- independent
+        of filled_positions, so one entry can appear in both (see
+        docs/claude_context/article_unions.md)."""
+        return [
+            block for block in self.sitting_members
+            if block.value.get("availability", "filled") != "filled"
+        ]
+
+    @property
+    def member_count_sitting(self):
+        """Count of filled_positions -- no longer a manually-entered field,
+        so it can't drift from the union's actual sitting_members data.
+        Unlike member_count_intern (still manual: interns aren't tracked
+        as sitting_members entries at all)."""
+        return len(self.filled_positions)
 
     # Below this many events in the current semester, "auto" visibility
     # hides the calendar rather than showing a mostly-empty grid.

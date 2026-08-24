@@ -20,7 +20,7 @@
     <div class="union-page" style="--accent-color: var(--color-purple)">
         <div class="union-header">
             {% if page.logo %}
-                {% image page.logo fill-160x160 as logo_img %}
+                {% image page.logo fill-240x240 as logo_img %}
                 <img class="union-logo" src="{{ logo_img.url }}" alt="{{ page.title }}">
             {% endif %}
             <div class="union-header-text">
@@ -42,6 +42,57 @@
         {% endif %}
 
         <div class="union-layout">
+            <aside class="union-sidebar">
+                {% if page.union_links %}
+                    <div class="union-info-box">
+                        {% for block in page.union_links %}
+                            <a class="union-info-link union-info-link--signup" href="{{ block.value.url }}" target="_blank" rel="noopener noreferrer">{{ block.value.label }}</a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="union-sidebar-row">
+                    {% if page.email or page.website_url or page.social_links %}
+                        <div class="union-info-box union-info-box--contact">
+                            <h2>{% trans "Contact" %}</h2>
+                            {% if page.email %}
+                                <a class="union-info-link" href="mailto:{{ page.email }}">{% trans "Email" %}</a>
+                            {% endif %}
+                            {% if page.website_url %}
+                                <a class="union-info-link" href="{{ page.website_url }}" target="_blank" rel="noopener noreferrer">{% trans "Website" %}</a>
+                            {% endif %}
+                            {% for block in page.social_links %}
+                                {% with platform=block.value.platform %}
+                                    <a class="union-info-link" href="{{ block.value.url }}" target="_blank" rel="noopener noreferrer">
+                                        {% if platform == "linkedin" %}{% trans "LinkedIn" %}{% elif platform == "tiktok" %}{% trans "TikTok" %}{% elif platform == "github" %}{% trans "GitHub" %}{% else %}{{ platform|title }}{% endif %}
+                                    </a>
+                                {% endwith %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if page.member_count_sitting or page.member_count_intern %}
+                        <div class="union-info-box">
+                            <h2>{% trans "Members" %}</h2>
+                            <div class="union-stats">
+                                {% if page.member_count_sitting %}
+                                    <div class="union-stat">
+                                        <span class="union-stat-number">{{ page.member_count_sitting }}</span>
+                                        <span class="union-stat-label">{% trans "Sitting" %}</span>
+                                    </div>
+                                {% endif %}
+                                {% if page.member_count_intern %}
+                                    <div class="union-stat">
+                                        <span class="union-stat-number">{{ page.member_count_intern }}</span>
+                                        <span class="union-stat-label">{% trans "Interns" %}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </aside>
+
             <article class="union-main">
                 {% if page.purpose %}
                     <h2>{% trans "Purpose" %}</h2>
@@ -63,6 +114,24 @@
                     {% endif %}
                 {% endif %}
 
+                {% if page.filled_positions %}
+                    <h2>{% trans "Sitting Members" %}</h2>
+                    <div class="union-member-grid">
+                        {% for block in page.filled_positions %}
+                            {% include "info_articles/partials/union_position_card.html" with block=block show_description_inline=False %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if page.open_positions %}
+                    <h2>{% trans "Open Positions" %}</h2>
+                    <div class="union-member-grid">
+                        {% for block in page.open_positions %}
+                            {% include "info_articles/partials/union_position_card.html" with block=block show_description_inline=True %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
                 {% if union_calendar %}
                     {% include "info_articles/partials/union_calendar_panel.html" %}
                 {% endif %}
@@ -71,78 +140,9 @@
                     <h2>{% trans "Upcoming Events" %}</h2>
                     {% include "events/partials/event_month_groups.html" with groups=upcoming_event_month_groups %}
                 {% endif %}
-
-                {% if page.sitting_members %}
-                    <h2>{% trans "Sitting Members" %}</h2>
-                    <div class="union-member-grid">
-                        {% for block in page.sitting_members %}
-                            {% with member=block.value %}
-                                <div class="union-member-card">
-                                    {% if member.picture %}
-                                        {% image member.picture fill-160x160 as member_img %}
-                                        <img class="union-member-picture" src="{{ member_img.url }}" alt="{{ member.name }}">
-                                    {% else %}
-                                        <div class="union-member-picture union-member-picture--placeholder" aria-hidden="true"></div>
-                                    {% endif %}
-                                    <h3>{{ member.name }}</h3>
-                                    <span class="union-member-role">{{ member.role }}</span>
-                                    {% if member.school_email %}
-                                        <a class="union-member-email" href="mailto:{{ member.school_email }}">{{ member.school_email }}</a>
-                                    {% endif %}
-                                </div>
-                            {% endwith %}
-                        {% endfor %}
-                    </div>
-                {% endif %}
             </article>
-
-            <aside class="union-sidebar">
-                {% if page.signup_url %}
-                    <div class="union-info-box">
-                        <a class="union-info-link union-info-link--signup" href="{{ page.signup_url }}" target="_blank" rel="noopener noreferrer">{% trans "Sign up / register interest" %}</a>
-                    </div>
-                {% endif %}
-
-                {% if page.email or page.website_url or page.social_links %}
-                    <div class="union-info-box union-info-box--contact">
-                        <h2>{% trans "Contact" %}</h2>
-                        {% if page.email %}
-                            <a class="union-info-link" href="mailto:{{ page.email }}">{% trans "Email" %}</a>
-                        {% endif %}
-                        {% if page.website_url %}
-                            <a class="union-info-link" href="{{ page.website_url }}" target="_blank" rel="noopener noreferrer">{% trans "Website" %}</a>
-                        {% endif %}
-                        {% for block in page.social_links %}
-                            {% with platform=block.value.platform %}
-                                <a class="union-info-link" href="{{ block.value.url }}" target="_blank" rel="noopener noreferrer">
-                                    {% if platform == "linkedin" %}{% trans "LinkedIn" %}{% elif platform == "tiktok" %}{% trans "TikTok" %}{% elif platform == "github" %}{% trans "GitHub" %}{% else %}{{ platform|title }}{% endif %}
-                                </a>
-                            {% endwith %}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if page.member_count_sitting or page.member_count_intern %}
-                    <div class="union-info-box">
-                        <h2>{% trans "Members" %}</h2>
-                        <div class="union-stats">
-                            {% if page.member_count_sitting %}
-                                <div class="union-stat">
-                                    <span class="union-stat-number">{{ page.member_count_sitting }}</span>
-                                    <span class="union-stat-label">{% trans "Sitting" %}</span>
-                                </div>
-                            {% endif %}
-                            {% if page.member_count_intern %}
-                                <div class="union-stat">
-                                    <span class="union-stat-number">{{ page.member_count_intern }}</span>
-                                    <span class="union-stat-label">{% trans "Interns" %}</span>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                {% endif %}
-            </aside>
         </div>
     </div>
     <script src="{% static 'js/union_calendar.js' %}" defer></script>
+    <script src="{% static 'js/union_position_info.js' %}" defer></script>
 {% endblock maincontent %}

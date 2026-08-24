@@ -38,6 +38,18 @@ EVENT_SPECS = [
     ("DNB Bedriftspresentasjon med Navet", "company", 20, "16:00", None),
 ]
 
+# Recurring "company presentation" EventPages for Navet, every Tuesday and
+# Thursday for NAVET_COMPANY_PRESENTATION_WEEKS weeks -- Navet's real
+# Peoply events were removed, so sync_peoply_events no longer produces any
+# for it; this keeps its calendar looking realistic in local dev regardless
+# (see EventSeedMixin._seed_navet_company_presentations). Company names
+# just cycle through this list in order.
+NAVET_COMPANY_PRESENTATION_COMPANIES = ["Bouvet", "Bekk", "Computas", "Sopra Steria"]
+NAVET_COMPANY_PRESENTATION_WEEKS = 6
+NAVET_COMPANY_PRESENTATION_TIME = "16:30"
+NAVET_COMPANY_PRESENTATION_END_TIME = "18:30"
+NAVET_COMPANY_PRESENTATION_LOCATION = "Escape"
+
 # Fadderuke's own week-calendar color legend (see EventPage.calendar_legend's
 # docstring) -- one entry per calendar_color actually used in
 # FADDERUKE_SUB_EVENT_SPECS below.
