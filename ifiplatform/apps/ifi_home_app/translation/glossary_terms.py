@@ -52,4 +52,6 @@ GLOSSARY_TERMS = {
     # templates/partials/bottom_header.html and home_sidemenu.html) --
     # renamed from "Ifi-Guild of Creators".
     "Ifi-Creators' Guild": "Ifi-Creators' Guild",
+    "pub til pub":"pub crawl",
+    "bar til bar": "bar crawl",
 }

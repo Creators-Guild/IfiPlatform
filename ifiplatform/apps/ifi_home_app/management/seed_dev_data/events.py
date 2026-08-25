@@ -4,8 +4,10 @@ full Mon-Fri sub-event programme (which also seeds the unions it references)."""
 from datetime import datetime, timedelta
 
 from django.utils import timezone
+from django.utils.text import slugify
 
 from ifi_home_app.models import EventIndexPage, EventPage
+from ifi_home_app.models.article_models import UnionPage
 
 from .constants import (
     EVENT_SPECS,
@@ -13,6 +15,11 @@ from .constants import (
     FADDERUKE_LEGEND,
     FADDERUKE_SUB_EVENT_SPECS,
     FADDERUKE_SUB_EVENT_UNIONS,
+    NAVET_COMPANY_PRESENTATION_COMPANIES,
+    NAVET_COMPANY_PRESENTATION_END_TIME,
+    NAVET_COMPANY_PRESENTATION_LOCATION,
+    NAVET_COMPANY_PRESENTATION_TIME,
+    NAVET_COMPANY_PRESENTATION_WEEKS,
 )
 
 
@@ -52,6 +59,7 @@ class EventSeedMixin:
                 self._translate_page(event, en_locale)
 
         self._seed_fadderuke_sub_events(fadderuke, nb_locale, en_locale, seed_image)
+        self._seed_navet_company_presentations(event_index, nb_locale, en_locale)
 
     def _seed_fadderuke_sub_events(self, fadderuke, nb_locale, en_locale, seed_image):
         """Fills Fadderuke with a full Mon-Fri programme (see
@@ -101,3 +109,48 @@ class EventSeedMixin:
                 sub_event.save_revision().publish()
 
             self._translate_page(sub_event, en_locale)
+
+    def _seed_navet_company_presentations(self, event_index, nb_locale, en_locale):
+        """Recurring Tue/Thu "company presentation" EventPages for Navet --
+        its real Peoply events were removed, so sync_peoply_events no
+        longer produces any for it; this keeps its calendar looking
+        realistic in local dev regardless. external_source/external_uid
+        are left blank (unlike a real synced event) since these aren't
+        actually from Peoply. Requires _seed_fadderuke_unions (called from
+        _seed_fadderuke_sub_events, above) to have already created Navet."""
+        navet = UnionPage.objects.get(title="Navet", locale=nb_locale)
+        companies = NAVET_COMPANY_PRESENTATION_COMPANIES
+        event_time = datetime.strptime(NAVET_COMPANY_PRESENTATION_TIME, "%H:%M").time()
+        event_end_time = datetime.strptime(NAVET_COMPANY_PRESENTATION_END_TIME, "%H:%M").time()
+
+        today = timezone.now().date()
+        last_date = today + timedelta(weeks=NAVET_COMPANY_PRESENTATION_WEEKS)
+        dates = []
+        day = today + timedelta(days=1)
+        while day <= last_date:
+            if day.weekday() in (1, 3):  # Tuesday, Thursday
+                dates.append(day)
+            day += timedelta(days=1)
+
+        for i, event_date in enumerate(dates):
+            company = companies[i % len(companies)]
+            title = f"Bedriftspresentasjon med {company}"
+            slug = f"bedriftspresentasjon-{slugify(company)}-{event_date.isoformat()}"
+            event = self._get_or_create_page(
+                event_index, EventPage, title, nb_locale, slug=slug,
+                event_type="company",
+                event_date=event_date,
+                event_time=event_time,
+                event_end_time=event_end_time,
+                location=NAVET_COMPANY_PRESENTATION_LOCATION,
+                intro=(
+                    f"<p>Velkommen til bedriftspresentasjon med {company}!</p>"
+                    f"<p>Arrangør: {company}<br>Mat: Pizza<br>Språk: Norsk<br>"
+                    f"Aldersgrense: 18<br>Plasser: 40</p>"
+                    f"<p>Bli med for en uformell presentasjon, etterfulgt av god mat og drikke.</p>"
+                ),
+            )
+            if not event.related_unions:
+                event.related_unions = [("union", {"union": navet, "role": "host"})]
+                event.save_revision().publish()
+            self._translate_page(event, en_locale)

@@ -28,14 +28,26 @@ class UnionSeedMixin:
                         "url": "https://instagram.com/example",
                     }),
                 ],
-                member_count_sitting=1,
                 member_count_intern=0,
                 sitting_members=[
                     ("member", {
                         "name": "Test Testesen",
                         "role": "Leder",
+                        "role_nickname": "Guild Master",
                         "school_email": "test@ifi.uio.no",
                         "picture": seed_image,
+                        "description": "<p>Test-beskrivelse generert av seed-scriptet.</p>",
+                        "availability": "opening_soon",
+                        "availability_note": "Etter neste generalforsamling",
+                    }),
+                    ("member", {
+                        "name": "",
+                        "role": "Nestleder",
+                        "role_nickname": "",
+                        "school_email": "",
+                        "description": "<p>Test-beskrivelse generert av seed-scriptet.</p>",
+                        "availability": "open",
+                        "availability_note": "",
                     }),
                 ],
             )
@@ -45,19 +57,89 @@ class UnionSeedMixin:
         """Creates the minimal UnionPage per name in FADDERUKE_UNION_SPECS
         (as children of the same Studentforeninger category Testforening
         1/2 live under), for FADDERUKE_SUB_EVENT_UNIONS to link sub-events
-        to via EventPage.related_unions. Returns {title: nb UnionPage}."""
+        to via EventPage.related_unions. Returns {title: nb UnionPage}.
+
+        Navet alone also gets a full sitting_members spread plus fake
+        contact/social data -- see docs/claude_context/article_unions.md."""
         union_category = StudentUnionCategoryPage.objects.get(
             slug="studentforeninger", locale=nb_locale
         )
         unions = {}
         for title in FADDERUKE_UNION_SPECS:
+            extra_kwargs = (
+                {
+                    "sitting_members": self._navet_sitting_members(seed_image),
+                    "show_in_menu": True,
+                    "email": "navet@ifi.uio.no",
+                    "website_url": "https://ifinavet.no",
+                    "union_links": [
+                        ("link", {"label": "Bli medlem", "url": "https://ifinavet.no/bli-medlem"}),
+                        ("link", {"label": "Søk verv i styret", "url": "https://ifinavet.no/verv"}),
+                    ],
+                    "social_links": [
+                        ("social_link", {"platform": "instagram", "url": "https://instagram.com/ifinavet"}),
+                        ("social_link", {"platform": "linkedin", "url": "https://linkedin.com/company/ifinavet"}),
+                    ],
+                    "member_count_intern": 3,
+                }
+                if title == "Navet" else {}
+            )
             union = self._get_or_create_page(
                 union_category, UnionPage, title, nb_locale,
                 logo=seed_image,
                 purpose="En studentforening ved Ifi generert av seed-scriptet.",
                 union_type="general",
                 peoply_organization_id=FADDERUKE_UNION_PEOPLY_IDS.get(title, ""),
+                **extra_kwargs,
             )
             self._translate_page(union, en_locale)
             unions[title] = union
         return unions
+
+    def _navet_sitting_members(self, seed_image):
+        # Every optional CharBlock/RichTextBlock below is given an explicit
+        # value (even "") rather than omitted -- an omitted key resolves to
+        # None here (raw StreamField construction, unlike an admin form
+        # submission) and crashes _translate_page's wagtail_localize export.
+        # picture (ImageChooserBlock, not a string segment) is unaffected,
+        # so it's simply left out where there's no picture.
+        return [
+            ("member", {  # filled, opening soon, every field set
+                "name": "Kari Nordmann",
+                "role": "Leder",
+                "role_nickname": "Husets Sjel",
+                "school_email": "kari@ifi.uio.no",
+                "picture": seed_image,
+                "description": "<p>Ansvarlig for driften av Navet og koordinering av frivillige.</p>",
+                "availability": "opening_soon",
+                "availability_note": "Etter neste generalforsamling",
+            }),
+            ("member", {  # filled, every optional field left blank
+                "name": "Ola Nordmann",
+                "role": "Kasserer",
+                "role_nickname": "",
+                "school_email": "",
+                "description": "",
+                "availability": "filled",
+                "availability_note": "",
+            }),
+            ("member", {  # vacant/open, every field set
+                "name": "",
+                "role": "Aktivitetsansvarlig",
+                "role_nickname": "Festfixer",
+                "school_email": "aktivitet@navet.example",
+                "picture": seed_image,
+                "description": "<p>Planlegger sosiale arrangementer i Navet.</p>",
+                "availability": "open",
+                "availability_note": "Søknadsfrist 1. september",
+            }),
+            ("member", {  # vacant/open, every optional field left blank
+                "name": "",
+                "role": "Vaktansvarlig",
+                "role_nickname": "",
+                "school_email": "",
+                "description": "",
+                "availability": "open",
+                "availability_note": "",
+            }),
+        ]
