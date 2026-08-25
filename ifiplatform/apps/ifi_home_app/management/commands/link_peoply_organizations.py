@@ -26,7 +26,7 @@ write peoply_organization_id."""
 import requests
 from django.core.management.base import BaseCommand
 
-from ifi_home_app.integrations.peoply_api import find_exact_match
+from ifi_home_app.integrations.peoply_api import apply_peoply_match, find_exact_match
 from ifi_home_app.models.article.unions import UnionPage
 
 PEOPLY_ORGANIZATIONS_URL = "https://api.peoply.app/organizations"
@@ -88,7 +88,5 @@ class Command(BaseCommand):
             return
 
         for union, org in matched:
-            UnionPage.objects.filter(translation_key=union.translation_key).update(
-                peoply_organization_id=org["id"]
-            )
+            apply_peoply_match(union, org)
         self.stdout.write(self.style.SUCCESS(f"Applied {len(matched)} match(es)."))

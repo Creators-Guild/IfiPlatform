@@ -215,6 +215,22 @@ class CheckPeoplyUnionMatchesTests(TestCase):
 
         self.assertIn("Every union and Peoply organization matches up", out.getvalue())
 
+    def test_union_with_no_id_but_exact_match_is_reported_pending_link_not_missing_org(self):
+        union = _make_union(title="CYB", slug="cyb")
+        self._patch_organizations([_fake_org(id="org-1", name="CYB", urlId="cyb")])
+
+        out = StringIO()
+        call_command("check_peoply_union_matches", stdout=out)
+
+        self.assertIn(union.title, out.getvalue())
+        self.assertIn("aren't linked yet", out.getvalue())
+        self.assertNotIn("no matching union on this site", out.getvalue())
+        self.assertTrue(
+            PeoplyUnionMismatch.objects.filter(
+                kind="pending_link", identifier=str(union.translation_key)
+            ).exists()
+        )
+
     def test_union_with_no_id_and_no_name_match_is_reported_unlinked(self):
         _make_union(title="Mystery Union", slug="mystery-union")
         self._patch_organizations([_fake_org(id="org-1", name="Unrelated Org", urlId="unrelated")])
@@ -225,9 +241,9 @@ class CheckPeoplyUnionMatchesTests(TestCase):
         self.assertIn("Mystery Union", out.getvalue())
         self.assertIn("no matching Peoply organization", out.getvalue())
 
-    def test_union_with_no_id_but_exact_name_match_is_not_reported(self):
-        _make_union(title="CYB", slug="cyb")
-        self._patch_organizations([_fake_org(id="org-1", name="CYB", urlId="cyb")])
+    def test_retired_union_with_no_match_is_not_reported(self):
+        _make_union(title="Mystery Union", slug="mystery-union", status="retired")
+        self._patch_organizations([])
 
         out = StringIO()
         call_command("check_peoply_union_matches", stdout=out)

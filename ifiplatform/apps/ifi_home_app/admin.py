@@ -8,12 +8,13 @@ import requests
 from wagtail.coreutils import find_available_slug
 from wagtail.models import Locale
 
-from .integrations.peoply_api import get_organizations
+from .integrations.peoply_api import apply_peoply_match, find_exact_match, get_organizations
 from .models import StudentUnion
 from .models.article.unions import StudentUnionCategoryPage, UnionPage
 from .models.event_models import (
     PeoplySyncLog,
     PeoplyOrgsWithoutUnion,
+    UnionsPendingPeoplyLink,
     UnionsWithoutPeoplyOrg,
     UnionsWithStalePeoplyLink,
 )
@@ -47,16 +48,20 @@ class PeoplySyncLogAdmin(admin.ModelAdmin):
 
 
 class _PeoplyUnionMismatchAdmin(admin.ModelAdmin):
-    """Shared base for the three PeoplyUnionMismatch proxies below (see
+    """Shared base for the four PeoplyUnionMismatch proxies below (see
     their own docstrings, event_models.py, on why they're three separate
-    admin entries rather than one combined filterable list). Read-only,
-    superuser-only -- rows are never edited/deleted by hand here, only
-    check_peoply_union_matches writes the mismatch bookkeeping itself.
-    `kind` isn't in list_display -- each proxy's own manager already
-    restricts it to a single kind, so the column would be constant."""
+    admin entries rather than one combined filterable list). Superuser-only,
+    and never editable -- but deletable, so stale/no-longer-interesting rows
+    (e.g. already resolved_at) can be cleaned out by hand. Safe to delete
+    freely: check_peoply_union_matches recreates a row from scratch the next
+    time it sees that same (kind, identifier) mismatch again, it just won't
+    remember first_seen_at from before the delete. `kind` isn't in
+    list_display -- each proxy's own manager already restricts it to a
+    single kind, so the column would be constant."""
 
     list_display = ["label", "first_seen_at", "last_seen_at", "resolved_at"]
     list_filter = ["resolved_at"]
+    actions = ["delete_selected_logs"]
 
     def has_module_permission(self, request):
         return request.user.is_superuser
@@ -71,7 +76,26 @@ class _PeoplyUnionMismatchAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return request.user.is_superuser
+
+    def get_actions(self, request):
+        # Drop the built-in "delete_selected" action -- its label quotes
+        # this model's verbose_name ("site union without a Peoply
+        # organization"), which reads as deleting the actual UnionPage.
+        # delete_selected_logs below is the same delete, worded to make
+        # clear it's only the log row.
+        actions = super().get_actions(request)
+        actions.pop("delete_selected", None)
+        return actions
+
+    @admin.action(description="Delete selected log entries")
+    def delete_selected_logs(self, request, queryset):
+        if not request.user.is_superuser:
+            self.message_user(request, "Only superusers can do this.", level=messages.ERROR)
+            return
+        count = queryset.count()
+        queryset.delete()
+        self.message_user(request, f"Deleted {count} log entr{'y' if count == 1 else 'ies'}.")
 
 
 @admin.register(UnionsWithoutPeoplyOrg)
@@ -93,10 +117,10 @@ class UnionsWithStalePeoplyLinkAdmin(_PeoplyUnionMismatchAdmin):
 @admin.register(PeoplyOrgsWithoutUnion)
 class PeoplyOrgsWithoutUnionAdmin(_PeoplyUnionMismatchAdmin):
     """Peoply organizations with no matching UnionPage here at all. The
-    only one of the three with an action attached -- creating a stub only
-    makes sense in this direction, not the other two."""
+    only one of the three with an extra action attached -- creating a stub
+    only makes sense in this direction, not the other two."""
 
-    actions = ["create_union_pages_for_missing_orgs"]
+    actions = ["delete_selected_logs", "create_union_pages_for_missing_orgs"]
 
     @admin.action(description="Create a draft UnionPage for the selected mismatch(es)")
     def create_union_pages_for_missing_orgs(self, request, queryset):
@@ -177,6 +201,86 @@ class PeoplyOrgsWithoutUnionAdmin(_PeoplyUnionMismatchAdmin):
                 request,
                 f"{len(gone_from_peoply)} selected mismatch(es) no longer appear on Peoply, skipped: "
                 + ", ".join(gone_from_peoply),
+                level=messages.WARNING,
+            )
+        if resolved_skipped:
+            self.message_user(
+                request,
+                f"{resolved_skipped} selected row(s) were already resolved, skipped.",
+                level=messages.WARNING,
+            )
+
+
+@admin.register(UnionsPendingPeoplyLink)
+class UnionsPendingPeoplyLinkAdmin(_PeoplyUnionMismatchAdmin):
+    """Site UnionPages with no peoply_organization_id, but an exact title
+    match against a Peoply organization -- check_peoply_union_matches only
+    ever reports these (it's read-only); link_selected_unions below is the
+    admin-side equivalent of running link_peoply_organizations --apply for
+    just the selected row(s)."""
+
+    actions = ["delete_selected_logs", "link_selected_unions"]
+
+    @admin.action(description="Link selected union(s) to their matched Peoply organization")
+    def link_selected_unions(self, request, queryset):
+        if not request.user.is_superuser:
+            self.message_user(request, "Only superusers can do this.", level=messages.ERROR)
+            return
+
+        resolved_skipped = queryset.filter(resolved_at__isnull=False).count()
+        targets = list(queryset.filter(resolved_at__isnull=True))
+
+        if not targets:
+            self.message_user(
+                request, "Nothing to link -- selection had no open mismatch.", level=messages.WARNING
+            )
+            return
+
+        try:
+            nb_locale = Locale.objects.get(language_code="nb")
+            orgs = get_organizations()
+        except (requests.RequestException, Locale.DoesNotExist) as exc:
+            self.message_user(request, f"Couldn't fetch Peoply's organizations: {exc}", level=messages.ERROR)
+            return
+
+        linked = []
+        no_longer_matches = []
+        gone = []
+        for mismatch in targets:
+            try:
+                union = UnionPage.objects.get(translation_key=mismatch.identifier, locale=nb_locale)
+            except UnionPage.DoesNotExist:
+                gone.append(mismatch.label)
+                continue
+
+            # Re-checked here, not trusted from the log row -- the union's
+            # own peoply_organization_id or Peoply's own roster may have
+            # changed since check_peoply_union_matches last ran.
+            org = None if union.peoply_organization_id else find_exact_match(union.title, orgs)
+            if org is None:
+                no_longer_matches.append(mismatch.label)
+                continue
+
+            apply_peoply_match(union, org)
+            linked.append(f"{union.title} -> {org['name']}")
+
+            mismatch.resolved_at = timezone.now()
+            mismatch.save()
+
+        if linked:
+            self.message_user(
+                request, f"Linked {len(linked)} union(s): " + ", ".join(linked), level=messages.SUCCESS
+            )
+        if no_longer_matches:
+            self.message_user(
+                request,
+                f"{len(no_longer_matches)} selected row(s) no longer have an exact match (or already have an id), skipped: "
+                + ", ".join(no_longer_matches),
+                level=messages.WARNING,
+            )
+        if gone:
+            self.message_user(
+                request, f"{len(gone)} selected union(s) no longer exist, skipped: " + ", ".join(gone),
                 level=messages.WARNING,
             )
         if resolved_skipped:

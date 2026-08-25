@@ -4,6 +4,9 @@ looks at site unions missing a peoply_organization_id, one at a time via
 Peoply's name search), this fetches every organization Peoply knows about
 and reports:
 
+Only considers status="active" unions -- retired/unknown ones aren't
+expected to have a working Peoply link, so they never get flagged.
+
 - site unions with no corresponding Peoply organization at all (no id set,
   and no exact name/urlId match either) -- these can't get automatic event
   sync (see UnionPage.peoply_organization_id's own help text) until someone
@@ -18,6 +21,12 @@ and reports:
   --create-missing to create a draft (unpublished) UnionPage stub for each,
   pre-filled with its Peoply id and website -- left for an editor to
   review, fill in, and publish by hand rather than going live unattended.
+- site unions with no peoply_organization_id set, but whose title is an
+  exact match against a Peoply organization -- these aren't counted as
+  "missing" on either side, just not linked here yet. Surfaced as their own
+  kind (not silently absorbed) so there's a log to act on -- see
+  UnionsPendingPeoplyLink's "link selected" admin action, or run
+  link_peoply_organizations --apply.
 
 Every mismatch found is also reconciled against PeoplyUnionMismatch (see
 that model's own docstring, event_models.py) -- a mismatch seen for the
@@ -80,10 +89,19 @@ class Command(BaseCommand):
             raise CommandError(f"Couldn't fetch Peoply's organizations: {exc}") from exc
 
         orgs_by_id = {org["id"]: org for org in orgs}
-        unions = list(UnionPage.objects.live().filter(locale=nb_locale).order_by("title"))
+        # status="active" only -- retired/unknown unions aren't expected to
+        # have a working Peoply link, so they're excluded from every check
+        # below, not just reported differently. A union that later gets
+        # retired/marked unknown drops out of `current` on its own, so any
+        # mismatch already on file for it gets auto-resolved next run (see
+        # _reconcile_mismatches) without needing special-casing here.
+        unions = list(
+            UnionPage.objects.live().filter(locale=nb_locale, status="active").order_by("title")
+        )
 
         unlinked = []  # no peoply_organization_id, and no exact name/urlId match either
         stale = []  # peoply_organization_id no longer matches any org Peoply returns
+        pending_link = []  # (union, org) -- no peoply_organization_id, but an exact match exists
         matched_org_ids = set()
 
         for union in unions:
@@ -96,10 +114,14 @@ class Command(BaseCommand):
 
             org = find_exact_match(union.title, orgs)
             if org:
-                # Accounted for on Peoply, just not linked here yet --
-                # link_peoply_organizations --apply is the fix for these,
-                # not a missing-organization problem.
+                # Accounted for on Peoply, just not linked here yet -- not a
+                # missing-organization problem, so it's excluded from
+                # missing_here below. Still surfaced of its own accord (not
+                # silently dropped) so there's a log to link it from, via
+                # UnionsPendingPeoplyLink's "link selected" admin action or
+                # link_peoply_organizations --apply.
                 matched_org_ids.add(org["id"])
+                pending_link.append((union, org))
             else:
                 unlinked.append(union)
 
@@ -112,12 +134,17 @@ class Command(BaseCommand):
             (str(union.translation_key), f"{union.title} ({union.peoply_organization_id})")
             for union in stale
         ]
+        pending_link_items = [
+            (str(union.translation_key), f"{union.title} -> {org['name']} ({org['urlId'] or org['id']})")
+            for union, org in pending_link
+        ]
         missing_items = [(org["id"], f"{org['name']} ({org['urlId']})") for org in missing_here]
 
         current = (
             [("unlinked_union", *item) for item in unlinked_items]
             + [("stale_link", *item) for item in stale_items]
             + [("missing_org", *item) for item in missing_items]
+            + [("pending_link", *item) for item in pending_link_items]
         )
         new_records, resolved_records = self._reconcile_mismatches(current)
 
@@ -132,6 +159,9 @@ class Command(BaseCommand):
                          new_keys)
             self._report("missing_org", missing_items,
                          "Peoply organization(s) have no matching union on this site", new_keys)
+            self._report("pending_link", pending_link_items,
+                         "union(s) have an exact Peoply match but aren't linked yet -- see admin action to link them",
+                         new_keys)
 
         if resolved_records:
             self.stdout.write(self.style.SUCCESS(
