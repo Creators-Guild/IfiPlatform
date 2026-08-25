@@ -147,7 +147,7 @@ If that fails because `msgfmt` (part of GNU gettext) isn't installed — common 
 ```bash
 python manage.py compile_translations
 ```
-See [core_app's management commands doc](ifiplatform/core_app/management/commands/commands.md#compile_translations) for why this exists.
+See [docs/management_commands.md](docs/management_commands.md#compile_translations) for why this exists.
 #### Log in on admin interface or wagtail-admin interface
 Log in via a superuser you have created.
 ```

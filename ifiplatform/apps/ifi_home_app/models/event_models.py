@@ -169,24 +169,25 @@ class PeoplyUnionMismatch(models.Model):
     already-known gap forever.
 
     (kind, identifier) is the stable identity of one mismatch: identifier
-    is the union's translation_key for "unlinked_union"/"stale_link" (nb/en
-    both share it, and it survives a slug/title change), or Peoply's own
-    organization id for "missing_org". first_seen_at is set once;
-    last_seen_at is bumped every run the mismatch is still present;
-    resolved_at is set the first run it's no longer found (e.g. someone
-    linked/created the union, or Peoply's data changed) and cleared again
-    if it ever comes back, rather than creating a second row for the same
-    (kind, identifier)."""
+    is the union's translation_key for "unlinked_union"/"stale_link"/
+    "pending_link" (nb/en both share it, and it survives a slug/title
+    change), or Peoply's own organization id for "missing_org".
+    first_seen_at is set once; last_seen_at is bumped every run the
+    mismatch is still present; resolved_at is set the first run it's no
+    longer found (e.g. someone linked/created the union, or Peoply's data
+    changed) and cleared again if it ever comes back, rather than creating
+    a second row for the same (kind, identifier)."""
 
     KIND_CHOICES = [
         ("unlinked_union", "Site union has no matching Peoply organization"),
         ("stale_link", "Site union's peoply_organization_id no longer matches any Peoply organization"),
         ("missing_org", "Peoply organization has no matching UnionPage here"),
+        ("pending_link", "Site union has an exact Peoply match, not linked yet"),
     ]
     kind = models.CharField(max_length=20, choices=KIND_CHOICES)
     identifier = models.CharField(
         max_length=64,
-        help_text="UnionPage.translation_key for unlinked_union/stale_link, Peoply organization id for missing_org.",
+        help_text="UnionPage.translation_key for unlinked_union/stale_link/pending_link, Peoply organization id for missing_org.",
     )
     label = models.CharField(max_length=255, help_text="Human-readable description, refreshed on every sighting.")
     first_seen_at = models.DateTimeField(auto_now_add=True)
@@ -254,10 +255,9 @@ class UnionsWithStalePeoplyLink(PeoplyUnionMismatch):
 
 class PeoplyOrgsWithoutUnion(PeoplyUnionMismatch):
     """Proxy over PeoplyUnionMismatch, scoped to kind="missing_org" --
-    Peoply organizations with no matching UnionPage here at all. The only
-    one of the three with an admin action attached
-    (create_union_pages_for_missing_orgs, admin.py) -- creating a stub only
-    makes sense in this direction."""
+    Peoply organizations with no matching UnionPage here at all. Creating a
+    stub only makes sense in this direction (create_union_pages_for_missing_orgs,
+    admin.py)."""
 
     objects = _SingleKindMismatchManager("missing_org")
 
@@ -265,6 +265,25 @@ class PeoplyOrgsWithoutUnion(PeoplyUnionMismatch):
         proxy = True
         verbose_name = "Peoply organization without a site union"
         verbose_name_plural = "Peoply organizations without a site union"
+
+
+class UnionsPendingPeoplyLink(PeoplyUnionMismatch):
+    """Proxy over PeoplyUnionMismatch, scoped to kind="pending_link" --
+    site UnionPages with no peoply_organization_id set, but whose title is
+    an exact match (case-insensitive, name or urlId) against a Peoply
+    organization -- check_peoply_union_matches finds these via the same
+    find_exact_match link_peoply_organizations uses, but doesn't write
+    anything itself (read-only command). A separate kind from
+    "unlinked_union" specifically because the fix here is just linking, not
+    finding/creating the union on Peoply -- link_selected_unions
+    (admin.py) does exactly that in one click."""
+
+    objects = _SingleKindMismatchManager("pending_link")
+
+    class Meta:
+        proxy = True
+        verbose_name = "site union with an unlinked Peoply match"
+        verbose_name_plural = "Site unions with an unlinked Peoply match"
 
 
 class EventIndexPage(TranslationWarningMixin, Page):
