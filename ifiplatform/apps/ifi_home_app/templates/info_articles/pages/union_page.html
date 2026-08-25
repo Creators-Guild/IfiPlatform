@@ -44,7 +44,7 @@
         <div class="union-layout">
             <aside class="union-sidebar">
                 {% if page.union_links %}
-                    <div class="union-info-box">
+                    <div class="union-info-box union-info-box--links">
                         {% for block in page.union_links %}
                             <a class="union-info-link union-info-link--signup" href="{{ block.value.url }}" target="_blank" rel="noopener noreferrer">{{ block.value.label }}</a>
                         {% endfor %}

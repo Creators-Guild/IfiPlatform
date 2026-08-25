@@ -13,3 +13,12 @@ html, body {
      boundary, so it doesn't introduce a new one. */
   overflow-x: hidden;
 }
+
+/* inside, not the default outside -- an outside marker sits in its own box
+to the left of the list, ignoring any text-align on the list/li (centered
+text still gets a left-hanging bullet/number). inside makes the marker
+part of the li's own inline content, so it follows text-align like the
+text itself does. */
+ul, ol {
+  list-style-position: inside;
+}

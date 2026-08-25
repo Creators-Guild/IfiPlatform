@@ -45,8 +45,6 @@ this one -- see docs/claude_context/union_page.md. */
   color: var(--color-on-accent);
 }
 
-/* .union-main and .union-sidebar are independent layouts, not a shared
-grid/flex row -- see docs/claude_context/union_page.md for why. */
 .union-layout {
   position: relative;
   margin-top: 1.5rem;
@@ -55,7 +53,6 @@ grid/flex row -- see docs/claude_context/union_page.md for why. */
 .union-main {
   max-width: 60rem;
   margin: 0 auto;
-  /* safe here since .union-main is a plain block, not a row item -- see .union-layout's comment above */
   text-align: center;
 }
 
@@ -76,7 +73,7 @@ grid/flex row -- see docs/claude_context/union_page.md for why. */
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  /* below 115rem: normal flow above .union-main, sized to match its column width -- see docs/claude_context/union_page.md */
+  /* below the @media breakpoint further down: normal flow above .union-main, sized to match its column width */
   max-width: 60rem;
   margin: 0 auto 1.5rem;
 }
@@ -103,6 +100,20 @@ grid/flex row -- see docs/claude_context/union_page.md for why. */
 .union-info-box h2 {
   margin: 0 0 0.75rem;
   font-size: 1rem;
+}
+
+/* .union-sidebar's flex column otherwise stretches this to the sidebar's
+own full width (up to 60rem in stacked mode) -- capped here so a union
+with just one or two links doesn't render as a giant edge-to-edge button.
+width, not max-width: the link buttons' own content is far narrower than
+45rem, so a plain max-width has nothing to constrain -- the box just
+shrinks to fit its content regardless of how big max-width is. min(45rem,
+100%) forces it to actually render at 45rem, while still shrinking on
+anything narrower than that (mobile) instead of overflowing. */
+.union-info-box--links {
+  width: min(24rem, 100%);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .union-info-link {
@@ -402,15 +413,40 @@ grid/flex row -- see docs/claude_context/union_page.md for why. */
 }
 
 /* Only above this width does .union-sidebar leave normal flow to float
-beside .union-main -- breakpoint value derivation in
-docs/claude_context/union_page.md. */
-@media (min-width: 115rem) {
+beside .union-main. */
+@media (min-width: 80rem) {
   .union-sidebar {
     position: absolute;
     top: 0;
     right: 0;
     width: 16rem;
-    max-width: 16rem;
     margin: 0;
+  }
+}
+
+/* Between 80rem and 104rem, there isn't reliably enough room for
+.union-main/.union-header's full-width centering to clear .union-sidebar's
+16rem column on its own. padding-right on .union-page (their shared
+parent, not .union-layout) reserves that space on both their content
+boxes at once, so both re-center within the same narrower remainder and
+stay lined up with each other -- same margin:auto centering either
+already had, just now solving against a narrower canvas.
+
+.union-sidebar's own position is unaffected by that padding directly (see
+the min-width:80rem block above) -- but .union-layout itself, as a plain
+block filling .union-page's content box, physically shrinks by that same
+18rem, which would otherwise drag .union-sidebar's right:0 anchor 18rem
+left of .union-page's true right edge along with it. The right:-18rem
+below compensates, pushing back out by exactly the space .union-page
+reserved, landing .union-sidebar back at the true right edge -- same
+visual position as outside this range. Keep this value equal to
+.union-page's padding-right above if either one changes. */
+@media (min-width: 80rem) and (max-width: 104rem) {
+  .union-page {
+    padding-right: 18rem;
+  }
+
+  .union-sidebar {
+    right: -18rem;
   }
 }
