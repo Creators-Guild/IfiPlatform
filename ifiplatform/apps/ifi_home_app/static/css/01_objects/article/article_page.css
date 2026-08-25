@@ -1,0 +1,126 @@
+/* Design rationale/history: docs/claude_context/article_page.md */
+
+/* flow-root so floated content inside (hero image, ToC popover anchors,
+   floated body images/boxes) is properly contained -- the article's own
+   height wraps around them instead of collapsing past their bottom edge. */
+.article-page {
+  display: flow-root;
+  /* editor-controlled default alignment (ArticlePage.content_alignment)
+  -- text-align is inherited, so this is only a fallback for anything with
+  no alignment control of its own (title/meta/intro have their own, see
+  .article-header below; most block types set text-align explicitly on
+  themselves too, which always wins regardless of specificity). */
+  text-align: var(--content-alignment, left);
+}
+
+/* title/meta/intro are wrapped together (see article_page.html) so they
+share one hover trigger/mini panel, but each still gets its own alignment
+(ArticlePage.title_alignment/intro_alignment/meta_alignment). text-align
+here (not on h1 itself) is what actually positions h1 -- h1 is
+display:inline-block (see category_card.css), and an inline-block's own
+box is positioned by its *containing block's* text-align, not its own. */
+.article-header {
+  text-align: var(--title-alignment, left);
+  /* separates the title/meta/intro group from whatever comes next (hero
+  image, or straight into the body if there's no hero image). Same color
+  as the title's own underline (category_card.css's .article-page h1),
+  just thinner. */
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--accent-color, var(--color-border));
+}
+
+.article-header > .intro {
+  text-align: var(--intro-alignment, left);
+  /* editor-controlled (ArticlePage.intro_font_size, --intro-font-size set
+  on .article-header) -- independent from --content-font-size, same split
+  as the alignment properties above. */
+  font-size: var(--intro-font-size, 1rem);
+}
+
+/* .article-meta is a flex container -- flex items ignore inherited
+text-align for their own positioning, so the row needs its own explicit
+justify-content instead. "left"/"center"/"right" are valid justify-content
+keywords too (CSS Box Alignment), so the same custom property value works
+here unchanged. Scoped to .article-header > .article-meta rather than
+touching .article-meta itself (article_meta.css) -- that class is shared
+by other page types (union/tool pages) that don't have this per-article
+override. */
+.article-header > .article-meta {
+  justify-content: var(--meta-alignment, left);
+  /* editor-controlled (ArticlePage.meta_font_size, --meta-font-size set on
+  .article-header) -- fallback matches article_meta.css's own plain
+  default (0.9rem), so an article with no override renders identically to
+  before this became overridable. */
+  font-size: var(--meta-font-size, 0.9rem);
+}
+
+/* editor-controlled side padding, applied to the title/meta/intro wrapper
+and the body separately (each its own custom property/control -- same
+split as the alignment properties above) rather than on .article-page
+itself, so the hero image figure stays unaffected and keeps its own
+edge-to-edge position. Margin, not padding: h1's border-bottom (the accent
+underline) is part of its border box, and padding on a width:auto block
+only shrinks the content area inside a fixed-width border box, leaving the
+border behind at the un-indented edge -- margin moves the whole box,
+border included, so the underline stays lined up with the now-indented
+text above it. */
+.article-page > .article-header {
+  margin-left: var(--header-side-padding, 0);
+  margin-right: var(--header-side-padding, 0);
+}
+
+.article-page > article {
+  margin-left: var(--content-side-padding, 0);
+  margin-right: var(--content-side-padding, 0);
+}
+
+/* editor-set side padding/alignment are ignored below this (45rem -- same
+"phone" breakpoint used throughout the rest of the site: event_page.css,
+union_card.css, article_multicolumn.css, article_image.css, dropdown_menu.js,
+...) -- a large padding or centered/right alignment picked for a wide desktop
+column can eat the whole screen or read badly once the column is already
+this narrow, so mobile always gets the plain left-aligned, unpadded default
+regardless of what's configured. */
+@media (max-width: 45rem) {
+  .article-page {
+    text-align: center;
+    font-size: 1rem;
+  }
+
+  .article-header,
+  .article-header > .intro {
+    text-align: center;
+  }
+
+  .article-header > .article-meta {
+    justify-content: center;
+  }
+
+  .article-page > .article-header,
+  .article-page > article {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* same "ignore editor-picked sizing below this breakpoint" rule as
+  margin/alignment above, extended to the title/intro/meta font sizes
+  (ArticlePage.title_font_size/intro_font_size/meta_font_size,
+  --title-font-size/etc set on .article-header) and their own box padding
+  (h1/.intro/.article-meta are independently boxable -- see
+  _effective_box_style() -- box.padding renders inline here as
+  "padding: Xrem"). Box background/border/radius stay untouched -- only
+  sizing that can overflow or read badly this narrow gets reset. Why 45rem
+  specifically, not 480px: docs/claude_context/article_page.md */
+  .article-header {
+    --title-font-size: 2rem !important;
+    --intro-font-size: 1rem !important;
+    --meta-font-size: 0.9rem !important;
+  }
+
+  .article-page h1,
+  .article-header > .intro,
+  .article-header > .article-meta {
+    padding: 0 !important;
+  }
+}

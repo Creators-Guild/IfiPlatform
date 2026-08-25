@@ -1,5 +1,6 @@
 {% load i18n wagtailcore_tags wagtailimages_tags %}
 {% with member=block.value %}
+    <!-- adaptive classname based on position availability -->
     <div class="union-member-card{% if show_description_inline %} union-member-card--open{% endif %}">
         {% if not show_description_inline and member.description %}
             <div class="position-info-widget">
@@ -30,15 +31,23 @@
                 <div class="union-member-picture union-member-picture--placeholder" aria-hidden="true"></div>
             {% endif %}
         {% endif %}
-
+        
+        <!-- name -->
         {% if not show_description_inline %}
             <h3>{{ member.name }}</h3>
         {% endif %}
 
-        <span class="union-member-role">
-            {{ member.role }}{% if member.role_nickname %} &mdash; {{ member.role_nickname }}{% endif %}
-        </span>
+        <!-- role -->
+        <div class="union-member-role">
+            {% if member.role_nickname %}
+            <div class="role">{{ member.role }}</div>
+            <div class="role-main">{{ member.role_nickname }}</div>
+            {% else %}
+            <div class="role-main">{{ member.role }}</div>
+            {% endif %}
+        </div>
 
+        <!-- availability tag and note -->
         {% if member.availability != "filled" %}
             <span class="union-position-badge union-position-badge--{{ member.availability }}">
                 {% if member.availability == "open" %}{% trans "Open now" %}{% else %}{% trans "Opening soon" %}{% endif %}
@@ -47,11 +56,8 @@
                 <span class="union-position-note">{{ member.availability_note }}</span>
             {% endif %}
         {% endif %}
-
-        {% if not show_description_inline and member.school_email %}
-            <a class="union-member-email" href="mailto:{{ member.school_email }}">{{ member.school_email }}</a>
-        {% endif %}
-
+        
+        <!-- position description -->
         {% if show_description_inline and member.description %}
             <div class="union-position-description prose">{{ member.description|richtext }}</div>
         {% endif %}
@@ -63,5 +69,13 @@
                 <span class="union-position-held-by union-position-held-by--vacant">{% trans "Vacant" %}</span>
             {% endif %}
         {% endif %}
+        
+        <!-- mail -->
+        {% if not show_description_inline and member.school_email %}
+            <a class="union-member-email" href="mailto:{{ member.school_email }}">{{ member.school_email }}</a>
+        {% endif %}
+
+
     </div>
+            
 {% endwith %}

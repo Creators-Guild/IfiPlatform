@@ -4,9 +4,13 @@
 {% block title %}{{ page.title }}{% endblock %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css/styles/neon_style/home_base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/tool_page.css' %}">
-    <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
+    <link rel="stylesheet" href="{% static 'css/01_objects/home/home_layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/01_objects/home/home_page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/shared/modal_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/01_objects/tool/tool_page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/tool/tool_preview_grid.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/tool/tool_lightbox.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/shared/translation_warning.css' %}">
     <script src="{% static 'js/tool_preview_lightbox.js' %}" defer></script>
 {% endblock extra_head %}
 

@@ -1,0 +1,76 @@
+/* Same icon-button-toggles-a-panel pattern as .toc-open-button/
+   .toc-overlay-panel (article_toc/article_toc_overlay.css) -- see union_position_info.js. */
+.position-info-widget {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+}
+
+.position-info-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.position-info-button:hover,
+.position-info-button:focus-visible {
+  color: var(--accent-color, var(--color-border));
+}
+
+.position-info-icon {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+/* background-color/border come from ../shared/popover_base.css */
+.position-info-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  z-index: 50;
+  width: min(85vw, 16rem);
+  box-sizing: border-box;
+  padding: 1rem;
+  text-align: left;
+  border-left: 6px solid var(--accent-color, var(--color-border));
+  border-radius: 12px;
+  box-shadow: 0 4px 16px var(--color-shadow);
+}
+
+.position-info-panel[hidden] {
+  display: none;
+}
+
+/* display/align-items/justify-content/gap come from ../shared/popover_base.css */
+.position-info-header {
+  margin: 0 0 0.5rem;
+}
+
+/* margin/font-weight come from ../shared/popover_base.css */
+.position-info-title {
+  font-size: 0.85rem;
+}
+
+/* flex/cursor come from ../shared/popover_base.css */
+.position-info-close {
+  padding: 0.1rem 0.5rem;
+  background: none;
+  border: 1px solid var(--color-text-muted);
+  border-radius: 8px;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.position-info-close:hover {
+  color: var(--color-text);
+  border-color: var(--color-text);
+}

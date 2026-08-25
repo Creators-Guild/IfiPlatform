@@ -1,0 +1,96 @@
+/* Callout above .home-eventsbox-list for whatever's happening today
+(home_eventsbox.html/EventPage.is_happening_now) -- --color-cta rather than
+--color-accent, since the latter is already .event-type-badge--social's
+color (event_page.css) and would read as "this is a social event" instead
+of "this is live right now". The label is a block on its own line (a
+section title above the list) rather than an inline-flex row alongside it
+-- with more than one event possibly happening at once, "Happening now"
+reads as a heading introducing all of them, not a badge stuck to the
+first one's name. */
+.home-eventsbox-live {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.home-eventsbox-live-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: fit-content;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.2rem 0.6rem;
+  margin-bottom: 0.5rem;
+  border-radius: 999px;
+  color: var(--color-on-accent);
+  background-color: var(--color-cta);
+}
+
+/* Pulsing dot -- the label text alone ("Happening now") doesn't read as
+distinctly "live" at a glance the way a small animated indicator does. */
+.home-eventsbox-live-label::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background-color: var(--color-on-accent);
+  animation: home-eventsbox-live-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes home-eventsbox-live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.home-eventsbox-live-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+}
+
+.home-eventsbox-live-list > li > a {
+  font-weight: bold;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.home-eventsbox-live-list > li > a:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+/* This event's own sub-events actually in progress right now
+(EventPage.live_sub_events) -- same border-left "expanded menu" indent as
+.home-eventsbox-subevents-list below, just always shown here rather than
+toggle-revealed, since everything in this callout is already "live". */
+.home-eventsbox-live-sublist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0.3rem 0 0;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--color-border);
+  min-width: 0;
+}
+
+.home-eventsbox-live-sublist a {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.home-eventsbox-live-sublist a:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}

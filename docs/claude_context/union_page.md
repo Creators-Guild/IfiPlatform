@@ -1,6 +1,6 @@
 # union_page.css / union_page.html — layout rationale
 
-Covers `ifi_home_app/static/css/styles/neon_style/02_components/union_page.css`
+Covers `ifi_home_app/static/css/01_objects/union/union_page.css`
 and `ifi_home_app/templates/info_articles/pages/union_page.html`.
 
 ## .union-header
@@ -38,22 +38,49 @@ overflows into normal flow.
 it's a plain block, not a row item that could feed the text width back
 into shared track sizing.
 
-### Where 115rem comes from
+### Where the 80rem breakpoint came from
 
-`.union-main` centers against `.union-layout`'s *full* width regardless of
-the sidebar, so avoiding overlap needs roughly
-`2 * (.union-main half-width + .union-sidebar width + gap)` of
-`.union-layout` width just to break even:
-`60rem / 2 + 16rem + 2rem gap ≈ 96rem` minimum. `.union-layout` itself is
-somewhat narrower than the viewport (the sidemenu rail + `.maincontent`'s
-own side padding — see `home_layout.css`). `115rem` clears the 96rem
-break-even point with real margin, chosen deliberately generous ("stack
-earlier rather than cut it close") after two tighter breakpoints both
-overlapped/overflowed in testing.
+Mathematically, avoiding overlap with pure full-page centering needs
+roughly `2 * (.union-main half-width + .union-sidebar width + gap)` of
+`.union-layout` width to break even: `60rem / 2 + 16rem + 2rem gap ≈ 96rem`.
+A previous version of this page used `115rem` (that derived minimum plus
+a deliberate buffer). This time the number was tuned live in the browser
+instead of computed up front — deliberately started too small (`60rem`,
+guaranteed overlap) and raised in steps (`70rem` → `80rem`) until the
+overlap was gone, landing below the ~96rem derived minimum. That gap
+between "tuned" and "derived" is exactly what the push zone below exists
+to cover.
+
+## The 80rem–104rem push zone
+
+Between `80rem` (where `.union-sidebar` starts floating) and the ~96rem
+derived break-even point above, pure full-page centering isn't reliably
+safe yet. Rather than let `.union-main`/`.union-header` overlap
+`.union-sidebar` in that range, `.union-page` (their shared parent —
+*not* `.union-layout`) gets `padding-right: 18rem` there, so both
+re-center within the same narrower remainder and stay lined up with each
+other — the same `margin: auto` centering they already had, just now
+solving against a narrower canvas.
+
+That padding doesn't move `.union-sidebar` on its own — `right: 0`
+(set in the `min-width: 80rem` block) resolves against `.union-layout`'s
+own padding box, which `.union-page`'s padding doesn't touch directly.
+But `.union-layout` itself, as a plain block filling `.union-page`'s
+content box, physically shrinks by that same `18rem` — which would drag
+`.union-sidebar`'s anchor `18rem` left of `.union-page`'s true right edge
+along with it. `right: -18rem` in this same breakpoint block compensates,
+pushing back out by exactly the space `.union-page` reserved, landing
+`.union-sidebar` back at the true right edge — same visual position as
+outside this range. **Keep the `18rem` padding-right and the `-18rem`
+right-offset equal if either one changes.**
+
+104rem is just past where the derived ~96rem minimum clears with a small
+buffer — above it, `.union-page` drops the padding and full-page centering
+is safe on its own again.
 
 ## .union-sidebar-row
 
 Contact and Members boxes sit side by side and wrap on their own (no extra
-breakpoint) once there's no room for both — relevant above 115rem where
-`.union-sidebar` is only 16rem wide, not below it where `.union-sidebar`
-matches `.union-main`'s 60rem column width.
+breakpoint) once there's no room for both — relevant above `80rem` where
+`.union-sidebar` is only `16rem` wide, not below it where `.union-sidebar`
+matches `.union-main`'s `60rem` column width.

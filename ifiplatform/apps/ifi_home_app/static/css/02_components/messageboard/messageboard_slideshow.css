@@ -1,0 +1,316 @@
+/* Design rationale/history: docs/claude_context/messageboard.md */
+
+.messageboard {
+  position: relative;
+  height: 20rem;
+  box-sizing: border-box;
+  margin: 1rem 0 0.5rem;
+  padding: 1.5rem 3.5rem 2.5rem 3.5rem;
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.messageboard-slide {
+  display: none;
+  height: 100%;
+}
+
+.messageboard-slide.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.messageboard-slide h2 {
+  flex: 0 0 auto;
+  margin: 0 0 0.25rem;
+}
+
+.messageboard-date {
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.messageboard-body-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: 1.75rem;
+}
+
+.messageboard-body {
+  height: 100%;
+  margin: 0;
+  padding-right: 0.9rem;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.messageboard-body::-webkit-scrollbar {
+  display: none;
+}
+
+.messageboard-scrollbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 1.75rem;
+  width: 14px;
+  cursor: pointer;
+  /* the drag is driven entirely by JS (pointer events + setPointerCapture,
+     see messageboard.js) -- without this, touch input here would also try
+     to pan/scroll the page underneath while a drag is in progress. Harmless
+     for mouse users, touch-action only governs touch gesture handling. */
+  touch-action: none;
+}
+
+.messageboard-scrollbar-thumb {
+  display: none;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+
+.messageboard-scrollbar-thumb::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background-color: var(--color-text);
+}
+
+.messageboard-scrollbar-thumb:active {
+  cursor: grabbing;
+}
+
+.messageboard-signature {
+  position: absolute;
+  right: 3.5rem;
+  bottom: 0.4rem;
+  max-width: 45%;
+  margin: 0;
+  text-align: right;
+  font-style: italic;
+  line-height: 1.15;
+}
+
+/* base/desktop default -- the mobile-scoped rule below only set this
+inside @media (max-width: 480px), so at desktop widths neither it nor
+.is-visible ever applied at all and the browser's own default <button>
+styling rendered instead (a plain gray bar), regardless of the
+mobile-only JS gate on when .is-visible gets added. This unscoped rule is
+what actually keeps it hidden outside mobile. */
+.messageboard-expand {
+  display: none;
+}
+
+/* invisible at desktop size -- lets .messageboard-prev/-dots/-next keep
+   positioning relative to .messageboard (the nearest *positioned*
+   ancestor) exactly as if this wrapper weren't there. At the mobile
+   breakpoint it becomes a real flex row instead, so the group can move
+   as a unit (arrows flanking the dots) without touching desktop layout. */
+.messageboard-controls {
+  display: contents;
+}
+
+.messageboard-prev,
+.messageboard-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  font-family: inherit;
+  line-height: 1;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.messageboard-prev {
+  left: 1rem;
+}
+
+.messageboard-next {
+  right: 1rem;
+}
+
+.messageboard-prev:hover,
+.messageboard-prev:focus-visible,
+.messageboard-next:hover,
+.messageboard-next:focus-visible {
+  color: var(--color-accent-hover);
+}
+
+.messageboard-dots {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.9rem;
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 999px;
+}
+
+/* Why 72rem, and what changes below it: docs/claude_context/messageboard.md */
+@media (max-width: 72rem) {
+  .messageboard {
+    height: auto;
+    max-height: 34rem;
+    margin: 0.5rem 0;
+    /* the prev/next arrows no longer float at the card's left/right edges
+       at this size (they're in .messageboard-controls, bottom-centered),
+       so this doesn't need to clear them anymore -- much tighter now */
+    padding: 1rem 1.25rem;
+  }
+
+  .messageboard-slide h2 {
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .messageboard-date {
+    /* smaller than the base 0.85rem -- next to a centered heading and
+       centered body text, the original size read as too prominent for a
+       secondary metadata line */
+    font-size: 0.7rem;
+    text-align: center;
+  }
+
+  .messageboard-slide {
+    height: auto;
+  }
+
+  .messageboard-body-wrap {
+    flex: 0 1 auto;
+    /* was reserving room for the old absolutely-positioned scrollbar
+       track -- body's own max-height below makes that unnecessary here */
+    padding-bottom: 0;
+  }
+
+  .messageboard-body {
+    height: auto;
+    max-height: none;
+    text-align: center;
+    /* multi-line clamp instead of an internal scroll -- dragging inside a
+       ~5-7 line scrollable box felt awkward on touch (easy to fight the
+       page's own scroll/rubber-band right at the box's edges, see the
+       overscroll-behavior-y this used to need). A fixed number of lines
+       with a trailing ellipsis, plus "View full message" opening the rest
+       in a modal (messageboard.js, same pattern as tool_page.html's
+       .tool-lightbox), reads as more natural on mobile than scrolling
+       inside a small card. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+    line-clamp: 6;
+    overflow: hidden;
+  }
+
+  /* no more internal scroll on mobile (see .messageboard-body above) --
+     this drag handle has nothing left to control. Desktop keeps it. */
+  .messageboard-scrollbar {
+    display: none;
+  }
+
+  /* styling only -- display:none lives in the unscoped base rule above
+     (see its own comment on why), shown via JS (messageboard.js) toggling
+     .is-visible below only once it's confirmed the body is actually
+     clamped. */
+  .messageboard-expand {
+    margin: 0.5rem auto 0;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .messageboard-expand.is-visible {
+    display: block;
+  }
+
+  .messageboard-signature {
+    position: static;
+    max-width: none;
+    padding-left: 0;
+    margin-top: 0.35rem;
+    text-align: right;
+    font-size: 0.8rem; /* was inheriting the same size as the body text -- too prominent for a byline */
+  }
+
+  .messageboard-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .messageboard-prev,
+  .messageboard-next {
+    position: static;
+    transform: none;
+  }
+
+  .messageboard-dots {
+    position: static;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    margin: 0;
+  }
+}
+
+.messageboard-dot {
+  position: relative;
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.messageboard-dot.active {
+  position: relative;
+  z-index: 0;
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.messageboard-dot.seen {
+  --progress: 100;
+}
+
+.messageboard-dot.seen::before,
+.messageboard-dot.active::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: -2px;
+  border-radius: 50%;
+  background: conic-gradient(var(--color-text) calc(var(--progress, 0) * 1%), transparent 0);
+  /* black/transparent here are a mask technique (alpha-only, opaque vs
+     see-through), not a themeable color -- left as literal black */
+  -webkit-mask: radial-gradient(closest-side, transparent 68%, black 74%, black 100%);
+  mask: radial-gradient(closest-side, transparent 68%, black 74%, black 100%);
+  pointer-events: none;
+}

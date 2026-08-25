@@ -1,0 +1,156 @@
+/* Union listing card (studentunion_category_page.html).
+Design rationale/history: docs/claude_context/union_card.md */
+
+.union-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.union-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  flex: 0 1 14rem;
+  /* explicit cap regardless of what a given flex container's own gaps/
+  cross-axis rules resolve to -- flex-basis alone is a *starting* size,
+  not a hard ceiling, so a container with generous leftover row space
+  (e.g. .event-union-list on a wide screen) could still let this stretch
+  past 14rem despite flex-grow already being 0 here. */
+  max-width: 14rem;
+  /* a block-level element's own width already fills its parent by
+  default, but height doesn't -- height:100% only takes effect once its
+  parent (the wrapping .body-union-card div in article_body_blocks.html)
+  actually has an explicit height of its own (see "Height" in the block-
+  style panel); percentage height against an auto-height parent just
+  resolves back to auto, so this is a no-op until then. Relies on
+  box-sizing:border-box/overflow:hidden from shared/card_base.css so 100%
+  includes this element's own padding/border and content taller than an
+  explicit height gets cleanly clipped. */
+  height: 100%;
+  padding: 1.5rem;
+  border: 2px solid var(--color-border);
+  border-top: 6px solid var(--accent-color, var(--color-border));
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--color-shadow);
+  text-decoration: none;
+  color: var(--color-text);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.union-card:hover,
+.union-card:focus-visible {
+  box-shadow: 0 4px 14px var(--color-shadow);
+  transform: translateY(-2px);
+}
+
+.union-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  /* a long single unbroken union name (no spaces to wrap at otherwise)
+  would overflow the card and get raw-clipped by its own overflow:hidden
+  above. */
+  overflow-wrap: break-word;
+}
+
+.union-card-logo,
+.union-card-logo--placeholder {
+  width: 5rem;
+  height: 5rem;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 2px solid var(--color-border);
+}
+
+.union-card-logo--placeholder {
+  background-color: var(--color-bg-dark, var(--color-text-muted));
+  opacity: 0.15;
+}
+
+.union-card--retired {
+  border-top-color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+.union-card--retired:hover,
+.union-card--retired:focus-visible {
+  opacity: 1;
+}
+
+.union-card--retired .union-card-logo {
+  filter: grayscale(1);
+}
+
+.union-card--unknown {
+  border-top-style: dashed;
+  border-top-color: var(--color-text-muted);
+  opacity: 0.85;
+}
+
+.union-card--unknown .union-card-logo {
+  filter: saturate(0.4);
+}
+
+.union-card--retired .union-type-badge {
+  background-color: var(--color-text-muted);
+}
+
+/* a union_card block's own width is a free-form rem number (editor picks
+it via width_rem) -- carried in as a --card-width custom property
+(article_body_blocks.html/article_column_content.html) rather than a
+literal inline width, so the mobile override below can win over it at
+normal specificity instead of needing !important to beat an inline style.
+.union-card's own "flex: 0 1 14rem" only means anything as a flex *item*
+(inside .union-grid), so standalone it needs its own explicit width
+instead, same pattern as article_card.css's own .body-article-card. */
+.body-union-card {
+  width: var(--card-width);
+  max-width: 100%;
+}
+
+.body-union-card--fixed-height {
+  height: var(--card-height);
+  overflow: hidden;
+}
+
+/* Why 45rem, not the old 480px: docs/claude_context/union_card.md */
+@media (max-width: 45rem) {
+  .body-union-card,
+  .body-union-card--fixed-height {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Compact row on phone regardless of context (standalone in an article
+  body, or inside .union-grid's own listing pages) -- the vertical-stack
+  layout's fixed 5rem circular logo plus 1.5rem padding on every side
+  made this the single biggest space user on a narrow screen among all
+  four card types; a leaner row fixes that directly. */
+  .union-card {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .union-card-logo,
+  .union-card-logo--placeholder {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+  }
+
+  .union-card h3 {
+    font-size: 0.95rem;
+  }
+
+  .union-type-badge {
+    display: none;
+  }
+}

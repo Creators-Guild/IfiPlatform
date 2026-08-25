@@ -1,0 +1,99 @@
+/* Tool detail page (tool_page.html) */
+
+.tool-page {
+  display: flow-root;
+}
+
+.tool-page .article-meta {
+  display: flex;
+  justify-content: center;
+}
+
+.tool-hero {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.tool-hero-image {
+  display: block;
+  width: 100%;
+  height: 18rem;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 2px solid var(--color-border);
+}
+
+.tool-hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(to top, color-mix(in srgb, var(--color-text) 85%, transparent), transparent 65%);
+}
+
+.tool-hero-overlay h1 {
+  margin: 0;
+  color: var(--color-on-accent);
+  border: none;
+  padding: 0;
+}
+
+.tool-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.tool-made-by {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--color-cta), var(--color-secondary));
+  color: var(--color-on-accent);
+  width: fit-content;
+}
+
+.tool-made-by--standalone {
+  margin-top: 0.5rem;
+}
+
+.tool-body {
+  max-width: 42rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.tool-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 1.05rem;
+  font-weight: bold;
+  background: linear-gradient(90deg, var(--color-cta), var(--color-secondary));
+  border: 2px solid var(--color-border);
+  box-shadow: 0 3px 0 var(--color-border);
+}
+
+.tool-cta:hover {
+  background: linear-gradient(90deg, var(--color-cta), var(--color-secondary));
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.tool-cta:active {
+  box-shadow: 0 1px 0 var(--color-border);
+  transform: translateY(2px);
+}
+
+@media (max-width: 640px) {
+  .tool-hero-image {
+    height: 12rem;
+  }
+}
