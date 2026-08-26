@@ -25,6 +25,7 @@ def _make_article(author=None, **kwargs):
     root = Page.get_first_root_node()
     kwargs.setdefault("title", "Test Article")
     kwargs.setdefault("slug", "test-article")
+    kwargs.setdefault("published_date", timezone.now().date())
     article = ArticlePage(body=[], author=author, **kwargs)
     root.add_child(instance=article)
     return article
