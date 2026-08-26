@@ -40,10 +40,14 @@ block data by these exact names. `name` is optional now: a blank name is a
 vacant position, not a data-entry mistake.
 
 `description` (a single `RichTextBlock`) was replaced with
-`responsibilities` (a `ListBlock(CharBlock())`, one short item per
-responsibility) -- see migration `0148_migrate_union_position_description_
-to_responsibilities.py` for the one-time copy of each position's old
-description text (HTML stripped) into the first responsibility item.
+`responsibilities` (a `ListBlock(RichTextBlock(features=["bold", "italic"]))`,
+one short item per responsibility, formatting limited to bold/italic --
+no links/lists within an item) -- see migration `0148_migrate_union_
+position_description_to_responsibilities.py` for the one-time copy of each
+position's old description text (HTML stripped) into the first
+responsibility item, and `0150_alter_unionpage_sitting_members.py` for the
+later CharBlock -> RichTextBlock upgrade (schema-only -- existing plain-
+text items are valid RichText source as-is, no data migration needed).
 `description` itself was removed from the block rather than kept alongside
 -- any leftover `description` key in old stored JSON is simply ignored by
 the current block definition (StructBlock.to_python() only reads fields it
