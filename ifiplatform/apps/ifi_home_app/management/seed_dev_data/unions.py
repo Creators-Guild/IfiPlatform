@@ -36,7 +36,7 @@ class UnionSeedMixin:
                         "role_nickname": "Guild Master",
                         "school_email": "test@ifi.uio.no",
                         "picture": seed_image,
-                        "description": "<p>Test-beskrivelse generert av seed-scriptet.</p>",
+                        "responsibilities": ["Test-ansvar generert av seed-scriptet."],
                         "availability": "opening_soon",
                         "availability_note": "Etter neste generalforsamling",
                     }),
@@ -45,7 +45,7 @@ class UnionSeedMixin:
                         "role": "Nestleder",
                         "role_nickname": "",
                         "school_email": "",
-                        "description": "<p>Test-beskrivelse generert av seed-scriptet.</p>",
+                        "responsibilities": ["Test-ansvar generert av seed-scriptet."],
                         "availability": "open",
                         "availability_note": "",
                     }),
@@ -97,12 +97,14 @@ class UnionSeedMixin:
         return unions
 
     def _navet_sitting_members(self, seed_image):
-        # Every optional CharBlock/RichTextBlock below is given an explicit
-        # value (even "") rather than omitted -- an omitted key resolves to
-        # None here (raw StreamField construction, unlike an admin form
-        # submission) and crashes _translate_page's wagtail_localize export.
-        # picture (ImageChooserBlock, not a string segment) is unaffected,
-        # so it's simply left out where there's no picture.
+        # Every optional CharBlock below is given an explicit value (even ""
+        # or []) rather than omitted -- an omitted key resolves to None here
+        # (raw StreamField construction, unlike an admin form submission)
+        # and crashes _translate_page's wagtail_localize export. picture
+        # (ImageChooserBlock, not a string segment) is unaffected, so it's
+        # simply left out where there's no picture. responsibilities takes a
+        # plain list of strings here (raw-construction input, not the
+        # {"type": "item", ...} shape the field serializes to on save).
         return [
             ("member", {  # filled, opening soon, every field set
                 "name": "Kari Nordmann",
@@ -110,7 +112,7 @@ class UnionSeedMixin:
                 "role_nickname": "Husets Sjel",
                 "school_email": "kari@ifi.uio.no",
                 "picture": seed_image,
-                "description": "<p>Ansvarlig for driften av Navet og koordinering av frivillige.</p>",
+                "responsibilities": ["Ansvarlig for driften av Navet og koordinering av frivillige."],
                 "availability": "opening_soon",
                 "availability_note": "Etter neste generalforsamling",
             }),
@@ -119,7 +121,7 @@ class UnionSeedMixin:
                 "role": "Kasserer",
                 "role_nickname": "",
                 "school_email": "",
-                "description": "",
+                "responsibilities": [],
                 "availability": "filled",
                 "availability_note": "",
             }),
@@ -129,7 +131,7 @@ class UnionSeedMixin:
                 "role_nickname": "Festfixer",
                 "school_email": "aktivitet@navet.example",
                 "picture": seed_image,
-                "description": "<p>Planlegger sosiale arrangementer i Navet.</p>",
+                "responsibilities": ["Planlegger sosiale arrangementer i Navet.", "Bestiller mat og drikke til arrangementer."],
                 "availability": "open",
                 "availability_note": "Søknadsfrist 1. september",
             }),
@@ -138,7 +140,7 @@ class UnionSeedMixin:
                 "role": "Vaktansvarlig",
                 "role_nickname": "",
                 "school_email": "",
-                "description": "",
+                "responsibilities": [],
                 "availability": "open",
                 "availability_note": "",
             }),

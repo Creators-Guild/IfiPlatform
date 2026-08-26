@@ -66,11 +66,11 @@ class UnionPositionCardRenderTests(TestCase):
     irrelevant to this partial) -- catches template syntax errors in the
     two show_description_inline modes."""
 
-    def test_sitting_member_card_hides_description_behind_info_icon(self):
+    def test_sitting_member_card_hides_responsibilities_behind_info_icon(self):
         union = _make_union([
             ("member", {
                 "name": "Ada", "role": "Leder", "role_nickname": "Guild Master",
-                "description": "<p>Leads the union.</p>", "availability": "opening_soon",
+                "responsibilities": ["Leads the union."], "availability": "opening_soon",
                 "availability_note": "After the next generalforsamling",
             }),
         ])
@@ -82,12 +82,12 @@ class UnionPositionCardRenderTests(TestCase):
         self.assertIn("Ada", html)
         self.assertIn("Guild Master", html)
         self.assertIn("After the next generalforsamling", html)
-        self.assertIn("position-info-widget", html)  # icon popup for the description
+        self.assertIn("position-info-widget", html)  # icon popup for the responsibilities
         self.assertIn("Leads the union", html)  # server-rendered into the (JS-hidden) popup panel
 
-    def test_open_position_card_shows_description_inline_and_vacant_label(self):
+    def test_open_position_card_shows_responsibilities_inline_and_vacant_label(self):
         union = _make_union([
-            ("member", {"role": "Nestleder", "description": "<p>Deputy duties.</p>", "availability": "open"}),
+            ("member", {"role": "Nestleder", "responsibilities": ["Deputy duties."], "availability": "open"}),
         ])
         union = UnionPage.objects.get(pk=union.pk)
         block = union.open_positions[0]

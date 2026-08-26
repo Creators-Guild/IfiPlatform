@@ -34,22 +34,32 @@ more specific section.
 
 The block type is still named `"member"`, and `role`/`school_email`/
 `picture` kept their original field names when `name`/`role_nickname`/
-`description`/`availability`/`availability_note` were added -- renaming
-any of these would orphan already-saved StreamField JSON, since Wagtail
-matches stored block data by these exact names. `name` is optional now: a
-blank name is a vacant position, not a data-entry mistake.
+`availability`/`availability_note` were added -- renaming any of these
+would orphan already-saved StreamField JSON, since Wagtail matches stored
+block data by these exact names. `name` is optional now: a blank name is a
+vacant position, not a data-entry mistake.
+
+`description` (a single `RichTextBlock`) was replaced with
+`responsibilities` (a `ListBlock(CharBlock())`, one short item per
+responsibility) -- see migration `0148_migrate_union_position_description_
+to_responsibilities.py` for the one-time copy of each position's old
+description text (HTML stripped) into the first responsibility item.
+`description` itself was removed from the block rather than kept alongside
+-- any leftover `description` key in old stored JSON is simply ignored by
+the current block definition (StructBlock.to_python() only reads fields it
+knows about), not a live/rendered field any more.
 
 `filled_positions` and `open_positions` (properties on `UnionPage`) are
 independent filters over the same `sitting_members` list, not a
 partition -- a block with both a `name` set and `availability` other than
 `"filled"` shows up in both (a seat that's currently held but opening up
-at the next generalforsamling). `open_positions` renders `description`
+at the next generalforsamling). `open_positions` renders `responsibilities`
 inline on the card (the point of that row is "what does this role need,"
 so it shouldn't take an extra click); `filled_positions` puts it behind
 the info-icon popup instead (`union_position_info.js`, same
 icon-button-toggles-a-panel pattern as `table_of_content.js`/`.toc-widget`)
-since showing full requirements text on every currently-filled seat's
-card would be clutter there.
+since showing every responsibility on every currently-filled seat's card
+would be clutter there.
 
 ### Navet's seed sitting_members (seed_dev_data/unions.py)
 

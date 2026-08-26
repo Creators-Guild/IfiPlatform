@@ -11,6 +11,7 @@
   .article-header below; most block types set text-align explicitly on
   themselves too, which always wins regardless of specificity). */
   text-align: var(--content-alignment, left);
+  line-height: 1.5;
 }
 
 /* title/meta/intro are wrapped together (see article_page.html) so they

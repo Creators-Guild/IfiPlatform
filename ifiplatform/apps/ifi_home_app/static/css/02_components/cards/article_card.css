@@ -1,63 +1,65 @@
 /* Design rationale/history: docs/claude_context/article_card.md */
 
 .articlecard {
-  /* anchors .articlecard-toggle's absolute positioning to the card itself */
-  position: relative;
-  display: block;
-  /* a block element's own width already fills its parent by default, but
-  height doesn't -- height:100% only takes effect once its parent (the
-  wrapping .body-article-card div in article_body_blocks.html) actually
-  has an explicit height of its own (see "Height" in the block-style
-  panel); percentage height against an auto-height parent just resolves
-  back to auto (the CSS spec's own rule for this), so this is a no-op
-  until then. Relies on box-sizing:border-box/overflow:hidden from
-  shared/card_base.css so 100% includes this element's own padding/border
-  instead of adding on top of it (which would overflow the parent's own
-  explicit height by that amount), and content taller than an explicit
-  height gets cleanly clipped rather than spilling out underneath. */
-  height: 100%;
-  padding: 0.5rem;
-  color: inherit;
-  text-decoration: none;
-  border-radius: 4px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, padding 0.2s ease;
-  text-align: left;
+	/* anchors .articlecard-toggle's absolute positioning to the card itself */
+	position: relative;
+	display: block;
+	/* a block element's own width already fills its parent by default, but
+	height doesn't -- height:100% only takes effect once its parent (the
+	wrapping .body-article-card div in article_body_blocks.html) actually
+	has an explicit height of its own (see "Height" in the block-style
+	panel); percentage height against an auto-height parent just resolves
+	back to auto (the CSS spec's own rule for this), so this is a no-op
+	until then. Relies on box-sizing:border-box/overflow:hidden from
+	shared/card_base.css so 100% includes this element's own padding/border
+	instead of adding on top of it (which would overflow the parent's own
+	explicit height by that amount), and content taller than an explicit
+	height gets cleanly clipped rather than spilling out underneath. */
+	height: 100%;
+	padding: 0.5rem;
+	color: inherit;
+	text-decoration: none;
+	box-shadow: 0 2px 5px var(--color-shadow);
+	border-radius: 4px;
+	transition: transform 0.15s ease, box-shadow 0.15s ease, padding 0.2s ease;
+	text-align: left;
+	
 }
 
 .articlecard:hover,
 .articlecard:focus-visible {
-  box-shadow: 0 4px 14px var(--color-shadow);
-  transform: translateY(-2px);
-  background-color: var(--color-card-bg);
+	box-shadow: 0 4px 14px var(--color-shadow);
+	transform: translateY(-2px);
+	background-color: var(--color-card-bg);
 }
 
 .articlecard--category {
-  border-left: 6px solid var(--accent-color, var(--color-border));
+	border-left: 6px solid var(--accent-color, var(--color-border));
 }
 
 .articlecard img {
-  aspect-ratio: 8 / 5;
-  width: 100%;
-  display: block;
-  object-fit: cover;
-  /* generous cap, well above any realistic rendered height at this aspect
-     ratio -- a no-op while expanded (the image is never actually that
-     tall, so nothing gets clipped), but gives .articlecard--list img
-     below a real value to animate down to 0 from. Collapsing via
-     max-height/opacity instead of display:none is what makes this
-     transition-able at all -- display can't be animated. */
-  max-height: 30rem;
-  opacity: 1;
-  overflow: hidden;
-  transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
+	aspect-ratio: 8 / 5;
+	width: 100%;
+	display: block;
+	object-fit: cover;
+	/* generous cap, well above any realistic rendered height at this aspect
+		 ratio -- a no-op while expanded (the image is never actually that
+		 tall, so nothing gets clipped), but gives .articlecard--list img
+		 below a real value to animate down to 0 from. Collapsing via
+		 max-height/opacity instead of display:none is what makes this
+		 transition-able at all -- display can't be animated. */
+	max-height: 30rem;
+	opacity: 1;
+	overflow: hidden;
+	transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
 }
 
 .articlecard h3 {
-  margin: 0.5rem 0 0.2rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: margin 0.2s ease;
+	margin: 0.5rem 0 0.2rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	transition: margin 0.2s ease;
 }
 
 /* editors only ever see this (see article_card.html's own comment) --
@@ -65,26 +67,26 @@ same red used for the "Draft" badge in the global style panel
 (quick-style-status-badge--draft in article_quick_style.css), so a draft
 reads as the same thing wherever it shows up. */
 .articlecard-draft-badge {
-  display: inline-block;
-  margin-top: 0.4rem;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: bold;
-  color: var(--color-on-accent);
-  background: var(--color-error);
-  transition: margin 0.2s ease;
+	display: inline-block;
+	margin-top: 0.4rem;
+	padding: 0.1rem 0.5rem;
+	border-radius: 999px;
+	font-size: 0.7rem;
+	font-weight: bold;
+	color: var(--color-on-accent);
+	background: var(--color-error);
+	transition: margin 0.2s ease;
 }
 
 .articlecard-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.75rem;
-  margin: 0.15rem 0 0.5rem;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  transition: margin 0.2s ease, gap 0.2s ease, font-size 0.2s ease, color 0.2s ease;
-  text-align: left;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 0.75rem;
+	margin: 0.15rem 0 0.5rem;
+	font-size: 0.8rem;
+	color: var(--color-text-muted);
+	transition: margin 0.2s ease, gap 0.2s ease, font-size 0.2s ease, color 0.2s ease;
+	text-align: left;
 }
 
 /* separator between the author and date spans (article_card.html) --
@@ -98,23 +100,23 @@ the author span before it, so mirroring it here on the other side of the
 "|" is what actually centers the separator between the two words instead
 of it sitting closer to one side. */
 .articlecard-meta > span + span::before {
-  content: "|";
-  margin-right: 0.75rem;
+	content: "|";
+	margin-right: 0.75rem;
 }
 
 .articlecard-intro {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  overflow: hidden;
-  margin: 0;
-  /* same generous-cap technique as .articlecard img above -- a no-op at 2
-     clamped lines while expanded, real room to animate down to 0 when
-     collapsed. */
-  max-height: 3rem;
-  opacity: 1;
-  transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	overflow: hidden;
+	margin: 0;
+	/* same generous-cap technique as .articlecard img above -- a no-op at 2
+		 clamped lines while expanded, real room to animate down to 0 when
+		 collapsed. */
+	max-height: 3rem;
+	opacity: 1;
+	transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
 }
 
 /* an article_card block's own width is a free-form rem number (editor picks
@@ -129,13 +131,13 @@ prose column with nothing else to size it. Height only applies via the
 --card-height whenever an editor sets a nonzero height_rem) -- 0/blank
 height leaves the card at its own natural content-driven height instead. */
 .body-article-card {
-  width: var(--card-width);
-  max-width: 100%;
+	width: var(--card-width);
+	max-width: 100%;
 }
 
 .body-article-card--fixed-height {
-  height: var(--card-height);
-  overflow: hidden;
+	height: var(--card-height);
+	overflow: hidden;
 }
 
 /* Editor-chosen width/height are desktop-only concerns -- on a phone the
@@ -146,12 +148,21 @@ visible (not hidden) since height is back to auto here: nothing needs
 clipping any more, and hidden would otherwise still clip this card's own
 hover-lift/shadow, which paints slightly outside its border box. */
 @media (max-width: 480px) {
-  .body-article-card,
-  .body-article-card--fixed-height {
-    width: 100%;
-    height: auto;
-    overflow: visible;
-  }
+	.body-article-card,
+	.body-article-card--fixed-height {
+		width: 100%;
+		height: auto;
+		overflow: visible;
+	}
+	.articlecard {
+		box-shadow: 0 4px 5px var(--color-shadow);
+	}
+	.articlecard:hover,
+	.articlecard:focus-visible {
+		box-shadow: 0 4px 14px var(--color-shadow);
+		transform: translateY(-2px);
+		background-color: var(--color-bg);
+	}
 }
 
 /* editor-picked list_style (ArticleBlockStyle.list_style) and
@@ -159,34 +170,34 @@ article_list_toggle.js's homepage narrow-screen collapse share this same
 class/look -- see docs/claude_context/article_card.md for the layout
 history (why plain block flow, not a flex row). */
 .articlecard--list {
-  padding: 0.6rem 0.75rem;
+	padding: 0.6rem 0.75rem;
 }
 
 .articlecard--list img {
-  max-height: 0;
-  opacity: 0;
-  margin: 0;
+	max-height: 0;
+	opacity: 0;
+	margin: 0;
 }
 
 .articlecard--list h3 {
-  margin: 0;
+	margin: 0;
 }
 
 .articlecard--list .articlecard-meta {
-  gap: 0.5rem;
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
+	gap: 0.5rem;
+	margin: 0;
+	font-size: 0.75rem;
+	color: var(--color-text-muted);
 }
 
 .articlecard--list .articlecard-intro {
-  max-height: 0;
-  opacity: 0;
-  margin: 0;
+	max-height: 0;
+	opacity: 0;
+	margin: 0;
 }
 
 .articlecard--list .articlecard-draft-badge {
-  margin: 0;
+	margin: 0;
 }
 
 /* editor-picked fixed_ratio=False (article_body_blocks.html's own "Lock
@@ -199,8 +210,8 @@ stops scaling with width and an explicit card height actually has visible
 room to matter -- object-fit:cover (already set on .articlecard img)
 still crops it cleanly regardless of the source image's own proportions. */
 .articlecard--unlocked-ratio img {
-  aspect-ratio: unset;
-  height: 10rem;
+	aspect-ratio: unset;
+	height: 10rem;
 }
 
 /* per-card expand/collapse control, driven by article_list_toggle.js --
@@ -212,34 +223,34 @@ a homepage newsbar/articlesbar grid on narrow screens, see the
 sit above the card's own click target and never trigger navigation
 itself -- article_list_toggle.js's click handler stops that. */
 .articlecard-toggle {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  z-index: 1;
-  width: 1.8rem;
-  height: 1.8rem;
-  /* A light bg + thin dark border read as a heavy, stark badge sitting on
-  top of the card's own photo (the state you actually see it in most --
-  this shows whenever a card is *expanded*, not just when collapsed to a
-  plain-background list row). A translucent dark backdrop instead just
-  softly floats over whatever's underneath -- image or plain background
-  alike -- same "overlay control on a photo" treatment as e.g. video
-  player buttons, rather than a bordered chip. color-mix() already used
-  the same way elsewhere in this project (profile_dropdown.css). */
-  border: none;
-  border-radius: 999px;
-  background-color: color-mix(in srgb, var(--color-ink) 55%, transparent);
-  color: var(--color-bright);
-  cursor: pointer;
-  transition: background-color 0.15s ease;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	z-index: 1;
+	width: 1.8rem;
+	height: 1.8rem;
+	/* A light bg + thin dark border read as a heavy, stark badge sitting on
+	top of the card's own photo (the state you actually see it in most --
+	this shows whenever a card is *expanded*, not just when collapsed to a
+	plain-background list row). A translucent dark backdrop instead just
+	softly floats over whatever's underneath -- image or plain background
+	alike -- same "overlay control on a photo" treatment as e.g. video
+	player buttons, rather than a bordered chip. color-mix() already used
+	the same way elsewhere in this project (profile_dropdown.css). */
+	border: none;
+	border-radius: 999px;
+	background-color: color-mix(in srgb, var(--color-ink) 55%, transparent);
+	color: var(--color-bright);
+	cursor: pointer;
+	transition: background-color 0.15s ease;
 }
 
 .articlecard-toggle:hover,
 .articlecard-toggle:focus-visible {
-  background-color: color-mix(in srgb, var(--color-ink) 75%, transparent);
+	background-color: color-mix(in srgb, var(--color-ink) 75%, transparent);
 }
 
 /* a real SVG chevron (article_card.html), not a border-triangle -- that
@@ -255,22 +266,22 @@ expand"), flips to point up once the card is expanded (article_list_
 toggle.js toggles .articlecard--list off the card and updates
 aria-expanded together). */
 .articlecard-toggle svg {
-  /* matches the viewBox's own 16:9 ratio (article_card.html) so the shape
-     fills the whole box edge to edge, not just a small chevron centered
-     in a mostly-empty square -- that made the previous size bump barely
-     register even though the box itself did get bigger. */
-  width: 1.3rem;
-  height: 0.73rem;
-  transform: rotate(180deg);
-  transition: transform 0.15s ease;
+	/* matches the viewBox's own 16:9 ratio (article_card.html) so the shape
+		 fills the whole box edge to edge, not just a small chevron centered
+		 in a mostly-empty square -- that made the previous size bump barely
+		 register even though the box itself did get bigger. */
+	width: 1.3rem;
+	height: 0.73rem;
+	transform: rotate(180deg);
+	transition: transform 0.15s ease;
 }
 
 .articlecard-toggle[aria-expanded="true"] svg {
-  transform: rotate(0deg);
+	transform: rotate(0deg);
 }
 
 @media (max-width: 45rem) {
-  .newsbar-layout .articlecard-toggle {
-    display: flex;
-  }
+	.newsbar-layout .articlecard-toggle {
+		display: flex;
+	}
 }
