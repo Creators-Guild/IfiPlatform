@@ -23,6 +23,19 @@ numbers (editor picks the exact value), applied directly via inline style
 with no min/max clamp -- it's on the editor to pick a sane value for their
 screen. */
 
+/* {{ block.value.text }} (a RichTextBlock, article_body_blocks.html)
+renders as a <p> -- the global `p { font-size: 1.05rem; }` rule
+(elements.css) sets that directly on the tag itself, which always wins
+over inheriting .prose's own font-size from its parent regardless of
+.prose's specificity (a property set directly on an element is never
+overridden by inheritance, no matter how specific the ancestor rule is,
+and this includes the mobile !important reset below). inherit here forces
+it back onto .prose's own computed value instead of the global default --
+same fix as .article-header > .intro p in article_page.css. */
+.prose p {
+  font-size: inherit;
+}
+
 /* heading blocks (h2/h3 in the article body): same alignment/font-size/
 side-padding editing as paragraph above, and font-size/side-padding are
 applied the same way (inline style, see article_body_blocks.html) -- but

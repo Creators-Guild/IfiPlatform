@@ -2,7 +2,7 @@
 {% with member=block.value %}
     <!-- adaptive classname based on position availability -->
     <div class="union-member-card{% if show_description_inline %} union-member-card--open{% endif %}">
-        {% if not show_description_inline and member.description %}
+        {% if not show_description_inline and member.responsibilities %}
             <div class="position-info-widget">
                 <button type="button" class="position-info-button" id="position-info-button-{{ block.id }}"
                         aria-haspopup="dialog" aria-controls="position-info-panel-{{ block.id }}"
@@ -18,7 +18,14 @@
                         <p class="position-info-title" id="position-info-title-{{ block.id }}">{{ member.role }}</p>
                         <button type="button" class="position-info-close" aria-label="{% trans 'Close' %}">&times;</button>
                     </div>
-                    <div class="prose">{{ member.description|richtext }}</div>
+                    <div class="union-position-responsibilities">
+                        <h4>{% trans "Responsibilities" %}</h4>
+                        <ul>
+                            {% for item in member.responsibilities %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
             </div>
         {% endif %}
@@ -57,9 +64,27 @@
             {% endif %}
         {% endif %}
         
-        <!-- position description -->
-        {% if show_description_inline and member.description %}
-            <div class="union-position-description prose">{{ member.description|richtext }}</div>
+        <!-- position responsibilities -->
+        {% if show_description_inline and member.responsibilities %}
+            <div class="union-position-responsibilities">
+                {% comment %}
+                h3, not h4 -- unlike the info-popup panel above (where
+                <h3>{{ member.name }}</h3> renders right before it, since
+                that's the not-show_description_inline path), the Open
+                Positions card never renders member.name as a heading at
+                all (line ~44's <h3> is gated on `not
+                show_description_inline`) and role/role-main are plain
+                divs, not headings -- so this is the *first* heading-level
+                element after the page's own <h2>Open Positions</h2>, and
+                h4 here would skip a level.
+                {% endcomment %}
+                <h3>{% trans "Responsibilities" %}</h3>
+                <ul>
+                    {% for item in member.responsibilities %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
         {% endif %}
 
         {% if show_description_inline %}

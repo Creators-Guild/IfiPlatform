@@ -54,4 +54,7 @@ GLOSSARY_TERMS = {
     "Ifi-Creators' Guild": "Ifi-Creators' Guild",
     "pub til pub":"pub crawl",
     "bar til bar": "bar crawl",
+    "guildmaster": "guildmaster",
+    "generalforsamling": "general meeting",
+    "studentforening": "student union",
 }

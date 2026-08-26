@@ -192,6 +192,17 @@ document.addEventListener("DOMContentLoaded", () => {
         b.classList.toggle("active", b === button);
       });
       window.ifiUnsavedChanges.markDirty("quickStyle");
+      // Save will bulk-overwrite every block's own alignment once this
+      // actually differs from what's saved (see save()'s own comment on
+      // apply_alignment_to_blocks) -- flip back off if clicked back to the
+      // originally-saved value before ever saving. Own source key (not
+      // shared with resetHeaderPending below) so this can toggle off
+      // without accidentally clearing that pending reset's own flag too.
+      if (align !== lastSavedAlignment) {
+        window.ifiUnsavedChanges.markApplyPending("quickStyleAlignment");
+      } else {
+        window.ifiUnsavedChanges.clearApplyPending("quickStyleAlignment");
+      }
     });
   });
 
@@ -325,6 +336,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // panel's own, would flush right after this reset and overwrite it.
     window.ifiDiscardPendingHeaderStyleEdit?.();
     window.ifiUnsavedChanges.markDirty("quickStyle");
+    // Just like alignment above, this only takes effect once actually
+    // saved (there's no live CSS var to preview the header's own reset
+    // font sizes/padding through) -- own source key so it isn't
+    // accidentally cleared by the alignment click below if the default
+    // alignment happens to match what's already saved.
+    window.ifiUnsavedChanges.markApplyPending("quickStyleReset");
 
     paddingInput.value = panel.dataset.defaultPadding;
     paddingInput.dispatchEvent(new Event("input"));

@@ -179,10 +179,11 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
                         ),
                         ("picture", ImageChooserBlock(required=False)),
                         (
-                            "description",
-                            blocks.RichTextBlock(
+                            "responsibilities",
+                            blocks.ListBlock(
+                                blocks.CharBlock(),
                                 required=False,
-                                help_text="Requirements/description of this position.",
+                                help_text="One responsibility per item -- each renders as its own stacked box under a \"Responsibilities\" heading.",
                             ),
                         ),
                         (

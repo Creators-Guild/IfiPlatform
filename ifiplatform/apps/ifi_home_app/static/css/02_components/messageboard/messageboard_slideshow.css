@@ -49,6 +49,12 @@
   scrollbar-width: none;
 }
 
+.messageboard-body p {
+  font-size: 1.2rem;
+  letter-spacing: -0.05rem;
+  line-height: 1.2;
+}
+
 .messageboard-body::-webkit-scrollbar {
   display: none;
 }

@@ -19,6 +19,21 @@ window.ifiUnsavedChanges = (() => {
     changeListeners.forEach((fn) => fn(dirty));
   };
 
+  // Separate from dirtySources above -- a source can be dirty (something
+  // changed) without saving it being destructive (e.g. padding/font-size/
+  // background just live-preview). This tracks specifically "Save will also
+  // bulk-apply something beyond what's already previewed on screen" (today
+  // just the quick-style panel's Alignment field, see article_quick_style.js's
+  // own comment on apply_alignment_to_blocks) so the save buttons can relabel
+  // themselves "Save and Apply" as a heads-up, instead of a plain "Save" that
+  // undersells what pressing it is about to do.
+  const applySources = new Set();
+  const applyChangeListeners = [];
+  const notifyApply = () => {
+    const pending = applySources.size > 0;
+    applyChangeListeners.forEach((fn) => fn(pending));
+  };
+
   // A real page unload -- closing the tab, an actual reload, typing a new
   // URL, back/forward -- can't be intercepted with custom UI. Browsers
   // hard-code their own generic "leave site?" wording here regardless of
@@ -48,11 +63,25 @@ window.ifiUnsavedChanges = (() => {
     // speaks for the one source that called it.
     markAllClean: () => {
       dirtySources.clear();
+      applySources.clear();
       notify();
+      notifyApply();
     },
     isDirty: () => dirtySources.size > 0,
     onChange: (fn) => {
       changeListeners.push(fn);
+    },
+    markApplyPending: (source) => {
+      applySources.add(source);
+      notifyApply();
+    },
+    clearApplyPending: (source) => {
+      applySources.delete(source);
+      notifyApply();
+    },
+    hasApplyPending: () => applySources.size > 0,
+    onApplyChange: (fn) => {
+      applyChangeListeners.push(fn);
     },
     // each editor panel (quick-style, block-style) registers its own save
     // function here -- () => Promise<{ok, error}> -- so the modal's "Save
@@ -95,6 +124,14 @@ function wireUnsavedChangesModal(modal) {
   const discardButton = document.getElementById("unsaved-changes-discard");
   const cancelButton = document.getElementById("unsaved-changes-cancel");
   const statusEl = document.getElementById("unsaved-changes-status");
+
+  // Same "Save and Apply" heads-up as the floating save bar below -- see
+  // ifiUnsavedChanges' own comment on applySources for what this means.
+  const saveLabel = saveButton.textContent;
+  const applySaveLabel = "Save and Apply changes";
+  window.ifiUnsavedChanges.onApplyChange((pending) => {
+    saveButton.textContent = pending ? applySaveLabel : saveLabel;
+  });
 
   // the link the user actually tried to follow -- navigated to for real
   // once they've saved or chosen to discard.
@@ -187,6 +224,14 @@ function wireSaveBar() {
   const saveButton = document.getElementById("save-bar-save");
   const discardButton = document.getElementById("save-bar-discard");
   const statusEl = document.getElementById("save-bar-status");
+
+  // Same "Save and Apply" heads-up as the unsaved-changes modal above --
+  // see ifiUnsavedChanges' own comment on applySources for what this means.
+  const saveLabel = saveButton.textContent;
+  const applySaveLabel = "Save and Apply";
+  window.ifiUnsavedChanges.onApplyChange((pending) => {
+    saveButton.textContent = pending ? applySaveLabel : saveLabel;
+  });
 
   window.ifiUnsavedChanges.onChange((isDirty) => {
     bar.hidden = !isDirty;

@@ -33,7 +33,9 @@ targets h1 here. */
 
 /* intro reads as the page's lead paragraph; general info is a smaller,
 secondary note underneath it -- see CategoryPage.general_info/
-ArticleIndexPage.general_info's own help_text. */
+ArticleIndexPage.general_info's own help_text. Also covers
+StudentUnionCategoryPage, which shares the plain .category-page wrapper
+class (studentunion_category_page.html). */
 .category-page .intro,
 .article-index-page .intro {
   font-size: 1.15rem;
@@ -43,6 +45,22 @@ ArticleIndexPage.general_info's own help_text. */
 .article-index-page .general-info {
   font-size: 0.95rem;
   color: var(--color-text-muted);
+}
+
+/* Both render as {{ ...|richtext }}, i.e. plain <p> tags -- the global
+`p { font-size: 1.05rem; }` rule (elements.css) sets that directly on the
+tag itself, which always wins over inheriting .intro/.general-info's own
+font-size from their parent regardless of specificity (a property set
+directly on an element is never overridden by inheritance, no matter how
+specific the ancestor rule is). inherit here forces it back onto each
+one's own computed value instead of the global default -- same fix as
+.article-header > .intro p in article_page.css and .union-core p in
+union_page.css. */
+.category-page .intro p,
+.article-index-page .intro p,
+.category-page .general-info p,
+.article-index-page .general-info p {
+  font-size: inherit;
 }
 
 /* "Subcategories"/"Categories"/"Suggested Articles"/"Tools" section
