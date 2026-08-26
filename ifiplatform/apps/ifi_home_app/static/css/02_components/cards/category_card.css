@@ -24,6 +24,7 @@
   text-decoration: none;
   color: var(--color-text);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  background-color: var(--color-card-bg);
 }
 
 .category-card:hover,

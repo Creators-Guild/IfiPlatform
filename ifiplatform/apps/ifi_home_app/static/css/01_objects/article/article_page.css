@@ -30,12 +30,36 @@ box is positioned by its *containing block's* text-align, not its own. */
   border-bottom: 2px solid var(--accent-color, var(--color-border));
 }
 
+/* .block-box (header_style.box.enabled, article_page.html) supplies its
+own background/border/shadow inline (_block_box_style.html) -- when its own
+border is on, the inline "border: ..." shorthand already overrides this on
+all four sides (inline always wins over an external stylesheet regardless
+of specificity), but when the box has no border of its own (just
+background/shadow), this separator line was left poking out underneath it,
+looking like a stray leftover rather than part of the box. */
+.article-header.block-box {
+  border-bottom: none;
+}
+
 .article-header > .intro {
   text-align: var(--intro-alignment, left);
   /* editor-controlled (ArticlePage.intro_font_size, --intro-font-size set
-  on .article-header) -- independent from --content-font-size, same split
-  as the alignment properties above. */
-  font-size: var(--intro-font-size, 1rem);
+  on .article-header), scaled by the Global editor's own font-size
+  multiplier (--content-font-size-multiplier, set on .article-page --
+  inherited here) same way _effective_heading_style() scales body blocks --
+  on top of, never overwriting, this field's own stored value. */
+  font-size: calc(var(--intro-font-size, 1rem) * var(--content-font-size-multiplier, 1));
+}
+
+/* {{ page.intro|richtext }} renders as a <p> -- the global `p { font-size:
+1.05rem; }` rule (elements.css) sets that directly on the tag itself, which
+always wins over inheriting .intro's own font-size from its parent
+regardless of .intro's specificity (a property set directly on an element
+is never overridden by inheritance, no matter how specific the ancestor
+rule is). inherit here forces it back onto .intro's own computed value
+instead of the global default. */
+.article-header > .intro p {
+  font-size: inherit;
 }
 
 /* .article-meta is a flex container -- flex items ignore inherited
@@ -51,8 +75,22 @@ override. */
   /* editor-controlled (ArticlePage.meta_font_size, --meta-font-size set on
   .article-header) -- fallback matches article_meta.css's own plain
   default (0.9rem), so an article with no override renders identically to
-  before this became overridable. */
-  font-size: var(--meta-font-size, 0.9rem);
+  before this became overridable. Scaled by the Global editor's font-size
+  multiplier, same as .intro above. */
+  font-size: calc(var(--meta-font-size, 0.9rem) * var(--content-font-size-multiplier, 1));
+}
+
+/* Stacked on its own line below .article-meta (article_page.html renders
+it as a separate wrapper, not one more flex item in that row) -- still
+follows the meta's own alignment rather than .article-header's title
+alignment, since it's conceptually meta content, just visually separated
+from the by/published/last-edited row above it. text-align has to live on
+this full-width wrapper, not on .translation-warning itself: text-align
+positions inline-level content *within* the element it's set on, it can't
+be used by a block box to position itself within its own parent. */
+.article-header > .translation-warning-row {
+  text-align: var(--meta-alignment, left);
+  margin-top: 0.5rem;
 }
 
 /* editor-controlled side padding, applied to the title/meta/intro wrapper
@@ -64,10 +102,18 @@ underline) is part of its border box, and padding on a width:auto block
 only shrinks the content area inside a fixed-width border box, leaving the
 border behind at the un-indented edge -- margin moves the whole box,
 border included, so the underline stays lined up with the now-indented
-text above it. */
+text above it.
+
+Stacks with the Global editor's own --content-side-padding (set on
+.article-page, inherited here) via calc() rather than overwriting
+--header-side-padding -- same "on top of, never replacing" relationship
+ArticleStyle.content_side_padding's own docstring already describes for
+the body's per-block padding, just expressed as addition here since both
+values land on the same margin property instead of two separately nested
+boxes. */
 .article-page > .article-header {
-  margin-left: var(--header-side-padding, 0);
-  margin-right: var(--header-side-padding, 0);
+  margin-left: calc(var(--header-side-padding, 0rem) + var(--content-side-padding, 0rem));
+  margin-right: calc(var(--header-side-padding, 0rem) + var(--content-side-padding, 0rem));
 }
 
 .article-page > article {
@@ -97,6 +143,10 @@ regardless of what's configured. */
     justify-content: center;
   }
 
+  .article-header > .translation-warning-row {
+    text-align: center;
+  }
+
   .article-page > .article-header,
   .article-page > article {
     margin-left: 0;
@@ -116,6 +166,12 @@ regardless of what's configured. */
     --title-font-size: 2rem !important;
     --intro-font-size: 1rem !important;
     --meta-font-size: 0.9rem !important;
+    /* the three resets above would otherwise still get scaled right back
+    up (or down) by whatever the Global editor's font-size multiplier is
+    currently set to, since h1/.intro/.article-meta read it via calc() --
+    pinning it to 1 here keeps this breakpoint's fixed sizes actually
+    fixed. */
+    --content-font-size-multiplier: 1 !important;
   }
 
   .article-page h1,

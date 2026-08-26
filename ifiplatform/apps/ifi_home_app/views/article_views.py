@@ -19,6 +19,7 @@ from ifi_home_app.models.article_models import (
     HEX_COLOR_VALIDATOR,
     ArticleBlockStyle,
     ArticlePage,
+    ArticleStyle,
     PageBannerStyle,
     alignment_capable_block_ids,
 )
@@ -88,8 +89,8 @@ BLOCK_STYLE_FIELDS = {
 @require_POST
 def save_quick_style(request, page_id):
     """Upsert onto the page's shared ArticleStyle row. Live immediately, no
-    Wagtail revision/publish. apply_alignment_to_blocks is the one
-    destructive exception -- see docs/claude_context/article_views.md."""
+    Wagtail revision/publish. apply_alignment_to_blocks and reset_header are
+    the two destructive exceptions -- see docs/claude_context/article_views.md."""
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.can_edit_in_editor_mode(request.user):
@@ -104,6 +105,7 @@ def save_quick_style(request, page_id):
         bg_color = data["content_bg_color"]
         bg_custom_color = data.get("content_bg_custom_color") or ""
         apply_alignment_to_blocks = bool(data.get("apply_alignment_to_blocks"))
+        reset_header = bool(data.get("reset_header"))
     except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
@@ -129,6 +131,34 @@ def save_quick_style(request, page_id):
     style.content_bg_enabled = bg_enabled
     style.content_bg_color = bg_color
     style.content_bg_custom_color = bg_custom_color
+
+    if reset_header:
+        # the one part of "reset to default" that content_side_padding/
+        # content_font_size_multiplier above can't reach on their own --
+        # those two only ever stack/multiply with these (see their own
+        # docstrings), never overwrite them, so a real reset has to touch
+        # these fields directly instead. Same defaults quick_style_defaults()
+        # already exposes to the Reset button's own data-default-* attributes
+        # (article_quick_style_panel.html) -- one source of truth either way.
+        header_defaults = ArticleStyle.quick_style_defaults()
+        style.header_side_padding = header_defaults["header_padding"]
+        style.title_font_size = header_defaults["title_font_size"]
+        style.meta_font_size = header_defaults["meta_font_size"]
+        style.intro_font_size = header_defaults["intro_font_size"]
+        # title/meta/intro alignment too -- set directly here rather than
+        # relying solely on apply_alignment_to_blocks below, which only
+        # touches them when content_alignment itself actually changed this
+        # session (alignmentChanged in article_quick_style.js), and even
+        # then sets all three to content_alignment's own value rather than
+        # each field's own default. Each field's own default here instead
+        # (can differ from content_alignment's and from each other's, see
+        # their own docstrings) -- apply_alignment_to_blocks's header loop
+        # is skipped below whenever reset_header is set, so it can't
+        # immediately overwrite these with content_alignment's value.
+        style.title_alignment = header_defaults["title_alignment"]
+        style.meta_alignment = header_defaults["meta_alignment"]
+        style.intro_alignment = header_defaults["intro_alignment"]
+
     style.save()
 
     if apply_alignment_to_blocks:
@@ -150,18 +180,23 @@ def save_quick_style(request, page_id):
             update_fields=["alignment"],
         )
 
-        header_alignment_fields = {
-            "article-title": "title_alignment",
-            "article-meta": "meta_alignment",
-            "article-intro": "intro_alignment",
-        }
-        style_changed = False
-        for header_block_id, style_field in header_alignment_fields.items():
-            if header_block_id not in excluded_ids:
-                setattr(style, style_field, alignment)
-                style_changed = True
-        if style_changed:
-            style.save()
+        # Skipped when reset_header already set these above -- to each
+        # field's own default, not content_alignment's value, see that
+        # block's own comment. Running this loop too would immediately
+        # overwrite that with content_alignment's value instead.
+        if not reset_header:
+            header_alignment_fields = {
+                "article-title": "title_alignment",
+                "article-meta": "meta_alignment",
+                "article-intro": "intro_alignment",
+            }
+            style_changed = False
+            for header_block_id, style_field in header_alignment_fields.items():
+                if header_block_id not in excluded_ids:
+                    setattr(style, style_field, alignment)
+                    style_changed = True
+            if style_changed:
+                style.save()
 
     return JsonResponse({"ok": True})
 

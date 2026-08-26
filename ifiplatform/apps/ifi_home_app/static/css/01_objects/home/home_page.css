@@ -6,7 +6,7 @@ identity" each read as one thing per file. Box styling (border/radius/
 shadow) deliberately copies .messageboard (messageboard_slideshow.css) verbatim --
 same "card" look. */
 .home-layout .maincontent .content-row > .eventsbox_container {
-    background-color: var(--color-bg);
+    background-color: var(--color-card-bg);
     border: 2px solid var(--color-border);
     border-radius: 12px;
     box-shadow: 0 2px 8px var(--color-shadow);

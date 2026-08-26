@@ -1,13 +1,15 @@
 .union-info-box {
   padding: 1.25rem;
   background-color: var(--color-card-bg);
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   box-shadow: 0 4px 12px var(--color-shadow);
+  font-size: 1rem;
 }
 
 .union-info-box h2 {
   margin: 0 0 0.75rem;
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
 /* .union-sidebar's flex column otherwise stretches this to the sidebar's

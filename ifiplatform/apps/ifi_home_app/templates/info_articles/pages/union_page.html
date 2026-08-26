@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{% static 'css/02_components/union/union_stats.css' %}">
     <link rel="stylesheet" href="{% static 'css/02_components/union/union_member_card.css' %}">
     <link rel="stylesheet" href="{% static 'css/02_components/union/union_position_info.css' %}">
+    <link rel="stylesheet" href="{% static 'css/01_objects/event/event_page.css' %}">
     <link rel="stylesheet" href="{% static 'css/02_components/shared/modal_base.css' %}">
     <link rel="stylesheet" href="{% static 'css/02_components/event/event_calendar.css' %}">
     <link rel="stylesheet" href="{% static 'css/02_components/shared/translation_warning.css' %}">
@@ -51,7 +52,7 @@
         <div class="union-layout">
             <aside class="union-sidebar">
                 {% if page.union_links %}
-                    <div class="union-info-box">
+                    <div class="union-info-box union-info-box--links">
                         {% for block in page.union_links %}
                             <a class="union-info-link union-info-link--signup" href="{{ block.value.url }}" target="_blank" rel="noopener noreferrer">{{ block.value.label }}</a>
                         {% endfor %}

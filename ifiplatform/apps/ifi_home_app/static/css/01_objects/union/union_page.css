@@ -54,7 +54,6 @@ this one -- see docs/claude_context/union_page.md. */
   max-width: 60rem;
   margin: 0 auto;
   text-align: center;
-  font-size: 1.3rem;
 }
 
 .union-main h2 {
@@ -67,10 +66,13 @@ this one -- see docs/claude_context/union_page.md. */
 
 .union-core {
   background-color: var(--color-card-bg);
+  border: 2px solid var(--color-border);
   border-radius: 1rem;
   box-shadow: 0 4px 14px var(--color-shadow);
   padding: 1.5rem;
+  font-size: 1.3rem;
 }
+
 
 /* padding, not margin -- margin here would collapse into the h2's own margin-top instead of adding to it */
 .union-calendar-section {

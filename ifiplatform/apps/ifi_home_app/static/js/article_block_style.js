@@ -595,6 +595,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // block's whole set of relevant fields at once.
   const pendingEdits = new Map();
 
+  // Exposed for article_quick_style.js's own Reset button: without this, a
+  // stale "article-header-style" entry queued earlier in the session (from
+  // touching Title/Meta/Intro's own sliders in this panel before resetting
+  // globally) would flush via save() below -- registered *after* quick
+  // style's own save handler (see article_page.html's <script> order) --
+  // and silently overwrite the header_side_padding/title_font_size/
+  // meta_font_size/intro_font_size global Reset just wrote, even though
+  // alignment resets fine (it's re-applied unconditionally by save_quick_
+  // style's own apply_alignment_to_blocks, not just whatever this panel's
+  // pendingEdits happens to send).
+  window.ifiDiscardPendingHeaderStyleEdit = () => {
+    pendingEdits.delete("article-header-style");
+  };
+
   // builds the {url, payload} save() would send for whatever block is
   // currently shown in the panel, from the panel's own current field
   // values -- reads targetTypeInput/targetIdInput/paddingInput/etc, all

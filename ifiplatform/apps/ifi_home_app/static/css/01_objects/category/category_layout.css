@@ -43,10 +43,6 @@ yet another top margin on top of the row's own gap above. */
   justify-content: center;
 }
 
-.category-page .articlecard-meta,
-.article-index-page .articlecard-meta {
-  justify-content: center;
-}
 
 .category-grid {
   display: flex;

@@ -53,9 +53,7 @@ category_layout.css's own justify-content rule for that). Category card
 titles need no override here: .category-card below already centers itself
 explicitly, everywhere it's used. */
 .category-page .section-heading,
-.article-index-page .section-heading,
-.category-page .articlecard h3,
-.article-index-page .articlecard h3 {
+.article-index-page .section-heading {
   text-align: center;
 }
 
@@ -90,10 +88,12 @@ explicitly, everywhere it's used. */
 }
 
 /* editor-controlled title font size (ArticleStyle.title_font_size,
---title-font-size set on .article-header, see article_page.html) --
-independent from the body's own font size/multiplier (the fallback here,
-2rem, is just the plain browser h1 default, matching the size before this
-became an explicit override). */
+--title-font-size set on .article-header, see article_page.html) -- the
+fallback here, 2rem, is just the plain browser h1 default, matching the
+size before this became an explicit override. Scaled by the Global
+editor's own font-size multiplier (--content-font-size-multiplier, set on
+.article-page -- inherited here), same as .intro/.article-meta in
+article_page.css. */
 .article-page h1 {
-  font-size: var(--title-font-size, 2rem);
+  font-size: calc(var(--title-font-size, 2rem) * var(--content-font-size-multiplier, 1));
 }

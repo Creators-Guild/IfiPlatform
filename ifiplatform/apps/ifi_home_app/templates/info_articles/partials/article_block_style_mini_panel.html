@@ -57,6 +57,40 @@ with (registerSaveHandler).
             <input type="range" id="block-style-width" min="4" max="60" step="0.5">
         </label>
 
+        <div class="block-style-field" data-style-field="alignment">
+            <span>{% trans "Alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
+
+        {% comment %}
+        Opts this one block out of the Global editor's Alignment "overwrite
+        all blocks" action (see ArticleBlockStyle.exclude_from_global_
+        alignment, save_quick_style's apply_alignment_to_blocks). Shares
+        the alignment field's own visibility gate above -- only relevant
+        wherever alignment itself is.
+        {% endcomment %}
+        <label class="block-style-field block-style-toggle" data-style-field="exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-exclude-global-alignment">
+            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
+        </label>
+
+        <label class="block-style-field" data-style-field="font_size">
+            {% comment %}
+            Shared by heading/paragraph (where "Font size" describes the
+            block itself) and the merged column panel (where the exact same
+            field/input describes the column's *title* instead -- see
+            FIELDS_BY_TYPE.column in article_block_style.js). data-label-title
+            holds the alternate wording; openPanelFor() swaps this span's text
+            between the two depending on which one is actually being edited.
+            {% endcomment %}
+            <span><span id="block-style-font-size-label" data-label-default="{% trans 'Font size' %}" data-label-title="{% trans 'Title font size' %}">{% trans "Font size" %}</span> (<span id="block-style-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-font-size" min="0.5" max="3" step="0.05">
+        </label>
+
         {% comment %}
         hero_image only -- draws a border/box around the image, title and
         caption (see .image-figure--boxed in article_image.css). Saved via
@@ -172,15 +206,143 @@ with (registerSaveHandler).
             <span>{% trans "Icon size" %} (<span id="block-style-toc-icon-size-value"></span>rem)</span>
             <input type="range" id="block-style-toc-icon-size" min="0.75" max="2.5" step="0.05">
         </label>
+
+        {% comment %}
+        image_caption's own title (alt_text)/caption text alignment/font-
+        size/side-padding -- same Layout/Style split as everything else
+        above, just with their own dedicated caption_title_*/caption_body_*
+        ids since both an image's title and its caption need to be visible/
+        editable at once in this one shared panel (see the "Image title"/
+        "Image caption" sections below for these two's own text color/
+        shadow instead).
+        {% endcomment %}
+        <div class="block-style-field" data-style-field="caption_title_alignment">
+            <span>{% trans "Title alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-caption-title-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="caption_title_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-caption-title-exclude-global-alignment">
+            <span>{% trans "Lock title alignment (ignore Global editor overwrites)" %}</span>
+        </label>
+
+        <label class="block-style-field" data-style-field="caption_title_font_size">
+            <span>{% trans "Title font size" %} (<span id="block-style-caption-title-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-caption-title-font-size" min="0.5" max="3" step="0.05">
+        </label>
+
+        <label class="block-style-field" data-style-field="caption_title_side_padding">
+            <span>{% trans "Title side padding" %} (<span id="block-style-caption-title-padding-value"></span>rem)</span>
+            <input type="range" id="block-style-caption-title-padding" min="0" max="10" step="0.25">
+        </label>
+
+        <div class="block-style-field" data-style-field="caption_body_alignment">
+            <span>{% trans "Caption alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-caption-body-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="caption_body_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-caption-body-exclude-global-alignment">
+            <span>{% trans "Lock caption alignment (ignore Global editor overwrites)" %}</span>
+        </label>
+
+        <label class="block-style-field" data-style-field="caption_body_font_size">
+            <span>{% trans "Caption font size" %} (<span id="block-style-caption-body-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-caption-body-font-size" min="0.5" max="3" step="0.05">
+        </label>
+
+        <label class="block-style-field" data-style-field="caption_body_side_padding">
+            <span>{% trans "Caption side padding" %} (<span id="block-style-caption-body-padding-value"></span>rem)</span>
+            <input type="range" id="block-style-caption-body-padding" min="0" max="10" step="0.25">
+        </label>
+
+        {% comment %}
+        Title/Meta/Intro's own alignment/font-size -- same Layout/Style
+        split as everywhere else, just with their own dedicated title_*/
+        meta_*/intro_* ids since all three need to be visible/editable at
+        once regardless of which one's own trigger opened the panel (see
+        the "Style" sections below for why -- save_header_style only ever
+        accepts the whole title+meta+intro payload together). Labeled by
+        name (not bare "Alignment"/"Font size") since, unlike Style's own
+        three separately-headed sections below, these three sit in this one
+        shared Layout section with no sub-headers of their own to tell them
+        apart otherwise.
+        {% endcomment %}
+        <div class="block-style-field" data-style-field="title_alignment">
+            <span>{% trans "Title alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-title-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="title_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-title-exclude-global-alignment">
+            <span>{% trans "Lock title alignment (ignore Global editor overwrites)" %}</span>
+        </label>
+
+        <label class="block-style-field" data-style-field="title_font_size">
+            <span>{% trans "Title font size" %} (<span id="block-style-title-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-title-font-size" min="1" max="4" step="0.1">
+        </label>
+
+        <div class="block-style-field" data-style-field="meta_alignment">
+            <span>{% trans "Meta alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-meta-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="meta_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-meta-exclude-global-alignment">
+            <span>{% trans "Lock meta alignment (ignore Global editor overwrites)" %}</span>
+        </label>
+
+        <label class="block-style-field" data-style-field="meta_font_size">
+            <span>{% trans "Meta font size" %} (<span id="block-style-meta-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-meta-font-size" min="0.5" max="2" step="0.05">
+        </label>
+
+        <div class="block-style-field" data-style-field="intro_alignment">
+            <span>{% trans "Intro alignment" %}</span>
+            <div class="block-style-align-buttons" id="block-style-intro-alignment" data-value="">
+                <button type="button" data-align="left">{% trans "Left" %}</button>
+                <button type="button" data-align="center">{% trans "Center" %}</button>
+                <button type="button" data-align="right">{% trans "Right" %}</button>
+            </div>
+        </div>
+
+        <label class="block-style-field block-style-toggle" data-style-field="intro_exclude_from_global_alignment">
+            <input type="checkbox" id="block-style-intro-exclude-global-alignment">
+            <span>{% trans "Lock intro alignment (ignore Global editor overwrites)" %}</span>
+        </label>
+
+        <label class="block-style-field" data-style-field="intro_font_size">
+            <span>{% trans "Intro font size" %} (<span id="block-style-intro-font-size-value"></span>rem)</span>
+            <input type="range" id="block-style-intro-font-size" min="0.5" max="3" step="0.05">
+        </label>
     </div>
 
     {% comment %}
-    "Style" -- alignment/font-size/text-color together: for heading/styled_
-    text/image this is the block's own; for the merged column panel (see
-    FIELDS_BY_TYPE.column in article_block_style.js) the exact same fields
-    describe the column's *title* instead, so this header's own label swaps
-    to "Column title" in that case (data-label-title, same mechanism as the
-    font-size/text-color field labels below).
+    "Style" -- text color/shadow: for heading/styled_text/image this is the
+    block's own; for the merged column panel (see FIELDS_BY_TYPE.column in
+    article_block_style.js) the exact same fields describe the column's
+    *title* instead, so this header's own label swaps to "Column title" in
+    that case (data-label-title, same mechanism as the text-color field
+    label below). Alignment/font-size for these types now live in Layout
+    above instead (positioning/sizing concerns, not color/shadow), same
+    split as the Global editor's own Layout/Style panel.
     {% endcomment %}
     <div class="block-style-field block-style-caption-header" data-style-field="style_label">
         <p class="block-style-box-subsection-title" id="block-style-style-label" data-label-default="{% trans 'Style' %}" data-label-title="{% trans 'Column title' %}">{% trans "Style" %}</p>
@@ -188,40 +350,6 @@ with (registerSaveHandler).
     </div>
 
     <div class="block-style-box-fields" id="block-style-style-fields" hidden>
-        <div class="block-style-field" data-style-field="alignment">
-            <span>{% trans "Alignment" %}</span>
-            <div class="block-style-align-buttons" id="block-style-alignment" data-value="">
-                <button type="button" data-align="left">{% trans "Left" %}</button>
-                <button type="button" data-align="center">{% trans "Center" %}</button>
-                <button type="button" data-align="right">{% trans "Right" %}</button>
-            </div>
-        </div>
-
-        {% comment %}
-        Opts this one block out of the Global editor's Alignment "overwrite
-        all blocks" action (see ArticleBlockStyle.exclude_from_global_
-        alignment, save_quick_style's apply_alignment_to_blocks). Shares
-        the alignment field's own visibility gate above -- only relevant
-        wherever alignment itself is.
-        {% endcomment %}
-        <label class="block-style-field block-style-toggle" data-style-field="exclude_from_global_alignment">
-            <input type="checkbox" id="block-style-exclude-global-alignment">
-            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
-        </label>
-
-        <label class="block-style-field" data-style-field="font_size">
-            {% comment %}
-            Shared by heading/paragraph (where "Font size" describes the
-            block itself) and the merged column panel (where the exact same
-            field/input describes the column's *title* instead -- see
-            FIELDS_BY_TYPE.column in article_block_style.js). data-label-title
-            holds the alternate wording; openPanelFor() swaps this span's text
-            between the two depending on which one is actually being edited.
-            {% endcomment %}
-            <span><span id="block-style-font-size-label" data-label-default="{% trans 'Font size' %}" data-label-title="{% trans 'Title font size' %}">{% trans "Font size" %}</span> (<span id="block-style-font-size-value"></span>rem)</span>
-            <input type="range" id="block-style-font-size" min="0.5" max="3" step="0.05">
-        </label>
-
         {% comment %}
         Applies independent of that block's own box -- not nested under Box
         below, unlike background/border color (see
@@ -233,9 +361,10 @@ with (registerSaveHandler).
         {% endcomment %}
         <div class="block-style-field" data-style-field="text_color">
             {% comment %}
-            Same shared-label pattern as font_size above -- "Text color" for
-            heading/paragraph, "Title color" for the merged column panel
-            (see FIELDS_BY_TYPE.column in article_block_style.js).
+            Same shared-label pattern as font_size in Layout above (a
+            different section now, but the same swap mechanism) -- "Text
+            color" for heading/paragraph, "Title color" for the merged
+            column panel (see FIELDS_BY_TYPE.column in article_block_style.js).
             {% endcomment %}
             <span id="block-style-text-color-label" data-label-default="{% trans 'Text color' %}" data-label-title="{% trans 'Title color' %}">{% trans "Text color" %}</span>
             <div class="block-style-color-buttons" id="block-style-text-color" data-value="">
@@ -290,16 +419,17 @@ with (registerSaveHandler).
     </div>
 
     {% comment %}
-    An image's own title (alt_text)/caption text -- independent of each
-    other and of the figcaption's own box above (see BOX_FIELDS/data-style-
-    field="box_enabled" etc.) -- shown only while editing an image_caption
-    block whose figcaption actually has that text (data-title-text-id/
-    data-caption-text-id, see article_image_block.html), same "only if it
-    exists" gating as the "Style" section's own "Column title" label swap
-    above. Two near-identical groups,
-    same fields as the generic alignment/font_size/text_color/side_padding
-    used everywhere else, just with their own dedicated ids since both need
-    to be visible/editable at once in this one shared panel.
+    An image's own title (alt_text)/caption text's own text color/shadow --
+    independent of each other and of the figcaption's own box above (see
+    BOX_FIELDS/data-style-field="box_enabled" etc.) -- shown only while
+    editing an image_caption block whose figcaption actually has that text
+    (data-title-text-id/data-caption-text-id, see article_image_block.html),
+    same "only if it exists" gating as the "Style" section's own "Column
+    title" label swap above. Alignment/font-size/side-padding for these two
+    live in Layout above instead now (see "Title alignment"/"Caption
+    alignment" etc there) -- same Layout/Style split as everywhere else,
+    just with their own dedicated caption_title_*/caption_body_* ids since
+    both need to be visible/editable at once in this one shared panel.
     {% endcomment %}
     {% comment %}
     Collapsible, like Box below -- but no "enabled" checkbox alongside the
@@ -313,30 +443,6 @@ with (registerSaveHandler).
     </div>
 
     <div class="block-style-box-fields" id="block-style-caption-title-fields" hidden>
-        <div class="block-style-field" data-style-field="caption_title_alignment">
-            <span>{% trans "Alignment" %}</span>
-            <div class="block-style-align-buttons" id="block-style-caption-title-alignment" data-value="">
-                <button type="button" data-align="left">{% trans "Left" %}</button>
-                <button type="button" data-align="center">{% trans "Center" %}</button>
-                <button type="button" data-align="right">{% trans "Right" %}</button>
-            </div>
-        </div>
-
-        <label class="block-style-field block-style-toggle" data-style-field="caption_title_exclude_from_global_alignment">
-            <input type="checkbox" id="block-style-caption-title-exclude-global-alignment">
-            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
-        </label>
-
-        <label class="block-style-field" data-style-field="caption_title_font_size">
-            <span>{% trans "Font size" %} (<span id="block-style-caption-title-font-size-value"></span>rem)</span>
-            <input type="range" id="block-style-caption-title-font-size" min="0.5" max="3" step="0.05">
-        </label>
-
-        <label class="block-style-field" data-style-field="caption_title_side_padding">
-            <span>{% trans "Side padding" %} (<span id="block-style-caption-title-padding-value"></span>rem)</span>
-            <input type="range" id="block-style-caption-title-padding" min="0" max="10" step="0.25">
-        </label>
-
         <div class="block-style-field" data-style-field="caption_title_text_color">
             <span>{% trans "Text color" %}</span>
             <div class="block-style-color-buttons" id="block-style-caption-title-text-color" data-value="">
@@ -386,30 +492,6 @@ with (registerSaveHandler).
     </div>
 
     <div class="block-style-box-fields" id="block-style-caption-body-fields" hidden>
-        <div class="block-style-field" data-style-field="caption_body_alignment">
-            <span>{% trans "Alignment" %}</span>
-            <div class="block-style-align-buttons" id="block-style-caption-body-alignment" data-value="">
-                <button type="button" data-align="left">{% trans "Left" %}</button>
-                <button type="button" data-align="center">{% trans "Center" %}</button>
-                <button type="button" data-align="right">{% trans "Right" %}</button>
-            </div>
-        </div>
-
-        <label class="block-style-field block-style-toggle" data-style-field="caption_body_exclude_from_global_alignment">
-            <input type="checkbox" id="block-style-caption-body-exclude-global-alignment">
-            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
-        </label>
-
-        <label class="block-style-field" data-style-field="caption_body_font_size">
-            <span>{% trans "Font size" %} (<span id="block-style-caption-body-font-size-value"></span>rem)</span>
-            <input type="range" id="block-style-caption-body-font-size" min="0.5" max="3" step="0.05">
-        </label>
-
-        <label class="block-style-field" data-style-field="caption_body_side_padding">
-            <span>{% trans "Side padding" %} (<span id="block-style-caption-body-padding-value"></span>rem)</span>
-            <input type="range" id="block-style-caption-body-padding" min="0" max="10" step="0.25">
-        </label>
-
         <div class="block-style-field" data-style-field="caption_body_text_color">
             <span>{% trans "Text color" %}</span>
             <div class="block-style-color-buttons" id="block-style-caption-body-text-color" data-value="">
@@ -491,25 +573,24 @@ with (registerSaveHandler).
     </div>
 
     {% comment %}
-    Title/Meta/Intro -- in that order, matching the actual page layout
-    (see article_page.html's .article-header: h1, then .article-meta, then
-    .intro). Each one's own alignment/font-size/text color, edited from its
-    own individual trigger -- article_header's shared trigger now only
-    offers Layout (its own side padding) and Box, nothing else (see
-    FIELDS_BY_TYPE.article_header in article_block_style.js); the
-    alignment/font-size fields here still save via the same shared
-    save_header_style request regardless of which of the three triggered
-    it (see recordPendingEdit), since that endpoint only ever accepts the
-    whole title+meta+intro payload at once. Three separate collapsible
-    sections, same granularity as Image title/Image caption below, rather
-    than one shared one, since each is independently adjustable and
-    usually only one at a time is what someone's after. Each one's own
-    section is labeled "Style" (not "Title"/"Meta"/"Intro" again -- the
-    panel's own title, set by openPanelFor() from BLOCK_TYPE_LABELS, already
-    says that), same label and field order (Alignment, Lock alignment, Font
-    size, Text color) as heading/paragraph's own "Style" section above, so
-    editing any of these three feels like the same control set as
-    everywhere else in this panel rather than a one-off.
+    Title/Meta/Intro's own text color/shadow -- alignment/font-size for all
+    three live in Layout above instead now (see "Title alignment"/"Meta
+    alignment"/"Intro alignment" etc there). Edited from each one's own
+    individual trigger -- article_header's shared trigger now only offers
+    Layout (its own side padding) and Box, nothing else (see FIELDS_BY_TYPE.
+    article_header in article_block_style.js); these fields still save via
+    the same shared save_header_style request regardless of which of the
+    three triggered it (see recordPendingEdit), since that endpoint only
+    ever accepts the whole title+meta+intro payload at once. Three separate
+    collapsible sections, same granularity as Image title/Image caption
+    above, rather than one shared one, since each is independently
+    adjustable and usually only one at a time is what someone's after. Each
+    one's own section is labeled "Style" (not "Title"/"Meta"/"Intro" again
+    -- the panel's own title, set by openPanelFor() from BLOCK_TYPE_LABELS,
+    already says that), same label and field order (Text color, Shadow) as
+    heading/paragraph's own "Style" section above, so editing any of these
+    three feels like the same control set as everywhere else in this panel
+    rather than a one-off.
     {% endcomment %}
     <div class="block-style-field block-style-caption-header" data-style-field="title_label">
         <p class="block-style-box-subsection-title">{% trans "Style" %}</p>
@@ -517,25 +598,6 @@ with (registerSaveHandler).
     </div>
 
     <div class="block-style-box-fields" id="block-style-header-title-fields" hidden>
-        <div class="block-style-field" data-style-field="title_alignment">
-            <span>{% trans "Alignment" %}</span>
-            <div class="block-style-align-buttons" id="block-style-title-alignment" data-value="">
-                <button type="button" data-align="left">{% trans "Left" %}</button>
-                <button type="button" data-align="center">{% trans "Center" %}</button>
-                <button type="button" data-align="right">{% trans "Right" %}</button>
-            </div>
-        </div>
-
-        <label class="block-style-field block-style-toggle" data-style-field="title_exclude_from_global_alignment">
-            <input type="checkbox" id="block-style-title-exclude-global-alignment">
-            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
-        </label>
-
-        <label class="block-style-field" data-style-field="title_font_size">
-            <span>{% trans "Font size" %} (<span id="block-style-title-font-size-value"></span>rem)</span>
-            <input type="range" id="block-style-title-font-size" min="1" max="4" step="0.1">
-        </label>
-
         <div class="block-style-field" data-style-field="title_text_color">
             <span>{% trans "Text color" %}</span>
             <div class="block-style-color-buttons" id="block-style-title-text-color" data-value="">
@@ -585,25 +647,6 @@ with (registerSaveHandler).
     </div>
 
     <div class="block-style-box-fields" id="block-style-header-meta-fields" hidden>
-        <div class="block-style-field" data-style-field="meta_alignment">
-            <span>{% trans "Alignment" %}</span>
-            <div class="block-style-align-buttons" id="block-style-meta-alignment" data-value="">
-                <button type="button" data-align="left">{% trans "Left" %}</button>
-                <button type="button" data-align="center">{% trans "Center" %}</button>
-                <button type="button" data-align="right">{% trans "Right" %}</button>
-            </div>
-        </div>
-
-        <label class="block-style-field block-style-toggle" data-style-field="meta_exclude_from_global_alignment">
-            <input type="checkbox" id="block-style-meta-exclude-global-alignment">
-            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
-        </label>
-
-        <label class="block-style-field" data-style-field="meta_font_size">
-            <span>{% trans "Font size" %} (<span id="block-style-meta-font-size-value"></span>rem)</span>
-            <input type="range" id="block-style-meta-font-size" min="0.5" max="2" step="0.05">
-        </label>
-
         <div class="block-style-field" data-style-field="meta_text_color">
             <span>{% trans "Text color" %}</span>
             <div class="block-style-color-buttons" id="block-style-meta-text-color" data-value="">
@@ -653,25 +696,6 @@ with (registerSaveHandler).
     </div>
 
     <div class="block-style-box-fields" id="block-style-header-intro-fields" hidden>
-        <div class="block-style-field" data-style-field="intro_alignment">
-            <span>{% trans "Alignment" %}</span>
-            <div class="block-style-align-buttons" id="block-style-intro-alignment" data-value="">
-                <button type="button" data-align="left">{% trans "Left" %}</button>
-                <button type="button" data-align="center">{% trans "Center" %}</button>
-                <button type="button" data-align="right">{% trans "Right" %}</button>
-            </div>
-        </div>
-
-        <label class="block-style-field block-style-toggle" data-style-field="intro_exclude_from_global_alignment">
-            <input type="checkbox" id="block-style-intro-exclude-global-alignment">
-            <span>{% trans "Lock alignment (ignore Global editor overwrites)" %}</span>
-        </label>
-
-        <label class="block-style-field" data-style-field="intro_font_size">
-            <span>{% trans "Font size" %} (<span id="block-style-intro-font-size-value"></span>rem)</span>
-            <input type="range" id="block-style-intro-font-size" min="0.5" max="3" step="0.05">
-        </label>
-
         <div class="block-style-field" data-style-field="intro_text_color">
             <span>{% trans "Text color" %}</span>
             <div class="block-style-color-buttons" id="block-style-intro-text-color" data-value="">

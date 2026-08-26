@@ -74,7 +74,7 @@ leaving a visible strip of the site's default background there instead.
     var(--color-) when there's no category to source it from; every
     var(--accent-color, ...) consumer already has its own fallback.
     {% endcomment %}
-    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" data-font-size-multiplier="{{ page.style.content_font_size_multiplier|unlocalize }}" style="{% if page.category %}--accent-color: var(--color-{{ page.category.color }}); {% endif %}--content-side-padding: {{ page.style.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.style.content_alignment }}; --toc-icon-size: {{ page.style.toc_icon_size|unlocalize }}rem;">
+    <div class="article-page{% if page.has_headings %} article-page--has-toc{% endif %}" data-font-size-multiplier="{{ page.style.content_font_size_multiplier|unlocalize }}" style="{% if page.category %}--accent-color: var(--color-{{ page.category.color }}); {% endif %}--content-side-padding: {{ page.style.content_side_padding|unlocalize }}rem; --content-alignment: {{ page.style.content_alignment }}; --content-font-size-multiplier: {{ page.style.content_font_size_multiplier|unlocalize }}; --toc-icon-size: {{ page.style.toc_icon_size|unlocalize }}rem;">
         {% if can_edit_style %}
             {% include "info_articles/partials/article_editor_mode_toggle.html" %}
         {% endif %}
@@ -142,7 +142,7 @@ leaving a visible strip of the site's default background there instead.
                 {% if can_edit_style %}<button type="button" class="block-style-trigger" aria-label="{% trans 'Edit block style' %}">&#8942;</button>{% endif %}
             </h1>
 
-            {% if page.display_author_name or page.published_date or page.last_published_at or needs_translation %}
+            {% if page.display_author_name or page.published_date or page.last_published_at %}
                 <div class="article-meta{% if meta_style.box.enabled %} block-box{% endif %}{% if can_edit_style %} editable-block{% endif %}"
                      {% if can_edit_style %}data-block-id="article-meta" data-block-type="meta"
                      data-side-padding="{{ meta_style.side_padding|unlocalize }}"
@@ -159,6 +159,10 @@ leaving a visible strip of the site's default background there instead.
                     {% if page.last_published_at %}
                         <span class="article-meta-item">{% trans "Last edited" %} {{ page.last_published_at|date }}</span>
                     {% endif %}
+                </div>
+            {% endif %}
+            {% if needs_translation %}
+                <div class="translation-warning-row">
                     {% include "info_articles/partials/translation_warning.html" %}
                 </div>
             {% endif %}

@@ -19,15 +19,16 @@
   padding: 0.5rem;
   color: inherit;
   text-decoration: none;
-  border-radius: 3px;
-  box-shadow: 0 2px 8px var(--color-shadow);
+  border-radius: 4px;
   transition: transform 0.15s ease, box-shadow 0.15s ease, padding 0.2s ease;
+  text-align: left;
 }
 
 .articlecard:hover,
 .articlecard:focus-visible {
   box-shadow: 0 4px 14px var(--color-shadow);
   transform: translateY(-2px);
+  background-color: var(--color-card-bg);
 }
 
 .articlecard--category {
@@ -39,7 +40,6 @@
   width: 100%;
   display: block;
   object-fit: cover;
-  border-radius: 8px;
   /* generous cap, well above any realistic rendered height at this aspect
      ratio -- a no-op while expanded (the image is never actually that
      tall, so nothing gets clipped), but gives .articlecard--list img
@@ -84,6 +84,7 @@ reads as the same thing wherever it shows up. */
   font-size: 0.8rem;
   color: var(--color-text-muted);
   transition: margin 0.2s ease, gap 0.2s ease, font-size 0.2s ease, color 0.2s ease;
+  text-align: left;
 }
 
 /* separator between the author and date spans (article_card.html) --
