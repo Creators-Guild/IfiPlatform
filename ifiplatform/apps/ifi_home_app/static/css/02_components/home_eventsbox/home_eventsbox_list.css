@@ -1,0 +1,87 @@
+/* Homepage "This month at Ifi" box -- a compact bulleted list (see
+event_page.css for the shared .event-type-badge), not the card-grid layout
+newsbar_layout.css uses for News/Info Articles, since it lives in a
+narrower column (see home_layout.css's own .eventsbox_container rule,
+which also already provides this box's left/right padding -- no extra
+horizontal padding needed here). */
+.home-eventsbox-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.home-eventsbox-item {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  /* same hover-lift convention as .articlecard (article_card.css) and the
+  top nav's .nav_link (topheader_bar.css) -- :hover on this element already
+  fires from hovering any child (including the tags), no :has() needed. */
+  transition: transform 0.15s ease;
+}
+
+.home-eventsbox-item:hover {
+  transform: translateY(-1px);
+}
+
+.home-eventsbox-list li:last-child .home-eventsbox-item {
+  border-bottom: none;
+}
+
+.home-eventsbox-title {
+  font-weight: bold;
+  flex-basis: 100%;
+}
+
+.home-eventsbox-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* "Stretched link": covers the whole .home-eventsbox-item (its nearest
+positioned ancestor, see position:relative above) so clicking anywhere in
+the row navigates to the event -- this item is a <div> rather than an <a>
+now specifically so .home-eventsbox-union-tag below can be its own,
+separately-clickable <a> without nesting one link inside another. */
+.home-eventsbox-title-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.home-eventsbox-date {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+.home-eventsbox-empty {
+  color: var(--color-text-muted);
+}
+
+/* Link to the full events overview (events/event_index_page.html) --
+always visible, unlike .home-eventsbox-more below (mobile-only, and only
+ever reveals the rest of this same short list). Same understated
+"text link, not a button" treatment as .home-eventsbox-more itself. */
+.home-eventsbox-view-all {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+  text-align: center;
+}
+
+.home-eventsbox-view-all:hover,
+.home-eventsbox-view-all:focus-visible {
+  color: var(--color-text);
+}

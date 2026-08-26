@@ -1,0 +1,23 @@
+/* Shared base shape across the four card components: .articlecard
+(cards/article_card.css), .category-card (cards/category_card.css),
+.tool-card (cards/tool_card.css), .union-card (cards/union_card.css). Only
+declarations that are genuinely byte-for-byte identical across all four are
+lifted here -- each card file keeps its own border/border-radius/box-shadow/
+color where those actually differ (e.g. .articlecard's border-radius is
+3px, .tool-card's is 14px, the other two are 12px; .tool-card's box-shadow
+carries an extra glow layer the others don't).
+
+position:relative is deliberately NOT included here even though it looks
+like an obvious "card" fundamental: .union-card doesn't set it (it has no
+absolutely-positioned descendants of its own, unlike the other three),
+so lifting it into this shared rule would silently give .union-card a new
+positioning/stacking context it doesn't have today -- exactly the kind of
+behavioral change this refactor is meant to avoid. */
+.articlecard,
+.category-card,
+.tool-card,
+.union-card {
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: var(--color-bg);
+}

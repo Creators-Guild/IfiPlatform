@@ -106,7 +106,7 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
     # Written by account_app's delete_account_view once author goes NULL --
     # see docs/claude_context/article_pages.md for the fallback chain.
     author_display_name = models.CharField(max_length=150, blank=True)
-    published_date = models.DateField(null=True, blank=True)
+    published_date = models.DateField()
     show_on_homepage = models.BooleanField(
         default=True,
         help_text="Whether this article can be suggested on the homepage (newsbar/articles bar).",
@@ -221,6 +221,7 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
         key is for and the title/meta/intro pseudo-id styling."""
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
+        context["quick_style_defaults"] = ArticleStyle.quick_style_defaults()
         context["page_is_live"] = self.live
         context["page_has_unpublished_changes"] = self.has_unpublished_changes
         context["page_has_pending_publish"] = (not self.live) or self.has_unpublished_changes

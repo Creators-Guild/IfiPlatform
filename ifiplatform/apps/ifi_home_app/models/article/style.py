@@ -88,11 +88,13 @@ class ArticleStyle(models.Model):
     )
 
     content_side_padding = models.FloatField(
-        default=0,
+        default=20,
         help_text=(
             "Left/right padding around the whole article body, in rem (0 = "
             "none). Applies on top of the site's own layout padding, and "
-            "stacks with any per-block side padding inside it."
+            "stacks with any per-block side padding inside it -- and, via "
+            "calc() in article_page.css, with header_side_padding on the "
+            "title/meta/intro block above the body too."
         ),
     )
     content_alignment = models.CharField(
@@ -104,10 +106,11 @@ class ArticleStyle(models.Model):
             "alignment-capable block in the article body (heading, "
             "paragraph, image, image captions, column titles) -- see "
             "save_quick_style's apply_alignment_to_blocks handling and "
-            "alignment_capable_block_ids(). A block can opt out via its own "
-            "'exclude_from_global_alignment' flag on ArticleBlockStyle. "
-            "Does not affect the title/intro/meta block above the body, "
-            "which has its own separate alignment controls."
+            "alignment_capable_block_ids() -- and the title/intro/meta "
+            "block above the body (title_alignment/intro_alignment/"
+            "meta_alignment below), via that same handling's "
+            "header_alignment_fields. A block or header field can opt out "
+            "via its own 'exclude_from_global_alignment' flag."
         ),
     )
     content_font_size_multiplier = models.FloatField(
@@ -116,11 +119,12 @@ class ArticleStyle(models.Model):
             "Multiplies the effective font size of every heading/paragraph/"
             "image-caption/column-title block in the body, on top of each "
             "block's own font size (1 = no change) -- see "
-            "_effective_heading_style()'s display_font_size. Unlike "
-            "alignment above, this never overwrites any block's own stored "
-            "font_size -- it's a display-time scale, not a per-block "
-            "override. Title, intro and meta have their own separate font "
-            "size controls, unaffected by this."
+            "_effective_heading_style()'s display_font_size. Also multiplies "
+            "title_font_size/intro_font_size/meta_font_size below, via "
+            "calc() in article_page.css/category_page.css (--content-font-"
+            "size-multiplier, set on .article-page). Never overwrites any "
+            "field's own stored value in either case -- it's a display-time "
+            "scale, not an override."
         ),
     )
     content_bg_enabled = models.BooleanField(
@@ -143,12 +147,16 @@ class ArticleStyle(models.Model):
     title_alignment = models.CharField(
         max_length=20,
         choices=TITLE_ALIGNMENT_CHOICES,
-        default="left",
+        default="center",
         help_text="Alignment for the article title.",
     )
     title_font_size = models.FloatField(
         default=2,
-        help_text="Font size for the article title, in rem. Independent from the body's own font size.",
+        help_text=(
+            "Font size for the article title, in rem. Scaled by "
+            "content_font_size_multiplier above -- see that field's own "
+            "docstring."
+        ),
     )
     intro_alignment = models.CharField(
         max_length=20,
@@ -157,24 +165,33 @@ class ArticleStyle(models.Model):
         help_text="Alignment for the intro paragraph.",
     )
     intro_font_size = models.FloatField(
-        default=1,
-        help_text="Font size for the intro paragraph, in rem. Independent from the body's own font size.",
+        default=1.3,
+        help_text=(
+            "Font size for the intro paragraph, in rem. Scaled by "
+            "content_font_size_multiplier above -- see that field's own "
+            "docstring."
+        ),
     )
     meta_alignment = models.CharField(
         max_length=20,
         choices=TITLE_ALIGNMENT_CHOICES,
-        default="left",
+        default="center",
         help_text="Alignment for the byline/date meta row.",
     )
     meta_font_size = models.FloatField(
         default=0.9,
-        help_text="Font size for the byline/date meta row, in rem. Independent from the body's own font size.",
+        help_text=(
+            "Font size for the byline/date meta row, in rem. Scaled by "
+            "content_font_size_multiplier above -- see that field's own "
+            "docstring."
+        ),
     )
     header_side_padding = models.FloatField(
         default=0,
         help_text=(
             "Left/right padding around the title/meta/intro block, in rem "
-            "(0 = none). Independent from the body's own side padding."
+            "(0 = none). Stacks with content_side_padding above -- see that "
+            "field's own docstring."
         ),
     )
 
@@ -196,3 +213,37 @@ class ArticleStyle(models.Model):
     @property
     def hero_image_box_shadow_blur(self):
         return 8 * self.hero_image_box_shadow_strength
+
+    # Single source of truth for the Global editor's "Reset to default"
+    # button (article_quick_style_panel.html's data-default-* attributes,
+    # read by article_quick_style.js) -- pulled from these fields' own
+    # `default=` above instead of separately hardcoded in the template, so
+    # changing a default here can't drift out of sync with what Reset
+    # restores. See ArticlePage.get_context() for where this is passed
+    # into the template as quick_style_defaults.
+    #
+    # header_side_padding/title_font_size/meta_font_size/intro_font_size/
+    # title_alignment/meta_alignment/intro_alignment are included too even
+    # though they're not quick-style fields themselves -- Reset also
+    # restores these (see save_quick_style's reset_header handling) since
+    # they'd otherwise be the one part of the article a "reset to default"
+    # doesn't actually reset. Each resets to its OWN default here, not
+    # content_alignment's -- title_alignment/meta_alignment/intro_alignment
+    # can each have a different default from content_alignment and from
+    # each other (see their own docstrings below), same "independent
+    # fields, independently reset" treatment as the font-size ones.
+    @classmethod
+    def quick_style_defaults(cls):
+        return {
+            "padding": cls._meta.get_field("content_side_padding").default,
+            "alignment": cls._meta.get_field("content_alignment").default,
+            "font_size": cls._meta.get_field("content_font_size_multiplier").default,
+            "bg_color": cls._meta.get_field("content_bg_color").default,
+            "header_padding": cls._meta.get_field("header_side_padding").default,
+            "title_font_size": cls._meta.get_field("title_font_size").default,
+            "meta_font_size": cls._meta.get_field("meta_font_size").default,
+            "intro_font_size": cls._meta.get_field("intro_font_size").default,
+            "title_alignment": cls._meta.get_field("title_alignment").default,
+            "meta_alignment": cls._meta.get_field("meta_alignment").default,
+            "intro_alignment": cls._meta.get_field("intro_alignment").default,
+        }

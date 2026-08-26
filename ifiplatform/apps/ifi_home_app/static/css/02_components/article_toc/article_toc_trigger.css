@@ -1,0 +1,155 @@
+/* ToC is now an icon button that opens an overlay dialog, rather than a
+   floated in-flow box. It lives in a gutter reserved out of .article-page's
+   OWN left padding (not the sidebar's space, not the text's) -- .toc-open-
+   -sticky is pulled back into that gutter with a negative margin equal to
+   the padding, so it can never land on top of either regardless of the
+   sidemenu's current (collapsible/hover-expanding) width. Sticky, not
+   fixed, so its horizontal position always tracks the article column
+   itself instead of a hardcoded viewport offset. The gutter itself scales
+   with --toc-icon-size (same variable .toc-open-button/.toc-open-icon use
+   below) so a bigger button never gets clipped against/overlapping the
+   article text next to it. */
+.article-page--has-toc {
+  padding-left: calc(var(--toc-icon-size, 1.3rem) + 2.2rem);
+}
+
+.toc-open-sticky {
+  position: sticky;
+  top: 1.5rem;
+  height: 0;
+  margin-left: calc(-1 * (var(--toc-icon-size, 1.3rem) + 2.2rem));
+  width: calc(var(--toc-icon-size, 1.3rem) + 2.2rem);
+  z-index: 40;
+}
+
+/* being .toc-open-sticky's next sibling means the first real content
+   block (heading/paragraph/etc.) is no longer .article's own first child,
+   so its top margin can no longer collapse up through .article into the
+   gap below .article-meta -- reset it here so that gap stays just
+   .article-meta's own margin, instead of adding both. */
+.toc-open-sticky + * {
+  margin-top: 0;
+}
+
+/* size is editor-controlled (ArticlePage.toc_icon_size, --toc-icon-size set
+inline on .article-page -- see article_page.html/article_quick_style.js) --
+the circle grows with the icon (same 1.45rem ring around it either way,
+matching the original fixed 2.75rem circle around a 1.3rem icon), not
+independently. */
+.toc-open-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--toc-icon-size, 1.3rem) + 1.45rem);
+  height: calc(var(--toc-icon-size, 1.3rem) + 1.45rem);
+  padding: 0;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--color-shadow);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.toc-open-button:hover {
+  box-shadow: 0 4px 12px var(--color-shadow);
+  transform: translateY(-1px);
+}
+
+.toc-open-icon {
+  width: var(--toc-icon-size, 1.3rem);
+  height: var(--toc-icon-size, 1.3rem);
+  flex: 0 0 auto;
+}
+
+@media (max-width: 640px) {
+  .article-page--has-toc {
+    padding-left: 2.75rem;
+  }
+
+  .toc-open-sticky {
+    margin-left: -2.75rem;
+    width: 2.75rem;
+  }
+
+  .toc-open-button {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .toc-open-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+/* below this, the floating icon is replaced by .toc-title-button next to
+   the h1 (opening .toc-modal, a full-screen dialog) instead, so it'd be
+   redundant here. Comes after the 640px block above so its padding-left:0
+   wins at these narrower widths, where both media queries match. */
+@media (max-width: 480px) {
+  .article-page--has-toc {
+    padding-left: 0;
+  }
+
+  .toc-open-sticky {
+    display: none;
+  }
+}
+
+/* zero-height + position:sticky, same trick as .toc-open-sticky above --
+   .article-page is tall (it wraps the whole article), so this can keep
+   sticking all the way down the page. Being .article-page's first child
+   (before .article-header, which wraps h1/meta/intro) means the button
+   renders at the top-right corner of the content area, right where the
+   title starts. */
+.toc-title-sticky {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .toc-title-sticky {
+    display: block;
+    position: sticky;
+    top: 1rem;
+    height: 0;
+    z-index: 40;
+    /* h1 has its own (browser-default) margin-top, which .toc-title-sticky
+       doesn't -- without matching it here, the floated button starts flush
+       with the top of .article-page while the title text starts lower,
+       leaving the button floating above the title instead of beside it. */
+    margin-top: 1rem;
+  }
+
+  .toc-title-sticky + .article-header {
+    margin-top: 1rem;
+  }
+}
+
+.toc-title-button {
+  /* absolute, not float -- float makes the h1 text reflow around it
+     (shrinking/rewrapping the title to avoid it), which is the opposite of
+     what's wanted here: it should just sit on top of the title, ignored by
+     its layout entirely, overlapping is fine. */
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.toc-title-button .toc-open-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+}

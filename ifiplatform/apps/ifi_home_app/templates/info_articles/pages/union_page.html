@@ -4,11 +4,19 @@
 {% block title %}{{ page.title }}{% endblock %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css/styles/neon_style/home_base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/article_meta.css' %}">
-    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/union_page.css' %}">
-    <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/event_page.css' %}">
-    <link rel="stylesheet" href="{% static 'css/styles/neon_style/05_components/translation_warning.css' %}">
+    <link rel="stylesheet" href="{% static 'css/01_objects/home/home_layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/01_objects/home/home_page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/shared/article_meta.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/shared/popover_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/01_objects/union/union_page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/union/union_info_box.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/union/union_stats.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/union/union_member_card.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/union/union_position_info.css' %}">
+    <link rel="stylesheet" href="{% static 'css/01_objects/event/event_page.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/shared/modal_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/event/event_calendar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/02_components/shared/translation_warning.css' %}">
 {% endblock extra_head %}
 
 {% block sidemenu %}
@@ -94,25 +102,27 @@
             </aside>
 
             <article class="union-main">
-                {% if page.purpose %}
+                <div class="union-core">
+                    {% if page.purpose %}
                     <h2>{% trans "Purpose" %}</h2>
                     <div class="prose">{{ page.purpose|richtext }}</div>
-                {% endif %}
-
-                {% if page.activities %}
-                    <h2>{% trans "Activities" %}</h2>
-                    <div class="prose">{{ page.activities|richtext }}</div>
-                {% endif %}
-
-                {% if page.vedtekter or page.vedtekter_url %}
-                    <h2>{% trans "Bylaws" %}</h2>
-                    {% if page.vedtekter %}
-                        <div class="prose">{{ page.vedtekter|richtext }}</div>
                     {% endif %}
-                    {% if page.vedtekter_url %}
-                        <a class="union-bylaws-link" href="{{ page.vedtekter_url }}" target="_blank" rel="noopener noreferrer">{% trans "Full bylaws" %} <span aria-hidden="true">&rarr;</span></a>
+
+                    {% if page.activities %}
+                        <h2>{% trans "Activities" %}</h2>
+                        <div class="prose">{{ page.activities|richtext }}</div>
                     {% endif %}
-                {% endif %}
+
+                    {% if page.vedtekter or page.vedtekter_url %}
+                        <h2>{% trans "Bylaws" %}</h2>
+                        {% if page.vedtekter %}
+                            <div class="prose">{{ page.vedtekter|richtext }}</div>
+                        {% endif %}
+                        {% if page.vedtekter_url %}
+                            <a class="union-bylaws-link" href="{{ page.vedtekter_url }}" target="_blank" rel="noopener noreferrer">{% trans "Full bylaws" %} <span aria-hidden="true">&rarr;</span></a>
+                        {% endif %}
+                    {% endif %}
+                </div>
 
                 {% if page.filled_positions %}
                     <h2>{% trans "Sitting Members" %}</h2>

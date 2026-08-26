@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from wagtail.models import GroupPagePermission, Page
 
@@ -22,6 +23,7 @@ def _make_article(**kwargs):
     root = Page.get_first_root_node()
     kwargs.setdefault("title", "Test Article")
     kwargs.setdefault("slug", "test-article")
+    kwargs.setdefault("published_date", timezone.now().date())
     article = ArticlePage(body=[], **kwargs)
     root.add_child(instance=article)
     return article

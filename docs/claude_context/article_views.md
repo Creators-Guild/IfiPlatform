@@ -47,6 +47,24 @@ aren't part of `page.body` so `alignment_capable_block_ids()` can't see
 them). `content_font_size_multiplier`, in contrast, never touches
 `ArticleBlockStyle` — it's applied purely at render time.
 
+`reset_header` (default `False`) is the other destructive exception, same
+"only sent after a confirm dialog" pattern as `apply_alignment_to_blocks`.
+`content_side_padding`/`content_font_size_multiplier` only ever stack/
+multiply with `header_side_padding`/`title_font_size`/`meta_font_size`/
+`intro_font_size` (via `calc()` in `article_page.css`/`category_page.css`)
+— they can't reset those fields back to their own defaults themselves, so
+`reset_header=True` sets all seven (those four plus `title_alignment`/
+`meta_alignment`/`intro_alignment`) directly from
+`ArticleStyle.quick_style_defaults()`, each to its own field default rather
+than to `content_alignment`'s -- those three can each have a different
+default from `content_alignment` and from each other (see their own
+docstrings). `apply_alignment_to_blocks`'s own header-alignment loop above
+is skipped entirely whenever `reset_header` is set, specifically so it
+can't immediately overwrite these three with `content_alignment`'s value
+right after -- the two requests almost always arrive together (Reset also
+resets the alignment control), so without that guard `reset_header`'s own
+per-field defaults would never actually stick.
+
 ## save_block_style
 
 The width/height/shadow-strength bound checks match the on-page slider's

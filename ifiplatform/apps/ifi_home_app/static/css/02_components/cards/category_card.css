@@ -1,0 +1,102 @@
+.category-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 0 1 14rem;
+  min-height: 8rem;
+  /* a block-level element's own width already fills its parent by
+  default, but height doesn't -- height:100% only takes effect once its
+  parent (the wrapping .body-category-card div in article_body_blocks.html)
+  actually has an explicit height of its own (see "Height" in the block-
+  style panel); percentage height against an auto-height parent just
+  resolves back to auto, so this is a no-op until then. Relies on
+  box-sizing:border-box/overflow:hidden from shared/card_base.css so 100%
+  includes this element's own padding/border and content taller than an
+  explicit height gets cleanly clipped. */
+  height: 100%;
+  padding: 1.5rem;
+  border: 2px solid var(--color-border);
+  border-top: 6px solid var(--accent-color, var(--color-border));
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--color-shadow);
+  text-decoration: none;
+  color: var(--color-text);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  background-color: var(--color-card-bg);
+}
+
+.category-card:hover,
+.category-card:focus-visible {
+  box-shadow: 0 4px 14px var(--color-shadow);
+  transform: translateY(-2px);
+}
+
+.category-card h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--color-text);
+  /* a long single unbroken word (no spaces to wrap at otherwise) would
+  overflow the card and get raw-clipped by its own overflow:hidden above --
+  same reasoning as .title-banner h1's own overflow-wrap further down this
+  file. */
+  overflow-wrap: break-word;
+}
+
+/* a category_card block's own width is a free-form rem number (editor
+picks it via width_rem) -- carried in as a --card-width custom property
+(article_body_blocks.html/article_column_content.html) rather than a
+literal inline width, so the 480px override below can win over it at
+normal specificity instead of needing !important to beat an inline style.
+.category-card's own "flex: 0 1 14rem" only means anything as a flex
+*item* (inside .category-grid), so standalone it needs its own explicit
+width instead, same pattern as article_card.css's own .body-article-card. */
+.body-category-card {
+  width: var(--card-width);
+  max-width: 100%;
+}
+
+.body-category-card--fixed-height {
+  height: var(--card-height);
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .body-category-card,
+  .body-category-card--fixed-height {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Compact list row on phone regardless of context (standalone in an
+  article body, or inside .category-grid's own listing pages) -- a
+  centered title tile with 1.5rem padding on every side ate too much
+  vertical space on a narrow screen for what's ultimately just a link with
+  a title. */
+  .category-card {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    min-height: 0;
+    padding: 0.6rem 0.9rem;
+  }
+
+  .category-card h2 {
+    font-size: 1rem;
+  }
+}
+
+.category-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: var(--accent-color, var(--color-secondary));
+  color: var(--color-on-accent);
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+

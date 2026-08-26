@@ -571,7 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // fields needs to go through this wrapper rather than currentBlockEl
   // directly, so the live-preview CSS custom properties (--title-alignment
   // etc, only consumed by rules scoped to .article-header itself/its
-  // direct children in article_layout.css) land on the right element, and
+  // direct children in article_page.css) land on the right element, and
   // so switching triggers doesn't lose track of the other two's current
   // values before a save (see the combined save_header_style payload in
   // recordPendingEdit). Returns null if no block is open, or the block
@@ -594,6 +594,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // not just the one field that changed, since a save always POSTs a
   // block's whole set of relevant fields at once.
   const pendingEdits = new Map();
+
+  // Exposed for article_quick_style.js's own Reset button: without this, a
+  // stale "article-header-style" entry queued earlier in the session (from
+  // touching Title/Meta/Intro's own sliders in this panel before resetting
+  // globally) would flush via save() below -- registered *after* quick
+  // style's own save handler (see article_page.html's <script> order) --
+  // and silently overwrite the header_side_padding/title_font_size/
+  // meta_font_size/intro_font_size global Reset just wrote, even though
+  // alignment resets fine (it's re-applied unconditionally by save_quick_
+  // style's own apply_alignment_to_blocks, not just whatever this panel's
+  // pendingEdits happens to send).
+  window.ifiDiscardPendingHeaderStyleEdit = () => {
+    pendingEdits.delete("article-header-style");
+  };
 
   // builds the {url, payload} save() would send for whatever block is
   // currently shown in the panel, from the panel's own current field
@@ -1841,7 +1855,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // article_header's three alignment groups aren't class-based (h1/.intro/
   // .article-meta each read their own CSS custom property, see
-  // article_layout.css) -- live preview writes straight to that property on
+  // article_page.css) -- live preview writes straight to that property on
   // the wrapper instead of swapping a class.
   const wireHeaderAlignmentGroup = (group, cssVar, datasetKey) => {
     group.querySelectorAll("button").forEach((button) => {
@@ -2272,7 +2286,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     // article_header expresses its side padding as margin (via
-    // --header-side-padding, see article_layout.css) rather than padding --
+    // --header-side-padding, see article_page.css) rather than padding --
     // its border-bottom accent underline needs to move with the indent, and
     // margin does that while padding on a width:auto block wouldn't.
     if (targetTypeInput.value === "article_header") {
@@ -2529,7 +2543,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // title/intro/meta font size, like the header's alignment groups, write
   // straight to a CSS custom property on the wrapper (h1/.intro/.article-meta
-  // each read their own, see article_layout.css/category_card.css) rather
+  // each read their own, see article_page.css/category_card.css) rather
   // than an inline font-size directly on the wrapper itself -- there's no
   // single element here that all three should apply to.
   const wireHeaderFontSizeInput = (input, valueEl, cssVar, datasetKey) => {

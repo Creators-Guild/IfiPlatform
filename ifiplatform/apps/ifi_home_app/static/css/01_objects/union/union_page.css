@@ -1,0 +1,146 @@
+/* Union detail page (union_page.html) */
+
+/* Both this and .union-header-text need flex-direction:column, not just
+this one -- see docs/claude_context/union_page.md. */
+.union-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 60rem;
+  margin: 1rem auto 1.5rem; /* dont remove top padding */
+}
+
+.union-logo {
+  width: 12rem;
+  height: 12rem;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 2px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.union-header-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.union-header-text h1 {
+  display: inline-block;
+  margin: 0;
+  font-size: 2.4rem;
+  border-bottom: 4px solid var(--accent-color, var(--color-border));
+  padding-bottom: 0.3rem;
+}
+
+.union-type-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background-color: var(--accent-color, var(--color-secondary));
+  color: var(--color-on-accent);
+}
+
+.union-layout {
+  position: relative;
+  margin-top: 1.5rem;
+}
+
+.union-main {
+  max-width: 60rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.union-main h2 {
+  margin-top: 2rem;
+}
+
+.union-main h2:first-child {
+  margin-top: 0;
+}
+
+.union-core {
+  background-color: var(--color-card-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 1rem;
+  box-shadow: 0 4px 14px var(--color-shadow);
+  padding: 1.5rem;
+  font-size: 1.3rem;
+}
+
+
+/* padding, not margin -- margin here would collapse into the h2's own margin-top instead of adding to it */
+.union-calendar-section {
+  padding-top: 1.5rem;
+}
+
+.union-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  /* below the @media breakpoint further down: normal flow above .union-main, sized to match its column width */
+  max-width: 60rem;
+  margin: 0 auto 1.5rem;
+}
+
+/* Contact + Members wrap to stacked on their own once there's no room for both -- see docs/claude_context/union_page.md */
+.union-sidebar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.union-sidebar-row > .union-info-box {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.union-bylaws-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--accent-color, var(--color-border));
+  border-radius: 999px;
+  color: var(--accent-color, var(--color-text));
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.union-bylaws-link:hover,
+.union-bylaws-link:focus-visible {
+  background-color: var(--accent-color, var(--color-border));
+  color: var(--color-on-accent, var(--color-bg));
+}
+
+/* Only above this width does .union-sidebar leave normal flow to float
+beside .union-main. */
+@media (min-width: 80rem) {
+  .union-sidebar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 16rem;
+    margin: 0;
+  }
+}
+
+/* 80rem-104rem "push zone" -- see docs/claude_context/union_page.md for
+why this range needs it and the compensating right:-18rem below. Keep
+these two 18rem values equal if either one changes. */
+@media (min-width: 80rem) and (max-width: 104rem) {
+  .union-page {
+    padding-right: 18rem;
+  }
+
+  .union-sidebar {
+    right: -18rem;
+  }
+}

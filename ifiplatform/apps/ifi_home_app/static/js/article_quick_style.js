@@ -35,6 +35,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // save that doesn't reload the page (see save()'s own comment).
   let lastSavedAlignment = alignmentGroup.dataset.value;
 
+  // Set by the Reset button (below), same "stays pending until Save"
+  // pattern as alignment above -- header_side_padding/title_font_size/
+  // meta_font_size/intro_font_size are the header's own independent
+  // fields (not read/written by anything else in this panel, see
+  // article_page.css's calc()), so Reset can't just live-preview them the
+  // way padding/font-size/background do. Cleared after a successful save.
+  let resetHeaderPending = false;
+
   // Shared by the Publish/Unpublish buttons below -- neither is a style
   // field, so they act immediately on click rather than going through the
   // dirty-tracking/save-bar flow the rest of this panel uses (there's
@@ -161,6 +169,10 @@ document.addEventListener("DOMContentLoaded", () => {
   fontSizeInput.addEventListener("input", () => {
     const multiplier = parseFloat(fontSizeInput.value) || 1;
     articlePage.dataset.fontSizeMultiplier = fontSizeInput.value;
+    // title/meta/intro read this directly via calc() (article_page.css) --
+    // unlike the body blocks below, they have no per-element data-font-size
+    // to rescale in JS, so the CSS var is the only thing driving them.
+    articlePage.style.setProperty("--content-font-size-multiplier", fontSizeInput.value);
     document.querySelectorAll("[data-font-size]").forEach((el) => {
       const raw = parseFloat(el.dataset.fontSize);
       if (!Number.isNaN(raw)) {
@@ -293,9 +305,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // do -- same trick as article_block_style.js's own reset button.
   const resetButton = document.getElementById("quick-style-reset");
   resetButton.addEventListener("click", () => {
-    if (!window.confirm("Reset the global style to its default values? Unsaved changes will be lost.")) {
+    if (
+      !window.confirm(
+        "Reset the global style to its default values? This also resets the title/meta/intro block's own side padding and font sizes. Unsaved changes will be lost."
+      )
+    ) {
       return;
     }
+
+    // header_side_padding/title_font_size/meta_font_size/intro_font_size
+    // stay pending until Save (see resetHeaderPending's own comment) --
+    // unlike padding/font-size/background above, there's no live CSS var
+    // for these to preview through here, they only take effect once
+    // save_quick_style writes them and the page reloads.
+    resetHeaderPending = true;
+    // discard any stale header edit already queued by article_block_
+    // style.js's own mini panel (see that file's own comment on this
+    // function) -- otherwise its save handler, registered after this
+    // panel's own, would flush right after this reset and overwrite it.
+    window.ifiDiscardPendingHeaderStyleEdit?.();
+    window.ifiUnsavedChanges.markDirty("quickStyle");
 
     paddingInput.value = panel.dataset.defaultPadding;
     paddingInput.dispatchEvent(new Event("input"));
@@ -371,6 +400,7 @@ document.addEventListener("DOMContentLoaded", () => {
         content_bg_color: bgColorGroup.dataset.value,
         content_bg_custom_color: bgCustomColorInput.value,
         apply_alignment_to_blocks: alignmentChanged,
+        reset_header: resetHeaderPending,
       }),
     })
       .then((response) =>
@@ -380,11 +410,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (ok) {
           statusEl.textContent = "Saved";
           window.ifiUnsavedChanges.markClean("quickStyle");
-          if (alignmentChanged) {
-            // every block's alignment class/data-alignment currently on the
-            // page is now stale (overwritten server-side) -- reload rather
-            // than trying to replicate save_quick_style's bulk update in
-            // JS, same pattern runPublishAction already uses on success.
+          if (alignmentChanged || resetHeaderPending) {
+            // every block's alignment class/data-alignment, and/or the
+            // header's own side padding/font sizes, are now stale
+            // (overwritten server-side) -- reload rather than trying to
+            // replicate save_quick_style's bulk update in JS, same pattern
+            // runPublishAction already uses on success.
             window.location.reload();
             return { ok: true };
           }

@@ -1,0 +1,76 @@
+/* Alignment modifiers for the article body's paragraph (.prose--align-*)
+and heading (.heading--align-* below) block types. Two separate class
+families, not one shared set -- headings don't share the paragraph
+block's own .prose stem, which is also the sitewide "this is rendered
+richtext" marker class (applied plain, alongside these alignment
+modifiers, wherever richtext renders across the site). */
+
+/* paragraph block: alignment */
+.prose--align-left {
+  text-align: left;
+}
+
+.prose--align-center {
+  text-align: center;
+}
+
+.prose--align-right {
+  text-align: right;
+}
+
+/* paragraph block: font size and side padding are both free-form rem
+numbers (editor picks the exact value), applied directly via inline style
+with no min/max clamp -- it's on the editor to pick a sane value for their
+screen. */
+
+/* heading blocks (h2/h3 in the article body): same alignment/font-size/
+side-padding editing as paragraph above, and font-size/side-padding are
+applied the same way (inline style, see article_body_blocks.html) -- but
+alignment needs its own class family here since headings don't share
+prose's own classes. */
+.heading--align-left {
+  text-align: left;
+}
+
+.heading--align-center {
+  text-align: center;
+}
+
+.heading--align-right {
+  text-align: right;
+}
+
+/* editor-picked font size and side padding/box padding (both free-form rem
+numbers, applied inline -- see article_body_blocks.html/article_column_
+content.html) are ignored below this breakpoint, same reasoning and
+breakpoint as article_page.css's own top-level reset: a size or padding
+picked for a wide desktop column can overflow or read badly once the
+column is this narrow. Hard-reset to each block's own default size rather
+than the article's plain 1rem, since a heading/column-title that's the
+same size as body text stops reading as a heading at all. Box background/
+border/radius (and any text color) are untouched -- only sizing. Matches
+.heading--align-* for both heading (h2-h5) and column-title (h3.column-
+title, sharing this same class family) at once, and .prose--align-* for
+paragraph (also shared by the nested column variant in article_column_
+content.html).
+
+45rem, not 480px -- matches the breakpoint every other mobile treatment on
+the site uses (event_page.css, union_card.css, article_multicolumn.css,
+article_image.css, article_page.css, ...). 480px left a gap for phones
+reporting a CSS viewport width between 480-720px, where an editor-picked
+desktop font-size/padding on a heading or paragraph never got reset at all. */
+@media (max-width: 45rem) {
+  .heading--align-left,
+  .heading--align-center,
+  .heading--align-right {
+    font-size: 1.5rem !important;
+    padding: 0 !important;
+  }
+
+  .prose--align-left,
+  .prose--align-center,
+  .prose--align-right {
+    font-size: 1rem !important;
+    padding: 0 !important;
+  }
+}

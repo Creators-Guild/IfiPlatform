@@ -1,0 +1,98 @@
+/* the panel is a plain popover anchored to .toc-open-sticky (positioned via
+   that ancestor, since position:sticky establishes a containing block for
+   absolutely-positioned descendants same as position:relative) -- no
+   backdrop, so the rest of the page stays fully visible and interactable;
+   table_of_content.js closes it on an outside click / Escape / choosing a
+   link instead. background-color/border come from ../shared/popover_base.css,
+   shared across every anchored-popover component. */
+.toc-overlay-panel {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 0.75rem);
+  z-index: 50;
+  width: min(85vw, 20rem);
+  max-width: calc(100vw - 5rem);
+  max-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 1.25rem;
+  border-left: 6px solid var(--accent-color, var(--color-border));
+  border-radius: 12px;
+  box-shadow: 0 4px 16px var(--color-shadow);
+}
+
+.toc-overlay-panel[hidden] {
+  display: none;
+}
+
+/* display/align-items/justify-content/gap come from ../shared/popover_base.css */
+.toc-overlay-header {
+  margin: 0 0 0.75rem;
+}
+
+/* margin/font-weight come from ../shared/popover_base.css */
+.toc-overlay-title {
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* flex/cursor come from ../shared/popover_base.css */
+.toc-overlay-close {
+  padding: 0.1rem 0.5rem;
+  background: none;
+  border: 1px solid var(--color-text-muted);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.toc-overlay-close:hover {
+  color: var(--color-text);
+  border-color: var(--color-text);
+}
+
+.toc-overlay-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc-overlay-list li {
+  margin: 0.3rem 0;
+}
+
+.toc-overlay-list li.toc-h3 {
+  margin-left: 1.25rem;
+}
+
+.toc-overlay-list li.toc-h4 {
+  margin-left: 2.5rem;
+}
+
+.toc-overlay-list li.toc-h5 {
+  margin-left: 3.75rem;
+}
+
+.toc-overlay-list a {
+  color: var(--color-text);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.toc-overlay-list a::before {
+  content: "→";
+  display: inline-block;
+  margin-right: 0.4rem;
+  color: var(--accent-color, var(--color-accent));
+}
+
+.toc-overlay-list a:hover {
+  color: var(--color-text-muted);
+  border-bottom-color: var(--accent-color, var(--color-text-muted));
+}

@@ -6,12 +6,13 @@ id here would be a much bigger diff for no real benefit): lets someone
 with edit rights on this exact ArticlePage (see can_edit_style in
 article_models.py's get_context()) publish/unpublish it (see the Publish
 section below) and tweak content_side_padding/content_alignment/
-content_font_size_multiplier/content_bg_enabled/content_bg_color/
-content_bg_custom_color directly on the live page (see the Style section
-below), with an instant preview for the latter (article_quick_style.js
-writes the CSS custom properties/background on .article-page, plus
-rescales every font-size-bearing block live, as you interact). Style has
-no Save button of its own -- saving happens via the global floating save
+content_font_size_multiplier (Layout section below) and content_bg_enabled/
+content_bg_color/content_bg_custom_color (Style section below) directly on
+the live page, with an instant preview for most of these
+(article_quick_style.js writes the CSS custom properties/background on
+.article-page, plus rescales every font-size-bearing block live, as you
+interact). Neither section has a Save button of its own -- saving happens
+via the global floating save
 bar (article_save_bar.html), which this panel's save() registers itself
 with (registerSaveHandler), publishing for real via
 article_views.save_quick_style -- Publish/Unpublish act immediately
@@ -29,8 +30,10 @@ is UX, not the security boundary.
       data-publish-url="{% url 'article_publish' page.id %}"
       data-unpublish-url="{% url 'article_unpublish' page.id %}"
       data-sync-mirrored-url="{% url 'page_sync_mirrored' page.id %}"
-      data-default-padding="0" data-default-alignment="left" data-default-font-size="1"
-      data-default-bg-color="bg-light">
+      data-default-padding="{{ quick_style_defaults.padding|unlocalize }}" data-default-alignment="{{ quick_style_defaults.alignment }}" data-default-font-size="{{ quick_style_defaults.font_size|unlocalize }}"
+      data-default-bg-color="{{ quick_style_defaults.bg_color }}"
+      data-default-header-padding="{{ quick_style_defaults.header_padding|unlocalize }}" data-default-title-font-size="{{ quick_style_defaults.title_font_size|unlocalize }}"
+      data-default-meta-font-size="{{ quick_style_defaults.meta_font_size|unlocalize }}" data-default-intro-font-size="{{ quick_style_defaults.intro_font_size|unlocalize }}">
     {% csrf_token %}
     <div class="quick-style-panel-header">
         <p class="quick-style-panel-title">{% trans "Global editor (editors only)" %}</p>
@@ -40,12 +43,12 @@ is UX, not the security boundary.
 
     <div class="quick-style-panel-body" id="quick-style-panel-body">
         {% comment %}
-        Two collapsible sections, same markup/mechanism as the block-style
+        Three collapsible sections, same markup/mechanism as the block-style
         mini panel's own (block-style-box-collapse-toggle/block-style-box-
         fields, generic [data-controls] wiring reused as-is in
         article_quick_style.js -- see that file's own comment) rather than
         duplicating that CSS/JS here. Publish starts expanded (the more
-        likely reason you opened this panel at all); Style starts
+        likely reason you opened this panel at all); Layout/Style start
         collapsed, matching the block-style panel's own default-closed
         convention.
         {% endcomment %}
@@ -100,11 +103,18 @@ is UX, not the security boundary.
             </div>
         </div>
 
+        {% comment %}
+        Side padding/alignment/font-size multiplier -- positioning/sizing
+        concerns, same "Layout" naming as the per-block mini panel's own
+        Layout section (article_block_style_mini_panel.html), grouped
+        separately from Style's own background color below. Starts
+        collapsed, matching Style's existing default-closed convention.
+        {% endcomment %}
         <div class="block-style-field block-style-caption-header">
-            <p class="block-style-box-subsection-title">{% trans "Style" %}</p>
-            <button type="button" class="block-style-box-collapse-toggle" data-controls="quick-style-style-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse style options' %}">&#9662;</button>
+            <p class="block-style-box-subsection-title">{% trans "Layout" %}</p>
+            <button type="button" class="block-style-box-collapse-toggle" data-controls="quick-style-layout-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse layout options' %}">&#9662;</button>
         </div>
-        <div class="block-style-box-fields" id="quick-style-style-fields" hidden>
+        <div class="block-style-box-fields" id="quick-style-layout-fields" hidden>
             <label class="quick-style-field">
                 <span>{% trans "Side padding" %} (<span id="quick-style-padding-value">{{ page.style.content_side_padding|unlocalize }}</span>rem)</span>
                 <input type="range" id="quick-style-padding" min="0" max="20" step="0.25" value="{{ page.style.content_side_padding|unlocalize }}">
@@ -133,7 +143,13 @@ is UX, not the security boundary.
                 <span>{% trans "Font size multiplier" %} (&times;<span id="quick-style-font-size-value">{{ page.style.content_font_size_multiplier|unlocalize }}</span>)</span>
                 <input type="range" id="quick-style-font-size" min="0.5" max="2" step="0.05" value="{{ page.style.content_font_size_multiplier|unlocalize }}">
             </label>
+        </div>
 
+        <div class="block-style-field block-style-caption-header">
+            <p class="block-style-box-subsection-title">{% trans "Style" %}</p>
+            <button type="button" class="block-style-box-collapse-toggle" data-controls="quick-style-style-fields" aria-expanded="false" aria-label="{% trans 'Expand or collapse style options' %}">&#9662;</button>
+        </div>
+        <div class="block-style-box-fields" id="quick-style-style-fields" hidden>
             {% comment %}
             Reuses the .color-swatch/.color-swatch-custom-group/.color-swatch-
             picker classes from article_block_style.css (already loaded
@@ -164,11 +180,19 @@ is UX, not the security boundary.
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="quick-style-actions">
-                <button type="button" id="quick-style-reset" class="quick-style-reset">{% trans "Reset to default" %}</button>
-                <span class="quick-style-status" id="quick-style-status" aria-live="polite"></span>
-            </div>
+        {% comment %}
+        Outside all three collapsible sections above (Publish/Layout/Style)
+        rather than tucked inside one of them -- resets Publish-adjacent
+        nothing, sure, but it resets every Layout/Style field regardless of
+        whether either section happens to be expanded right now, so it
+        needs to stay visible either way rather than requiring one to be
+        open first just to find it.
+        {% endcomment %}
+        <div class="quick-style-actions">
+            <button type="button" id="quick-style-reset" class="quick-style-reset">{% trans "Reset all to default" %}</button>
+            <span class="quick-style-status" id="quick-style-status" aria-live="polite"></span>
         </div>
     </div>
 </form>

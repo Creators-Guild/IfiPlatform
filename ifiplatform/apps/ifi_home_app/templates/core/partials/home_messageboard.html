@@ -1,7 +1,9 @@
 {% load i18n static wagtailcore_tags %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/styles/neon_style/02_components/messageboard.css' %}">
+  <link rel="stylesheet" href="{% static 'css/02_components/messageboard/messageboard_slideshow.css' %}">
+  <link rel="stylesheet" href="{% static 'css/02_components/shared/modal_base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/02_components/messageboard/messageboard_modal.css' %}">
 {% endblock %}
 
 {% if board_messages %}
