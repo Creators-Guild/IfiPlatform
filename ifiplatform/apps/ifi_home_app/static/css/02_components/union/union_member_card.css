@@ -22,15 +22,13 @@
 
 /* Open Positions cards carry more text (description shown inline, not
    behind an icon -- see union_position_card.html), so they get more room
-   than a plain Sitting Members card. */
+   than a plain Sitting Members card. Wider still than the original 16rem --
+   responsibilities can run long, and a narrower card just wraps that text
+   onto more lines, making the card taller instead of easier to read. */
 .union-member-card--open {
-	flex-basis: 16rem;
+	flex-basis: 18rem;
 	text-align: left;
 	align-items: flex-start;
-}
-
-.union-member-card--open .union-member-role {
-	font-size: 1.1rem;
 }
 
 .union-member-card h3 {
@@ -97,32 +95,56 @@
 }
 
 /* One <li> per member.responsibilities item (union_position_card.html) --
-plain text, not richtext, so no global `p { font-size }` override to work
-around here (see docs/claude_context/article_unions.md for why description
-was replaced with this). Shared by both the inline Open Positions card and
-the Sitting Members info popover. */
+richtext (bold/italic only, see article/unions.py), so {{ item }} renders
+as a <p> inside each <li>. Shared by both the inline Open Positions card
+and the Sitting Members info popover. */
 .union-position-responsibilities {
 	margin-top: 0.25rem;
 	width: 100%;
 }
 
+/* the global `p { font-size: 1.05rem; }` rule (elements.css) sets that
+directly on the tag itself, which always wins over inheriting this <li>'s
+own font-size regardless of specificity (a property set directly on an
+element is never overridden by inheritance) -- same fix as .prose p in
+article_alignment.css. margin:0 too, since a bare <p> otherwise carries
+the browser's own default paragraph margin, which here would just add
+uneven space inside the <li> on top of the li+li divider/gap below.
+display:inline on top of both -- list-style-position:inside (elements.css)
+puts the bullet as the first inline box of the li's content, but a <p> is
+block-level by default, so the marker was rendering on its own line above
+it instead of in front of the text. Safe to force inline here specifically
+(unlike a general <p>) since this richtext only allows bold/italic, so a
+<p> in this one context never wraps more than a single line of inline
+content anyway. */
+.union-position-responsibilities p {
+	font-size: inherit;
+	margin: 0;
+	display: inline;
+}
+
 /* h3 on the Open Positions card, h4 in the Sitting Members info popup --
 same visual treatment either way, just whichever heading level is
 correct for that context's own hierarchy (see union_position_card.html's
-own comment on the h3/h4 split). */
+own comment on the h3/h4 split). No font-size here -- h3 only ever
+appears under .union-member-card--open, h4 only ever under
+.position-info-panel, and both of those contexts always set their own
+more-specific font-size override below (this file) / in union_position_
+info.css, so a size set here would never actually render. */
 .union-position-responsibilities h3,
 .union-position-responsibilities h4 {
 	margin: 0;
-	font-size: 0.8rem;
 	font-weight: bold;
 }
 
 /* list-style-position:inside comes from the sitewide ul/ol reset
 (elements.css) -- no extra padding-left needed, the marker already sits
-flush with the text instead of hanging outside the box. */
+flush with the text instead of hanging outside the box. No font-size here,
+same reasoning as the heading rule above -- this ul only ever renders
+inside .union-member-card--open or .position-info-panel, both of which
+always override it. */
 .union-position-responsibilities ul {
 	margin: 0.3rem 0 0;
-	font-size: 0.8rem;
 	padding-left: 0;
 	list-style-position: inside;
 }
@@ -132,6 +154,25 @@ flush with the text instead of hanging outside the box. */
 	padding-left: 0;
 	margin-left: 0;
 	list-style-position: inside;
+}
+
+/* Same bigger-text/more-breathing-room/divider-line treatment as the
+Sitting Members info popover (union_position_info.css's own
+.position-info-panel .union-position-responsibilities overrides) --
+mirrored here for the Open Positions card's own reading context. */
+.union-member-card--open .union-position-responsibilities h3 {
+	font-size: 1rem;
+}
+
+.union-member-card--open .union-position-responsibilities ul {
+	font-size: 1.05rem;
+	line-height: 1.3;
+}
+
+.union-member-card--open .union-position-responsibilities li + li {
+	margin-top: 0.6rem;
+	padding-top: 0.6rem;
+	border-top: 1px solid var(--color-border);
 }
 
 .union-position-held-by {

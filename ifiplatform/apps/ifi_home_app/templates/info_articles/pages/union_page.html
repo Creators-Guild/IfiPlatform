@@ -123,34 +123,59 @@
                         {% endif %}
                     {% endif %}
                 </div>
+            </article>
 
-                {% if page.filled_positions %}
+            {% comment %}
+            Own section (not nested inside .union-main above) so it can use
+            .union-main--wide's own, slightly wider max-width -- a child
+            can't render wider than its own parent's box, so widening these
+            grids beyond union-core's 60rem needs them out of that box
+            entirely, not just a wider class on the grid itself. Same
+            "own section, own width, centered independently against
+            .union-layout" pattern .union-header already uses. See
+            union_page.css's own comment on .union-main--wide for why 68rem.
+            {% endcomment %}
+            {% if page.filled_positions %}
+                <section class="union-main union-main--wide">
                     <h2>{% trans "Sitting Members" %}</h2>
                     <div class="union-member-grid">
                         {% for block in page.filled_positions %}
                             {% include "info_articles/partials/union_position_card.html" with block=block show_description_inline=False %}
                         {% endfor %}
                     </div>
-                {% endif %}
+                </section>
+            {% endif %}
 
-                {% if page.open_positions %}
+            {% if page.open_positions %}
+                <section class="union-main union-main--wide">
                     <h2>{% trans "Open Positions" %}</h2>
                     <div class="union-member-grid">
                         {% for block in page.open_positions %}
                             {% include "info_articles/partials/union_position_card.html" with block=block show_description_inline=True %}
                         {% endfor %}
                     </div>
-                {% endif %}
+                </section>
+            {% endif %}
 
-                {% if union_calendar %}
-                    {% include "info_articles/partials/union_calendar_panel.html" %}
-                {% endif %}
+            {% if union_calendar or upcoming_event_month_groups %}
+                {% comment %}
+                Guarded on the whole section, not just left empty when
+                neither renders -- .union-main + .union-main's margin-top
+                (union_page.css) would otherwise still apply to an empty,
+                zero-content article, leaving stray blank space at the
+                bottom of the page.
+                {% endcomment %}
+                <article class="union-main">
+                    {% if union_calendar %}
+                        {% include "info_articles/partials/union_calendar_panel.html" %}
+                    {% endif %}
 
-                {% if upcoming_event_month_groups %}
-                    <h2>{% trans "Upcoming Events" %}</h2>
-                    {% include "events/partials/event_month_groups.html" with groups=upcoming_event_month_groups %}
-                {% endif %}
-            </article>
+                    {% if upcoming_event_month_groups %}
+                        <h2>{% trans "Upcoming Events" %}</h2>
+                        {% include "events/partials/event_month_groups.html" with groups=upcoming_event_month_groups %}
+                    {% endif %}
+                </article>
+            {% endif %}
         </div>
     </div>
     <script src="{% static 'js/union_calendar.js' %}" defer></script>
