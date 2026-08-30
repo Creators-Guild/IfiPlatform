@@ -49,6 +49,30 @@
   display: none;
 }
 
+/* Mobile: same problem as the nav dropdown (dropdownmenu.css) -- anchored
+to a small icon whose position varies per card in the grid, so the panel
+can run into the sidemenu or off the edge of the screen. The icon itself
+(.position-info-widget) stays exactly where it is; only the panel escapes
+to a fixed, viewport-relative spot instead of growing from the icon.
+`top` is set inline by union_position_info.js -- just under the icon,
+pushed back up if that would run it off the bottom of the screen. */
+@media (max-width: 45rem) {
+  .position-info-panel {
+    position: fixed;
+    /* 60px clears the sidemenu's collapsed rail at any width in this
+       range (60px desktop-collapsed / 56px mobile-collapsed, see
+       sidemenu.css), plus a small gutter matching the page's own mobile
+       side padding (home_layout.css). */
+    left: calc(60px + 0.75rem);
+    right: 0.75rem;
+    margin-top: 0;
+    width: auto;
+    max-width: none;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+}
+
 /* display/align-items/justify-content/gap come from ../shared/popover_base.css */
 .position-info-header {
   margin: 0 0 0.5rem;

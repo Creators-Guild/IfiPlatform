@@ -7,16 +7,40 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // Mobile only (union_position_info.css switches the panel to
+    // position:fixed there) -- places the panel just under the icon, same
+    // gap as dropdown_menu.js's profile-dropdown positioning, but pushed
+    // back up if that would run it off the bottom of the screen.
+    // offsetHeight needs the panel already unhidden to measure.
+    const positionPanelForMobile = () => {
+      if (!window.matchMedia("(max-width: 45rem)").matches) {
+        panel.style.top = "";
+        return;
+      }
+      const rect = openButton.getBoundingClientRect();
+      const margin = 8;
+      const maxTop = Math.max(window.innerHeight - panel.offsetHeight - margin, margin);
+      const top = Math.min(rect.bottom + margin, maxTop);
+      panel.style.top = `${top}px`;
+    };
+
     const openPanel = () => {
       panel.hidden = false;
       openButton.setAttribute("aria-expanded", "true");
       closeButton.focus();
+      positionPanelForMobile();
     };
 
     const closePanel = () => {
       panel.hidden = true;
       openButton.setAttribute("aria-expanded", "false");
     };
+
+    window.addEventListener("resize", () => {
+      if (!panel.hidden) {
+        positionPanelForMobile();
+      }
+    });
 
     openButton.addEventListener("click", (event) => {
       event.stopPropagation();

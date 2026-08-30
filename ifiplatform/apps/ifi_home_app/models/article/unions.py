@@ -181,7 +181,7 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
                         (
                             "responsibilities",
                             blocks.ListBlock(
-                                blocks.RichTextBlock(features=["bold", "italic"]),
+                                blocks.RichTextBlock(features=["bold", "italic"], required=False),
                                 required=False,
                                 help_text="One responsibility per item -- each renders as its own stacked box under a \"Responsibilities\" heading. Bold/italic supported, no links/lists.",
                             ),
