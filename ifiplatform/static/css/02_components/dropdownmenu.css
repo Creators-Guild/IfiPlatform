@@ -18,6 +18,9 @@
 
   min-width: 98%;
   width: max-content;      /* or just let auto work; see note below */
+  /* caps a long union/category name to a sane width; each .drop-content a's
+     own text-overflow below then ellipsizes it instead of overflowing */
+  max-width: min(22rem, 80vw);
   white-space: nowrap; /* optional: prevent items from wrapping */
 
   transition:
@@ -32,6 +35,8 @@
   text-decoration: none;
   color: var(--color-text);
   border-bottom: 1px solid;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dropdown-menu .drop-content a:last-child {

@@ -3,7 +3,7 @@ Fadderuke-hosting union roster used by events.py's sub-event seeding."""
 
 from ifi_home_app.models.article_models import StudentUnionCategoryPage, UnionPage
 
-from .constants import FADDERUKE_UNION_PEOPLY_IDS, FADDERUKE_UNION_SPECS
+from .constants import FADDERUKE_UNION_PEOPLY_IDS, FADDERUKE_UNION_SPECS, LONG_UNION_NAME
 
 
 class UnionSeedMixin:
@@ -13,7 +13,12 @@ class UnionSeedMixin:
         )
         self._translate_page(union_category, en_locale)
 
-        for name in ["Testforening 1", "Testforening 2"]:
+        for name in ["Testforening 1", "Testforening 2", LONG_UNION_NAME]:
+            # Only the long-name union needs show_in_menu -- it exists
+            # specifically to test the home nav dropdown (see LONG_UNION_NAME's
+            # own comment in constants.py); Testforening 1/2 don't need to
+            # clutter that menu.
+            extra_kwargs = {"show_in_menu": True} if name == LONG_UNION_NAME else {}
             union = self._get_or_create_page(
                 union_category, UnionPage, name, nb_locale,
                 email="testforening@example.com",
@@ -29,6 +34,7 @@ class UnionSeedMixin:
                     }),
                 ],
                 member_count_intern=0,
+                **extra_kwargs,
                 sitting_members=[
                     ("member", {
                         "name": "Test Testesen",
