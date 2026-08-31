@@ -37,14 +37,19 @@
   border-bottom: 1px solid;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .dropdown-menu .drop-content a:last-child {
   border-bottom: none;
 }
 
+/* opacity, not a color swap -- lets whatever's behind (the panel's own
+background-color) show through slightly instead of picking one fixed
+muted color. */
 .dropdown-menu .drop-content a:hover {
-  color: var(--color-text-muted);
+  opacity: 0.7;
+  transform: translateY(-1px);
 }
 
 .dropdown-menu.is-open .drop-content {
