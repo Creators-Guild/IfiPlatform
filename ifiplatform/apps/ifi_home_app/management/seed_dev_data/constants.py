@@ -19,6 +19,15 @@ CATEGORY_SPECS = [
     ("IfiPlattform", "pink"),
 ]
 
+# Deliberately long, wraps-onto-multiple-words name -- exercises the home
+# nav's Student Unions dropdown at a length real union names can plausibly
+# reach, to test dropdownmenu.css's max-width/wrapping on narrow screens.
+# show_in_menu=True (see _seed_student_unions) so it actually appears there.
+LONG_UNION_NAME = (
+    "Den Ekstremt Lange Studentforeningen for Informatikkstudenter med "
+    "Spesiell Interesse for Kunstig Intelligens og Maskinlæring"
+)
+
 NEWS_ARTICLE_TITLES = [
     "Nyhetsartikkel 1",
     "Nyhetsartikkel 2",
@@ -233,6 +242,11 @@ TRANSLATIONS = {
     "Studentforeninger": "Student Unions",
     "Testforening 1": "Test Union 1",
     "Testforening 2": "Test Union 2",
+    "Den Ekstremt Lange Studentforeningen for Informatikkstudenter med "
+    "Spesiell Interesse for Kunstig Intelligens og Maskinlæring": (
+        "The Extremely Long Student Union for Computer Science Students "
+        "with a Special Interest in Artificial Intelligence and Machine Learning"
+    ),
     "Siste nytt": "Latest News",
     "Nyhetsartikkel 1": "News Article 1",
     "Nyhetsartikkel 2": "News Article 2",

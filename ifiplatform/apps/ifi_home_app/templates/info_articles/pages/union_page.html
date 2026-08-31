@@ -104,23 +104,29 @@
             <article class="union-main">
                 <div class="union-core">
                     {% if page.purpose %}
-                    <h2>{% trans "Purpose" %}</h2>
-                    <div class="prose">{{ page.purpose|richtext }}</div>
+                    <details class="union-section" open>
+                        <summary class="union-section-summary"><h2>{% trans "Purpose" %}</h2></summary>
+                        <div class="prose">{{ page.purpose|richtext }}</div>
+                    </details>
                     {% endif %}
 
                     {% if page.activities %}
-                        <h2>{% trans "Activities" %}</h2>
-                        <div class="prose">{{ page.activities|richtext }}</div>
+                        <details class="union-section" open>
+                            <summary class="union-section-summary"><h2>{% trans "Activities" %}</h2></summary>
+                            <div class="prose">{{ page.activities|richtext }}</div>
+                        </details>
                     {% endif %}
 
                     {% if page.vedtekter or page.vedtekter_url %}
-                        <h2>{% trans "Bylaws" %}</h2>
-                        {% if page.vedtekter %}
-                            <div class="prose">{{ page.vedtekter|richtext }}</div>
-                        {% endif %}
-                        {% if page.vedtekter_url %}
-                            <a class="union-bylaws-link" href="{{ page.vedtekter_url }}" target="_blank" rel="noopener noreferrer">{% trans "Full bylaws" %} <span aria-hidden="true">&rarr;</span></a>
-                        {% endif %}
+                        <details class="union-section" open>
+                            <summary class="union-section-summary"><h2>{% trans "Bylaws" %}</h2></summary>
+                            {% if page.vedtekter %}
+                                <div class="prose">{{ page.vedtekter|richtext }}</div>
+                            {% endif %}
+                            {% if page.vedtekter_url %}
+                                <a class="union-bylaws-link" href="{{ page.vedtekter_url }}" target="_blank" rel="noopener noreferrer">{% trans "Full bylaws" %} <span aria-hidden="true">&rarr;</span></a>
+                            {% endif %}
+                        </details>
                     {% endif %}
                 </div>
             </article>
@@ -137,23 +143,27 @@
             {% endcomment %}
             {% if page.filled_positions %}
                 <section class="union-main union-main--wide">
-                    <h2>{% trans "Sitting Members" %}</h2>
-                    <div class="union-member-grid">
-                        {% for block in page.filled_positions %}
-                            {% include "info_articles/partials/union_position_card.html" with block=block show_description_inline=False %}
-                        {% endfor %}
-                    </div>
+                    <details class="union-section" open>
+                        <summary class="union-section-summary"><h2>{% trans "Sitting Members" %}</h2></summary>
+                        <div class="union-member-grid">
+                            {% for block in page.filled_positions %}
+                                {% include "info_articles/partials/union_position_card.html" with block=block show_description_inline=False %}
+                            {% endfor %}
+                        </div>
+                    </details>
                 </section>
             {% endif %}
 
             {% if page.open_positions %}
                 <section class="union-main union-main--wide">
-                    <h2>{% trans "Open Positions" %}</h2>
-                    <div class="union-member-grid">
-                        {% for block in page.open_positions %}
-                            {% include "info_articles/partials/union_position_card.html" with block=block show_description_inline=True %}
-                        {% endfor %}
-                    </div>
+                    <details class="union-section" open>
+                        <summary class="union-section-summary"><h2>{% trans "Open Positions" %}</h2></summary>
+                        <div class="union-member-grid">
+                            {% for block in page.open_positions %}
+                                {% include "info_articles/partials/union_position_card.html" with block=block show_description_inline=True %}
+                            {% endfor %}
+                        </div>
+                    </details>
                 </section>
             {% endif %}
 
@@ -180,4 +190,5 @@
     </div>
     <script src="{% static 'js/union_calendar.js' %}" defer></script>
     <script src="{% static 'js/union_position_info.js' %}" defer></script>
+    <script src="{% static 'js/union_core_sections.js' %}" defer></script>
 {% endblock maincontent %}
