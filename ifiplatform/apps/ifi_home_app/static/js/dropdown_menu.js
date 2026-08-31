@@ -100,12 +100,19 @@ if (!window.__ifiTapToggleMenusInit) {
     // just read the date/tags was revealing the extra tags too easily.
     setupTapToggle(".home-eventsbox-unions", "button.home-eventsbox-unions-toggle");
 
+    // Sidebar submenus: always click-to-open/click-to-close, on every
+    // device -- no more CSS :hover reveal for these specifically (see
+    // sidemenu.css), even with a mouse. Kept unconditional (unlike the rail
+    // itself below, and the nav dropdown/eventsbox-subevents further down,
+    // which all keep their hover behavior on hover-capable devices) since
+    // this was specifically asked to stop opening on hover.
+    setupTapToggle(".sidemenu-item", "a.sidemenu-option");
+
     if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
       return; // devices with real mouse hover keep the existing CSS :hover behavior
     }
 
     setupTapToggle(".dropdown-menu:not(.profile-dropdown)", "button.link");
-    setupTapToggle(".sidemenu-item", "a.sidemenu-option");
     // Homepage events box: an event's highlighted sub-events (home_
     // eventsbox.html/.css), same in-flow expand-in-place pattern as
     // .sidemenu-item above rather than a floating .dropdown-menu -- it
@@ -119,7 +126,9 @@ if (!window.__ifiTapToggleMenusInit) {
     // The sidebar rail itself: tapping .sidemenu-header expands it (this is
     // what makes the submenus above visible/reachable at all on touch --
     // .sidemenu-item is opacity:0 until the rail is expanded), and either
-    // .sidemenu-close or tapping outside collapses it back.
+    // .sidemenu-close or tapping outside collapses it back. Only reached on
+    // touch (the hover-capable return above already sent desktop away) --
+    // there the rail keeps expanding on CSS :hover instead (sidemenu.css).
     document.querySelectorAll(".sidemenu").forEach((sidemenu) => {
       const header = sidemenu.querySelector(".sidemenu-header");
       const closeButton = sidemenu.querySelector(".sidemenu-close");

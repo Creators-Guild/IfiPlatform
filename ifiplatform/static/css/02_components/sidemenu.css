@@ -63,6 +63,18 @@ clipped area instead of the true collapsed width. */
     color: var(--color-text);
     text-decoration: none;
     font-size: large;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* same hover treatment as the home nav's dropdown links (.dropdown-menu
+.drop-content a:hover, dropdownmenu.css) -- covers both .sidemenu-option
+(the item's own top-level label) and every link inside its .drop-content,
+since both are plain <a> descendants of .sidemenu-item. Opacity, not a
+color swap -- lets whatever's behind (the rail's own background-color)
+show through slightly instead of picking one fixed muted color. */
+.sidemenu-item a:hover {
+    opacity: 0.7;
+    transform: translateY(-1px);
 }
 
 .sidemenu-header {
@@ -143,7 +155,8 @@ stretches to the full rail height the user sees (background-color lives
 there too, in home_layout.css). Hovering .sidemenu directly meant moving the
 cursor into the lower part of the visibly-colored rail -- still inside
 .sidemenu_container, but below the short .sidemenu box -- fell outside the
-real hover target and snapped the rail shut. */
+real hover target and snapped the rail shut. Submenus (.sidemenu-item) stay
+click-only even here -- only the rail itself opens on hover. */
 @media (hover: hover) and (pointer: fine) {
     .sidemenu_container:hover .sidemenu {
         width: 250px;
@@ -212,24 +225,12 @@ real hover target and snapped the rail shut. */
     padding: 0.25rem 0.75rem;
 }
 
-/* is-open is the JS-driven equivalent of :hover below, for touch devices --
-see dropdown_menu.js. Kept unscoped (unlike :hover) since it's only ever
-added by JS, which already gates itself on hover-capability, so there's no
-risk of it firing on a hover device. */
+/* is-open is JS-driven, on every device -- see dropdown_menu.js's
+unconditional setupTapToggle(".sidemenu-item", ...). No more CSS :hover
+reveal here at all. */
 .sidemenu-item.is-open .drop-content {
     max-height: 500px;               /* big enough to fit children */
     opacity: 1;
-}
-
-/* :hover only, not touch -- scoped so a tap's simulated/sticky :hover state
-(a well-known mobile quirk, since hover has no real meaning on touch) can't
-keep the submenu expanded after dropdown_menu.js has already toggled
-.is-open off. Touch devices rely purely on the JS-driven class above. */
-@media (hover: hover) and (pointer: fine) {
-    .sidemenu-item:hover .drop-content {
-        max-height: 500px;
-        opacity: 1;
-    }
 }
 
 /* same caret pattern as the top navbar's .dropdown-menu (see
@@ -253,25 +254,11 @@ the navbar's .link::after. */
     transform: rotate(180deg);
 }
 
-@media (hover: hover) and (pointer: fine) {
-    .sidemenu-item:hover .sidemenu-option::after {
-        transform: rotate(180deg);
-    }
-}
-
-/* the top-level link still doubles as a direct navigation link for mouse
-users (hover reveals the dropdown underneath it), so "All" would be
-redundant there. On touch it's the only way in, since the top-level tap is
-now toggle-only -- see dropdown_menu.js. Keep this condition the mirror of
-the JS's hover-capability check. */
+/* the top-level link is toggle-only on every device (see dropdown_menu.js's
+unconditional setupTapToggle(".sidemenu-item", ...)) -- "All" is always the
+way to actually navigate to it, not just on touch. */
 .sidemenu-item .drop-option--all {
-    display: none;
-}
-
-@media not all and (hover: hover) and (pointer: fine) {
-    .sidemenu-item .drop-option--all {
-        display: block;
-    }
+    display: block;
 }
 
 /* phone-sized screens: the default font-size/margins are tuned for a

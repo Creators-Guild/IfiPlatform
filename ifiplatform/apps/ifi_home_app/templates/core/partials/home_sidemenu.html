@@ -76,19 +76,21 @@
         </div>
     </div>
 
+        {% get_help_category as help_category %}
+        {% get_help_subcategories as help_subcategories %}
         <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="">{% trans "hELP" %}</a>
+        <!-- "hELP"/"hJELP" deliberately, only in this sidemenu label -- not
+        the same string as any generic "Help" text elsewhere on the site. -->
+        <a class="sidemenu-option" href="{% pageurl help_category %}">{% trans "hELP" %}</a>
         <div class="drop-content">
-            <a class="drop-option drop-option--all" href="">{% trans "All" %}</a>
-            <a href="">
-                {% trans "Ifi Platform Support" %}
-            </a>
-            <a href="">
-                {% trans "School Reception" %}
-            </a>
-            <a href="">
-                {% trans "Vaktsentralen" %}
-            </a>
+            <a class="drop-option drop-option--all" href="{% pageurl help_category %}">{% trans "All" %}</a>
+            {% for subcategory in help_subcategories %}
+                <a class="drop-option" href="{% pageurl subcategory %}">
+                    {{ subcategory.title }}
+                </a>
+            {% empty %}
+                <a class="drop-option-empty" href="">{% trans "No categories yet" %}</a>
+            {% endfor %}
         </div>
     </div>
 </div>
