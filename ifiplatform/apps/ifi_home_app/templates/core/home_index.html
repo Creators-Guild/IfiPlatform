@@ -3,6 +3,7 @@
 
 {% block title %}{% trans "Ifi Home" %}{% endblock %}
 
+
 <div class = "home-layout">
     {% block sidemenu %}
         {% include "core/partials/home_sidemenu.html" %}
@@ -11,6 +12,14 @@
         <div class="top">
             {% include "core/partials/home_navbar.html" %}
         </div>
+        <nav id="home-shortcuts">
+            <a href="">Info</a>
+            <a href="">News</a>
+            <a href="">Jobs</a>
+            <a href="">Student Unions</a>
+            <a href="">Events</a>
+            <a href="">Student Tools</a>
+        </nav>
         <div class="content-row">
             <div class="content-main">
                 {% include "core/partials/home_messageboard.html" %}
