@@ -17,6 +17,7 @@ jobs:
       TRELLO_LABEL_FEATURE: ${{ vars.TRELLO_LABEL_FEATURE }} # label ID for "Feature" type
       TRELLO_LABEL_TASK: ${{ vars.TRELLO_LABEL_TASK }}       # label ID for "Task" type
       ISSUE_TYPE: ${{ github.event.issue.type.name }}
+      ISSUE_PARENT_URL: ${{ github.event.issue.parent_issue_url }}
       ISSUE_TITLE: ${{ github.event.issue.title }}
       ISSUE_BODY: ${{ github.event.issue.body }}
       ISSUE_URL: ${{ github.event.issue.html_url }}
@@ -33,8 +34,42 @@ jobs:
           esac
           echo "type_label=${TYPE_LABEL}" >> "$GITHUB_OUTPUT"
 
+          if [ -n "${ISSUE_PARENT_URL}" ]; then
+            echo "This issue is a sub-issue (parent: ${ISSUE_PARENT_URL}). Skipping Trello sync."
+            echo "is_sub_issue=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_sub_issue=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Attach sub-issue to parent card (issue opened)
+        if: github.event.action == 'opened' && steps.resolve_label.outputs.is_sub_issue == 'true'
+        run: |
+          # Find the parent issue's card by searching for the parent issue's URL
+          SEARCH_RESULT=$(curl -s -G "https://api.trello.com/1/search" \
+            --data-urlencode "query=${ISSUE_PARENT_URL}" \
+            --data-urlencode "modelTypes=cards" \
+            --data-urlencode "card_fields=id,name" \
+            --data-urlencode "cards_limit=1" \
+            --data-urlencode "key=${TRELLO_KEY}" \
+            --data-urlencode "token=${TRELLO_TOKEN}")
+
+          CARD_ID=$(echo "$SEARCH_RESULT" | jq -r '.cards[0].id // empty')
+
+          if [ -z "$CARD_ID" ]; then
+            echo "No Trello card found for parent issue ${ISSUE_PARENT_URL}. Skipping attachment."
+            exit 0
+          fi
+
+          echo "Found parent card ${CARD_ID}, attaching sub-issue link."
+
+          curl -s -X POST "https://api.trello.com/1/cards/${CARD_ID}/attachments" \
+            --data-urlencode "url=${ISSUE_URL}" \
+            --data-urlencode "name=Sub-issue: ${ISSUE_TITLE}" \
+            --data-urlencode "key=${TRELLO_KEY}" \
+            --data-urlencode "token=${TRELLO_TOKEN}"
+
       - name: Create Trello card (issue opened)
-        if: github.event.action == 'opened'
+        if: github.event.action == 'opened' && steps.resolve_label.outputs.is_sub_issue == 'false'
         env:
           TYPE_LABEL: ${{ steps.resolve_label.outputs.type_label }}
         run: |
@@ -54,7 +89,7 @@ jobs:
             --data-urlencode "token=${TRELLO_TOKEN}"
 
       - name: Update Trello card (issue edited)
-        if: github.event.action == 'edited'
+        if: github.event.action == 'edited' && steps.resolve_label.outputs.is_sub_issue == 'false'
         env:
           TYPE_LABEL: ${{ steps.resolve_label.outputs.type_label }}
         run: |
@@ -105,7 +140,7 @@ jobs:
           fi
 
       - name: Find and move Trello card (issue closed)
-        if: github.event.action == 'closed'
+        if: github.event.action == 'closed' && steps.resolve_label.outputs.is_sub_issue == 'false'
         env:
           TYPE_LABEL: ${{ steps.resolve_label.outputs.type_label }}
         run: |
