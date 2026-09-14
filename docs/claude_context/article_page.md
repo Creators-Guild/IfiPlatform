@@ -1,6 +1,6 @@
 # article_page.css — design history
 
-Covers `ifi_home_app/static/css/01_objects/article/article_page.css`.
+Covers `ifi_home_app/static/css/05_objects/article/article_page.css`.
 
 ## Why title/intro/meta each got their own alignment control
 

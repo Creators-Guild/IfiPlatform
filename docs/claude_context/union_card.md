@@ -1,6 +1,6 @@
 # union_card.css — design history
 
-Covers `ifi_home_app/static/css/02_components/cards/union_card.css`.
+Covers `ifi_home_app/static/css/06_components/cards/union_card.css`.
 
 ## Why the mobile breakpoint is 45rem, not 480px
 

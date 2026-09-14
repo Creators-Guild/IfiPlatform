@@ -3,10 +3,9 @@
 
 {% block title %}{% trans "Ifi Home" %}{% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css/01_objects/home/home_layout.css' %}">
-    <link rel="stylesheet" href="{% static 'css/01_objects/home/home_page.css' %}">
-{% endblock extra_head %}
+{% block app_css %}
+    {% include "css_links/base.html" %}
+{% endblock app_css %}
 
 {% block content %}
     <div class = "home-layout">

@@ -1,6 +1,10 @@
 {% extends "home_base.html" %}
 {% load i18n static %}
 
+{% block section_css %}
+    {% include "css_links/home_index.html" %}
+{% endblock section_css %}
+
 {% block title %}{% trans "Ifi Home" %}{% endblock %}
 
 <div class = "home-layout">

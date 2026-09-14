@@ -1,6 +1,6 @@
 # event_calendar.css — design rationale
 
-Covers `ifi_home_app/static/css/02_components/event/event_calendar.css` —
+Covers `ifi_home_app/static/css/06_components/event/event_calendar.css` —
 the week/day calendar grid shared by a single event page's sub-events
 (`event_page.html`) and a union page's own weekly calendar
 (`union_page.html`/`union_calendar_panel.html`, via `union_calendar.js`).

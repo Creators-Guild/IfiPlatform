@@ -3,28 +3,15 @@
 
 {% block title %}{% trans "Information Articles" %}{% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css/01_objects/home/home_layout.css' %}">
-    <link rel="stylesheet" href="{% static 'css/01_objects/home/home_page.css' %}">
-    <link rel="stylesheet" href="{% static 'css/01_objects/category/category_layout.css' %}">
-    <link rel="stylesheet" href="{% static 'css/01_objects/category/category_page.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/category/title_banner.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/shared/card_base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/cards/category_card.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/cards/tool_card.css' %}">
-    <link rel="stylesheet" href="{% static 'css/01_objects/newsbar/newsbar_layout.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/cards/article_card.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/shared/translation_warning.css' %}">
+{% block section_css %}
+    {% include "css_links/category.html" %}
+{% endblock section_css %}
+
+{% block page_css %}
     {% if can_edit_style %}
-        <link rel="stylesheet" href="{% static 'css/02_components/shared/popover_base.css' %}">
-        <link rel="stylesheet" href="{% static 'css/02_components/shared/modal_base.css' %}">
-        <link rel="stylesheet" href="{% static 'css/02_components/article_editor/article_quick_style.css' %}">
-        <link rel="stylesheet" href="{% static 'css/02_components/article_editor/article_block_trigger.css' %}">
-        <link rel="stylesheet" href="{% static 'css/02_components/article_editor/article_block_panel.css' %}">
-        <link rel="stylesheet" href="{% static 'css/02_components/article_editor/article_color_picker.css' %}">
-        <link rel="stylesheet" href="{% static 'css/02_components/article_editor/article_unsaved_changes.css' %}">
+        {% include "css_links/article_editor.html" %}
     {% endif %}
-{% endblock extra_head %}
+{% endblock page_css %}
 
 {% block sidemenu %}
     {% include "info_articles/partials/article_sidemenu.html" %}

@@ -1,11 +1,5 @@
 {% load i18n static wagtailcore_tags %}
 
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/02_components/messageboard/messageboard_slideshow.css' %}">
-  <link rel="stylesheet" href="{% static 'css/02_components/shared/modal_base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/02_components/messageboard/messageboard_modal.css' %}">
-{% endblock %}
-
 {% if board_messages %}
 <div class="messageboard"{% if board_messages|length > 1 %} data-autorotate="true"{% endif %}>
     {% for msg in board_messages %}

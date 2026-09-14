@@ -1,12 +1,6 @@
 {% load i18n %}
 {% load static wagtailcore_tags wagtailimages_tags %}
 
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/01_objects/newsbar/newsbar_layout.css' %}">
-  <link rel="stylesheet" href="{% static 'css/02_components/shared/card_base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/02_components/cards/article_card.css' %}">
-{% endblock %}
-
 <div class="newsbar-layout bottom-content">
     {% for article in suggested_articles %}
         {% include "info_articles/partials/article_card.html" with article=article %}

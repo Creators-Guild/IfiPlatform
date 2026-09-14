@@ -1,6 +1,6 @@
 # home_layout.css — design rationale
 
-Covers `ifi_home_app/static/css/01_objects/home/home_layout.css` (and its
+Covers `ifi_home_app/static/css/05_objects/home/home_layout.css` (and its
 visual-identity counterpart, `home_page.css`, for the same `.eventsbox_container`
 selector — see that split's own note in `static/css/README.md`).
 

@@ -141,7 +141,7 @@ category -- the flat tag list carries no category metadata to color by. */
 }
 
 /* Same "solid pill button" treatment as .union-info-link--signup
-(../../02_components/union/union_info_box.css), just self-contained rather
+(../../06_components/union/union_info_box.css), just self-contained rather
 than depending on that component's own --accent-color custom property. */
 .event-signup-link {
   display: inline-block;

@@ -4,10 +4,6 @@
 {% get_news_categories as news_categories %}
 
 <!-- to avoid mutiple loads of the same css if partial is used mutiple times -->
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/02_components/sidemenu.css' %}">
-{% endblock %}
-
 <div class= "sidemenu">
     <button type="button" class="sidemenu-close" aria-label="{% trans "Close menu" %}">&times;</button>
     <div class="sidemenu-header" role="button" tabindex="0" aria-expanded="false">

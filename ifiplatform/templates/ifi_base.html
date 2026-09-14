@@ -18,8 +18,11 @@
     <link rel="icon" href="{% static 'images/favicon.ico' %}?v=6" sizes="any">
     <link rel="icon" href="{% static 'images/favicon-32.png' %}?v=6" type="image/png" sizes="32x32">
     <link rel="apple-touch-icon" href="{% static 'images/favicon-180.png' %}?v=6">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    {% block extra_head %}<!-- addtional css here -->{% endblock extra_head %}
+    {% include "css_links/global.html" %}
+    {% block app_css %}{% endblock app_css %}
+    {% block section_css %}{% endblock section_css %}
+    {% block page_css %}{% endblock page_css %}
+    {% block extra_head %}{% endblock extra_head %}
 </head>
 <body>
     {% include "partials/deploy_notice.html" %}

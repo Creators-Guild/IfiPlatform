@@ -1,13 +1,4 @@
 {% load i18n static wagtailcore_tags article_tags %}
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/01_objects/event/event_page.css' %}">
-  <link rel="stylesheet" href="{% static 'css/02_components/event/peoply_sync.css' %}">
-  <link rel="stylesheet" href="{% static 'css/02_components/home_eventsbox/home_eventsbox_live.css' %}">
-  <link rel="stylesheet" href="{% static 'css/02_components/home_eventsbox/home_eventsbox_list.css' %}">
-  <link rel="stylesheet" href="{% static 'css/02_components/home_eventsbox/home_eventsbox_subevents.css' %}">
-  <link rel="stylesheet" href="{% static 'css/02_components/home_eventsbox/home_eventsbox_mobile.css' %}">
-{% endblock %}
-
 {% if happening_now_events %}
     {% comment %}
     Callout for whatever's actually in progress today (e.g. day 3 of a

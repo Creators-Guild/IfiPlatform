@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
+    "core_app.apps.DocsExcludedStaticFilesConfig",
     "django.contrib.sites",
     "django.contrib.sitemaps",
     "core_app.apps.CoreAppConfig",

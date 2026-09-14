@@ -1,3 +1,18 @@
+// Waits for stylesheets before measuring: docs/claude_context/css_loading.md
+const stylesheetsReady = () =>
+  Promise.all(
+    [...document.querySelectorAll('link[rel="stylesheet"]')]
+      .filter((link) => !link.sheet)
+      .map(
+        (link) =>
+          new Promise((resolve) => {
+            // on error too, so one 404 sheet can't leave the nav unmeasured
+            link.addEventListener("load", resolve, { once: true });
+            link.addEventListener("error", resolve, { once: true });
+          }),
+      ),
+  );
+
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".header-bar").forEach((headerBar) => {
     const logoBox = headerBar.querySelector(".ifiplatform-logo-box");
@@ -37,7 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
       headerBar.classList.toggle("nav-compact", !sameLine);
     };
 
-    check();
+    // not check() directly: DOMContentLoaded doesn't wait for stylesheets
+    stylesheetsReady().then(check);
 
     if (window.ResizeObserver) {
       new ResizeObserver(check).observe(headerBar);

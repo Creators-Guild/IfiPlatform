@@ -1,6 +1,6 @@
 # article_card.css — design history
 
-Covers `ifi_home_app/static/css/02_components/cards/article_card.css`.
+Covers `ifi_home_app/static/css/06_components/cards/article_card.css`.
 
 ## `.articlecard--list`: why plain block flow, not a flex row
 

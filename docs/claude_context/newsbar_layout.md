@@ -1,6 +1,6 @@
 # newsbar_layout.css — design rationale
 
-Covers `ifi_home_app/static/css/01_objects/newsbar/newsbar_layout.css` —
+Covers `ifi_home_app/static/css/05_objects/newsbar/newsbar_layout.css` —
 the auto-fit card grid shared by the homepage's "Suggested News"/
 "Suggested Info Articles" sections and the article index/category pages'
 "Suggested Articles" section.

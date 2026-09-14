@@ -1,11 +1,14 @@
 .page-layout {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    display: grid;
+    min-height: 100vh;
+    grid-template:
+        "top" auto
+        "main" 1fr
+        "bot" auto;
 }
 
 .topheader-content {
-    flex: 0;
+    grid-area: top;
     /* positioning context for select_language.css's mobile-only absolute
        placement (the language dropdown overlaid in the corner instead of
        taking its own full-width row above the title) -- harmless at any
@@ -15,9 +18,9 @@
 }
 
 .page-content {
-    flex: 1;
+    grid-area: main;
 }
 
 .bottombar-content {
-    flex: 0;
+    grid-area: bot;
 }
