@@ -22,7 +22,7 @@
   --color-green: #1db954;
 
   /* Pastel set -- EventPage.calendar_color (event_models.py), for the
-     week-calendar view's day-schedule blocks (event_page.css). Deliberately
+     week-calendar view's day-schedule blocks (event_calendar.css). Deliberately
      a separate, softer palette from the saturated primitives above: those
      pair with white text at badge scale, but the same colors filling a
      much larger calendar block read as too bright/low-contrast against

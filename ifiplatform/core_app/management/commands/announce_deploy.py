@@ -1,6 +1,6 @@
 """Sets the shared "a deploy is imminent" flag that core_app.deploy_notice
 (the context processor powering partials/deploy_notice.html, included in
-every page via ifi_base.html) reads to show a site-wide countdown banner.
+every page via global_base.html) reads to show a site-wide countdown banner.
 
 Meant to be run by the deploy script (.github/workflows/ci-deploy.yml)
 *before* the actual git reset/migrate/restart steps, against whatever code

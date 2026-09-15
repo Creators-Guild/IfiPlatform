@@ -1,7 +1,3 @@
-.home-layout .maincontent {
-    background-color: var(--content-bg, transparent);
-}
-
 /* Visual/decorative properties for the homepage's own eventsbox card --
 its layout/positioning properties (flex-basis, overflow, box-sizing,
 margin, padding) live in home_layout.css on this same selector, kept

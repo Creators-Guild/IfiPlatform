@@ -1,6 +1,6 @@
-# union_page.css / union_page.html — layout rationale
+# union_page.html — layout rationale
 
-Covers `ifi_home_app/static/css/05_objects/union/union_page.css`
+Covers `ifi_home_app/static/css/05_objects/union/union_layout.css`, `06_components/union/union_header.css`
 and `ifi_home_app/templates/info_articles/pages/union_page.html`.
 
 ## .union-header

@@ -127,7 +127,7 @@
             entirely, not just a wider class on the grid itself. Same
             "own section, own width, centered independently against
             .union-layout" pattern .union-header already uses. See
-            union_page.css's own comment on .union-main--wide for why 68rem.
+            union_layout.css's own comment on .union-main--wide for why 68rem.
             {% endcomment %}
             {% if page.filled_positions %}
                 <section class="union-main union-main--wide">
@@ -159,7 +159,7 @@
                 {% comment %}
                 Guarded on the whole section, not just left empty when
                 neither renders -- .union-main + .union-main's margin-top
-                (union_page.css) would otherwise still apply to an empty,
+                (union_layout.css) would otherwise still apply to an empty,
                 zero-content article, leaving stray blank space at the
                 bottom of the page.
                 {% endcomment %}

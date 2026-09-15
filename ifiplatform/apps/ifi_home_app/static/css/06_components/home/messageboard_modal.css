@@ -92,7 +92,7 @@ from ../shared/modal_base.css, shared across every full-screen modal. */
   border: none;
   border-radius: 999px;
   /* was transparent -- a bare "x" glyph blended into the white panel too
-     easily. A filled circle behind it (same idea as tool_page.css's
+     easily. A filled circle behind it (same idea as tool_lightbox.css's
      .tool-lightbox-close) makes it read as an actual button instead of
      stray text. */
   background-color: color-mix(in srgb, var(--color-text) 12%, transparent);

@@ -1,6 +1,6 @@
-# article_page.css — design history
+# article_header.css — design history
 
-Covers `ifi_home_app/static/css/05_objects/article/article_page.css`.
+Covers `ifi_home_app/static/css/06_components/article/article_header.css`.
 
 ## Why title/intro/meta each got their own alignment control
 
@@ -20,7 +20,7 @@ inherited value regardless of specificity.
 The `@media (max-width: 45rem)` block that resets editor-picked side
 padding/alignment/font-size back to plain defaults used to fire at `480px`
 instead — narrower than `45rem` (720px), the breakpoint every other mobile
-treatment on the site uses (`event_page.css`, `union_card.css`,
+treatment on the site uses (`event_calendar.css`, `union_card.css`,
 `article_multicolumn.css`, `article_image.css`, `dropdown_menu.js`, ...).
 A visitor in that 480px–45rem gap got none of this reset: editor-picked
 side padding/alignment/font-size on the article header stayed at their

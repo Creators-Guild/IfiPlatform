@@ -51,7 +51,7 @@ them). `content_font_size_multiplier`, in contrast, never touches
 "only sent after a confirm dialog" pattern as `apply_alignment_to_blocks`.
 `content_side_padding`/`content_font_size_multiplier` only ever stack/
 multiply with `header_side_padding`/`title_font_size`/`meta_font_size`/
-`intro_font_size` (via `calc()` in `article_page.css`/`category_page.css`)
+`intro_font_size` (via `calc()` in `article_header.css`/`page_title.css`)
 — they can't reset those fields back to their own defaults themselves, so
 `reset_header=True` sets all seven (those four plus `title_alignment`/
 `meta_alignment`/`intro_alignment`) directly from

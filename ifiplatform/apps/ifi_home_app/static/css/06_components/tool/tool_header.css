@@ -1,14 +1,3 @@
-/* Tool detail page (tool_page.html) */
-
-.tool-page {
-  display: flow-root;
-}
-
-.tool-page .article-meta {
-  display: flex;
-  justify-content: center;
-}
-
 .tool-hero {
   position: relative;
   margin-bottom: 1.5rem;
@@ -60,36 +49,6 @@
 
 .tool-made-by--standalone {
   margin-top: 0.5rem;
-}
-
-.tool-body {
-  max-width: 42rem;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.tool-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 1.5rem;
-  padding: 0.7rem 1.5rem;
-  font-size: 1.05rem;
-  font-weight: bold;
-  background: linear-gradient(90deg, var(--color-cta), var(--color-secondary));
-  border: 2px solid var(--color-border);
-  box-shadow: 0 3px 0 var(--color-border);
-}
-
-.tool-cta:hover {
-  background: linear-gradient(90deg, var(--color-cta), var(--color-secondary));
-  filter: brightness(1.08);
-  transform: translateY(-1px);
-}
-
-.tool-cta:active {
-  box-shadow: 0 1px 0 var(--color-border);
-  transform: translateY(2px);
 }
 
 @media (max-width: 640px) {

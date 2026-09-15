@@ -1,9 +1,8 @@
 /* CategoryPage/ArticleIndexPage's own layout/positioning -- the grids
 that hold subcategories/articles/tools/unions, and the union-group row.
 Page identity (typography, section headings/dividers, the accent-color h1
-underline) lives in category_page.css instead -- kept separate so "how
-this page is laid out" and "what it looks like" each read as one thing
-per file. */
+underline) lives in 06_components: category_header.css,
+section_heading.css and page_title.css. */
 
 /* a "row" of union groups (StudentUnionCategoryPage.union_groups, "row"
 block type, see studentunion_category_page.html/union_group.html) --
@@ -50,4 +49,13 @@ yet another top margin on top of the row's own gap above. */
   justify-content: flex-start;
   gap: 1.25rem;
   margin-top: 1.5rem;
+}
+
+/* CategoryPage/ArticleIndexPage -- centered,
+unlike ArticlePage's own left-aligned prose (see article_layout.css) --
+both page types share this same template shape (title, intro, general
+info, card grids), so one shared rule covers both wrapper classes. */
+.category-page,
+.article-index-page {
+  text-align: center;
 }

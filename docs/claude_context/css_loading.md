@@ -1,6 +1,6 @@
 # How CSS is loaded — design rationale
 
-Covers `templates/ifi_base.html`'s tiered CSS blocks, the partials under
+Covers `templates/global_base.html`'s tiered CSS blocks, the partials under
 `templates/css_links/` and `apps/ifi_home_app/templates/css_links/`, and
 the stylesheet wait in `static/js/nav_overflow.js`.
 

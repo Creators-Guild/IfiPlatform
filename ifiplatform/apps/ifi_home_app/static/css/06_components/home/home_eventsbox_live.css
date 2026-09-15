@@ -1,7 +1,7 @@
 /* Callout above .home-eventsbox-list for whatever's happening today
 (home_eventsbox.html/EventPage.is_happening_now) -- --color-cta rather than
 --color-accent, since the latter is already .event-type-badge--social's
-color (event_page.css) and would read as "this is a social event" instead
+color (event_badges.css) and would read as "this is a social event" instead
 of "this is live right now". The label is a block on its own line (a
 section title above the list) rather than an inline-flex row alongside it
 -- with more than one event possibly happening at once, "Happening now"

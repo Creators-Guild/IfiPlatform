@@ -67,7 +67,7 @@ image note below. */
 }
 
 /* 45rem, not 640px -- matches the breakpoint every other mobile treatment
-on the site uses (event_page.css, union_card.css, article_multicolumn.css,
+on the site uses (event_calendar.css, union_card.css, article_multicolumn.css,
 ...); 640px left a gap for phones reporting a CSS viewport width between
 640-720px, where none of these resets fired at all. */
 @media (max-width: 45rem) {

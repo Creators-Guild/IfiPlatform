@@ -1,6 +1,6 @@
 /* mobile "contents" dialog -- unlike .toc-overlay-panel below, this one
    does use a backdrop + centered layout (same pattern as .tool-lightbox in
-   tool_page.css), since a small screen doesn't have room to anchor a
+   tool_lightbox.css), since a small screen doesn't have room to anchor a
    popover next to anything sensible. position:fixed/inset:0 come from
    ../shared/modal_base.css, shared across every full-screen modal. */
 .toc-modal {

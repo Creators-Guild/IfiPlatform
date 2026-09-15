@@ -14,7 +14,7 @@ class DeployNoticeTests(TestCase):
     """Covers the read side (deploy_notice context processor) of the
     site-wide deploy countdown banner -- see announce_deploy (the write
     side) and templates/partials/deploy_notice.html (the render side, one
-    include in ifi_base.html covering every page)."""
+    include in global_base.html covering every page)."""
 
     def setUp(self):
         cache.clear()

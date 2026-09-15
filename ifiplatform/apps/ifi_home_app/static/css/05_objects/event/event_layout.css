@@ -1,0 +1,71 @@
+/* Single event page only (event_page.html's own outer wrapper -- the
+events index listing uses a different one, .event-index-page, so this
+doesn't affect that) -- content-centered, but deliberately *not*
+width-capped itself any more (see .event-page-prose below for why). */
+.event-page {
+  text-align: center;
+}
+
+/* Title/meta/tags/intro -- a centered reading-width column, same as
+.event-page itself used to be, so prose text doesn't stretch uncomfortably
+wide on a big screen. Sub-events (.event-calendar below) and Involved
+Unions deliberately sit *outside* this wrapper in event_page.html: a
+multi-day calendar needs the page's whole given width to be legible, not a
+column sized for paragraph text -- see .event-calendar's own comment. */
+.event-page-prose {
+  max-width: 50rem;
+  margin: 0 auto;
+}
+
+.event-page-intro {
+  max-width: 60rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* EventPage.localized_location_articles (event_page.html) -- same
+centered, wrapping card-grid shape as .event-union-list just below, reusing
+.articlecard (article_card.css) as-is for each entry. Capped per-card
+(rather than relying on article_card.css's own sizing, which assumes a
+grid/list container that controls width) since a lone article card outside
+its usual home-page/category-listing grid would otherwise stretch to fill
+this section's full width. */
+.event-location-articles {
+  margin-top: 1.5rem;
+}
+
+.event-location-articles-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.event-location-articles-grid .articlecard {
+  flex: 0 1 18rem;
+  max-width: 18rem;
+}
+
+/* Reuses .union-card (union_card.css) as-is for each entry -- this just
+adds the role label above it. No max-width any more (dropped the 50rem cap
+this used to have) -- each card is already capped on its own
+(.union-card's own max-width:14rem, union_card.css), so the risk that cap
+was guarding against (individual cards stretching too wide/far apart) no
+longer applies; a fixed-size card grid just wraps more cards per row
+instead of leaving the rest of the page's given width empty beside a
+narrow column, same reasoning as .event-calendar going full-width. */
+.event-union-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  margin: 1rem 0 0;
+}
+
+.event-union-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}

@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // pattern as alignment above -- header_side_padding/title_font_size/
   // meta_font_size/intro_font_size are the header's own independent
   // fields (not read/written by anything else in this panel, see
-  // article_page.css's calc()), so Reset can't just live-preview them the
+  // article_layout.css/article_header.css/page_title.css calc()), so Reset can't just live-preview them the
   // way padding/font-size/background do. Cleared after a successful save.
   let resetHeaderPending = false;
 
@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
   fontSizeInput.addEventListener("input", () => {
     const multiplier = parseFloat(fontSizeInput.value) || 1;
     articlePage.dataset.fontSizeMultiplier = fontSizeInput.value;
-    // title/meta/intro read this directly via calc() (article_page.css) --
+    // title/meta/intro read this directly via calc() (article_header.css/page_title.css) --
     // unlike the body blocks below, they have no per-element data-font-size
     // to rescale in JS, so the CSS var is the only thing driving them.
     articlePage.style.setProperty("--content-font-size-multiplier", fontSizeInput.value);

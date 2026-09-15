@@ -1,0 +1,64 @@
+/* flow-root so floated content inside (hero image, ToC popover anchors,
+   floated body images/boxes) is properly contained -- the article's own
+   height wraps around them instead of collapsing past their bottom edge. */
+.article-page {
+  display: flow-root;
+  /* editor-controlled default alignment (ArticlePage.content_alignment)
+  -- text-align is inherited, so this is only a fallback for anything with
+  no alignment control of its own (title/meta/intro have their own, see
+  .article-header below; most block types set text-align explicitly on
+  themselves too, which always wins regardless of specificity). */
+  text-align: var(--content-alignment, left);
+  line-height: 1.5;
+}
+
+/* editor-controlled side padding, applied to the title/meta/intro wrapper
+and the body separately (each its own custom property/control -- same
+split as the alignment properties above) rather than on .article-page
+itself, so the hero image figure stays unaffected and keeps its own
+edge-to-edge position. Margin, not padding: h1's border-bottom (the accent
+underline) is part of its border box, and padding on a width:auto block
+only shrinks the content area inside a fixed-width border box, leaving the
+border behind at the un-indented edge -- margin moves the whole box,
+border included, so the underline stays lined up with the now-indented
+text above it.
+
+Stacks with the Global editor's own --content-side-padding (set on
+.article-page, inherited here) via calc() rather than overwriting
+--header-side-padding -- same "on top of, never replacing" relationship
+ArticleStyle.content_side_padding's own docstring already describes for
+the body's per-block padding, just expressed as addition here since both
+values land on the same margin property instead of two separately nested
+boxes. */
+.article-page > .article-header {
+  margin-left: calc(var(--header-side-padding, 0rem) + var(--content-side-padding, 0rem));
+  margin-right: calc(var(--header-side-padding, 0rem) + var(--content-side-padding, 0rem));
+}
+
+.article-page > article {
+  margin-left: var(--content-side-padding, 0);
+  margin-right: var(--content-side-padding, 0);
+}
+
+/* editor-set side padding/alignment are ignored below this (45rem -- same
+"phone" breakpoint used throughout the rest of the site: event_calendar.css,
+union_card.css, article_multicolumn.css, article_image.css, dropdown_menu.js,
+...) -- a large padding or centered/right alignment picked for a wide desktop
+column can eat the whole screen or read badly once the column is already
+this narrow, so mobile always gets the plain left-aligned, unpadded default
+regardless of what's configured. */
+@media (max-width: 45rem) {
+  .article-page {
+    text-align: center;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 45rem) {
+
+  .article-page > .article-header,
+  .article-page > article {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}

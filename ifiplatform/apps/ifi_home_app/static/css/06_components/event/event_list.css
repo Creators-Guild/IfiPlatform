@@ -1,0 +1,90 @@
+/* Events index page only (event_index_page.html) -- current semester
+label shown under the page's own editable title, and a heading per
+month_groups entry (EventIndexPage.get_context) above that month's own
+.event-list, so a semester spanning several months reads as one
+sub-section per month rather than one long undifferentiated list. */
+.event-index-semester {
+  color: var(--color-text-muted);
+  font-weight: bold;
+  margin: 0.25rem 0 0;
+}
+
+.event-index-month-heading {
+  margin: 1.5rem 0 0;
+}
+
+.event-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.event-list-item {
+  display: flex;
+  /* was a single line only (no wrap) -- badge + a long title + a nowrap
+  date easily add up to more than a narrow card's own width, and with
+  nothing here to let any of them give way, the date (or the whole row)
+  just overflowed straight past the card's own border on mobile instead
+  of the layout adapting. wrap lets the date drop to its own line
+  whenever the row doesn't have room for everything. */
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--color-text);
+  /* same hover-lift convention as .articlecard (article_card.css) and the
+  top nav's .nav_link (topheader_bar.css). */
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.event-list-item:hover,
+.event-list-item:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.event-list-title {
+  flex: 1 1 auto;
+  /* flex items default to min-width:auto (not 0), which stops them
+  shrinking below their own text's min-content width -- for a long
+  unbroken title that min-content width can still exceed the card, which
+  is what was forcing the whole row to overflow rather than wrapping the
+  title's own text normally. 0 here lets it actually shrink and wrap at
+  word boundaries instead. */
+  min-width: 0;
+  font-weight: bold;
+}
+
+.event-list-date {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.event-list-empty {
+  color: var(--color-text-muted);
+}
+
+/* Past events (EventIndexPage.get_context's past_month_groups) collapsed
+by default behind a native <details> toggle, same pattern as
+account_settings.html's "Delete my account" -- keeps the page opening on
+what's actually upcoming instead of burying it under everything that's
+already happened. */
+.event-index-past {
+  margin-top: 2rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 1rem;
+}
+
+.event-index-past-toggle {
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--color-text-muted);
+}

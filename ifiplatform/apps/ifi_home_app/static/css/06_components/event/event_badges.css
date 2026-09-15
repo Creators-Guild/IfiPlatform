@@ -1,0 +1,75 @@
+/* Shared between the single event page and the events index listing --
+same badge/list styling used again (compact form) by home_eventsbox_list.css on
+the homepage. */
+
+.event-type-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  color: var(--color-on-accent);
+  background-color: var(--color-text-muted);
+}
+
+.event-type-badge--social {
+  background-color: var(--color-accent);
+}
+
+.event-type-badge--deadline {
+  background-color: var(--color-error);
+}
+
+.event-type-badge--academic {
+  background-color: var(--color-secondary);
+}
+
+.event-type-badge--company {
+  background-color: var(--color-cta);
+}
+
+/* Peoply-sourced provenance note (events/partials/peoply_badge.html) --
+plain text, not a badge/pill like .event-type-badge above, since this is
+metadata about where the data came from, not a category a visitor
+scans/filters by. flex-basis:100% forces it onto its own line at the
+bottom of the flex-wrap containers it lives in (.event-list-item,
+.home-eventsbox-item, same trick .home-eventsbox-title already uses) --
+harmless where the parent isn't flex (event_page.html), display:block
+alone puts it on its own line there anyway. --compact is for the
+week-calendar's small absolutely-positioned blocks
+(event_calendar_grid.html). */
+.event-peoply-note {
+  display: block;
+  flex-basis: 100%;
+  text-align: center;
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.event-peoply-note--compact {
+  font-size: 0.6rem;
+}
+
+/* Freeform info tags (EventPage.info_tags -- audience/program, food,
+alcohol, etc., see event_models.py's own docstring on why these are plain
+django-taggit tags rather than a fixed choices list). Same pill shape as
+.event-type-badge above and .home-eventsbox-union-tag (home_eventsbox_subevents.css),
+but its own muted/outlined style since these aren't color-coded by
+category -- the flat tag list carries no category metadata to color by. */
+.event-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.event-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+}

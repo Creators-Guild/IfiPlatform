@@ -2,7 +2,7 @@
 .unsaved-changes-modal (article_editor/article_unsaved_changes.css),
 .toc-modal (article_toc/article_toc_modal.css), .tool-lightbox
 (../tool/tool_lightbox.css), .messageboard-modal
-(messageboard/messageboard_modal.css), .event-calendar-modal
+(home/messageboard_modal.css), .event-calendar-modal
 (event/event_calendar.css).
 
 Only genuinely-identical declarations are lifted here:

@@ -1,8 +1,8 @@
 # home_layout.css — design rationale
 
-Covers `ifi_home_app/static/css/05_objects/home/home_layout.css` (and its
-visual-identity counterpart, `home_page.css`, for the same `.eventsbox_container`
-selector — see that split's own note in `static/css/README.md`).
+Covers `ifi_home_app/static/css/05_objects/home/home_layout.css` (and
+`06_components/home/home_eventsbox_card.css`, which holds the look
+of the same `.eventsbox_container` selector).
 
 ## `.eventsbox_container`'s width: a `clamp()`, not a fixed value
 
@@ -96,4 +96,4 @@ way `.messageboard-modal-panel` is (`max-width: 26rem`) — more screen for
 an events *list* to actually be useful pays off more than it does for a
 single message's few paragraphs. `z-index: 1000` matches every other
 full-page overlay on the site (`.messageboard-modal`, `.tool-lightbox`,
-`event_page.css`'s own lightbox).
+`.event-calendar-modal`).

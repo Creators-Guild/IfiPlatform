@@ -1,0 +1,31 @@
+/* EventPage.calendar_legend (event_page.html) -- optional row explaining
+what each calendar_color means for this particular schedule, e.g. "Blue =
+Study-relevant". Only rendered at all when calendar_legend actually has
+entries, so there's no separate "show legend" toggle needed. */
+.event-calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.25rem;
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.event-calendar-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Reuses .event-calendar-block--{{ color }} (below) for its background --
+those rules only ever set background-color, so borrowing them here keeps
+the swatch and the actual calendar blocks guaranteed to match, rather than
+a second, separately maintained copy of the same color mapping. */
+.event-calendar-legend-swatch {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 3px;
+  flex-shrink: 0;
+}

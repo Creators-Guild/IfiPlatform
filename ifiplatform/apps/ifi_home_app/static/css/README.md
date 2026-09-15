@@ -1,57 +1,49 @@
 # ifi_home_app CSS structure
 
-This folder follows ITCSS: folders are ordered by cascade/specificity
-(objects load before components), not by "which page uses this". The
-numbers are the canonical ITCSS layer positions used sitewide (see
-`ifiplatform/static/css/README.md`), which is why this tree starts at 05
--- it simply has no files in the layers below it. Each tier has its own
-subfolders grouping related files together instead of one flat list.
-Lives directly under `css/`, not nested inside a `styles/neon_style/`
+The sitewide CSS architecture (ITCSS layers, how stylesheets are loaded,
+BEM) is described in [docs/frontend.md](../../../../../docs/frontend.md).
+This file only covers what is specific to this app's CSS.
+
+This tree starts at 05 because it only has objects and components. Each
+tier has its own subfolders grouping related files together instead of
+one flat list. Lives directly under `css/`, not nested inside a `styles/neon_style/`
 wrapper -- there's only ever one theme, so that extra nesting added path
 length without adding organization.
 
 ```
-05_objects/   -- layout patterns: page shells/scaffolding (one page-shape
-                 concern per subfolder: article/, category/, event/, home/,
-                 newsbar/, tool/, union/)
-06_components/ -- reusable UI widgets, one subfolder per widget family
-                 (cards/, article_toc/, article_editor/, event/,
-                 home_eventsbox/, messageboard/, navbar/, category/,
-                 union/, tool/), plus shared/ for cross-cutting base files
-                 and small generic-utility rules used by more than one
-                 widget
+05_objects/    -- one <area>_layout.css per area: article/, category/,
+                  event/, home/, newsbar/, tool/, union/
+06_components/ -- styled pieces, one subfolder per area or widget family
+                  (article/, article_editor/, article_toc/, cards/,
+                  category/, event/, home/, newsbar/, tool/, union/), plus
+                  shared/ for pieces used by more than one area
 ```
+
+An "area" is a Wagtail page type (ArticlePage, EventPage, UnionPage,
+ToolPage, the category/index pages) or the home page (`home/`: events box,
+message board, shortcuts, mobile navbar).
 
 ## Naming conventions
 
-- A file is named after the component/selector it defines, not the
-  template that happens to use it.
-- `_page.css` is reserved for a page's own visual/content identity
-  (typography, color, decorative treatment) -- `article_page.css`,
-  `tool_page.css`, `union_page.css`, `event_page.css`, `category_page.css`.
-  `_layout.css` is for genuine layout/positioning (flex, grid, structure,
-  breakpoints) -- `home_layout.css`, `category_layout.css`,
-  `newsbar_layout.css`. Never pick one word when a file is really both:
-  `category_layout.css`/`category_page.css` and
-  `home_layout.css`/`home_page.css` are each a deliberate split of what
-  used to be one mixed file, so "how this is laid out" and "what this
-  looks like" each read as one thing per file. A file only stays merged
-  when its layout and visual properties are genuinely inseparable rule by
-  rule (e.g. `event_page.css` has many selectors mixing `display`/`flex`
-  with `color`/`border` on the very same rule -- splitting those apart
-  property-by-property would read worse, not better, so it doesn't get a
-  `_layout.css` counterpart).
-- `_page`/`_layout` never applies outside `05_objects/` page shells -- a
-  card, modal, or any other `06_components/` file keeps its own name
-  regardless of which page renders it (`cards/article_card.css` is a card,
-  not a page, even though only pages render it).
+- **Layout files** live in `05_objects/<area>/` and are always named
+  `<area>_layout.css` (`event_layout.css`, `union_layout.css`). They only
+  place things: flex/grid, widths, gaps, alignment, breakpoints. No
+  colours, borders, shadows or font styling.
+- **Component files** live in `06_components/<area>/` and are named after
+  the piece they style, not the page it appears on: `event_badges.css`,
+  `event_list.css`, `union_header.css`, `tool_cta.css`.
+- There are no `_page.css` files. The name came from the Wagtail page types
+  (`event_page.css` was "all CSS for EventPage"), but the folder already
+  says which page type a file belongs to, and a whole-page file mixes
+  layout and components, which ITCSS keeps apart.
+- A component used by several areas goes in `06_components/shared/`
+  (`section_heading.css`, `page_title.css`).
 - A large file mixing unrelated concerns is split by concern into several
   small files under one subfolder, rather than kept as one long file (e.g.
   `article_toc.css` -> `article_toc/article_toc_trigger.css` +
   `article_toc_modal.css` + `article_toc_overlay.css`).
-- A reusable widget carved out of a page shell (e.g. `union_page.css`'s
-  member grid) belongs in `06_components/`, not alongside the page shell
-  it was carved from -- `union/union_member_card.css` (the card grid) and
+- A reusable widget carved out of a larger file (e.g. the union page's
+  member grid) gets its own component file -- `union/union_member_card.css` (the card grid) and
   `union/union_position_info.css` (its hover popover) are two separate
   components, not one file, since the popover is a distinct concern reused
   from the same `popover_base.css` pattern as `article_toc_overlay.css`.
@@ -67,15 +59,15 @@ length without adding organization.
 
 Templates never link a leaf file from `05_objects/` or `06_components/`
 directly. They include one partial per tier, and the partial holds the
-`<link>` tags -- see `ifiplatform/static/css/README.md` for the
-block-per-tier mechanism and the three rules that come with it, the first
-of which is **never use `@import`**.
+`<link>` tags -- see [docs/frontend.md](../../../../../docs/frontend.md)
+for the block-per-tier mechanism and the three rules that come with it,
+the first of which is **never use `@import`**.
 
 The partials live in this app's template tree, not here beside the CSS:
 
 ```
 apps/ifi_home_app/templates/css_links/
-  base.html                 -- app tier: what EVERY page here needs,
+  home_base.html            -- app tier: what EVERY page here needs,
                                included once in home_base.html
   home_index.html           -- section tier: one per page family.
   article.html                 category.html covers both
@@ -100,13 +92,14 @@ being something every template has to get right:
   `popover_base.css`/`modal_base.css` sit in `category.html` and
   `studentunion_category.html` unconditionally, even though only editor
   mode uses them, rather than in `article_editor.html`.
-- `title_banner.css` is linked after `category_page.css` -- see the
-  comment in `title_banner.css` for why.
+- `title_banner.css` is linked after `category_header.css`,
+  `section_heading.css` and `page_title.css` -- see the comment in
+  `title_banner.css` for why.
 - `translation_warning.css` is linked last in every section partial:
-  `05_objects/article/article_page.css` also styles
+  `06_components/article/article_header.css` also styles
   `.translation-warning`, and this one has to win.
-- In `base.html`, `06_components/sidemenu.css` comes after
+- `home_eventsbox_card.css` (the events box's look) is linked in
+  `home_index.html`, while its size and position stay in `home_layout.css`
+  -- same `.eventsbox_container` selector, split into layout and look.
+- In `home_base.html`, `06_components/sidemenu.css` comes after
   `home_layout.css` for the same reason -- both style `.sidemenu`.
-
-No build step or manifest -- paths are hardcoded, so moving, renaming or
-splitting a file means updating every `<link>` that references it.

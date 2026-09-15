@@ -1,7 +1,7 @@
 """Site-wide "a deploy is imminent" banner. See
 management/commands/announce_deploy.py (the write side, imports
 DEPLOY_NOTICE_CACHE_KEY from here) for how the flag gets set, and
-templates/partials/deploy_notice.html (included once in ifi_base.html) for
+templates/partials/deploy_notice.html (included once in global_base.html) for
 how this is actually rendered.
 
 Two read sides:

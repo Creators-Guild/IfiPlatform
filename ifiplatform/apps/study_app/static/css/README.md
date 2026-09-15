@@ -1,11 +1,11 @@
 # study_app CSS structure
 
-Same ITCSS-by-cascade-order convention as the global tree (see
-`ifiplatform/static/css/README.md`) and `ifi_home_app`'s own
-(`ifiplatform/apps/ifi_home_app/static/css/README.md`), scaled down to
-this app's actual size -- no per-concern subfolders needed yet, just the
-two tiers. The numbers are the sitewide canonical ITCSS layer positions,
-so this tree starts at 05 rather than renumbering from 01:
+The sitewide CSS architecture (ITCSS layers, how stylesheets are loaded,
+BEM) is described in [docs/frontend.md](../../../../../docs/frontend.md).
+This file only covers what is specific to this app's CSS.
+
+Scaled down to this app's actual size -- no per-concern subfolders needed
+yet, just the two tiers, so this tree starts at 05:
 
 ```
 05_objects/     -- study_layout.css (page shell)
@@ -22,15 +22,11 @@ are each linked separately, only on the specific study-tool page that
 uses them.
 
 This app has not adopted the block-per-tier loading described in
-`ifiplatform/static/css/README.md` yet -- its templates still each link
-`study_base.css` themselves, and it has no base template of its own. That
-works and causes no flash of unstyled content (the links sit in
-`extra_head`, so they are render-blocking), it is just more repetition
-than it needs.
-
-No bundler/manifest -- paths are hardcoded, so moving/renaming/splitting
-a file here always means finding and updating every template that
-references its old path.
+[docs/frontend.md](../../../../../docs/frontend.md) yet -- its templates
+still each link `study_base.css` themselves, and it has no base template
+of its own. That works and causes no flash of unstyled content (the links
+sit in `extra_head`, so they are render-blocking), it is just more
+repetition than it needs.
 
 Note (pre-existing, not a doc-scope fix): several templates under
 `templates/{flashcards,studygames,multiplechoice,mix_studyset}/` link a

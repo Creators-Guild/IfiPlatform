@@ -31,7 +31,7 @@ over inheriting .prose's own font-size from its parent regardless of
 overridden by inheritance, no matter how specific the ancestor rule is,
 and this includes the mobile !important reset below). inherit here forces
 it back onto .prose's own computed value instead of the global default --
-same fix as .article-header > .intro p in article_page.css. */
+same fix as .article-header > .intro p in article_header.css. */
 .prose p {
   font-size: inherit;
 }
@@ -56,7 +56,7 @@ prose's own classes. */
 /* editor-picked font size and side padding/box padding (both free-form rem
 numbers, applied inline -- see article_body_blocks.html/article_column_
 content.html) are ignored below this breakpoint, same reasoning and
-breakpoint as article_page.css's own top-level reset: a size or padding
+breakpoint as article_header.css's own top-level reset: a size or padding
 picked for a wide desktop column can overflow or read badly once the
 column is this narrow. Hard-reset to each block's own default size rather
 than the article's plain 1rem, since a heading/column-title that's the
@@ -68,8 +68,8 @@ paragraph (also shared by the nested column variant in article_column_
 content.html).
 
 45rem, not 480px -- matches the breakpoint every other mobile treatment on
-the site uses (event_page.css, union_card.css, article_multicolumn.css,
-article_image.css, article_page.css, ...). 480px left a gap for phones
+the site uses (event_calendar.css, union_card.css, article_multicolumn.css,
+article_image.css, article_header.css, ...). 480px left a gap for phones
 reporting a CSS viewport width between 480-720px, where an editor-picked
 desktop font-size/padding on a heading or paragraph never got reset at all. */
 @media (max-width: 45rem) {

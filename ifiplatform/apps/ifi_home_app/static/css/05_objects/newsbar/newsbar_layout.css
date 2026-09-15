@@ -1,49 +1,5 @@
 /* Design rationale/history: docs/claude_context/newsbar_layout.md */
 
-.newsbar-heading {
-  margin: 1rem 1em 0;
-}
-
-/* News/Info Articles headings only (not .newsbar-heading--events, the
-homepage events box's own heading in home_layout.css -- that one isn't
-centered) -- matches the .newsbar-layout grid below now centering its
-cards as a group instead of sitting flush-left. */
-.newsbar-heading--news,
-.newsbar-heading--articles {
-  text-align: center;
-  /* always exactly one line, truncated with an ellipsis rather than
-  wrapped -- see docs/claude_context/newsbar_layout.md */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* "Suggested Info Articles"/"Foreslåtte Infoartikkler" -- full label when
-.articlesbar_container has room, shortened once it doesn't (same full/
-short swap pattern as home_navbar.html's "Student Unions"/"Unions", see
-home_navbar_mobile.css). Span default display is already inline, so only the
-short-hidden state needs a base rule here. */
-.newsbar-heading-short {
-  display: none;
-}
-
-/* 26rem matches .newsbar-layout's own card width cap (grid-template-
-columns: minmax(min(22rem, 100%), 26rem)) -- below that, "Foreslåtte
-Infoartikkler" is tight enough to risk the ellipsis truncation above
-kicking in, so it swaps to the shorter label instead. Keyed off
-.articlesbar_container's own width (container-type:inline-size,
-home_layout.css), not the viewport, since the sidebar + events box +
-viewport together determine whether the column has room. */
-@container (max-width: 26rem) {
-  .newsbar-heading-full {
-    display: none;
-  }
-
-  .newsbar-heading-short {
-    display: inline;
-  }
-}
-
 /* 1fr, not a fixed max card width -- see
 docs/claude_context/newsbar_layout.md for why a fixed max always leaves
 dead space and this doesn't. */
@@ -98,10 +54,6 @@ of this variant's own intentionally compact height. */
 }
 
 @media (max-width: 480px) {
-  .newsbar-heading {
-    margin: 0.75rem 0.5rem 0;
-    font-size: 1.25rem;
-  }
 
   .newsbar-layout {
     /* same 1fr reasoning as the base rule above -- a single mobile card

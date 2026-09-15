@@ -1,5 +1,5 @@
 /* Homepage "This month at Ifi" box -- a compact bulleted list (see
-event_page.css for the shared .event-type-badge), not the card-grid layout
+event_badges.css for the shared .event-type-badge), not the card-grid layout
 newsbar_layout.css uses for News/Info Articles, since it lives in a
 narrower column (see home_layout.css's own .eventsbox_container rule,
 which also already provides this box's left/right padding -- no extra

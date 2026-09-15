@@ -143,6 +143,6 @@ def main_view(request):
 
     return render(
         request=request,
-        template_name="core/home_index.html",
+        template_name="home/home_index.html",
         context=context,
     )
