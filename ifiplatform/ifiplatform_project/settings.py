@@ -108,6 +108,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core_app.deploy_notice.deploy_notice",
+                "ifiplatform.context_processors.umami",
             ],
         },
     },
@@ -353,3 +354,7 @@ WAGTAILLOCALIZE_MACHINE_TRANSLATOR = {
         "GLOSSARY_IDS": {("NB", "EN"): os.environ.get("DEEPL_GLOSSARY_ID")}, # check .env
     },
 }
+
+# Umami
+UMAMI_SCRIPT_URL = os.environ.get("UMAMI_SCRIPT_URL", "")
+UMAMI_WEBSITE_ID = os.environ.get("UMAMI_WEBSITE_ID", "")
