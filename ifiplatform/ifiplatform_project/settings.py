@@ -108,7 +108,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core_app.deploy_notice.deploy_notice",
-                "ifiplatform.context_processors.umami",
+                "core_app.context_processors.umami",
             ],
         },
     },
