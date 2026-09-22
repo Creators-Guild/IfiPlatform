@@ -1,8 +1,7 @@
 # How CSS is loaded — design rationale
 
 Covers `templates/global_base.html`'s tiered CSS blocks, the partials under
-`templates/css_links/` and `apps/ifi_home_app/templates/css_links/`, and
-the stylesheet wait in `static/js/nav_overflow.js`.
+`templates/css_links/` and `apps/ifi_home_app/templates/css_links/`.
 
 ## The rule
 
@@ -38,8 +37,8 @@ downloading every `<link href>` it can see, but it cannot see inside a
 file has downloaded and parsed -- two sequential round trips instead of
 one parallel wave. That is inherent to `@import`; it cannot be tuned away.
 
-The delay matters because of `nav_overflow.js` below: it pushed the
-stylesheets past the moment that script starts measuring.
+The delay matters for any script that measures layout at startup (see
+below): it pushed the stylesheets past the moment such a script measured.
 
 Note `apps/account_app/static/css/account_base.css` and
 `apps/study_app/static/css/study_base.css` still use `@import` (3 each).
@@ -48,28 +47,20 @@ layout-critical files (`tokens`, `reset`, `elements`, `page_layout`) come
 from the global tier, which is plain `<link>` tags -- but they should move
 to partials when those apps adopt the tier blocks.
 
-## Why nav_overflow.js waits for stylesheets
+## Scripts that measure layout must wait for stylesheets
 
-`static/js/nav_overflow.js` measures the header with
-`getBoundingClientRect()` to decide whether the nav needs compact labels.
-It used to do that immediately on `DOMContentLoaded`, which does **not**
-wait for stylesheets. Firefox reports this directly: *"Layout was forced
-before the page was fully loaded. If stylesheets are not yet loaded this
-may cause a flash of unstyled content."* Forcing layout against
-half-applied CSS makes the browser lay out and paint that state, then
-restyle once the real CSS lands.
+`DOMContentLoaded` does **not** wait for stylesheets. A script that calls
+`getBoundingClientRect()` (or similar) then forces layout against
+half-applied CSS; Firefox warns *"Layout was forced before the page was
+fully loaded"*, and the result is a flash of unstyled content.
 
-It now waits via `stylesheetsReady()`, which resolves once every
-`link[rel="stylesheet"]` has a non-null `.sheet` (a `<link>`'s `.sheet` is
-populated only after its stylesheet loads and parses). It resolves on
-`error` as well as `load` on purpose: a single 404 stylesheet must not
-leave the nav stuck in its unmeasured state forever.
-
-With all CSS as `<link>` in `<head>`, browsers already delay deferred
-scripts until those sheets load, so this wait is belt-and-braces. Keep it
-anyway -- it is what stops a future stylesheet added somewhere new, or an
-`@import` creeping back, from quietly reintroducing the flash. Any other
-script that measures geometry at startup needs the same treatment.
+The former `static/js/nav_overflow.js` (removed when the header nav became
+plain CSS, see `header.md`) solved this with a `stylesheetsReady()` promise:
+resolve once every `link[rel="stylesheet"]` has a non-null `.sheet`,
+listening for `error` as well as `load` so one 404 sheet can't block it
+forever. Reuse that pattern for any future script that measures geometry
+at startup, even though `<link>`s in `<head>` already make deferred
+scripts wait in practice.
 
 ## Request count
 

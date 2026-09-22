@@ -63,31 +63,9 @@ if (!window.__ifiTapToggleMenusInit) {
 
   document.addEventListener("DOMContentLoaded", () => {
     // .profile-dropdown opts out of the hover-reveal .dropdown-menu
-    // otherwise gets (see topheader_bar.css) -- click-only on every device,
+    // otherwise gets (see dropdownmenu.css) -- click-only on every device,
     // so it's wired up here regardless of hover capability.
     setupTapToggle(".profile-dropdown", "button.link");
-
-    // Its .drop-content is position:fixed (see topheader_bar.css -- .nav_links
-    // has overflow-x:auto, which per the CSS overflow spec forces
-    // overflow-y:auto too, clipping a position:absolute panel), which means
-    // it no longer sits relative to the button automatically. Position it
-    // from the button's actual on-screen location instead of a guessed
-    // fixed offset, so it lands directly under the icon (not overlapping
-    // it) regardless of header height, zoom, or viewport width.
-    document.querySelectorAll(".profile-dropdown").forEach((dropdown) => {
-      const trigger = dropdown.querySelector("button.link");
-      const panel = dropdown.querySelector(".drop-content");
-      if (!trigger || !panel) {
-        return;
-      }
-      const positionPanel = () => {
-        const rect = trigger.getBoundingClientRect();
-        panel.style.top = `${rect.bottom + 8}px`;
-        panel.style.right = `${window.innerWidth - rect.right}px`;
-      };
-      trigger.addEventListener("click", positionPanel);
-      window.addEventListener("resize", positionPanel);
-    });
 
     // Same collapsed-by-default treatment for an event with more than 2
     // related_unions (home_eventsbox.html/.css) -- harmless to call this

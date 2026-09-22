@@ -1,7 +1,4 @@
-/* profile icon dropdown -- shares .dropdown-menu/.drop-content/.drop-option
-   from dropdownmenu.css (same hover/tap-toggle behavior as the other nav
-   dropdowns, see dropdown_menu.js) with just the trigger button and the
-   header/username block inside .drop-content styled here. */
+/* Design rationale: docs/claude_context/header.md */
 button.profile-trigger {
   flex-shrink: 0;
   display: flex;
@@ -18,20 +15,12 @@ button.profile-trigger {
   transition: color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
 }
 
-/* .is-open is the JS-driven equivalent of :hover below, for touch devices
-(tapping the trigger opens the dropdown, see dropdown_menu.js) -- kept
-unscoped since it's only ever added by JS, which already gates itself on
-hover-capability. */
 .profile-dropdown.is-open .profile-trigger {
   color: var(--color-cta);
   border-color: var(--color-cta);
   transform: translateY(-1px);
 }
 
-/* :hover only, not touch -- unscoped, this stuck the pink "active" color
-on the icon permanently after a tap, since touch devices have no real
-hover to naturally clear (the same sticky-hover quirk already scoped for
-every other dropdown on the site, just missed here). */
 @media (hover: hover) and (pointer: fine) {
   .profile-trigger:hover {
     color: var(--color-cta);
@@ -40,11 +29,6 @@ every other dropdown on the site, just missed here). */
   }
 }
 
-/* the dropdown caret from dropdownmenu.css assumes a trailing inline
-   trigger label -- there isn't one here, just the icon, and the caret
-   (a flex sibling of the icon inside the same row) was pushing the pair
-   off-center as a group rather than sitting cleanly below it. Just drop
-   it -- the icon alone is enough of an affordance here. */
 .profile-dropdown .link::after {
   display: none;
 }
@@ -54,47 +38,19 @@ every other dropdown on the site, just missed here). */
   height: 1.9rem;
 }
 
-/* on mobile this sits in the same centered nav row as the new icon-only
-   Home/Study/Your Page/Log in links (see topheader_bar.css) -- drops the
-   circular button chrome so it reads as "just the person" icon, matching
-   those plain icons instead of standing out as the only bordered/circular
-   one in the row. */
 @media (max-width: 45rem) {
   button.profile-trigger {
     width: auto;
     height: auto;
     border: none;
-    background: none;
-  }
-
-  .profile-trigger:hover,
-  .profile-dropdown.is-open .profile-trigger {
-    border-color: transparent; /* nothing to show now there's no border, but keeps the rule harmless if it ever comes back */
-  }
-
-  .profile-icon {
-    /* matches .nav_link-icon svg's mobile size (topheader_bar.css) -- same
-       row, same "icon is the link's sole content" treatment */
-    width: 1.9rem;
-    height: 1.9rem;
   }
 }
 
-/* .nav_links (topheader_bar.css) has overflow-x:auto -- per the CSS
-   overflow spec, pairing that with overflow-y:visible forces overflow-y
-   to auto too, so position:absolute here would get silently clipped by
-   that ancestor (same category of bug as .sidemenu clipping the mobile
-   ToC popover). position:fixed escapes it entirely; top/right are then
-   set inline by dropdown_menu.js from the button's actual
-   getBoundingClientRect() on each click, so the panel always lands
-   directly under the icon rather than a guessed static offset (which
-   drifts against the real header height and ended up overlapping the
-   icon instead of sitting below it). Light card + icon rows, closer to
-   GitHub's account menu (light mode) than the plain white/right-aligned
-   look .drop-content gets by default. */
 .dropdown-menu.profile-dropdown .drop-content {
-  position: fixed;
+  top: calc(100% + 8px);
+  right: 0;
   left: auto;
+  z-index: 200;
   min-width: 18rem;
   text-align: left;
   padding: 0;
@@ -103,11 +59,6 @@ every other dropdown on the site, just missed here). */
   border-radius: 10px;
   box-shadow: 0 8px 24px var(--color-shadow);
   overflow: hidden;
-  /* higher than .sidemenu's mobile z-index:100 (sidemenu.css) -- without
-     this, the panel had no z-index of its own (defaulting to 0) and the
-     open mobile sidemenu rail rendered on top of it instead of the other
-     way around. */
-  z-index: 200;
 }
 
 .profile-drop-header {

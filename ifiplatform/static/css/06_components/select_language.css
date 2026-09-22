@@ -1,4 +1,4 @@
-/* Select Languages */
+/* Design rationale: docs/claude_context/header.md */
 .select-language {
   width: 100%;
   text-align: right;
@@ -26,23 +26,17 @@
   font: inherit;
 }
 
-/* hover effect */
 .lang-btn:hover {
   background: var(--color-accent);
   color: var(--color-bg-dark);
 }
 
-/* current language */
 .lang-btn.active {
   background: var(--color-accent);
   color: var(--color-bg-dark);
   font-weight: bold;
 }
 
-/* this never shrank at any breakpoint before -- at extreme zoom the
-   buttons (font: inherit, no cap) eventually become individually wider
-   than the effective viewport, which wrapping alone can't fix since each
-   is one unbreakable inline-block token */
 @media (max-width: 45rem) {
   .lang-btn {
     padding: 2px 6px;
@@ -50,18 +44,11 @@
   }
 }
 
-/* the two-button row is the default everywhere -- .select-language-dropdown
-   (the <details> version) stays hidden until the 45rem block below swaps
-   which one is shown. */
 .select-language-dropdown {
   display: none;
 }
 
 @media (max-width: 45rem) {
-  /* overlaid in the corner instead of sitting in normal flow -- as a full-
-     width block above .header-bar (its default), this pushed the title
-     down by its own height. .topheader-content (page_layout.css) is the
-     positioning context. */
   .select-language {
     position: absolute;
     top: 4px;
@@ -79,10 +66,6 @@
     text-align: right;
   }
 
-  /* .lang-btn (shared with the trigger via a second class in the HTML)
-     already supplies the border/color/padding/font-size, so this is only
-     the bits specific to it being a <summary> -- matches "the original
-     menu"'s look exactly instead of a second, separately-tuned color. */
   .lang-dropdown-trigger {
     display: inline-block;
     cursor: pointer;
@@ -93,11 +76,6 @@
     display: none;
   }
 
-  /* same caret pattern used by the other dropdowns on the site (see
-     .dropdown-menu .link::after in dropdownmenu.css, .sidemenu-item
-     .sidemenu-option::after in sidemenu.css) -- signals this is a
-     dropdown now that the native marker above is suppressed, and flips
-     when <details> is actually open. */
   .lang-dropdown-trigger::after {
     content: "";
     display: inline-block;

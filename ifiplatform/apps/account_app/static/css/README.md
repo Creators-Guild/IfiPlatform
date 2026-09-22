@@ -17,7 +17,7 @@ account_base.css
 template. It bundles `05_objects/account_layout.css`,
 `06_components/account_card.css`, and `06_components/auth_card.css` via
 `@import`. `profile_dropdown.css` is deliberately NOT in that bundle:
-the shared `top_header.html` partial puts the profile dropdown on every
+the shared `header.html` partial puts the profile dropdown on every
 page sitewide, not just this app's, so it is linked once in
 `templates/css_links/global.html` instead. It stays owned by this app
 because this app owns the dropdown.

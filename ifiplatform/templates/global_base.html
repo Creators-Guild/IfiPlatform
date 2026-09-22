@@ -24,14 +24,14 @@
     <div class="page-layout">
         <div class= "topheader-content">
             {% include "partials/select_language.html" %}
-            {% include "partials/top_header.html" %}
+            {% include "partials/header.html" %}
         </div>
         <aside class="sidemenu_container">{% block sidemenu %}{% endblock sidemenu %}</aside>
         <main class="page-content">
             {% block content %}{% endblock %}
         </main>
         <div class="bottombar-content">
-            {% include "partials/bottom_header.html" %}
+            {% include "partials/footer.html" %}
         </div>
     </div>
 </body>

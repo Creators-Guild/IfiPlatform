@@ -13,7 +13,7 @@ global_base.html         -- the base every page extends, directly or
 under_development.html   -- placeholder page for sections not built yet
 partials/                -- included by global_base.html on every page:
                             deploy_notice, beta_notice, select_language,
-                            top_header, bottom_header.
+                            header, footer.
                             account_minimenu.html is not included
                             anywhere at the moment
 css_links/global.html    -- the global CSS tier, linked on every page

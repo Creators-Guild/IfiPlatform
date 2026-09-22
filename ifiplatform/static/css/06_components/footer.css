@@ -1,0 +1,67 @@
+.bot-bar {
+  background: var(--color-bg-dark);
+  padding: 1em;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bot-bar img {
+  grid-column: 2;
+  max-width: 90px;
+  max-height: 90px;
+}
+
+.bot-bar-info {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  text-align: right;
+  padding: 1rem;
+}
+
+/* keeps the footer clear of the Wagtail userbar, which only staff get */
+body:has(wagtail-userbar) .bot-bar-info {
+  padding-right: 5rem;
+}
+
+@media (max-width: 45rem) {
+  .bot-bar {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .bot-bar img,
+  .bot-bar-info {
+    grid-column: 1;
+  }
+
+  .bot-bar-info {
+    padding: 0;
+  }
+
+  .bot-bar-info {
+    justify-self: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  body:has(wagtail-userbar) .bot-bar {
+    padding-bottom: 4.5rem;
+  }
+
+  body:has(wagtail-userbar) .bot-bar-info {
+    padding-right: 1rem;
+  }
+}
+
+.bot-bar p {
+  margin: 0;
+  color: var(--color-on-accent);
+}
