@@ -46,11 +46,10 @@
 }
 
 .icon-text {
+    display: none;
     font-size: larger;
     font-weight: bold;
     text-decoration: underline;
-    opacity: 0;
-    transition: opacity 0.15s ease;
 }
 
 /* desktop: hover or keyboard focus only, so a leftover [open] from mobile is ignored */
@@ -68,8 +67,12 @@
         border-right: 1px solid color-mix(in srgb, var(--color-border) 15%, transparent);
     }
 
+    .sidemenu_container:is(:hover, :has(:focus-visible)) .icon {
+        display: none;
+    }
+
     .sidemenu_container:is(:hover, :has(:focus-visible)) .icon-text {
-        opacity: 1;
+        display: inline;
     }
 
     .sidemenu_container .sidemenu::details-content {
@@ -92,13 +95,17 @@
         border-right: 1px solid color-mix(in srgb, var(--color-border) 15%, transparent);
     }
 
+    .sidemenu[open] .icon {
+        display: none;
+    }
+
     .sidemenu[open] .icon-text {
-        opacity: 1;
+        display: inline;
     }
 }
 
 .sidemenu-item {
-    margin: 1rem;
+    margin: 1.5rem 1rem;
 }
 
 .sidemenu-option,
@@ -117,6 +124,7 @@
 
 .sidemenu-option {
     display: block;
+    width: fit-content;
     border-bottom: 1px solid var(--color-border);
     white-space: nowrap;
 }
@@ -184,7 +192,7 @@
     }
 
     .sidemenu-item {
-        margin: 0.5rem 0.75rem;
+        margin: 1rem 0.75rem;
     }
 
     .sidemenu-option,
