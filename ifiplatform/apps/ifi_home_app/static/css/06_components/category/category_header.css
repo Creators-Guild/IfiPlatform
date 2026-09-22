@@ -1,28 +1,13 @@
-/* bigger than the shared .category-page h1/.article-page h1 rule below
-gives it (plain ~2rem browser default) -- landing-page-sized title, unlike
-ArticlePage's own h1 which is governed by ArticleStyle.title_font_size
-instead (left untouched here). */
+/* Design rationale: docs/claude_context/category_page.md */
 .category-page h1,
 .article-index-page h1 {
   font-size: 2.75rem;
 }
 
-/* #page-title-plain (see page_title_banner.html) needs this explicitly:
-its own [hidden] attribute alone loses to the plain ".category-page h1"
-rule below (display: inline-block) at equal specificity, since author CSS
-always beats the UA stylesheet's own "[hidden] { display: none }" -- same
-issue/fix as .quick-style-field[hidden] in article_quick_style.css. An id
-selector's specificity guarantees this wins regardless of what else
-targets h1 here. */
 #page-title-plain[hidden] {
   display: none;
 }
 
-/* intro reads as the page's lead paragraph; general info is a smaller,
-secondary note underneath it -- see CategoryPage.general_info/
-ArticleIndexPage.general_info's own help_text. Also covers
-StudentUnionCategoryPage, which shares the plain .category-page wrapper
-class (studentunion_category_page.html). */
 .category-page .intro,
 .article-index-page .intro {
   font-size: 1.15rem;
@@ -34,15 +19,6 @@ class (studentunion_category_page.html). */
   color: var(--color-text-muted);
 }
 
-/* Both render as {{ ...|richtext }}, i.e. plain <p> tags -- the global
-`p { font-size: 1.05rem; }` rule (elements.css) sets that directly on the
-tag itself, which always wins over inheriting .intro/.general-info's own
-font-size from their parent regardless of specificity (a property set
-directly on an element is never overridden by inheritance, no matter how
-specific the ancestor rule is). inherit here forces it back onto each
-one's own computed value instead of the global default -- same fix as
-.article-header > .intro p in article_header.css and .union-core p in
-union_core.css. */
 .category-page .intro p,
 .article-index-page .intro p,
 .category-page .general-info p,

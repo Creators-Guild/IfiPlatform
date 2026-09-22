@@ -1,14 +1,4 @@
-/* editor mode toggle -- always visible for anyone with can_edit_style
-permission, regardless of the toggle's own on/off state (it's the one
-control that has to stay reachable to turn everything else back on).
-position:sticky, not fixed: it starts in normal flow at the top of
-.article-page's own content (so it never overlaps the site's header bar,
-which is outside .article-page entirely), then stays put once scrolled to
-top:1rem -- same sticky-within-content-column trick already used by
-.toc-open-sticky/.toc-title-sticky in article_toc_trigger.css. margin-left:auto
-pushes it to the right edge of the content column while staying a normal
-block box (sticky only pins the top offset here, not left/right, so this
-stays right-aligned even once stuck). */
+/* Design rationale: docs/claude_context/article_editor_css.md */
 .editor-mode-toggle {
   position: sticky;
   top: 1rem;
@@ -33,16 +23,6 @@ stays right-aligned even once stuck). */
   color: var(--color-secondary);
 }
 
-/* On-page quick style panel (padding/alignment/font size), editors only --
-see article_quick_style_panel.html. Fixed so it stays reachable regardless
-of scroll position, and z-index above everything else in the article
-(toc overlay, lightboxes, etc.) since it's a global editing tool, not part
-of the article's own content. Hidden by default -- editor_mode_toggle.js
-puts .editor-mode-on on <body> once the toggle is switched on, this and
-every other piece of editing UI key off that same class. Bottom-LEFT, not
-right -- Wagtail's own userbar (the bird icon) defaults to bottom-right,
-so right would put them on top of each other. */
-/* background-color/border come from ../shared/popover_base.css */
 .quick-style-panel {
   display: none;
   position: fixed;
@@ -62,10 +42,6 @@ body.editor-mode-on .quick-style-panel {
   display: flex;
 }
 
-/* minimized: keep just the header row (title + toggle) visible so the
-panel can be tucked out of the way of whatever content it's covering
-(e.g. the hero image) without leaving editor mode entirely -- see
-article_quick_style.js. */
 .quick-style-panel.is-minimized {
   gap: 0;
 }
@@ -74,22 +50,16 @@ article_quick_style.js. */
   display: none;
 }
 
-/* .quick-style-panel-header's full layout (display/align-items/
-justify-content/gap) comes from ../shared/popover_base.css -- nothing
-left to declare locally for it. */
-
 .quick-style-panel-body {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-/* margin/font-weight come from ../shared/popover_base.css */
 .quick-style-panel-title {
   color: var(--color-secondary);
 }
 
-/* flex comes from ../shared/popover_base.css */
 .quick-style-minimize {
   width: 1.5rem;
   height: 1.5rem;
@@ -107,12 +77,6 @@ left to declare locally for it. */
   gap: 0.3rem;
 }
 
-/* the background color field is the first one here that's ever
-conditionally hidden (see quick-style-bg-color-field, toggled by the
-"Background color" checkbox) -- without this, the class rule above's own
-"display: flex" outranks the [hidden] attribute's default "display: none"
-(same specificity tier, and author CSS always beats the UA stylesheet
-regardless), so the field would stay visible. */
 .quick-style-field[hidden] {
   display: none;
 }
@@ -142,10 +106,6 @@ regardless), so the field would stay visible. */
   color: var(--color-on-accent);
 }
 
-/* small reminder text under Alignment -- see its own comment in
-article_quick_style_panel.html. Same muted/small look as .quick-style-
-status, kept as its own class since that one's reserved for the live
-Saving/Saved/error text (id-targeted by JS), not a static hint. */
 .quick-style-field-hint {
   margin: 0;
   font-size: 0.75rem;
@@ -181,11 +141,6 @@ Saving/Saved/error text (id-targeted by JS), not a static hint. */
   color: var(--color-error);
 }
 
-/* this page's own published state, plus Publish/Unpublish buttons -- see
-ArticlePage.get_context()'s page_is_live/page_has_unpublished_changes/
-can_publish_page/can_unpublish_page and article_views.publish_page/
-unpublish_page. Not a style field, so it doesn't use .quick-style-field's
-column layout. */
 .quick-style-status-row {
   flex-direction: row;
   align-items: center;
@@ -259,13 +214,6 @@ column layout. */
   cursor: default;
 }
 
-/* big, hard-to-miss draft marker on the article itself -- see
-article_page.html: only page_is_live gates this at all, so it can afford
-to be this loud (only an editor with a reason to be looking at a draft
-ever sees it, see ArticlePage.route()). The small badge in this panel
-above stays around too since it's needed for the Publish/Unpublish
-buttons regardless, but is easy to miss on its own (panel minimized,
-scrolled past) -- this is the "impossible to miss" version. */
 .article-draft-banner {
   margin-bottom: 1rem;
   padding: 0.75rem 1rem;
@@ -279,7 +227,7 @@ scrolled past) -- this is the "impossible to miss" version. */
   text-transform: uppercase;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 45rem) {
   .article-draft-banner {
     font-size: 1rem;
   }

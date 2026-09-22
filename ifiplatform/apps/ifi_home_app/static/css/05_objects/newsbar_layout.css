@@ -1,0 +1,48 @@
+/* Design rationale: docs/claude_context/newsbar_layout.md */
+.newsbar-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  justify-content: center;
+  align-items: start;
+  gap: 1rem;
+  padding: 0.5em 0.1em;
+}
+
+.newsbar-layout .articlecard {
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 5 / 4;
+  width: 100%;
+  max-width: 40rem;
+  justify-self: center;
+}
+
+.newsbar-layout .articlecard img {
+  aspect-ratio: 2 / 1;
+}
+
+.newsbar-layout .articlecard--list {
+  aspect-ratio: unset;
+  max-width: unset;
+  justify-self: stretch;
+}
+
+@media (max-width: 45rem) {
+
+  .newsbar-layout {
+    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+    gap: 0.5rem;
+    padding: 0.35rem 0.5rem;
+  }
+
+  .newsbar-layout .articlecard {
+    aspect-ratio: unset;
+    height: auto;
+  }
+}
+
+@media (max-width: 45rem) {
+  .newsbar-layout .articlecard--list {
+    grid-column: 1 / -1;
+  }
+}

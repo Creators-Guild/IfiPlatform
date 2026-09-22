@@ -1,4 +1,3 @@
-/* Element */
 .btn {
     cursor: pointer;
     border-radius: 6px;
@@ -16,7 +15,6 @@
     text-decoration: none;
 }
 
-/* Modifiers */
 .btn:hover {
   background-color: var(--color-cta-hover);
   transform: translateY(-1px);

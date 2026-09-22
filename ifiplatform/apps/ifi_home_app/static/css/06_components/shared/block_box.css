@@ -1,18 +1,5 @@
-/* Generic per-block/per-column box styling -- the on-page editor's
-replacement for the old Wagtail 'box' block (background/border/radius come
-from inline style in _block_box_style.html, since they're editor-chosen
-colors/numbers, not a fixed set of steps; this file only needs box-sizing).
-Applied directly to whichever element the box belongs to (a heading, .prose,
-a body image figure, a multi-column grid or one of its own items) rather
-than a separate wrapping element, so a border+padding here doesn't add on
-top of that element's own explicit width (e.g. an image's width_rem) or
-throw off a multi-column item's flex sizing. */
+/* Design rationale: docs/claude_context/shared_components.md */
 .block-box {
   box-sizing: border-box;
-  /* a long unbroken word or URL inside a boxed heading/paragraph/column has
-  nothing else stopping it from forcing the box wider than its container --
-  padding alone doesn't help once the content itself is the overflow source.
-  Same fallback already used for figure captions (article_image.css) and
-  union card titles (union_card.css). */
   overflow-wrap: break-word;
 }

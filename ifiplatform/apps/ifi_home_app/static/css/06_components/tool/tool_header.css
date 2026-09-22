@@ -51,7 +51,7 @@
   margin-top: 0.5rem;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 45rem) {
   .tool-hero-image {
     height: 12rem;
   }

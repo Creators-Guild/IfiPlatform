@@ -4,15 +4,15 @@ The sitewide CSS architecture (ITCSS layers, how stylesheets are loaded,
 BEM) is described in [docs/frontend.md](../../../../../docs/frontend.md).
 This file only covers what is specific to this app's CSS.
 
-This tree starts at 05 because it only has objects and components. Each
-tier has its own subfolders grouping related files together instead of
-one flat list. Lives directly under `css/`, not nested inside a `styles/neon_style/`
+This tree starts at 05 because it only has objects and components.
+`05_objects/` is a flat list (one layout file per area); `06_components/`
+has subfolders grouping related files together. Lives directly under `css/`, not nested inside a `styles/neon_style/`
 wrapper -- there's only ever one theme, so that extra nesting added path
 length without adding organization.
 
 ```
-05_objects/    -- one <area>_layout.css per area: article/, category/,
-                  event/, home/, newsbar/, tool/, union/
+05_objects/    -- one <area>_layout.css per area: article, category,
+                  event, home, newsbar, tool, union
 06_components/ -- styled pieces, one subfolder per area or widget family
                   (article/, article_editor/, article_toc/, cards/,
                   category/, event/, home/, newsbar/, tool/, union/), plus
@@ -25,7 +25,7 @@ message board, shortcuts, mobile navbar).
 
 ## Naming conventions
 
-- **Layout files** live in `05_objects/<area>/` and are always named
+- **Layout files** live directly in `05_objects/` and are always named
   `<area>_layout.css` (`event_layout.css`, `union_layout.css`). They only
   place things: flex/grid, widths, gaps, alignment, breakpoints. No
   colours, borders, shadows or font styling.
@@ -49,7 +49,7 @@ message board, shortcuts, mobile navbar).
   from the same `popover_base.css` pattern as `article_toc_overlay.css`.
 - `06_components/shared/` holds two kinds of files: genuinely
   cross-component base files (`card_base.css`, `modal_base.css`,
-  `popover_base.css` -- see their own file comments for exactly which
+  `popover_base.css` -- see `docs/claude_context/shared_components.md` for exactly which
   declarations are shared and why some look-alike properties were
   deliberately left out), and small standalone utilities used by more than
   one page/component (`block_box.css`, `article_meta.css`,
@@ -93,8 +93,8 @@ being something every template has to get right:
   `studentunion_category.html` unconditionally, even though only editor
   mode uses them, rather than in `article_editor.html`.
 - `title_banner.css` is linked after `category_header.css`,
-  `section_heading.css` and `page_title.css` -- see the comment in
-  `title_banner.css` for why.
+  `section_heading.css` and `page_title.css` -- see
+  `docs/claude_context/title_banner.md` for why.
 - `translation_warning.css` is linked last in every section partial:
   `06_components/article/article_header.css` also styles
   `.translation-warning`, and this one has to win.

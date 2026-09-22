@@ -1,3 +1,4 @@
+/* Design rationale: docs/claude_context/article_body_css.md */
 .multi-col-grid {
   display: flex;
   flex-wrap: wrap;
@@ -5,16 +6,10 @@
   margin: 1.5rem 0;
 }
 
-/* the reverse direction of the clear above: a top-level image block right
-after a multi-column, if floated, should stack cleanly below it too rather
-than rising up next to its last row. */
 .multi-col-grid + .body-image-figure {
   clear: both;
 }
 
-/* vertical alignment of columns -- gap and side padding are inline styles
-(free-form rem numbers from the block, see article_page.html) rather than
-classes here, same reasoning as the styled text padding above. */
 .multi-col-grid--align-top {
   align-items: flex-start;
 }
@@ -31,16 +26,6 @@ classes here, same reasoning as the styled text padding above. */
   min-width: 0;
 }
 
-/* an image floated left/right inside a narrow flex column doesn't wrap
-cleanly with that column's own text the way it does in the full-width
-article body -- it can render wider than the column itself and spill out
-next to it instead. Images and multi-column layout should never float
-together: force any image inside a column to stack as a plain block, same
-treatment already used for body-image--left/right at the mobile breakpoint,
-just applied here unconditionally regardless of screen size. Deliberately
-NOT touching width/max-width here -- those are inline styles now (see
-article_image_block.html's width_rem), which always win over anything set
-here regardless of selector specificity, so there's nothing to fight over. */
 .multi-col-item .body-image--left,
 .multi-col-item .body-image--right {
   float: none;
@@ -61,15 +46,6 @@ here regardless of selector specificity, so there's nothing to fight over. */
   padding-bottom: 0.2rem;
 }
 
-/* 45rem, not some narrower phone-specific number -- matches the breakpoint
-every other mobile treatment on the site already uses (event_calendar.css,
-union_card.css, dropdown_menu.js, article_list_toggle.js, ...). This used
-to be 640px, which is narrower than 45rem (720px): a visitor whose phone
-reports a CSS viewport width in that 640-720px gap never got this reset at
-all, so an editor-picked desktop padding (seen in production: 15.25rem
-per side, on top of a 5rem gap) stayed in place and blew the row out
-past the screen -- reproduced and confirmed against the live site before
-this fix. */
 @media (max-width: 45rem) {
   .multi-col-grid {
     flex-direction: column;
@@ -79,11 +55,6 @@ this fix. */
     flex-basis: auto !important;
   }
 
-  /* editor-picked side padding/box padding (free-form rem numbers, inline
-  -- see article_body_blocks.html) ignored below this breakpoint, same
-  reasoning as the layout reset above: once columns stack into one, a wide
-  desktop padding just eats space on a screen this narrow. Background/
-  border/radius stay -- only sizing resets. */
   .multi-col-grid,
   .multi-col-item {
     padding: 0 !important;

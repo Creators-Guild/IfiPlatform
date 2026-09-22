@@ -1,14 +1,4 @@
-/* Shared "bordered popover" shape across four anchored-panel components:
-.toc-overlay-panel (article_toc/article_toc_overlay.css),
-.block-style-mini-panel (article_editor/article_block_panel.css),
-.quick-style-panel (article_editor/article_quick_style.css),
-.position-info-panel (../union/union_position_info.css).
-
-Only genuinely-identical declarations are lifted here -- position (two are
-position:absolute, two are position:fixed), border-radius (10px on
-.block-style-mini-panel vs 12px on the other three) and box-shadow
-(var(--color-shadow) vs the stronger var(--color-shadow-strong) on the two
-fixed panels) all differ per file and stay as per-file overrides. */
+/* Design rationale: docs/claude_context/shared_components.md */
 .toc-overlay-panel,
 .block-style-mini-panel,
 .quick-style-panel,
@@ -17,8 +7,6 @@ fixed panels) all differ per file and stay as per-file overrides. */
   border: 2px solid var(--color-border);
 }
 
-/* shared header row (title + close/minimize button) -- the margin below
-the row differs per file and stays local. */
 .toc-overlay-header,
 .block-style-mini-panel-header,
 .quick-style-panel-header,
@@ -29,8 +17,6 @@ the row differs per file and stays local. */
   gap: 0.5rem;
 }
 
-/* shared title basics -- font-size/color (muted vs. secondary-accent vs.
-inherited) differ per file and stay local. */
 .toc-overlay-title,
 .block-style-mini-panel-title,
 .quick-style-panel-title,
@@ -39,9 +25,6 @@ inherited) differ per file and stay local. */
   font-weight: bold;
 }
 
-/* shared base for each panel's own close/minimize button -- the two visual
-treatments (bordered text chip on toc-overlay/position-info vs. circular
-icon button on block-style/quick-style) differ per file and stay local. */
 .toc-overlay-close,
 .block-style-close,
 .quick-style-minimize,

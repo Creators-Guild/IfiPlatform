@@ -12,6 +12,7 @@ Sidemenu hover mdoifer will still enlarge menu */
 
 .study_layout .maincontent {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     padding: 1rem 2rem;

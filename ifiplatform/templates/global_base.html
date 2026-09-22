@@ -26,6 +26,7 @@
             {% include "partials/select_language.html" %}
             {% include "partials/top_header.html" %}
         </div>
+        <aside class="sidemenu_container">{% block sidemenu %}{% endblock sidemenu %}</aside>
         <main class="page-content">
             {% block content %}{% endblock %}
         </main>

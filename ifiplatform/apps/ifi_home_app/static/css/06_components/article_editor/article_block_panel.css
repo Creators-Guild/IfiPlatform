@@ -1,8 +1,4 @@
-/* fixed, with its top/left recalculated on every scroll/resize while open
-(see article_block_style.js) -- it should track the trigger icon that
-opened it. Plain viewport coordinates here, recomputed live, instead of
-trying to make position:absolute's containing-block math carry it along
-on its own. */
+/* Design rationale: docs/claude_context/article_editor_css.md */
 .block-style-mini-panel {
   position: fixed;
   z-index: 2010;
@@ -10,14 +6,6 @@ on its own. */
   flex-direction: column;
   gap: 0.6rem;
   width: 14rem;
-  /* Same cap-and-scroll pattern as .toc-modal-panel/messageboard's own
-  panels (article_toc_modal.css/messageboard_modal.css) -- with enough sections open at
-  once (Layout/Style/Title/Meta/Intro/Box and its own now-collapsible
-  subsections) this panel's natural content height can exceed the viewport,
-  and positionPanel()'s own on-screen clamping (article_block_style.js)
-  only ever repositions the panel, it never shrinks it -- without a cap
-  here, a tall-enough panel just runs off the bottom of the screen with no
-  way to reach its own Save/Reset row. */
   max-height: calc(100vh - 1rem);
   overflow-y: auto;
   padding: 0.85rem 1rem;
@@ -30,19 +18,10 @@ on its own. */
   display: none;
 }
 
-/* .block-style-mini-panel-header's full layout (display/align-items/
-justify-content/gap) comes from ../shared/popover_base.css -- nothing
-left to declare locally for it.
-
-margin/font-weight come from ../shared/popover_base.css */
 .block-style-mini-panel-title {
   color: var(--color-secondary);
 }
 
-/* flex/cursor come from ../shared/popover_base.css. This button's own
-border/background (a circular icon chip) are unrelated to the shared
-panel-level background-color/border grouped there -- different selector,
-own visual treatment, not part of that grouping. */
 .block-style-close {
   width: 1.5rem;
   height: 1.5rem;
@@ -101,16 +80,10 @@ own visual treatment, not part of that grouping. */
   gap: 0.5rem;
 }
 
-/* the "Box" checkbox row doubles as a header for the collapsible section
-below it -- the chevron button is pushed to the far right of that same row
-via margin-left: auto. */
 .block-style-box-header {
   position: relative;
 }
 
-/* same collapsible-header idea as Box above, but for a plain label with no
-checkbox alongside it (the image title/caption text sections -- there's no
-"enabled" state to toggle, just whether their fields are showing). */
 .block-style-caption-header {
   flex-direction: row;
   align-items: center;
@@ -129,10 +102,6 @@ checkbox alongside it (the image title/caption text sections -- there's no
   transition: transform 0.15s ease;
 }
 
-/* collapsed state points the chevron sideways, same "closed" convention as
-a native <details> triangle. Expand/collapse itself is a plain [hidden]
-toggle on #block-style-box-fields (see article_block_style.js) -- entirely
-independent of whether the box itself is enabled. */
 .block-style-box-collapse-toggle[aria-expanded="false"] {
   transform: rotate(-90deg);
 }
@@ -147,9 +116,6 @@ independent of whether the box itself is enabled. */
   display: none;
 }
 
-/* frames one group of related box fields (background, border, spacing) as
-its own visually distinct card, so it's obvious at a glance which controls
-belong together instead of them all blending into one long list. */
 .block-style-box-subsection {
   gap: 0.5rem;
   padding: 0.5rem;

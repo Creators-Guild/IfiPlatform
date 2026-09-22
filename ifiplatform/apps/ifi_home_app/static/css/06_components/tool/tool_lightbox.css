@@ -1,5 +1,4 @@
-/* position:fixed/inset:0 and the color-mix backdrop come from
-../shared/modal_base.css, shared across every full-screen modal on the site. */
+/* Design rationale: docs/claude_context/shared_components.md */
 .tool-lightbox {
   z-index: 1000;
   display: flex;

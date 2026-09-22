@@ -217,37 +217,16 @@
         <li class="home-eventsbox-empty">{% trans "No upcoming events." %}</li>
     {% endfor %}
 </ul>
-{% if upcoming_events|length > 4 %}
-    {% comment %}
-    Mobile only (home_eventsbox.css/home_layout.css) -- past that breakpoint
-    the collapsed box only shows "Happening now" plus the first 4 upcoming
-    events, no internal scroll any more. This button (and the close button
-    below, home_eventsbox.js) is how the rest becomes reachable: tapping it
-    expands .eventsbox_container itself to fill the screen, scrollable, same
-    "tap to see everything" idea as .messageboard-expand's "View full
-    message" (home_messageboard.html/messageboard.js) -- just expanding this
-    box in place rather than cloning its content into a separate modal,
-    since the list has real interactive state (union tag toggles, sub-event
-    toggles, links) a clone would have to duplicate. Only rendered at all
-    when there are more than 4 events -- with 4 or fewer, the collapsed view
-    above already shows everything, so there's nothing left to reveal.
-    {% endcomment %}
-    <button type="button" class="home-eventsbox-more">{% trans "See more events" %}</button>
-    <button type="button" class="home-eventsbox-close" aria-label="{% trans "Close" %}">&times;</button>
-{% endif %}
 {% get_event_index as event_index_page %}
 {% if event_index_page %}
     {% comment %}
-    This box only ever shows a handful of upcoming events (core_views.
-    main_view caps it at 6) -- this is the way to the full semester
-    overview (events/event_index_page.html), always visible (unlike
-    .home-eventsbox-more above, which is mobile-only and just reveals the
-    rest of *this* same short list).
+    This box only shows a handful of upcoming events (core_views.main_view
+    caps it at 6, and only 4 show on mobile) -- this is the way to the full
+    semester overview (events/event_index_page.html).
     {% endcomment %}
     <a class="home-eventsbox-view-all" href="{% pageurl event_index_page %}">{% trans "See all events" %}</a>
 {% endif %}
 {% include "events/partials/peoply_sync_button.html" %}
-<script src="{% static 'js/home_eventsbox.js' %}" defer></script>
 <script src="{% static 'js/dropdown_menu.js' %}" defer></script>
 {% if request.user.is_staff %}
     <script src="{% static 'js/peoply_sync_button.js' %}" defer></script>

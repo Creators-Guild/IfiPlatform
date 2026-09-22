@@ -4,15 +4,14 @@
 {% get_news_categories as news_categories %}
 
 <!-- to avoid mutiple loads of the same css if partial is used mutiple times -->
-<div class= "sidemenu">
-    <button type="button" class="sidemenu-close" aria-label="{% trans "Close menu" %}">&times;</button>
-    <div class="sidemenu-header" role="button" tabindex="0" aria-expanded="false">
-        <img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="{% trans "menu" %}">
+<details class="sidemenu">
+    <summary class="sidemenu-header">
+        <img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="">
         <span class="icon-text">{% trans "Menu" %}</span>
-    </div>
+    </summary>
 
-    <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="">{% trans "About" %}</a>
+    <details class="sidemenu-item" name="sidemenu-item">
+        <summary class="sidemenu-option">{% trans "About" %}</summary>
         <div class="drop-content">
             <a class="drop-option drop-option--all" href="">{% trans "All" %}</a>
             <a href="">
@@ -22,12 +21,12 @@
                 {% trans "Ifi-Creators' Guild" %}
             </a>
         </div>
-    </div>
+    </details>
 
-    <div class= "sidemenu-item">
+    <details class="sidemenu-item" name="sidemenu-item">
         <!-- pageurl has to use varible and not nested templatetags-function -->
         {% get_article_index as article_index_page %} <!-- store tag in varible -->
-        <a class="sidemenu-option" href="{% pageurl article_index_page %}">{% trans "Info Articles" %}</a>
+        <summary class="sidemenu-option">{% trans "Info Articles" %}</summary>
 
         <div class="drop-content">
             <a class="drop-option drop-option--all" href="{% pageurl article_index_page %}">{% trans "All" %}</a>
@@ -37,10 +36,10 @@
                 </a>
             {% endfor %}
         </div>
-    </div>
+    </details>
 
-    <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="{% pageurl news_index_page %}">{% trans "News" %}</a>
+    <details class="sidemenu-item" name="sidemenu-item">
+        <summary class="sidemenu-option">{% trans "News" %}</summary>
         <div class="drop-content">
             <a class="drop-option drop-option--all" href="{% pageurl news_index_page %}">{% trans "All" %}</a>
             {% for category in news_categories %}
@@ -49,11 +48,11 @@
                 </a>
             {% endfor %}
         </div>
-    </div>
+    </details>
 
-    <div class= "sidemenu-item">
+    <details class="sidemenu-item" name="sidemenu-item">
         {% get_event_index as event_index_page %}
-        <a class="sidemenu-option" href="{% pageurl event_index_page %}">{% trans "Events" %}</a>
+        <summary class="sidemenu-option">{% trans "Events" %}</summary>
         <div class="drop-content">
             <a class="drop-option drop-option--all" href="{% pageurl event_index_page %}">{% trans "All" %}</a>
             {% comment %}
@@ -70,14 +69,14 @@
                 {% trans "Always at Ifi" %}
             </a>
         </div>
-    </div>
+    </details>
 
-        {% get_help_category as help_category %}
-        {% get_help_subcategories as help_subcategories %}
-        <div class= "sidemenu-item">
+    {% get_help_category as help_category %}
+    {% get_help_subcategories as help_subcategories %}
+    <details class="sidemenu-item" name="sidemenu-item">
         <!-- "hELP"/"hJELP" deliberately, only in this sidemenu label -- not
         the same string as any generic "Help" text elsewhere on the site. -->
-        <a class="sidemenu-option" href="{% pageurl help_category %}">{% trans "hELP" %}</a>
+        <summary class="sidemenu-option">{% trans "hELP" %}</summary>
         <div class="drop-content">
             <a class="drop-option drop-option--all" href="{% pageurl help_category %}">{% trans "All" %}</a>
             {% for subcategory in help_subcategories %}
@@ -88,6 +87,5 @@
                 <a class="drop-option-empty" href="">{% trans "No categories yet" %}</a>
             {% endfor %}
         </div>
-    </div>
-</div>
-<script src="{% static 'js/dropdown_menu.js' %}" defer></script>
+    </details>
+</details>

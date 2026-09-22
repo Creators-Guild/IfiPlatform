@@ -22,8 +22,6 @@
   color: var(--color-link-hover);
 }
 
-/* Back to the full events overview (events/event_index_page.html) -- same
-understated link treatment as .event-location-map-link above. */
 .event-overview-link {
   margin-bottom: 1rem;
   font-size: 0.85rem;
@@ -39,9 +37,6 @@ understated link treatment as .event-location-map-link above. */
   color: var(--color-link-hover);
 }
 
-/* Same "solid pill button" treatment as .union-info-link--signup
-(../union/union_info_box.css), just self-contained rather
-than depending on that component's own --accent-color custom property. */
 .event-signup-link {
   display: inline-block;
   margin-bottom: 0.5rem;

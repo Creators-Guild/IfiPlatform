@@ -1,33 +1,13 @@
-/* Per-block style trigger (the small "..." icon on paragraph/image/
-multi_column blocks) and the mini panel it opens -- see
-article_block_style.js. Only meaningful once editor mode is on; the trigger
-itself stays hidden (not display:none, so it can still be found/measured by
-JS) until then, and only appears on hover/focus of its own block so a
-content-heavy article doesn't end up covered in icons. */
+/* Design rationale: docs/claude_context/article_editor_css.md */
 .editable-block {
   position: relative;
 }
 
-/* a floated image's own box only covers the image itself, but a *later*
-full-width block (a heading, a paragraph, .prose) that visually wraps
-around it still occupies that same screen region for hit-testing purposes,
-even where nothing of it actually renders. Both are position:relative
-(from .editable-block above) with no z-index of their own, so plain DOM
-order decides which one wins there -- and DOM order puts body content
-after the image, so it was winning, silently swallowing clicks meant for
-the image's own trigger underneath it. An explicit z-index here settles
-that regardless of DOM order. */
 .hero-image-figure.editable-block,
 .body-image-figure.editable-block {
   z-index: 5;
 }
 
-/* temporary highlight so it's clear exactly which block a trigger/panel
-belongs to -- same hover/focus/open conditions as the trigger icon itself
-(see below), plus .is-editing (set by article_block_style.js) so the
-highlight stays while its mini panel is open even after the mouse has
-moved onto the panel itself, away from the block. outline, not border --
-doesn't affect layout/box size, so nothing shifts when it appears. */
 body.editor-mode-on .editable-block:hover,
 body.editor-mode-on .editable-block:focus-within,
 body.editor-mode-on .editable-block.is-editing {

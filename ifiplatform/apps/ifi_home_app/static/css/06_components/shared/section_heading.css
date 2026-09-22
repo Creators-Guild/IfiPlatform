@@ -1,10 +1,3 @@
-/* "Subcategories"/"Categories"/"Suggested Articles"/"Tools" section
-headings, and the article cards' own titles/meta row (article_card.css --
-neither sets its own text-align, but .articlecard-meta is a flex row, so
-plain inherited text-align wouldn't center it as a row -- see
-category_layout.css's own justify-content rule for that). Category card
-titles need no override here: .category-card below already centers itself
-explicitly, everywhere it's used. */
 .category-page .section-heading,
 .article-index-page .section-heading {
   text-align: center;

@@ -26,7 +26,7 @@ reach the page through `home_base.html`'s `maincontent_style` block, which
     style="--content-bg: var(--color-bg-purple);"
 
 The declaration that consumes it lives in
-`ifi_home_app/static/css/05_objects/home/home_layout.css`:
+`ifi_home_app/static/css/05_objects/home_layout.css`:
 
     .home-layout .maincontent { background-color: var(--content-bg, transparent); }
 

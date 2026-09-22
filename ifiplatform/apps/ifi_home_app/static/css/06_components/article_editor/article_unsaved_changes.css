@@ -1,7 +1,4 @@
-/* same backdrop+centered-panel pattern as .toc-modal (article_toc_modal.css) --
-higher z-index than the editor panels (block-style: 2010) since this can
-pop up while one of them is open. position:fixed/inset:0 come from
-../shared/modal_base.css, shared across every full-screen modal. */
+/* Design rationale: docs/claude_context/article_editor_css.md */
 .unsaved-changes-modal {
   z-index: 3000;
   display: flex;
@@ -14,7 +11,6 @@ pop up while one of them is open. position:fixed/inset:0 come from
   display: none;
 }
 
-/* background comes from ../shared/modal_base.css */
 .unsaved-changes-backdrop {
   position: absolute;
   inset: 0;
@@ -105,13 +101,6 @@ pop up while one of them is open. position:fixed/inset:0 come from
   color: var(--color-error);
 }
 
-/* floating "unsaved changes" bar, bottom-center -- next to the quick-style
-panel (bottom-left, see article_quick_style.css) but its own separate
-control, reachable the whole time you're mid-edit rather than only when
-you try to navigate away (that's what the modal above is for). z-index
-above the quick-style panel (2000) so it's never hidden behind it, below
-the block-style mini panel (2010) and the modal (3000) since those are
-meant to take priority when open. */
 .save-bar {
   position: fixed;
   bottom: 1.5rem;
@@ -184,9 +173,7 @@ meant to take priority when open. */
   white-space: normal;
 }
 
-@media (max-width: 480px) {
-  /* the quick-style panel takes over the whole bottom edge on mobile (see
-  article_quick_style.css) -- move up out of its way rather than overlap. */
+@media (max-width: 45rem) {
   .save-bar {
     bottom: 6rem;
     left: 0.75rem;

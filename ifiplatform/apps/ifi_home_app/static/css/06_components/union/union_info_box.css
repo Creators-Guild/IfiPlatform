@@ -1,3 +1,4 @@
+/* Design rationale: docs/claude_context/union_page.md */
 .union-info-box {
   padding: 1.25rem;
   background-color: var(--color-card-bg);
@@ -12,14 +13,6 @@
   font-size: 1.2rem;
 }
 
-/* .union-sidebar's flex column otherwise stretches this to the sidebar's
-own full width (up to 60rem in stacked mode) -- capped here so a union
-with just one or two links doesn't render as a giant edge-to-edge button.
-width, not max-width: the link buttons' own content is far narrower than
-45rem, so a plain max-width has nothing to constrain -- the box just
-shrinks to fit its content regardless of how big max-width is. min(45rem,
-100%) forces it to actually render at 45rem, while still shrinking on
-anything narrower than that (mobile) instead of overflowing. */
 .union-info-box--links {
   width: min(24rem, 100%);
   margin-left: auto;

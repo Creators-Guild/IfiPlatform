@@ -1,4 +1,4 @@
-/* accent color carried from a category onto its own page and its articles */
+/* Design rationale: docs/claude_context/shared_components.md */
 .category-page h1,
 .article-page h1 {
   display: inline-block;
@@ -6,13 +6,6 @@
   padding-bottom: 0.4rem;
 }
 
-/* editor-controlled title font size (ArticleStyle.title_font_size,
---title-font-size set on .article-header, see article_page.html) -- the
-fallback here, 2rem, is just the plain browser h1 default, matching the
-size before this became an explicit override. Scaled by the Global
-editor's own font-size multiplier (--content-font-size-multiplier, set on
-.article-page -- inherited here), same as .intro/.article-meta in
-article_header.css. */
 .article-page h1 {
   font-size: calc(var(--title-font-size, 2rem) * var(--content-font-size-multiplier, 1));
 }

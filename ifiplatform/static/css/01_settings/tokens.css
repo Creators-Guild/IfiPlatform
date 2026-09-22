@@ -21,13 +21,7 @@
   --color-bright-yellow: #fff5bc;
   --color-green: #1db954;
 
-  /* Pastel set -- EventPage.calendar_color (event_models.py), for the
-     week-calendar view's day-schedule blocks (event_calendar.css). Deliberately
-     a separate, softer palette from the saturated primitives above: those
-     pair with white text at badge scale, but the same colors filling a
-     much larger calendar block read as too bright/low-contrast against
-     white text -- these pair with dark text instead (--color-event-text
-     below), same as the printed schedule's own color legend. */
+  /* Pastel set */
   --color-pastel-blue: #a3b0fa;
   --color-pastel-yellow: #ffe27a;
   --color-pastel-orange: #ffb15c;

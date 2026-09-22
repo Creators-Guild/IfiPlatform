@@ -1,10 +1,4 @@
-/* the panel is a plain popover anchored to .toc-open-sticky (positioned via
-   that ancestor, since position:sticky establishes a containing block for
-   absolutely-positioned descendants same as position:relative) -- no
-   backdrop, so the rest of the page stays fully visible and interactable;
-   table_of_content.js closes it on an outside click / Escape / choosing a
-   link instead. background-color/border come from ../shared/popover_base.css,
-   shared across every anchored-popover component. */
+/* Design rationale: docs/claude_context/article_toc.md */
 .toc-overlay-panel {
   position: absolute;
   top: 0;
@@ -25,12 +19,10 @@
   display: none;
 }
 
-/* display/align-items/justify-content/gap come from ../shared/popover_base.css */
 .toc-overlay-header {
   margin: 0 0 0.75rem;
 }
 
-/* margin/font-weight come from ../shared/popover_base.css */
 .toc-overlay-title {
   font-size: 0.9rem;
   letter-spacing: 0.08em;
@@ -38,7 +30,6 @@
   color: var(--color-text-muted);
 }
 
-/* flex/cursor come from ../shared/popover_base.css */
 .toc-overlay-close {
   padding: 0.1rem 0.5rem;
   background: none;

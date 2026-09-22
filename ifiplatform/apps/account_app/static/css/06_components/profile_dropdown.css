@@ -59,7 +59,7 @@ every other dropdown on the site, just missed here). */
    circular button chrome so it reads as "just the person" icon, matching
    those plain icons instead of standing out as the only bordered/circular
    one in the row. */
-@media (max-width: 480px) {
+@media (max-width: 45rem) {
   button.profile-trigger {
     width: auto;
     height: auto;

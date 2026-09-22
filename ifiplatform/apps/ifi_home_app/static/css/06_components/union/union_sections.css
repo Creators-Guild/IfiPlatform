@@ -1,3 +1,4 @@
+/* Design rationale: docs/claude_context/union_page.md */
 .union-main h2 {
     margin-top: 2rem;
     text-align: center;
@@ -7,36 +8,17 @@
     margin-top: 0;
 }
 
-/* Every top-level section under .union-layout (Purpose/Activities/Bylaws
-inside .union-core, plus Sitting Members/Open Positions -- union_page.html)
-is a plain <details open>: always expanded with no toggle affordance here;
-the mobile media query below is what actually turns them into tap-to-
-collapse sections (union_core_sections.js closes them by default there on
-load). Kept as real <details>/<summary> rather than a custom widget so it
-degrades to always-visible content with zero JS/CSS. */
 .union-section-summary {
-    /* browsers default <summary> to display:list-item, reserving space for
-    its own native marker on the left even with that marker hidden below --
-    same fix as .lang-dropdown-trigger (select_language.css), the other
-    <summary> in this codebase, uses. Without it the h2 inside centers
-    against a box that's already skewed left by that reserved space. */
     display: block;
-    list-style: none; /* Firefox/most browsers -- default disclosure triangle */
+    list-style: none;
     cursor: default;
-    pointer-events: none; /* not interactive outside the mobile override below */
+    pointer-events: none;
 }
 
 .union-section-summary::-webkit-details-marker {
-    display: none; /* Safari/Chrome -- default disclosure triangle */
+    display: none;
 }
 
-/* .union-main h2's own margin-top (above) assumed h2 was a direct,
-first-child-detectable child of its section -- now that each one is
-wrapped in its own <summary>, every heading is trivially :first-child of
-that wrapper, so h2:first-child would zero every section's margin-top
-instead of just the first. Spacing between sections now comes from the
-wrapper below instead, same "adjacent-sibling, not a flat margin-top"
-idiom .union-main + .union-main already uses. */
 .union-main .union-section-summary h2 {
     margin-top: 0;
 }
@@ -51,19 +33,10 @@ idiom .union-main + .union-main already uses. */
         pointer-events: auto;
     }
 
-    /* overrides .union-main h2's centered default -- left-aligned so the
-    caret sits right next to the title's own first letter instead of
-    wherever the centered text happens to land. */
     .union-section-summary h2 {
         text-align: left;
     }
 
-    /* on the h2 itself, not .union-section-summary -- the em-based size
-    below then matches the title's own font-size instead of summary's
-    (smaller) inherited one. Same caret sizing/vertical-align as
-    .dropdown-menu .link::after (dropdownmenu.css), ::before + margin-right
-    instead of ::after + margin-left to sit before the title instead of
-    after it. */
     .union-section-summary h2::before {
         content: "";
         display: inline-block;

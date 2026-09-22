@@ -1,14 +1,11 @@
-/* Union detail page (union_page.html) */
-
-/* Both this and .union-header-text need flex-direction:column, not just
-this one -- see docs/claude_context/union_page.md. */
+/* Design rationale: docs/claude_context/union_page.md */
 .union-header {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
     max-width: 60rem;
-    margin: 1rem auto 1.5rem; /* dont remove top padding */
+    margin: 1rem auto 1.5rem;
 }
 
 .union-logo {

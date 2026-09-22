@@ -1,3 +1,4 @@
+/* Design rationale: docs/claude_context/union_page.md */
 .union-core {
     background-color: var(--color-card-bg);
     border: 2px solid var(--color-border);
@@ -8,9 +9,6 @@
     text-align: left;
 }
 
-/* the 8rem side padding and 1.3rem font-size above are sized for the
-desktop reading column -- on mobile the padding alone would eat almost the
-entire screen width, and the larger font wastes even more of what's left */
 @media (max-width: 45rem) {
     .union-core {
         padding: 2rem 1rem;
@@ -19,7 +17,7 @@ entire screen width, and the larger font wastes even more of what's left */
 }
 
 .union-core p {
-    font-size: inherit; /* gets overwritten by gloabl p in elements.css, therefore inherit instead */
+    font-size: inherit;
 }
 
 .union-core ul, .union-core ol {
@@ -28,11 +26,6 @@ entire screen width, and the larger font wastes even more of what's left */
     list-style-position: inside;
 }
 
-/* flex + width:fit-content + margin:auto, not inline-flex -- centers just
-this link itself regardless of .union-core's own left text-align, without
-touching the Bylaws prose text above it (a shared text-align:center on
-some ancestor would centre both). An inline-level box's own margin can't
-do this centering trick -- only a block-level (or flex) box's can. */
 .union-bylaws-link {
     display: flex;
     width: fit-content;

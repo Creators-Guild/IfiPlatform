@@ -1,5 +1,4 @@
-/* flex-basis:100% (same trick .home-eventsbox-title uses above) so this
-drops to its own line below the date, rather than trailing after it. */
+/* Design rationale: docs/claude_context/home_eventsbox.md */
 .home-eventsbox-unions {
   flex-basis: 100%;
   display: flex;
@@ -8,9 +7,6 @@ drops to its own line below the date, rather than trailing after it. */
 }
 
 .home-eventsbox-union-tag {
-  /* position:relative + z-index puts this above .home-eventsbox-title-
-  link's stretched ::after overlay, so it intercepts its own clicks
-  (to the union) instead of the whole row's click going to the event. */
   position: relative;
   z-index: 1;
   display: inline-block;
@@ -26,21 +22,9 @@ drops to its own line below the date, rather than trailing after it. */
 .home-eventsbox-union-tag:hover {
   color: var(--color-text);
   border-color: var(--color-accent-hover);
-  /* stacks with the row's own -1px lift (.home-eventsbox-item:hover above
-  is already in effect too, since hovering a child counts as hovering its
-  parent), so the tag itself nudges up slightly further than the row. */
   transform: translateY(-1px);
 }
 
-/* Hidden past the first 2 tags (home_eventsbox.html) until
-.home-eventsbox-unions gets .is-open (click, on every device -- dropdown_
-menu.js's shared setupTapToggle called unconditionally for this one, see
-its own comment there) -- a plain display:none/inline-block toggle rather
-than the max-height/opacity animation .home-eventsbox-subevents-list uses,
-since these are individual inline pills wrapping in a flex row, not a block
-list that needs to grow smoothly. Deliberately no CSS :hover reveal (unlike
-.home-eventsbox-subevents below): hovering this row just to read the date
-was popping the extra tags open too easily. */
 .home-eventsbox-union-tag--extra {
   display: none;
 }
@@ -50,8 +34,6 @@ was popping the extra tags open too easily. */
 }
 
 .home-eventsbox-unions-toggle {
-  /* position:relative + z-index, same reason as .home-eventsbox-union-tag
-  above -- sits above the row's stretched title link. */
   position: relative;
   z-index: 1;
   display: inline-block;
@@ -71,9 +53,6 @@ was popping the extra tags open too easily. */
   border-color: var(--color-accent-hover);
 }
 
-/* "+N" swaps to "Close" once open (home_eventsbox.html) -- CSS-only, keyed
-off the same .is-open class dropdown_menu.js's setupTapToggle already puts
-on the container, same mechanism as the sub-events caret flip below. */
 .home-eventsbox-unions-toggle-close {
   display: none;
 }
@@ -86,9 +65,6 @@ on the container, same mechanism as the sub-events caret flip below. */
   display: inline;
 }
 
-/* flex-basis:100% so this drops to its own line, same as .home-eventsbox-
-unions/-title above -- no href of its own (see home_eventsbox.html's own
-comment), just text; the row's stretched link still covers it. */
 .home-eventsbox-subcount {
   flex-basis: 100%;
   font-size: 0.75rem;
@@ -96,8 +72,6 @@ comment), just text; the row's stretched link still covers it. */
   color: var(--color-text-muted);
 }
 
-/* Same flex-basis:100%-drops-to-its-own-line treatment as .home-eventsbox-
-subcount below, so it sits on its own row above the sub-event count/list. */
 .home-eventsbox-calendar-link {
   position: relative;
   z-index: 1;
@@ -114,29 +88,12 @@ subcount below, so it sits on its own row above the sub-event count/list. */
   color: var(--color-accent-hover);
 }
 
-/* Same flex-basis:100%-drops-to-its-own-line treatment as .home-eventsbox-
-subcount above, since this replaces it whenever there's at least one
-highlighted sub-event. min-width:0 overrides the flex-item default of
-min-width:auto (same fix as .maincontent in home_layout.css) -- without it,
-a flex item containing a white-space:nowrap descendant (.home-eventsbox-
-subevents-list a below) can't shrink narrower than that descendant's full
-text width, which was pushing .eventsbox_container wider than its own
-column and forcing a horizontal scrollbar instead of the intended ellipsis
-truncation. */
 .home-eventsbox-subevents {
   flex-basis: 100%;
   min-width: 0;
 }
 
 .home-eventsbox-subevents-toggle {
-  /* position:relative + z-index puts this above .home-eventsbox-title-
-  link's stretched ::after overlay, so it toggles the list below instead of
-  the click falling through to the row's own link. flex-wrap:wrap -- an
-  inline-flex container's own items (the count text and the hint span)
-  never wrap relative to each other by default, so a long translated
-  string here could force the same kind of overflow min-width:0 above
-  fixes for the sub-events list; wrapping the two onto a second line
-  instead keeps it contained. */
   position: relative;
   z-index: 1;
   display: inline-flex;
@@ -159,21 +116,15 @@ truncation. */
   color: var(--color-text);
 }
 
-/* "See highlights" -- a second, visually lighter hint after the count, not
-its own separate element/click target (the whole button already toggles the
-list; this is just a clearer label for what that click reveals). */
 .home-eventsbox-subevents-toggle-hint {
   opacity: 0.75;
 }
 
 .home-eventsbox-subevents-toggle-hint::before {
-  content: "\2013"; /* en dash */
+  content: "\2013";
   margin: 0 0.3em;
 }
 
-/* Same caret convention as .sidemenu-item .sidemenu-option::after
-(sidemenu.css)/.dropdown-menu .link::after (dropdownmenu.css) -- a small
-triangle that flips once open, self-contained here rather than shared. */
 .home-eventsbox-subevents-toggle::after {
   content: "";
   display: inline-block;
@@ -192,13 +143,6 @@ triangle that flips once open, self-contained here rather than shared. */
   }
 }
 
-/* Same expand-in-place mechanism as .sidemenu-item .drop-content
-(sidemenu.css): collapsed via max-height:0 (a real height, unlike display:
-none, is what makes the max-height transition below animate at all) rather
-than position:absolute/fixed, so expanding this just grows the row in
-normal document flow -- every event below it moves down naturally, and
-.eventsbox_container's own overflow-y:auto (home_layout.css) just scrolls
-to fit like it would for any other in-flow content, no clipping/drift risk. */
 .home-eventsbox-subevents-list {
   display: flex;
   flex-direction: column;
@@ -214,7 +158,7 @@ to fit like it would for any other in-flow content, no clipping/drift risk. */
 }
 
 .home-eventsbox-subevents.is-open .home-eventsbox-subevents-list {
-  max-height: 20rem; /* big enough to fit every highlighted sub-event */
+  max-height: 20rem;
   opacity: 1;
 }
 
@@ -229,10 +173,6 @@ to fit like it would for any other in-flow content, no clipping/drift risk. */
   position: relative;
   z-index: 1;
   display: block;
-  /* .home-eventsbox-subevents-list is itself display:flex (column), so
-  each <a> is its own flex item subject to the same min-width:auto trap as
-  .home-eventsbox-subevents above -- needs its own reset for the ellipsis
-  below to actually engage instead of overflowing. */
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;

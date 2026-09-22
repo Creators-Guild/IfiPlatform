@@ -43,7 +43,7 @@
    buttons (font: inherit, no cap) eventually become individually wider
    than the effective viewport, which wrapping alone can't fix since each
    is one unbreakable inline-block token */
-@media (max-width: 700px) {
+@media (max-width: 45rem) {
   .lang-btn {
     padding: 2px 6px;
     font-size: 14px;
@@ -51,13 +51,13 @@
 }
 
 /* the two-button row is the default everywhere -- .select-language-dropdown
-   (the <details> version) stays hidden until the 480px block below swaps
+   (the <details> version) stays hidden until the 45rem block below swaps
    which one is shown. */
 .select-language-dropdown {
   display: none;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 45rem) {
   /* overlaid in the corner instead of sitting in normal flow -- as a full-
      width block above .header-bar (its default), this pushed the title
      down by its own height. .topheader-content (page_layout.css) is the

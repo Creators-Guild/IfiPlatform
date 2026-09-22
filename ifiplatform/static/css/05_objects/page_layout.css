@@ -2,19 +2,24 @@
     display: grid;
     min-height: 100vh;
     grid-template:
-        "top" auto
-        "main" 1fr
-        "bot" auto;
+        "top top" auto
+        "side main" 1fr
+        "side bot" auto
+        / auto minmax(0, 1fr);
 }
 
 .topheader-content {
     grid-area: top;
-    /* positioning context for select_language.css's mobile-only absolute
-       placement (the language dropdown overlaid in the corner instead of
-       taking its own full-width row above the title) -- harmless at any
-       other breakpoint/on any other child, since nothing else in here is
-       absolutely positioned. */
     position: relative;
+}
+
+/* runs down behind the footer so the sticky menu inside is never pushed off screen */
+.page-layout > .sidemenu_container {
+    grid-area: side;
+}
+
+.page-layout > .sidemenu_container:not(:has(.sidemenu)) {
+    display: none;
 }
 
 .page-content {
@@ -22,5 +27,8 @@
 }
 
 .bottombar-content {
-    grid-area: bot;
+    grid-row: bot;
+    grid-column: 1 / -1;
+    position: relative;
+    z-index: 20;
 }

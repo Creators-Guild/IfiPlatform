@@ -135,7 +135,7 @@
     transform 0.05s ease;
 }
 
-/* icon-only mobile nav (see the 480px block below) -- hidden here so
+/* icon-only mobile nav (see the 45rem block below) -- hidden here so
    desktop/tablet keep the existing text labels unchanged. */
 .nav_link-icon {
   display: none;
@@ -144,7 +144,7 @@
 .nav_link-icon svg {
   display: block;
   /* this class is only ever visible at the mobile breakpoint (see the
-     display:none above and the 480px override further down) where it's
+     display:none above and the 45rem override further down) where it's
      the link's sole content, not sitting alongside text -- sized up
      accordingly rather than matching a typical inline-with-text icon. */
   width: 1.9rem;
@@ -201,7 +201,7 @@
 }
 
 /* max-width fallback, in case JS fails to load */
-@media (max-width: 700px) {
+@media (max-width: 45rem) {
   .nav_link-full {
     display: none;
   }
@@ -220,7 +220,7 @@
 
 /* phone-sized screens: shrink everything so the banner doesn't eat the
    whole first screenful, and the nav group reliably stays on one line */
-@media (max-width: 480px) {
+@media (max-width: 45rem) {
   .header-bar {
     padding: 12px 0.75rem 0.35rem;
     gap: 2px 0.75rem;

@@ -1,8 +1,4 @@
-/* mobile "contents" dialog -- unlike .toc-overlay-panel below, this one
-   does use a backdrop + centered layout (same pattern as .tool-lightbox in
-   tool_lightbox.css), since a small screen doesn't have room to anchor a
-   popover next to anything sensible. position:fixed/inset:0 come from
-   ../shared/modal_base.css, shared across every full-screen modal. */
+/* Design rationale: docs/claude_context/article_toc.md */
 .toc-modal {
   z-index: 1000;
   display: flex;
@@ -15,7 +11,6 @@
   display: none;
 }
 
-/* background comes from ../shared/modal_base.css */
 .toc-modal-backdrop {
   position: absolute;
   inset: 0;
@@ -103,4 +98,3 @@
   color: var(--color-text-muted);
   border-bottom-color: var(--accent-color, var(--color-text-muted));
 }
-

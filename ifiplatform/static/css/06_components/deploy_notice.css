@@ -1,22 +1,9 @@
-/* Site-wide "a deploy is imminent" banner -- see
-   templates/partials/deploy_notice.html and static/js/deploy_notice.js.
-   Full-width, above everything else (including the header), since it's a
-   time-sensitive warning every visitor should see regardless of what page
-   they're on. */
 .deploy-notice {
   width: 100%;
   box-sizing: border-box;
   padding: 0.75rem 1.5rem;
   background-color: var(--color-warning);
-  /* dark text -- --color-on-accent (near-white) had good contrast against
-     the old red background, but not against bright yellow. */
-  color: var(--color-text);
   font-weight: bold;
-  /* flexbox centering rather than relying on text-align alone -- keeps
-     the message centered as one visual unit (text + countdown span
-     together) regardless of container width/inherited alignment quirks. */
-  display: flex;
-  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
 }

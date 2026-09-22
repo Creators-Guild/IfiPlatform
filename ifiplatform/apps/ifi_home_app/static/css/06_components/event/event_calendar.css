@@ -1,14 +1,6 @@
-/* Design rationale/history: docs/claude_context/event_calendar.md */
-
-/* UnionPage's own week-calendar (union_page.html/union_calendar_panel.html)
--- reuses events/partials/event_calendar_grid.html and the .event-calendar-*
-rules below as-is, but navigates via union_calendar.js swapping the panel
-in place rather than event_calendar.js's day pager, so it gets its own
-always-visible nav row instead of reusing .event-calendar-pager. */
+/* Design rationale: docs/claude_context/event_calendar.md */
 .union-calendar-nav {
   display: grid;
-  /* fixed-width columns, not flex/1fr centering -- see
-  docs/claude_context/event_calendar.md for why. */
   grid-template-columns: 1.5rem 19rem 1.5rem;
   width: fit-content;
   margin: 0.5rem auto 1rem;
@@ -31,31 +23,16 @@ always-visible nav row instead of reusing .event-calendar-pager. */
   color: var(--color-accent-hover);
 }
 
-/* smaller than the default 3.75rem below -- see
-docs/claude_context/event_calendar.md for why a union's semester-wide
-calendar needs its own hour height. */
 .union-calendar-section .event-calendar {
   --ec-hour-height: 2.75rem;
 }
 
-/* Week-calendar view of a parent event's timed sub_events (event_page.html,
-positions/sizes computed by EventPage.calendar_days) -- deliberately
-uncapped width (unlike .event-page-prose's 50rem reading column), a
-5-day-wide grid needs the room. Full rationale + how --ec-hours drives
-block sizing: docs/claude_context/event_calendar.md */
 .event-calendar {
   width: 100%;
   margin-top: 1.5rem;
   text-align: left;
-  background-color: #e5e5e5; /* temp test color, per request */
-  --ec-bg: #e5e5e5; /* same value as background-color above -- referenced
-  by .event-calendar-hours' own sticky background at the mobile breakpoint
-  below, since background-color itself isn't an inherited CSS property. */
-  /* the one place each hour's actual height is set -- .event-calendar-
-  hours/.event-calendar-day both multiply this by --ec-hours (hour_count
-  from calendar_days) instead of hardcoding 3.75rem directly, so the
-  mobile breakpoint below can shrink the whole calendar's total height by
-  overriding just this one custom property. */
+  background-color: #e5e5e5;
+  --ec-bg: #e5e5e5;
   --ec-hour-height: 3.75rem;
 }
 
@@ -87,9 +64,6 @@ block sizing: docs/claude_context/event_calendar.md */
   position: absolute;
   left: 0;
   right: 0.5rem;
-  /* -0.5em nudges the label up so its text sits centered *on* the
-  gridline it marks (top_pct is the line's own position), rather than
-  hanging down from it like a caption. */
   transform: translateY(-0.5em);
   font-size: 0.75rem;
   color: var(--color-text-muted);
@@ -106,9 +80,6 @@ block sizing: docs/claude_context/event_calendar.md */
   flex: 1;
   height: calc(var(--ec-hours) * var(--ec-hour-height));
   border-left: 1px solid var(--color-border);
-  /* hourly gridlines -- a repeating background instead of one real element
-  per hour_mark, since these are purely decorative (the hour labels
-  themselves are the actual positioned elements). */
   background-image: repeating-linear-gradient(
     to bottom,
     var(--color-border) 0,
@@ -122,10 +93,6 @@ block sizing: docs/claude_context/event_calendar.md */
   border-right: 1px solid var(--color-border);
 }
 
-/* Purely a positioning box -- top/height/left/width (inline style) are
-EventPage.calendar_days' computed percentages. Deliberately holds none of
-the visible styling itself (see .event-calendar-block-inner below) -- why
-margin can't do this box's job, docs/claude_context/event_calendar.md */
 .event-calendar-block {
   position: absolute;
   text-decoration: none;
@@ -141,16 +108,7 @@ margin can't do this box's job, docs/claude_context/event_calendar.md */
   gap: 0.1rem;
   padding: 0.25rem 0.45rem;
   border-radius: 6px;
-  /* box-sizing:border-box means this draws inside the already-inset 2px
-  gap above rather than growing the box further or needing its own
-  recalculation. */
   border: 1px solid var(--color-border);
-  /* dark text on a pastel background (EventPage.calendar_color's own
-  palette below), not the site-wide white-on-saturated .event-type-badge
-  convention -- that pairing works at badge scale but reads as too
-  low-contrast once the same saturated color fills a block this big; the
-  printed schedule this view mirrors makes the same choice (dark text on
-  its own color-coded cells). */
   color: var(--color-event-text);
   background-color: var(--color-text-muted);
   line-height: 1.25;
@@ -158,9 +116,6 @@ margin can't do this box's job, docs/claude_context/event_calendar.md */
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
-/* translateY is the same hover-lift convention as .articlecard
-(article_card.css) -- safe on an absolutely-positioned element like this
-since it doesn't affect any sibling's layout. */
 .event-calendar-block:hover .event-calendar-block-inner,
 .event-calendar-block:focus-visible .event-calendar-block-inner {
   box-shadow: 0 4px 14px var(--color-shadow);
@@ -172,11 +127,6 @@ since it doesn't affect any sibling's layout. */
   z-index: 2;
 }
 
-/* Class suffix is EventPage.calendar_color's own choice value (blank ->
-_resolve_calendar_color's event_type-based fallback, event_models.py) --
-"custom" gets its background from the block's own inline style instead
-(calendar_color_custom, a freeform hex), this rule just supplies the
-matching dark text for it. */
 .event-calendar-block--blue {
   background-color: var(--color-event-blue);
 }
@@ -215,11 +165,6 @@ matching dark text for it. */
   margin-top: 1.5rem;
 }
 
-/* Mobile-only controls (event_calendar.js): prev/next day paging plus the
-"view whole week" modal trigger, stacked with the toggle above the
-centered arrows. Hidden here unconditionally; the @media block below is
-what actually shows this bar, only under the same 45rem breakpoint as the
-rest of this file's mobile treatment. */
 .event-calendar-controls {
   display: none;
   flex-direction: column;
@@ -234,12 +179,6 @@ rest of this file's mobile treatment. */
   gap: 0.75rem;
 }
 
-/* Second copy of the prev/next pair, repeated below the grid
-(event_page.html) so paging to the next day doesn't require scrolling
-back up to .event-calendar-controls first -- event_calendar.js binds
-both copies together, keeping their enabled/disabled state in sync.
-Hidden here for the same reason .event-calendar-controls is; shown by
-the same @media block below. */
 .event-calendar-pager--bottom {
   display: none;
 }
@@ -288,15 +227,6 @@ the same @media block below. */
   border-color: var(--color-accent);
 }
 
-/* Selected state for a tapped-once .event-calendar-block on a no-hover
-device (two-tap select-then-navigate, event_calendar.js) -- applies in
-BOTH the inline grid and the modal's own copy of it, since the modal is
-just as touch-driven. Reuses the existing :hover/:focus-visible lift
-above (box-shadow + translateY) so a touch user gets the same "this one's
-active" affordance a mouse user already gets for free, plus
-overflow:visible + height:auto so a title/time
-.event-calendar-block-inner would otherwise clip can grow to full size
-instead of staying truncated. */
 .event-calendar-block.is-selected {
   z-index: 3;
 }
@@ -311,12 +241,6 @@ instead of staying truncated. */
   transform: translateY(-2px);
 }
 
-/* Hidden until a block is selected -- this is what actually tells a
-first-time mobile visitor a second tap is needed, rather than leaving the
-two-tap requirement silent/undiscoverable. Always present in the DOM
-(event_calendar_grid.html) so no JS-driven text insertion is needed, just
-a visibility toggle keyed off the same .is-selected class as the expand
-treatment above. */
 .event-calendar-block-hint {
   display: none;
   margin-top: 0.15rem;
@@ -329,10 +253,6 @@ treatment above. */
   display: block;
 }
 
-/* "View whole week" modal -- see docs/claude_context/event_calendar.md
-for the full design (why it's not media-query-gated, the visible-
-scrollbar choice). position:fixed/inset:0 and the color-mix backdrop come
-from ../shared/modal_base.css, shared across every full-screen modal. */
 .event-calendar-modal {
   z-index: 1000;
   display: none;
@@ -382,9 +302,6 @@ from ../shared/modal_base.css, shared across every full-screen modal. */
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   padding: 2.5rem 0.5rem 0.9rem;
-  /* explicitly visible scrollbar along the bottom, not the browser
-  default (thin/auto-hiding on most mobile browsers) -- this IS the "it's
-  scrollable" signal, alongside the edge fades below. */
   scrollbar-width: auto;
   scrollbar-color: var(--color-text) transparent;
 }
@@ -402,19 +319,11 @@ from ../shared/modal_base.css, shared across every full-screen modal. */
   border-radius: 999px;
 }
 
-/* width:max-content is what actually creates the horizontal overflow to
-scroll -- see docs/claude_context/event_calendar.md */
 .event-calendar-modal-scroll .event-calendar {
   width: max-content;
   min-width: 100%;
 }
 
-/* Left/right "more content this way" hints -- direct children of
-.event-calendar-modal-panel, not .event-calendar-modal-scroll, so they
-stay fixed at the panel's own edges regardless of scroll position (same
-reasoning as messageboard_modal.css's .messageboard-modal-fade). Visibility
-toggled via JS (event_calendar.js's updateFades()) -- see
-docs/claude_context/event_calendar.md */
 .event-calendar-modal-fade-left,
 .event-calendar-modal-fade-right {
   display: none;
@@ -441,45 +350,18 @@ docs/claude_context/event_calendar.md */
 }
 
 @media (max-width: 45rem) {
-  /* Squeezing 5 day-columns down to fit a phone's own width made every
-  block too narrow to read at all -- horizontal scroll instead, keeping
-  each day at a fixed, actually-readable width (below) and letting
-  .event-calendar itself pan sideways, while the page around it still
-  scrolls vertically as normal. */
   .event-calendar {
     overflow-x: auto;
-    /* Setting only overflow-x leaves overflow-y at its default (visible),
-    but per the CSS overflow spec, a browser then silently computes that
-    visible value as auto too once the *other* axis isn't visible -- on
-    mobile Safari specifically, combined with -webkit-overflow-scrolling:
-    touch below, that auto-promoted vertical overflow can capture a
-    vertical swipe that starts on the calendar into scrolling *inside* it
-    instead of letting it bubble up to scroll the page. Explicit
-    overflow-y:hidden blocks that promotion -- there's nothing to actually
-    clip vertically anyway, since nothing here constrains this element's
-    own height (it's exactly as tall as --ec-hours of --ec-hour-height). */
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
-    /* shrinks every hour row (and so the calendar's total height, which is
-    just --ec-hours of these stacked) closer to a phone screen's own
-    height, instead of needing a long vertical scroll just to see a
-    whole day. */
     --ec-hour-height: 2.25rem;
   }
 
   .event-calendar-header-day,
   .event-calendar-day {
-    /* was flex:1 (equal share of whatever width was available) --
-    flex-shrink:0 here is what actually forces the scroll: .event-calendar-
-    days/. event-calendar-header can no longer squeeze these down to fit,
-    so their combined width (5 * 8rem) overflows .event-calendar instead. */
     flex: 0 0 8rem;
   }
 
-  /* 19rem's own comment (above, desktop rule) is sized for the longest
-  label with room to spare -- too wide a fixed column on a narrow phone
-  screen, so it shrinks here. Still fixed-width, not auto/1fr: the whole
-  point is the arrows don't move week to week, just at a size that fits. */
   .union-calendar-nav {
     grid-template-columns: 1.5rem 13rem 1.5rem;
     font-size: 0.8rem;
@@ -489,11 +371,6 @@ docs/claude_context/event_calendar.md */
     font-size: 0.7rem;
   }
 
-  /* Stays put while the day columns scroll past underneath, via
-  position:sticky against .event-calendar's own scrolling box -- without
-  its own background this would show whatever day column has scrolled
-  under it right through, instead of covering it the way a fixed hour
-  rail should. */
   .event-calendar-hours,
   .event-calendar-header-spacer {
     position: sticky;
@@ -533,15 +410,6 @@ docs/claude_context/event_calendar.md */
     margin-top: 1rem;
   }
 
-  /* Single-day paging (event_calendar.js adds/removes --paged on the
-  INLINE section's grid only, and --current on whichever day is
-  currently paged to) -- collapses the horizontal-scroll-all-days layout
-  above into showing only the current day at full width. Scoped under
-  .event-calendar--paged, not unconditionally, so a JS-disabled browser
-  (which never adds that class) falls back to the horizontal-scroll
-  behavior above instead of hiding every day with nothing marked
-  --current to reveal -- and so the modal's own grid copy (which also
-  never gets this class) is unaffected. */
   .event-calendar--paged {
     overflow-x: hidden;
   }
@@ -556,9 +424,6 @@ docs/claude_context/event_calendar.md */
     flex: 1 1 100%;
   }
 
-  /* True full-screen takeover on phones -- see
-  docs/claude_context/event_calendar.md for why the background/text
-  colors below all flip to a dark scheme here. */
   .event-calendar-modal {
     padding: 0;
   }
@@ -580,10 +445,6 @@ docs/claude_context/event_calendar.md */
   }
 
   .event-calendar-modal-scroll .event-calendar {
-    /* the sticky hour rail (.event-calendar-hours/-header-spacer) needs a
-    solid backing to actually mask day columns scrolling underneath it,
-    same reasoning as --ec-bg's own comment further up -- just a dark
-    value here instead of the light one used inline/on desktop. */
     --ec-bg: var(--color-bg-dark);
   }
 

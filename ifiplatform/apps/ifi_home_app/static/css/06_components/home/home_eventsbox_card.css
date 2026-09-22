@@ -1,23 +1,6 @@
-/* Visual/decorative properties for the homepage's own eventsbox card --
-its layout/positioning properties (flex-basis, overflow, box-sizing,
-margin, padding) live in home_layout.css on this same selector, kept
-separate so "the home page's own layout" and "the home page's own visual
-identity" each read as one thing per file. Box styling (border/radius/
-shadow) deliberately copies .messageboard (messageboard_slideshow.css) verbatim --
-same "card" look. */
-.home-layout .maincontent .content-row > .eventsbox_container {
+.eventsbox_container {
     background-color: var(--color-card-bg);
     border: 2px solid var(--color-border);
     border-radius: 12px;
     box-shadow: 0 2px 8px var(--color-shadow);
-}
-
-@media (max-width: 72rem) {
-    /* border/border-radius fall through unchanged from the base rule
-    above (same 2px/12px either way) -- only the shadow gets bumped up
-    here to something more clearly "modal-like" once expanded full-screen
-    (home_layout.css's own comment on .is-expanded has the full story). */
-    .home-layout .maincontent .content-row > .eventsbox_container.is-expanded {
-        box-shadow: 0 8px 24px var(--color-shadow);
-    }
 }

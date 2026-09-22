@@ -1,5 +1,4 @@
-/* Same icon-button-toggles-a-panel pattern as .toc-open-button/
-   .toc-overlay-panel (article_toc/article_toc_overlay.css) -- see union_position_info.js. */
+/* Design rationale: docs/claude_context/union_page.md */
 .position-info-widget {
   position: absolute;
   top: 0.6rem;
@@ -29,7 +28,6 @@
   height: 1.3rem;
 }
 
-/* background-color/border come from ../shared/popover_base.css */
 .position-info-panel {
   position: absolute;
   top: 100%;
@@ -49,20 +47,9 @@
   display: none;
 }
 
-/* Mobile: same problem as the nav dropdown (dropdownmenu.css) -- anchored
-to a small icon whose position varies per card in the grid, so the panel
-can run into the sidemenu or off the edge of the screen. The icon itself
-(.position-info-widget) stays exactly where it is; only the panel escapes
-to a fixed, viewport-relative spot instead of growing from the icon.
-`top` is set inline by union_position_info.js -- just under the icon,
-pushed back up if that would run it off the bottom of the screen. */
 @media (max-width: 45rem) {
   .position-info-panel {
     position: fixed;
-    /* 60px clears the sidemenu's collapsed rail at any width in this
-       range (60px desktop-collapsed / 56px mobile-collapsed, see
-       sidemenu.css), plus a small gutter matching the page's own mobile
-       side padding (home_layout.css). */
     left: calc(60px + 0.75rem);
     right: 0.75rem;
     margin-top: 0;
@@ -73,17 +60,14 @@ pushed back up if that would run it off the bottom of the screen. */
   }
 }
 
-/* display/align-items/justify-content/gap come from ../shared/popover_base.css */
 .position-info-header {
   margin: 0 0 0.5rem;
 }
 
-/* margin/font-weight come from ../shared/popover_base.css */
 .position-info-title {
   font-size: 0.85rem;
 }
 
-/* flex/cursor come from ../shared/popover_base.css */
 .position-info-close {
   padding: 0.1rem 0.5rem;
   background: none;
@@ -99,12 +83,6 @@ pushed back up if that would run it off the bottom of the screen. */
   border-color: var(--color-text);
 }
 
-/* Bigger text + more breathing room between lines/items, specifically
-inside this popover -- the inline Open Positions card (union_member_
-card.css's own .union-position-responsibilities rule, shared by both
-contexts) stays at its original compact size; two-class selectors here
-outweigh that one-class rule regardless of stylesheet order, so only this
-reading context gets scaled up. */
 .position-info-panel .union-position-responsibilities h4 {
   font-size: 0.95rem;
 }
