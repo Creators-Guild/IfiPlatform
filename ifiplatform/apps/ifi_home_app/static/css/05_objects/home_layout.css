@@ -29,6 +29,7 @@
 
 .eventsbox_container {
     grid-area: details;
+    align-self: start;
     max-width: 23rem;
     padding: 1rem;
     margin: 2rem;

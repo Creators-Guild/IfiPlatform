@@ -1,5 +1,5 @@
 // Tap-to-toggle behavior for hover-driven menu components (the top navbar's
-// .dropdown-menu and the homepage events box), shared since they all need
+// .dropdown-menu and the profile menu), shared since they all need
 // the same fix: on touch there's no hover to reveal a submenu, so the first
 // tap has to open it instead of navigating away. Guarded against double-init
 // since this script is included from multiple partials that can appear
@@ -67,29 +67,10 @@ if (!window.__ifiTapToggleMenusInit) {
     // so it's wired up here regardless of hover capability.
     setupTapToggle(".profile-dropdown", "button.link");
 
-    // Same collapsed-by-default treatment for an event with more than 2
-    // related_unions (home_eventsbox.html/.css) -- harmless to call this
-    // for every .home-eventsbox-unions row regardless of whether it
-    // actually has a toggle button; setupTapToggle just no-ops (returns
-    // early) on the ones that don't. Unlike the rest of this file, this one
-    // runs on every device, not just touch: it's click-only everywhere (no
-    // CSS :hover reveal, see home_eventsbox.css), since hovering the row to
-    // just read the date/tags was revealing the extra tags too easily.
-    setupTapToggle(".home-eventsbox-unions", "button.home-eventsbox-unions-toggle");
-
     if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
       return; // mouse devices keep the CSS :hover reveal for these
     }
 
     setupTapToggle(".dropdown-menu:not(.profile-dropdown)", "button.link");
-    // Homepage events box: an event's highlighted sub-events (home_
-    // eventsbox.html/.css), an in-flow expand-in-place panel rather than a
-    // floating .dropdown-menu -- it
-    // lives inside .eventsbox_container, which scrolls (overflow-y:auto),
-    // and a position:absolute/fixed panel there either gets clipped or (if
-    // fixed) drifts away from its trigger on scroll. Expanding in normal
-    // flow sidesteps that entirely: it just grows the row, same as any
-    // other in-flow content would.
-    setupTapToggle(".home-eventsbox-subevents", "button.home-eventsbox-subevents-toggle");
   });
 }

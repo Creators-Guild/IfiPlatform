@@ -2,7 +2,7 @@
 
 Covers `ifi_home_app/static/css/05_objects/home_layout.css` (the homepage
 grid, `home/home_index.html`), plus `06_components/home/home_navbar_mobile.css`.
-`06_components/home/home_eventsbox_card.css` holds the card look of the
+`06_components/home/home_eventsbox.css` holds the card look of the
 same `.eventsbox_container` selector; the box's contents are covered in
 `home_eventsbox.md`.
 
@@ -26,8 +26,8 @@ direct grid items of `.maincontent`, letting `#msg-board` (`msg`) and
 `details`. Their `grid-area` rules exist only inside this media query;
 above 72rem they're ordinary children of `#home-subcontent`.
 
-The `72rem` value is shared by eye with `home_eventsbox_card.css`,
-`home_eventsbox_mobile.css` and `messageboard_slideshow.css` (plus
+The `72rem` value is shared by eye with `home_eventsbox.css`
+and `messageboard_slideshow.css` (plus
 `messageboard.js`'s `MOBILE_QUERY`) — there's no shared variable between
 plain CSS files. It's wider than the `45rem` breakpoint used elsewhere
 because, with the events box beside it, the content column has already

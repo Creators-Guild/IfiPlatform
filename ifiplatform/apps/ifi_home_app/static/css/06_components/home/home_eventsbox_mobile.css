@@ -1,5 +1,0 @@
-@media (max-width: 72rem) {
-  .home-eventsbox-list li:nth-child(n+5) {
-    display: none;
-  }
-}

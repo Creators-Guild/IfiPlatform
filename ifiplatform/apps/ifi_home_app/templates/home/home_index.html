@@ -51,8 +51,7 @@
         </div>
         
         <div class="eventsbox_container">
-            {% now "F" as current_month %}
-            <h2 class="newsbar-heading newsbar-heading--events">{% blocktrans %}This month at Ifi &ndash; {{ current_month }}{% endblocktrans %}</h2>
+            <h2>{% blocktrans %}Happening at Ifi{% endblocktrans %}</h2>
             {% include "home/partials/home_eventsbox.html" %}
         </div>
     {% endblock maincontent %}

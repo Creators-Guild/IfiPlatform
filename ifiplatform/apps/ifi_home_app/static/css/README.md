@@ -98,7 +98,7 @@ being something every template has to get right:
 - `translation_warning.css` is linked last in every section partial:
   `06_components/article/article_header.css` also styles
   `.translation-warning`, and this one has to win.
-- `home_eventsbox_card.css` (the events box's look) is linked in
+- `home_eventsbox.css` (the events box's look) is linked in
   `home_index.html`, while its size and position stay in `home_layout.css`
   -- same `.eventsbox_container` selector, split into layout and look.
 - In `home_base.html`, `06_components/sidemenu.css` comes after

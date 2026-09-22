@@ -9,7 +9,7 @@ and `messageboard_modal.css` (`home/partials/home_messageboard.html`,
 `72rem`, not a narrower phone-only width — matches `home_layout.css`'s own
 stacking breakpoint (the homepage grid goes single-column there, and
 `.eventsbox_container` switches to its compact/collapsed mobile look at the
-same width, `home_eventsbox_mobile.css`). Below that breakpoint the message
+same width, `home_eventsbox.css`). Below that breakpoint the message
 board sits directly above the events box in a single narrow column, so it
 needs this compact treatment throughout that whole range, or the two
 would visibly mismatch. `messageboard.js`'s own `MOBILE_QUERY` has to stay

@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
@@ -456,6 +457,16 @@ class EventPage(TranslationWarningMixin, Page):
         return self.event_date <= today <= (self.end_date or self.event_date)
 
     @property
+    def time_tag(self):
+        """"today" or "tomorrow" when the event falls on one of those, else
+        None -- at most one applies, nearest first."""
+        if self.is_happening_now:
+            return "today"
+        if self.event_date == timezone.localdate() + timedelta(days=1):
+            return "tomorrow"
+        return None
+
+    @cached_property
     def sub_events(self):
         return EventPage.objects.child_of(self).live().order_by("event_date", "event_time")
 
@@ -496,7 +507,7 @@ class EventPage(TranslationWarningMixin, Page):
             if entry.value["article"] is not None
         ]
 
-    @property
+    @cached_property
     def all_related_unions(self):
         """This event's related_unions plus every sub_event's, deduped by
         union keeping the highest-priority role. See
@@ -522,7 +533,7 @@ class EventPage(TranslationWarningMixin, Page):
 
         return [{"role": role, "union": union} for role, union in best_by_union.values()]
 
-    @property
+    @cached_property
     def highlighted_sub_events(self):
         """Today's sub-event(s) if any are scheduled today, else the
         curated is_highlighted set."""
@@ -531,7 +542,7 @@ class EventPage(TranslationWarningMixin, Page):
             return today_events
         return self.sub_events.filter(is_highlighted=True)
 
-    @property
+    @cached_property
     def calendar_days(self):
         """This event's sub_events laid out for a week-calendar view -- see
         docs/claude_context/event_models.md for the full layout algorithm."""

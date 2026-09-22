@@ -116,12 +116,6 @@ def main_view(request):
         if event_index
         else EventPage.objects.none()
     )
-    # Top-level events actually in progress today, e.g. day 3 of Fadderuke
-    # -- a subset of upcoming_events (already includes ongoing multi-day
-    # events via the end_date filter above), surfaced separately so the
-    # homepage box can call them out at the top instead of leaving them to
-    # blend into the rest of the list.
-    happening_now_events = [event for event in upcoming_events if event.is_happening_now]
 
     context = {
         "news_items": news_items,
@@ -138,7 +132,6 @@ def main_view(request):
         "new_student_cat": new_student_category,
         "new_student_children": new_student_children,
         "upcoming_events": upcoming_events,
-        "happening_now_events": happening_now_events,
     }
 
     return render(
