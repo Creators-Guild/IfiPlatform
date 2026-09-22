@@ -12,10 +12,18 @@
     <link rel="icon" href="{% static 'images/favicon-32.png' %}?v=6" type="image/png" sizes="32x32">
     <link rel="apple-touch-icon" href="{% static 'images/favicon-180.png' %}?v=6">
     {% include "css_links/global.html" %}
+    {% if UMAMI_WEBSITE_ID %}
+    <script defer src="{{ UMAMI_SCRIPT_URL }}"
+            data-website-id="{{ UMAMI_WEBSITE_ID }}"
+            data-domains="ifiplattform.no, www.ifiplattform.no"></script>
+    {% endif %}
+    
     {% block app_css %}{% endblock app_css %}
     {% block section_css %}{% endblock section_css %}
     {% block page_css %}{% endblock page_css %}
     {% block extra_head %}{% endblock extra_head %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
 </head>
 <body>
     {% include "partials/deploy_notice.html" %}
