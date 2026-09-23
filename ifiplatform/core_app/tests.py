@@ -3,7 +3,11 @@ import os
 import re
 import time
 
+from pathlib import Path
+
+from django.apps import apps
 from django.conf import settings
+from django.contrib.staticfiles import finders
 from django.core.cache import cache
 from django.core.management import call_command
 from django.test import Client, RequestFactory, TestCase, TransactionTestCase, tag
@@ -77,6 +81,40 @@ class DeployNoticeStatusViewTests(TestCase):
         call_command("announce_deploy", "--clear")
         response = self.client.get(reverse("deploy_notice_status"))
         self.assertIsNone(response.json()["target"])
+
+
+class StaticReferenceTests(TestCase):
+    """Every {% static '...' %} path in the project's own templates must
+    exist. Tests run with plain StaticFilesStorage (see STORAGES in
+    settings.py), which never checks, while production's manifest storage
+    raises on a missing file -- so a stale path (e.g. left behind by a CSS
+    folder rename) 500s every page that uses it in production only."""
+
+    STATIC_TAG_RE = re.compile(r"""\{%\s*static\s+['"]([^'"]+)['"]""")
+    # Pre-existing, study_app is hidden behind APPS_UNDER_DEVELOPMENT.
+    KNOWN_MISSING = {
+        "styles/neon_style/ifi_study/flashcards.css",
+        "styles/neon_style/ifi_study/multiplechoice.css",
+        "styles/neon_style/ifi_study/studygames.css",
+    }
+
+    def _project_template_dirs(self):
+        base_dir = Path(settings.BASE_DIR)
+        dirs = [Path(d) for d in settings.TEMPLATES[0]["DIRS"]]
+        for app in apps.get_app_configs():
+            app_templates = Path(app.path) / "templates"
+            if base_dir in app_templates.parents and app_templates.is_dir():
+                dirs.append(app_templates)
+        return dirs
+
+    def test_every_static_reference_exists(self):
+        missing = []
+        for template_dir in self._project_template_dirs():
+            for template in template_dir.rglob("*.html"):
+                for path in self.STATIC_TAG_RE.findall(template.read_text(encoding="utf-8")):
+                    if path not in self.KNOWN_MISSING and finders.find(path) is None:
+                        missing.append(f"{path} (in {template.relative_to(settings.BASE_DIR)})")
+        self.assertEqual(missing, [], "Templates reference static files that don't exist")
 
 
 @tag("slow")
