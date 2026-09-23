@@ -220,6 +220,7 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
         context["can_publish_page"] = self.can_publish_in_editor_mode(request.user)
         context["can_unpublish_page"] = self.can_unpublish_in_editor_mode(request.user)
         context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
+        context["translation_nudge"] = self.translation_nudge(request.user)
         overrides_by_block_id = {
             style.block_id: style
             for style in ArticleBlockStyle.objects.filter(translation_key=self.translation_key)
@@ -361,6 +362,7 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
         context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
+        context["translation_nudge"] = self.translation_nudge(request.user)
         subcategories = (
             CategoryPage.objects.child_of(self)
             .live()
@@ -438,6 +440,7 @@ class ArticleIndexPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixi
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
         context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
+        context["translation_nudge"] = self.translation_nudge(request.user)
         categories = (
             CategoryPage.objects.child_of(self)
             .live()

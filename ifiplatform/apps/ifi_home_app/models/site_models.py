@@ -4,11 +4,9 @@ from django.db import models
 from django.utils.html import strip_tags
 from wagtail.admin.panels import FieldPanel
 from wagtail.fields import RichTextField
-from wagtail.snippets.models import register_snippet
 from wagtail.models import TranslatableMixin
 
 
-@register_snippet
 class HeaderMessage(TranslatableMixin, models.Model):
     """A short message shown in the site header; one is picked at random per page load."""
 

@@ -10,47 +10,14 @@ Design rationale/history: docs/claude_context/article_style_and_page_mixins.md""
 
 from account_app.permissions import is_pending_editor
 from django.utils.functional import cached_property
+from wagtail.models import Locale
 from wagtail_localize.models import TranslationSource
 
 from django.db import models
 
 from .article.constants import HEX_COLOR_VALIDATOR
+from ..translation.status import page_needs_translation, translation_status
 from ..translation.sync import SOURCE_LANGUAGE_CODE
-
-
-def _get_translation_progress(page):
-    """Returns (total, translated) string-segment counts for the wagtail-localize
-    Translation of `page` into its own locale, or None if there's no such record
-    (e.g. it was never submitted for translation via wagtail-localize)."""
-    try:
-        from wagtail_localize.models import Translation
-    except ImportError:
-        return None
-    translation = (
-        Translation.objects.filter(
-            source__object_id=page.translation_key,
-            target_locale_id=page.locale_id,
-            enabled=True,
-        )
-        .order_by("-created_at")
-        .first()
-    )
-    if translation is None:
-        return None
-    return translation.get_progress()
-
-
-def _page_needs_translation(page):
-    """True if `page` itself is untranslated: either it's still an untouched
-    alias auto-created by locale synchronisation (mirroring another locale's
-    content rather than having its own), or a real translation that
-    wagtail-localize considers incomplete. `alias_of` is unambiguous about
-    which side of a locale pair is the placeholder, unlike comparing text
-    between the two pages."""
-    if page.alias_of_id is not None:
-        return True
-    progress = _get_translation_progress(page)
-    return progress is not None and progress[1] < progress[0]
 
 
 class TranslationWarningMixin:
@@ -59,7 +26,7 @@ class TranslationWarningMixin:
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
-        context["needs_translation"] = _page_needs_translation(self)
+        context["needs_translation"] = page_needs_translation(self)
         return context
 
 
@@ -97,6 +64,17 @@ class EditorModeMixin:
             return False
         source = TranslationSource.objects.get_for_instance_or_none(target)
         return source is not None and source.translations.filter(enabled=True).exists()
+
+    def translation_nudge(self, user):
+        """translation_status() of this page's nb copy, for the editor-mode
+        banner -- None unless `user` may edit it. Resolved to nb so the
+        banner also shows on the en alias/translation of an outdated page."""
+        target = self.style_target
+        if target.locale.language_code != SOURCE_LANGUAGE_CODE:
+            target = target.get_translation_or_none(Locale.objects.get(language_code=SOURCE_LANGUAGE_CODE))
+        if target is None or not editor_mode_allowed(target, user, "edit"):
+            return None
+        return translation_status(target, user)
 
 
 class PageBannerStyle(models.Model):

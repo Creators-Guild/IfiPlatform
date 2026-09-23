@@ -9,7 +9,7 @@ from django.db import migrations, models
 # templates and the show_in_menu flags showed before this migration, as
 # editable MenuGroups and Menus (see models/menus.py). A frozen copy on
 # purpose -- seed_dev_data builds its own for fresh databases. Does nothing on
-# a database with no pages yet. Forward-only: reversing can't restore the
+# a database with no article pages yet. Forward-only: reversing can't restore the
 # removed show_in_menu values.
 
 EXTERNAL = {
@@ -36,7 +36,7 @@ def build_default_menus(apps, schema_editor):
 
     nb = Locale.objects.filter(language_code="nb").first()
     en = Locale.objects.filter(language_code="en").first()
-    if nb is None or Menu.objects.exists() or not Page.objects.filter(locale=nb, depth__gt=1).exists():
+    if nb is None or Menu.objects.exists() or not ArticleIndexPage.objects.filter(locale=nb).exists():
         return
 
     def nb_page(model, **filters):

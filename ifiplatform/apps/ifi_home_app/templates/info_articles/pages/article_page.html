@@ -40,6 +40,7 @@ leaving a visible strip of the site's default background there instead.
     {% if not page_is_live %}
         <div class="article-draft-banner">{% trans "DRAFT" %} &mdash; {% trans "not visible to the public" %}</div>
     {% endif %}
+    {% include "info_articles/partials/translation_nudge.html" %}
     {% if can_edit_style %}
         {% include "info_articles/partials/article_quick_style_panel.html" %}
         {% include "info_articles/partials/article_block_style_mini_panel.html" %}

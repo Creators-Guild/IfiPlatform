@@ -24,9 +24,9 @@ MENU_KEYS = [
 THUMBNAIL_FIELDS = ("logo", "image", "hero_image")
 
 
-@register_snippet
 class MenuGroup(TranslatableMixin, ClusterableModel):
-    """A titled, ordered list of links, placed into one or more Menus."""
+    """A titled, ordered list of links, placed into one or more Menus.
+    Registered as a snippet in wagtail_hooks.py (Norwegian-first listing)."""
 
     title = models.CharField(max_length=100)
     short_title = models.CharField(

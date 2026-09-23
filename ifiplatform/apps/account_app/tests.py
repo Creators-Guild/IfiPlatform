@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group, Permission
 from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 
 from wagtail.models import GroupPagePermission, Page
 
@@ -60,7 +60,8 @@ class DisplayAuthorNameTests(TestCase):
 
     def test_author_gone_unknown_sentinel(self):
         article = ArticlePage(author_display_name="unknown")
-        self.assertEqual(article.display_author_name, "Unknown")
+        with translation.override("en"):
+            self.assertEqual(article.display_author_name, "Unknown")
 
     def test_never_had_author(self):
         article = ArticlePage()

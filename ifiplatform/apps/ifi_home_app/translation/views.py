@@ -1,5 +1,5 @@
-"""wagtail-admin view for machine-translating an entire nb page subtree
-into English in one action, from one confirm screen.
+"""wagtail-admin views for machine-translating an nb page -- or its entire
+subtree -- into English in one action, from one confirm screen.
 
 Design rationale/history: docs/claude_context/translation_views.md"""
 
@@ -38,6 +38,19 @@ def machine_translate_subtree(request, page_id):
     machine_translate_subtree management command) and redirects back to
     the page's edit view immediately -- a real subtree is too slow for any
     request/response cycle, see docs/claude_context/translation_views.md."""
+    return _machine_translate(request, page_id, page_only=False)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def machine_translate_page(request, page_id):
+    """Same as machine_translate_subtree, for just this one page -- the
+    "Machine-translate now" button of the translation nudges
+    (docs/claude_context/translation_nudge.md)."""
+    return _machine_translate(request, page_id, page_only=True)
+
+
+def _machine_translate(request, page_id, page_only):
     if not request.user.has_perms(["wagtail_localize.submit_translation"]):
         raise PermissionDenied
 
@@ -53,7 +66,7 @@ def machine_translate_subtree(request, page_id):
         messages.error(request, "No machine translator is configured.")
         return redirect(reverse("wagtailadmin_pages:edit", args=[page.id]))
 
-    pages = [page, *page.get_descendants()]
+    pages = [page] if page_only else [page, *page.get_descendants()]
 
     if request.method == "POST":
         if "dry_run" in request.POST:
@@ -85,6 +98,7 @@ def machine_translate_subtree(request, page_id):
         base_command = [
             sys.executable, "manage.py", "machine_translate_subtree",
             str(page.id), str(request.user.id),
+            *(["--page-only"] if page_only else []),
         ]
         systemd_cat = shutil.which("systemd-cat")
         if systemd_cat:
@@ -115,5 +129,5 @@ def machine_translate_subtree(request, page_id):
     return render(
         request,
         "translation/machine_translate_subtree_confirm.html",
-        {"page": page, "descendant_count": len(pages) - 1},
+        {"page": page, "descendant_count": len(pages) - 1, "page_only": page_only},
     )

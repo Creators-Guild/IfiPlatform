@@ -1,11 +1,13 @@
 """Menu seeding: the MenuGroups and the three Menus (sidemenu, home
 dropmenus, homepage shortcuts) -- same layout migration 0152_menus builds
-for existing databases. Each group gets a real en copy via
-copy_for_translation, with its title and link labels swapped for English."""
+for existing databases. Each group gets an en copy via copy_for_translation,
+with its title and link labels swapped for English, then registered with
+wagtail-localize so it's mirrored from nb (translation/snippets.py)."""
 
 from ifi_home_app.models import ArticleIndexPage, EventIndexPage
 from ifi_home_app.models.article_models import CategoryPage, StudentUnionCategoryPage, UnionPage
 from ifi_home_app.models.menus import Menu, MenuGroup, MenuGroupLink, MenuSlot
+from ifi_home_app.translation.snippets import link_existing_translation
 
 from .constants import CATEGORY_SPECS, LONG_UNION_NAME
 
@@ -52,6 +54,7 @@ class MenuSeedMixin:
                 en_link.label = link.get("label", ("", ""))[1]
                 en_link.prefix = link.get("prefix", ("", ""))[1]
             en_group.save()
+            link_existing_translation(nb_group, en_group)
 
             self.created_count += 2
             self.stdout.write(f"  created MenuGroup (+en): {titles[0]}")

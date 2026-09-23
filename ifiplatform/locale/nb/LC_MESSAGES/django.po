@@ -2297,3 +2297,19 @@ msgstr "IfiPlattform blir Open Source! Kommer høsten 2026!"
 
 #~ msgid "Guest Lectures"
 #~ msgstr "Gjesteforeleserer"
+
+#: .\apps\ifi_home_app\templates\info_articles\partials\translation_nudge.html
+msgid "The English version of this page is missing."
+msgstr "Den engelske versjonen av denne siden mangler."
+
+#: .\apps\ifi_home_app\templates\info_articles\partials\translation_nudge.html
+msgid "The English version of this page is out of date."
+msgstr "Den engelske versjonen av denne siden er utdatert."
+
+#: .\apps\ifi_home_app\templates\info_articles\partials\translation_nudge.html
+msgid "Machine-translate now"
+msgstr "Maskinoversett nå"
+
+#: .\apps\ifi_home_app\templates\info_articles\partials\translation_nudge.html
+msgid "Open translation editor"
+msgstr "Åpne oversettelsesredigering"

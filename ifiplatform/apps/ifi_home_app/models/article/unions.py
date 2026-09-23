@@ -413,6 +413,7 @@ class StudentUnionCategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWar
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
         context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
+        context["translation_nudge"] = self.translation_nudge(request.user)
         unions = (
             UnionPage.objects.child_of(self)
             .live()

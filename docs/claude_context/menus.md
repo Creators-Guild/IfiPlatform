@@ -38,6 +38,14 @@ and don't depend on where pages sit.
   link stored against the nb page still points to the en page on `/en/`.
 - A blank link label means "use the page's own title", which is already
   translated.
+- English groups are real wagtail-localize translations of their nb group.
+  They're edited in the translation editor and synced from nb, and link
+  URLs and pages are synced rather than translated.
+  `translation/snippets.py:link_existing_translation` registers an
+  existing English copy with wagtail-localize without losing its text.
+  Seeding uses it, and so does `manage.py link_menu_translations` for the
+  plain copies migration `0152_menus` created. New groups just use the
+  normal "Translate" button.
 
 ## Resolving (`get_menu(key)`)
 
@@ -60,5 +68,6 @@ first of `logo`, `image`, `hero_image` that the page has.
 
 - Migration `0152_menus` builds the groups and menus from the old
   `show_in_menu` flags and slug lookups, with nb and en copies, then
-  removes the flags. It is forward-only.
+  removes the flags. It is forward-only. Its en copies are only linked
+  to wagtail-localize once `link_menu_translations` has run.
 - `seed_dev_data/menus.py` builds the same layout for fresh databases.

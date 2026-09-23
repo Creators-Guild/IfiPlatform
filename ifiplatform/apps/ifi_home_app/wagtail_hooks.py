@@ -1,28 +1,25 @@
 """Site-wide wagtail hooks for ifi_home_app.
 
-The nb -> en synchronized-field auto-sync (see the function docstring below)
-plus the "Machine-translate subtree" admin button/URL (see
-translation/views.py) -- add further hooks here rather than starting new
-files, unless a hook is specific enough to a single feature area to warrant
-its own module."""
+The nb -> en synchronized-field auto-sync (see the function docstring below),
+the "Machine-translate subtree"/"page" admin buttons/URLs (see
+translation/views.py), the Norwegian-only admin (see
+translation/admin_locales.py) and the translate-now nudges (see
+translation/nudge.py) -- add
+further hooks here rather than starting new files, unless a hook is
+specific enough to a single feature area to warrant its own module."""
 
 from django.dispatch import receiver
 from django.urls import path, reverse
 from wagtail import hooks
 from wagtail.admin.widgets.button import Button
 from wagtail.signals import page_published
+from wagtail.snippets.models import register_snippet
 from wagtail_localize.machine_translators import get_machine_translator
 
+from .models import HeaderMessage, HomeBoardMessage, MenuGroup
+from .translation import admin_locales, nudge
 from .translation import views as translation_views
 from .translation.sync import SOURCE_LANGUAGE_CODE, sync_synchronized_fields
-
-
-# find correct hook that happens in a spesific moment in wagtail's workflow, and ask it
-# to run a function
-@hooks.register('after_publish_page')
-def say_hello_when_published(request, page):
-    """Example hook that runs after every 'after_publish_page'"""
-    print(f"Someone just published: {page.title}")
 
 
 @hooks.register("register_admin_urls")
@@ -33,7 +30,39 @@ def register_admin_urls():
             translation_views.machine_translate_subtree,
             name="machine_translate_subtree",
         ),
+        path(
+            "machine-translate-page/<int:page_id>/",
+            translation_views.machine_translate_page,
+            name="machine_translate_page",
+        ),
+        path(
+            "toggle-all-locales/",
+            admin_locales.toggle_all_locales,
+            name="toggle_all_locales",
+        ),
     ]
+
+
+hooks.register("construct_explorer_page_queryset", admin_locales.filter_explorer_pages)
+hooks.register("construct_page_chooser_queryset", admin_locales.filter_chooser_pages)
+
+# Translatable snippets -- registered here rather than with @register_snippet
+# so their listing and chooser open on nb (see admin_locales.py).
+for _snippet_model in (HeaderMessage, HomeBoardMessage, MenuGroup):
+    register_snippet(_snippet_model, viewset=admin_locales.NorwegianFirstSnippetViewSet)
+
+
+@hooks.register("register_admin_menu_item")
+def register_toggle_all_locales_menu_item():
+    return admin_locales.ToggleAllLocalesMenuItem()
+
+
+hooks.register("after_publish_page", nudge.warn_after_publish)
+hooks.register("before_edit_page", nudge.warn_on_edit)
+hooks.register("construct_homepage_panels", nudge.add_dashboard_panel)
+hooks.register("register_page_listing_buttons", nudge.listing_status_button)
+hooks.register("register_page_header_buttons", nudge.machine_translate_button)
+hooks.register("register_page_listing_more_buttons", nudge.machine_translate_button)
 
 
 def _machine_translate_subtree_button(page, user, view_name=None, next_url=None):
