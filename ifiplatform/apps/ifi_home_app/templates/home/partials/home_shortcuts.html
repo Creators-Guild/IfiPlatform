@@ -1,7 +1,4 @@
 {% load i18n static wagtailcore_tags article_tags %}
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css\06_components\home_shortcuts\home_shortcuts.css' %}">
-{% endblock %}
 <nav id="home-shortcuts">
   <div class="shortcut-column">
     <div class="shortcut-card">
@@ -48,11 +45,14 @@
         </a>
         <span><img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="icon" width="24" height="24"></span>
       </div>
-      <a class="shortcut-secondary" href="">{% trans "Alle" %}</a>
+      {% get_event_index as event_index_page %}
+      {% if event_index_page %}
+        <a class="shortcut-secondary" href="{% pageurl event_index_page %}">{% trans "Alle" %}</a>
+      {% endif %}
       <a class="shortcut-secondary" href="https://peoply.app/" target="_blank" rel="noopener">{% trans "Union Events" %}<span aria-hidden="true">↗</span> <span class="shortcut-description">Peoply (Eventcalander)</span></a>
       <a class="shortcut-secondary" href="https://ifinavet.no/events" target="_blank" rel="noopener">{% trans "Company Presentations" %}<span aria-hidden="true">↗</span> <span class="shortcut-description">Navet</span></a>
       <a class="shortcut-secondary" href="https://dagenatifi.no/program/" target="_blank" rel="noopener">{% trans "Career Day" %}<span aria-hidden="true">↗</span> <span class="shortcut-description">dagen@ifi</span></a>
-      <a class="shortcut-secondary" href="">{% trans "Open Events" %} <span class="shortcut-description">{% trans "Hosted by Students" %}</span></a>
+      <!-- <a class="shortcut-secondary" href="">{% trans "Open Events" %} <span class="shortcut-description">{% trans "Hosted by Students" %}</span></a> -->
     </div>
   </div>
   <div class="shortcut-column">
