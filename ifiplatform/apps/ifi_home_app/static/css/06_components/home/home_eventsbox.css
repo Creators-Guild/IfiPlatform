@@ -2,7 +2,7 @@
   background-color: var(--color-card-bg);
   border: 2px solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-shadow);
+  box-shadow: 0 3px 8px var(--color-shadow);
 }
 
 .eventsbox_container h2 {

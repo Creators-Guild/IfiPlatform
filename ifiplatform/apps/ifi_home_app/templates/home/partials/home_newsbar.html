@@ -1,5 +1,11 @@
 {% load i18n static %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/01_objects/newsbar/newsbar_layout.css' %}">
+  <link rel="stylesheet" href="{% static 'css/02_components/shared/card_base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/02_components/cards/article_card.css' %}">
+{% endblock %}
+
 <div class="newsbar-layout bottom-content">
     {% for article in news_articles %}
         {% include "info_articles/partials/article_card.html" with article=article %}
@@ -7,4 +13,4 @@
         <p>{% trans "No news yet or something is broken ;_;" %}</p>
     {% endfor %}
 </div>
-<script src="{% static 'js/article_list_toggle.js' %}" defer></script>
+<script src="{% static 'js/article_list_toggle.js' %}" defer></script>  

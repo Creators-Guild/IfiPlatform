@@ -53,25 +53,6 @@ def main_view(request):
         if news_index_page
         else ArticlePage.objects.none()
     )
-    info_articles_index_page = get_section_index("info_articles")
-    suggested_articles = (
-        ArticlePage.objects.descendant_of(info_articles_index_page)
-        .live()
-        .filter(locale=Locale.get_active(), show_on_homepage=True)
-        .order_by("-published_date")[:12]
-        if info_articles_index_page
-        else ArticlePage.objects.none()
-    )
-    # Both columns share the same grid (newsbar_layout.css) at the same
-    # column width, so matching their card *counts* here is what keeps
-    # them the same number of rows tall in the browser -- whichever
-    # category happens to have fewer live articles caps the other one too,
-    # rather than one column trailing on shorter than its neighbour.
-    news_articles = list(news_articles)
-    suggested_articles = list(suggested_articles)
-    shared_article_count = min(len(news_articles), len(suggested_articles))
-    news_articles = news_articles[:shared_article_count]
-    suggested_articles = suggested_articles[:shared_article_count]
 
     unions = StudentUnion.objects.all()
     tools = IfiTool.objects.all()
@@ -116,11 +97,16 @@ def main_view(request):
         if event_index
         else EventPage.objects.none()
     )
+    # Top-level events actually in progress today, e.g. day 3 of Fadderuke
+    # -- a subset of upcoming_events (already includes ongoing multi-day
+    # events via the end_date filter above), surfaced separately so the
+    # homepage box can call them out at the top instead of leaving them to
+    # blend into the rest of the list.
+    happening_now_events = [event for event in upcoming_events if event.is_happening_now]
 
     context = {
         "news_items": news_items,
         "news_articles": news_articles,
-        "suggested_articles": suggested_articles,
         "unions": unions,
         "tools": tools,
         "board_messages": board_messages,
@@ -132,6 +118,7 @@ def main_view(request):
         "new_student_cat": new_student_category,
         "new_student_children": new_student_children,
         "upcoming_events": upcoming_events,
+        "happening_now_events": happening_now_events,
     }
 
     return render(

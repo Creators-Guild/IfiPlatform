@@ -38,7 +38,7 @@
     white-space: nowrap;
 }
 
-.icon {
+.sidemenu .icon {
     flex: none;
     width: var(--icon);
     height: var(--icon);

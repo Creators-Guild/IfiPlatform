@@ -18,7 +18,6 @@
   max-height: 85vh;
   max-height: 85dvh;
   background-color: var(--color-card-bg);
-  border: 2px solid var(--color-border);
   border-radius: 12px;
   box-shadow: 0 8px 24px var(--color-shadow);
   padding: 0.35rem;

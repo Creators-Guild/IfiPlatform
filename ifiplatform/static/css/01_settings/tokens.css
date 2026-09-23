@@ -28,6 +28,8 @@
   --color-pastel-pink: #ff9fd0;
   --color-pastel-green: #8de9a8;
   --color-pastel-purple: #cbaaff;
+  --color-pastel-turq: #C8FEFF;
+  --color-pastel-turq-hover: #6cf9fb;
 
   /* ---- 2. Wagtail compatibility aliases ----
      ArticlePage box/image colors and CategoryPage.color store a plain
