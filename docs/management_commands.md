@@ -81,7 +81,7 @@ running it:** copy the printed `glossary_id` into `DEEPL_GLOSSARY_ID` in
 python manage.py sync_translated_page_fields [--dry-run]
 ```
 
-Re-syncs wagtail-localize `SynchronizedField`s (`show_in_menu`, `status`,
+Re-syncs wagtail-localize `SynchronizedField`s (`status`,
 etc.) from every nb page to its existing English translation. One-off,
 historical catch-up only — `ifi_home_app/wagtail_hooks.py`'s auto-sync
 listens on Wagtail's `page_published` *signal* (not the `after_publish_page`

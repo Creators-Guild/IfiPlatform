@@ -1,82 +1,28 @@
-{% load i18n static wagtailcore_tags article_tags %}
+{% load i18n static article_tags %}
+{% get_shortcut_columns as columns %}
 <nav id="home-shortcuts">
-  <div class="shortcut-column">
-    <div class="shortcut-card">
-      <div class="shortcut-main">
-        <a href="">
-          {% trans "Info" %}
-        </a>
-        <span><img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="icon" width="24" height="24"></span>
-      </div>
-      <a class="shortcut-secondary" href="">{% trans "Academics" %}</a>
-      <a class="shortcut-secondary" href="">{% trans "Practical" %}</a>
-      <a class="shortcut-secondary" href="">{% trans "Social" %}</a>
-      <a class="shortcut-secondary" href="">{% trans "Help" %}</a>
+  {% for column in columns %}
+    <div class="shortcut-column">
+      {% for group in column %}
+        <div class="shortcut-card">
+          <div class="shortcut-main">
+            {% if group.url %}
+              <a href="{{ group.url }}"{% if group.external %} target="_blank" rel="noopener"{% endif %}>
+                {{ group.title }}{% if group.external %}<span aria-hidden="true">↗</span>{% endif %}
+              </a>
+            {% else %}
+              <p>{{ group.title }}</p>
+            {% endif %}
+            <span><img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="icon" width="24" height="24"></span>
+          </div>
+          {% for link in group.links %}
+            <a class="shortcut-secondary" href="{{ link.url }}"{% if link.external %} target="_blank" rel="noopener"{% endif %}>
+              {% if link.prefix %}<span class="shortcut-prefix">{{ link.prefix }} </span>{% endif %}{{ link.label }}{% if link.external %}<span aria-hidden="true">↗</span>{% endif %}
+              {% if link.description %}<span class="shortcut-description">{{ link.description }}</span>{% endif %}
+            </a>
+          {% endfor %}
+        </div>
+      {% endfor %}
     </div>
-    <div class="shortcut-card">
-      <div class="shortcut-main">
-        <a href="">
-          {% trans "Unions" %}
-        </a>
-        <span><img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="icon" width="24" height="24"></span>
-      </div>
-      <a class="shortcut-secondary" href="">{% trans "About" %}</a>
-      <a class="shortcut-secondary" href="">{% trans "All Unions" %}</a>
-      <a class="shortcut-secondary" href="">{% trans "Start a Union" %}</a>
-      <a class="shortcut-secondary" href="">{% trans "Report Misconduct" %}</a>
-    </div>
-  </div>
-  <div class="shortcut-column">
-    <div class="shortcut-card">
-      <div class="shortcut-main">
-        <a href="">
-          {% trans "News" %}
-        </a>
-        <span><img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="icon" width="24" height="24"></span>
-      </div>
-      <a class="shortcut-secondary" href="">{% trans "Recent" %}</a>
-      <a class="shortcut-secondary" href="">{% trans "Ifi" %}</a>
-      <a class="shortcut-secondary" href="">{% trans "UiO" %}</a>
-    </div>
-    <div class="shortcut-card">
-      <div class="shortcut-main">
-        <a href="">
-          {% trans "Events" %}
-        </a>
-        <span><img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="icon" width="24" height="24"></span>
-      </div>
-      {% get_event_index as event_index_page %}
-      {% if event_index_page %}
-        <a class="shortcut-secondary" href="{% pageurl event_index_page %}">{% trans "Alle" %}</a>
-      {% endif %}
-      <a class="shortcut-secondary" href="https://peoply.app/" target="_blank" rel="noopener">{% trans "Union Events" %}<span aria-hidden="true">↗</span> <span class="shortcut-description">Peoply (Eventcalander)</span></a>
-      <a class="shortcut-secondary" href="https://ifinavet.no/events" target="_blank" rel="noopener">{% trans "Company Presentations" %}<span aria-hidden="true">↗</span> <span class="shortcut-description">Navet</span></a>
-      <a class="shortcut-secondary" href="https://dagenatifi.no/program/" target="_blank" rel="noopener">{% trans "Career Day" %}<span aria-hidden="true">↗</span> <span class="shortcut-description">dagen@ifi</span></a>
-      <!-- <a class="shortcut-secondary" href="">{% trans "Open Events" %} <span class="shortcut-description">{% trans "Hosted by Students" %}</span></a> -->
-    </div>
-  </div>
-  <div class="shortcut-column">
-    <div class="shortcut-card">
-      <div class="shortcut-main">
-        <a href="">
-          {% trans "Job Listings" %}
-        </a>
-        <span><img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="icon" width="24" height="24"></span>
-      </div>
-      <a class="shortcut-secondary" href="https://dagenatifi.no/stillingsannonser/" target="_blank" rel="noopener"><span class="shortcut-prefix">{% trans "Listings at" %} </span>dagen@ifi<span aria-hidden="true">↗</span></a>
-      <a class="shortcut-secondary" href="https://ifinavet.no/job-listings" target="_blank" rel="noopener"><span class="shortcut-prefix">{% trans "Listings at" %} </span>Navet<span aria-hidden="true">↗</span></a>
-    </div>
-    <div class="shortcut-card">
-      <div class="shortcut-main">
-        <a href="">
-          {% trans "Student Tools" %}
-        </a>
-        <span><img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="icon" width="24" height="24"></span>
-      </div>
-      <a class="shortcut-secondary" href="">{% trans "All" %}</a>
-      <a class="shortcut-secondary" href="">{% trans "Mine Studier" %} <span class="shortcut-description">{% trans "UiO Student Tool" %}</span></a>
-      <a class="shortcut-secondary" href="">{% trans "Peoply" %} <span class="shortcut-description">{% trans "Ifi Eventcalander" %}</span></a>
-      <a class="shortcut-secondary" href="">{% trans "IFI Rom" %} <span class="shortcut-description">{% trans "Ifi Map" %}</span></a>
-    </div>
-  </div>
+  {% endfor %}
 </nav>

@@ -1,122 +1,34 @@
-{% load i18n static wagtailcore_tags wagtailimages_tags article_tags%}
-{% get_categories as categories %}
-{% get_news_index as news_index_page %}
-{% get_news_categories as news_categories %}
+{% load i18n static wagtailimages_tags article_tags %}
+{% get_menu "home_dropmenu" as menu %}
 <div class="home-navbar">
-    {% comment %}
-    News/Info Articles hidden on mobile (home_navbar.css) -- both are
-    still reachable there via the sidemenu (home_sidemenu.html has the
-    same set of items), narrow screens just don't have room for all five
-    dropdowns in this row.
-    {% endcomment %}
-    <div class="dropdown-menu dropdown-menu--news">
-        <button class="link">
-            <a class="drop-option" href="{% pageurl news_index_page %}">{% trans "News" %}</a>
-        </button>
-        <div class="drop-content">
-            <a class="drop-option drop-option--all" href="{% pageurl news_index_page %}">{% trans "All" %}</a>
-            {% for category in news_categories %}
-                <a class="drop-option" href="{% pageurl category %}">
-                    {{ category.title }}
-                </a>
-            {% empty %}
-                <a class="drop-option-empty" href="">{% trans "No news yet" %}</a>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="dropdown-menu dropdown-menu--articles">
-        <button class="link">
-            {% get_article_index as article_index_page %} <!-- store tag in varible -->
-            <a class="drop-option" href="{% pageurl article_index_page %}">{% trans "Info Articles" %}</a>
-        </button>
-        <div class="drop-content">
-            <a class="drop-option drop-option--all" href="{% pageurl article_index_page %}">{% trans "All" %}</a>
-            {% for category in categories %}
-                <a class="drop-option" href="{% pageurl category %}">
-                    {{ category.title }} <!-- dont use normal translate with wagtail, check out wagtails tranlation instead -->
-                </a>
-            {% empty %}
-                <a class="drop-option-empty" href="">{% trans "No categories yet" %}</a>
-            {% endfor %}
-        </div>
-    </div>
-    {% if student_union_cat %}
-        <div class="dropdown-menu">
-                <button class="link">
-                    <a class="drop-option" href="{% pageurl student_union_cat %}">
-                        {% comment %}
-                        Full label on desktop, shortened on mobile --
-                        same .nav_link-full/-short swap pattern already
-                        used in header.html (see home_navbar.css).
-                        {% endcomment %}
-                        <span class="drop-option-full">{% trans "Student Unions" %}</span>
-                        <span class="drop-option-short">{% trans "Unions" %}</span>
+    {% for group in menu %}
+        <div class="dropdown-menu{% if group.hide_on_mobile %} dropdown-menu--hide-mobile{% endif %}">
+            <button class="link">
+                {% if group.url %}
+                    <a class="drop-option" href="{{ group.url }}"{% if group.external %} target="_blank" rel="noopener"{% endif %}>
+                        {% include "home/partials/menu_group_title.html" %}
                     </a>
-                </button>
-                <div class="drop-content">
-                    <a class="drop-option drop-option--all" href="{% pageurl student_union_cat %}">{% trans "All" %}</a>
-                    {% if student_union_children %}
-                        {% for child in student_union_children %}
-                            <a class="drop-option" href="{% pageurl child %}">
-                                {% if child.logo %}
-                                    {% image child.logo fill-60x60 as child_thumb %}
-                                    <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.title }}">
-                                {% endif %}
-                                {{child.title}}
-                            </a>
-                        {% empty %}
-                            <a class="drop-option-empty" href="">{% trans "No unions or articles yet" %}</a>
-                        {% endfor %}
-                    {% endif %}
-                </div>
+                {% else %}
+                    <span class="drop-option">{% include "home/partials/menu_group_title.html" %}</span>
+                {% endif %}
+            </button>
+            <div class="drop-content">
+                {% if group.url %}
+                    <a class="drop-option drop-option--all" href="{{ group.url }}"{% if group.external %} target="_blank" rel="noopener"{% endif %}>{% trans "All" %}</a>
+                {% endif %}
+                {% for link in group.links %}
+                    <a class="drop-option" href="{{ link.url }}"{% if link.external %} target="_blank" rel="noopener"{% endif %}>
+                        {% if link.image %}
+                            {% image link.image fill-60x60 as link_thumb %}
+                            <img class="union-link-img" src="{{ link_thumb.url }}" alt="{{ link.label }}">
+                        {% endif %}
+                        {{ link.label }}{% if link.external %}<span aria-hidden="true">↗</span>{% endif %}
+                    </a>
+                {% empty %}
+                    <a class="drop-option-empty" href="">{% trans "Nothing here yet" %}</a>
+                {% endfor %}
             </div>
-        {% endif %}
-    {% if ifi_tools_cat %}
-        <div class="dropdown-menu">
-                <button class="link">
-                    <a class="drop-option" href="{% pageurl ifi_tools_cat %}">{% trans "Tools" %}</a>
-                </button>
-                <div class="drop-content">
-                    <a class="drop-option drop-option--all" href="{% pageurl ifi_tools_cat %}">{% trans "All" %}</a>
-                    {% if ifi_tools_children %}
-                        {% for child in ifi_tools_children %}
-                            <a class="drop-option" href="{% pageurl child %}">
-                                {% if child.image %}
-                                    {% image child.image fill-60x60 as child_thumb %}
-                                    <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.title }}">
-                                {% elif child.hero_image %}
-                                    {% image child.hero_image fill-60x60 as child_thumb %}
-                                    <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.title }}">
-                                {% endif %}
-                                {{child.title}}
-                            </a>
-                        {% empty %}
-                            <a class="drop-option-empty" href="">{% trans "No tools or articles yet" %}</a>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-        {% endif %}
-    {% if new_student_cat %}
-        <div class="dropdown-menu">
-                <button class="link">
-                    <a class="drop-option" href="{% pageurl new_student_cat %}">{% trans "New Student?" %}</a>
-                </button>
-                <div class="drop-content">
-                    <a class="drop-option drop-option--all" href="{% pageurl new_student_cat %}">{% trans "All" %}</a>
-                    {% for child in new_student_children %}
-                        <a class="drop-option" href="{% pageurl child %}">
-                            {% if child.hero_image %}
-                                {% image child.hero_image fill-60x60 as child_thumb %}
-                                <img class="union-link-img" src="{{ child_thumb.url }}" alt="{{ child.title }}">
-                            {% endif %}
-                            {{ child.title }}
-                        </a>
-                    {% empty %}
-                        <a class="drop-option-empty" href="">{% trans "No articles yet" %}</a>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
+        </div>
+    {% endfor %}
 </div>
 <script src="{% static 'js/dropdown_menu.js' %}" defer></script>

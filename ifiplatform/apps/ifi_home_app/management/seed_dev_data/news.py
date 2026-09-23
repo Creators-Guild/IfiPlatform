@@ -16,7 +16,7 @@ class NewsSeedMixin:
         # the news articles need a category under Nyheter to live in.
         news_category = self._get_or_create_page(
             nyheter, CategoryPage, "Siste nytt", nb_locale,
-            color="pink", show_in_menu=True,
+            color="pink",
         )
         self._translate_page(news_category, en_locale)
 

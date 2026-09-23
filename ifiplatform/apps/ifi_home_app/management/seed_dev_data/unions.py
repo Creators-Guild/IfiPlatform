@@ -14,11 +14,6 @@ class UnionSeedMixin:
         self._translate_page(union_category, en_locale)
 
         for name in ["Testforening 1", "Testforening 2", LONG_UNION_NAME]:
-            # Only the long-name union needs show_in_menu -- it exists
-            # specifically to test the home nav dropdown (see LONG_UNION_NAME's
-            # own comment in constants.py); Testforening 1/2 don't need to
-            # clutter that menu.
-            extra_kwargs = {"show_in_menu": True} if name == LONG_UNION_NAME else {}
             union = self._get_or_create_page(
                 union_category, UnionPage, name, nb_locale,
                 email="testforening@example.com",
@@ -34,7 +29,6 @@ class UnionSeedMixin:
                     }),
                 ],
                 member_count_intern=0,
-                **extra_kwargs,
                 sitting_members=[
                     ("member", {
                         "name": "Test Testesen",
@@ -75,7 +69,6 @@ class UnionSeedMixin:
             extra_kwargs = (
                 {
                     "sitting_members": self._navet_sitting_members(seed_image),
-                    "show_in_menu": True,
                     "email": "navet@ifi.uio.no",
                     "website_url": "https://ifinavet.no",
                     "union_links": [

@@ -1,10 +1,11 @@
 """One-off fix for pages that drifted out of sync before ifi_home_app.
 wagtail_hooks.sync_synchronized_fields_to_translations existed: re-syncs
-wagtail-localize SynchronizedFields (show_in_menu, status, and any other
+wagtail-localize SynchronizedFields (status, and any other
 plain non-text field wagtail-localize auto-classifies as synchronized) from
 every nb page to its existing English translation. That hook only fires on
 future publishes -- this command catches up everything published before it
-was added (e.g. the Student Unions show_in_menu drift that prompted this).
+was added (e.g. the Student Unions show_in_menu drift that prompted this -- that
+field has since been replaced by menu groups, see models/menus.py).
 
 Safe to re-run: re-syncing an already-synced page is a no-op.
 """
@@ -19,7 +20,7 @@ from ifi_home_app.translation.sync import sync_synchronized_fields
 
 class Command(BaseCommand):
     help = (
-        "Re-syncs wagtail-localize SynchronizedFields (show_in_menu, status, "
+        "Re-syncs wagtail-localize SynchronizedFields (status, "
         "etc.) from every nb page to its existing English translation. "
         "One-off catch-up for pages that drifted before the auto-sync hook "
         "(ifi_home_app/wagtail_hooks.py) existed; safe to re-run."

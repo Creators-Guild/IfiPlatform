@@ -4,7 +4,8 @@ from django import template
 from django.utils import timezone
 from wagtail.models import Locale
 
-from ifi_home_app.models.article_models import CategoryPage, get_section_categories, get_section_index
+from ifi_home_app.models import menus
+from ifi_home_app.models.article_models import get_section_index
 from ifi_home_app.models.event_models import EventIndexPage, PeoplySyncState, SITE_TIMEZONE
 
 register = template.Library()
@@ -17,49 +18,25 @@ def get_article_index():
 
 
 @register.simple_tag
-def get_categories():
-    """Return currently visible info-article categories flagged for menu display, for the sidemenu."""
-    return get_section_categories("info_articles")
-
-
-@register.simple_tag
 def get_news_index():
     """Return the site's news ArticleIndexPage, used to build links to it."""
     return get_section_index("news")
 
 
 @register.simple_tag
-def get_news_categories():
-    """Return currently visible news categories flagged for menu display, for the sidemenu."""
-    return get_section_categories("news")
+def get_menu(key):
+    """The editor-curated Menu with this key ("sidemenu", "home_dropmenu" or
+    "shortcuts"), resolved for the active locale -- see models/menus.py."""
+    return menus.get_menu(key)
 
 
 @register.simple_tag
-def get_help_category():
-    """Return the site's Hjelp category page in the active locale, used to
-    build the sidemenu's Help entry -- pinned by its nb slug, then resolved
-    to whichever locale is active (same pattern as home_views.py's
-    _get_localized_category). Can't just filter CategoryPage by
-    slug="hjelp" directly: _translate_page re-slugifies the en copy from
-    its translated title ("Hjelp" -> "Help", see TRANSLATIONS in
-    seed_dev_data/constants.py), so its real slug is "help", not "hjelp" --
-    filtering on the nb slug alone silently returned None on /en/, which
-    then crashed {% pageurl %} in the template (caught by
-    core_app.tests.SiteCrawlTests)."""
-    category = CategoryPage.objects.live().filter(
-        slug="hjelp", locale=Locale.objects.get(language_code="nb")
-    ).first()
-    return category.localized if category else None
-
-
-@register.simple_tag
-def get_help_subcategories():
-    """Currently visible child categories under Hjelp flagged for menu
-    display, for the sidemenu's Help dropdown."""
-    help_category = get_help_category()
-    if not help_category:
-        return CategoryPage.objects.none()
-    return CategoryPage.objects.child_of(help_category).live().filter(show_in_menu=True)
+def get_shortcut_columns():
+    """The "shortcuts" Menu's groups, split into their columns in order."""
+    columns = {}
+    for group in menus.get_menu("shortcuts"):
+        columns.setdefault(group["column"], []).append(group)
+    return [columns[number] for number in sorted(columns)]
 
 
 @register.simple_tag

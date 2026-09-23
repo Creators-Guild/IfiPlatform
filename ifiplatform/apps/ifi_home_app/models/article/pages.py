@@ -52,14 +52,6 @@ def get_section_index(section):
     )
 
 
-def get_section_categories(section):
-    """Currently visible categories in `section` flagged for menu display."""
-    categories = CategoryPage.objects.live().filter(
-        locale=Locale.get_active(), show_in_menu=True
-    )
-    return [c for c in categories if c.is_visible and c.category_section == section]
-
-
 # Current tree: ArticleIndexPage -> CategoryPage -> ArticlePage
 
 
@@ -314,10 +306,6 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
     )
     active_until = models.DateField(null=True, blank=True)
 
-    show_in_menu = models.BooleanField(
-        default=False,
-        help_text="Show this category in dropdown/sidemenu navigation.",
-    )
 
     show_nested_tools = models.BooleanField(
         default=False,
@@ -334,7 +322,6 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
         FieldPanel("color"),
         FieldPanel("active_from"),
         FieldPanel("active_until"),
-        FieldPanel("show_in_menu"),
         FieldPanel("show_nested_tools"),
     ]
 

@@ -66,7 +66,7 @@ hooks.register(
 @receiver(page_published)
 def sync_synchronized_fields_to_translations(sender, instance, revision, **kwargs):
     """On every nb page publish, push its wagtail-localize SynchronizedFields
-    (show_in_menu, status, etc.) out to every enabled translation, so they
+    (status, etc.) out to every enabled translation, so they
     don't silently drift (see translation/sync.py).
 
     Listens on the page_published *signal* rather than Wagtail's

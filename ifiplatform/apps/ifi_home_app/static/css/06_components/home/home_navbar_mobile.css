@@ -4,8 +4,7 @@
 }
 
 @media (max-width: 45rem) {
-  .home-navbar .dropdown-menu--news,
-  .home-navbar .dropdown-menu--articles {
+  .home-navbar .dropdown-menu--hide-mobile {
     display: none;
   }
 

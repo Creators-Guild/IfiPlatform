@@ -40,7 +40,9 @@ gets `position: relative` and `.home-navbar .dropdown-menu` is forced to
 `position: static`, so the absolutely-positioned `.drop-content` resolves
 against the navbar rather than its own menu item — both are required for
 `left: 0; right: 0` to mean "navbar width". `top: calc(100% + 0.75rem)`
-pushes the panel below the side menu's icon box. News/Articles dropdowns
-are hidden and `.drop-option-full`/`-short` swap to shorter labels.
+pushes the panel below the side menu's icon box. Dropdowns whose menu slot
+has "hide on mobile" (`.dropdown-menu--hide-mobile`, News/Info by default)
+are hidden, and a menu group's short title (`.drop-option-full`/`-short`)
+replaces its title.
 `home_layout.css`'s `.home-navbar { padding-left: 3rem }` at the same
 breakpoint belongs to this layout.

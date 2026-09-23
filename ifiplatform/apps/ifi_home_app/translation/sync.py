@@ -1,4 +1,4 @@
-"""Push of wagtail-localize "synchronized fields" (show_in_menu, status, and
+"""Push of wagtail-localize "synchronized fields" (status, and
 anything else get_translatable_fields() classifies as SynchronizedField --
 see wagtail_localize/fields.py) from an nb/"OG" page to its existing
 translations. Shared by:
@@ -20,9 +20,7 @@ from django.core.exceptions import ValidationError
 from wagtail_localize.models import TranslationSource
 
 SOURCE_LANGUAGE_CODE = "nb"  # the anchor/"OG" locale every other locale
-                              # mirrors -- matches ifi_home_app/views/
-                              # home_views.py's _get_localized_category()
-                              # lookups and ArticlePage.SOURCE_LANGUAGE_CODE
+                              # mirrors -- matches ArticlePage.SOURCE_LANGUAGE_CODE
 
 
 def sync_synchronized_fields(page, user=None):

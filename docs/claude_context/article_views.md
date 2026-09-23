@@ -117,7 +117,7 @@ so the two don't drift — nb is the source of truth. `can_publish`/
 
 Not `ArticlePage`-specific — `CategoryPage`/`ArticleIndexPage`/
 `StudentUnionCategoryPage` have no publish concept in editor mode at all,
-but do have synchronized fields (`show_in_menu`) that can still drift, so
+but do have synchronized fields (e.g. `status`) that can still drift, so
 this is a plain `Page` lookup through `style_target` rather than
 `ArticlePage`'s own `publish_target`.
 

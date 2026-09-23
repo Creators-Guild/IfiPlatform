@@ -22,7 +22,7 @@ CATEGORY_SPECS = [
 # Deliberately long, wraps-onto-multiple-words name -- exercises the home
 # nav's Student Unions dropdown at a length real union names can plausibly
 # reach, to test dropdownmenu.css's max-width/wrapping on narrow screens.
-# show_in_menu=True (see _seed_student_unions) so it actually appears there.
+# menus.py puts it in the Student Unions menu group so it actually appears there.
 LONG_UNION_NAME = (
     "Den Ekstremt Lange Studentforeningen for Informatikkstudenter med "
     "Spesiell Interesse for Kunstig Intelligens og Maskinlæring"

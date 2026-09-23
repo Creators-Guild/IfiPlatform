@@ -69,8 +69,8 @@ would be clutter there.
 
 `_navet_sitting_members` deliberately covers all four combinations of
 filled/open x all-fields-set/optional-fields-blank, since Navet is the
-project's designated main test union (also the only seed union with
-`show_in_menu=True`, pinning it in the homepage nav dropdown, plus fake
+project's designated main test union (also pinned in the seeded Student
+Unions menu group, see seed_dev_data/menus.py, plus fake
 contact/social/member-count data so its sidebar isn't empty).
 
 ### Deferred: linking a position to a real user account

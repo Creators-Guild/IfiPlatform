@@ -726,6 +726,11 @@ msgstr "Ingen nyheter ennå"
 msgid "No categories yet"
 msgstr "Ingen kategorier ennå"
 
+#: .\apps\ifi_home_app\templates\home\partials\home_navbar.html
+#: .\apps\ifi_home_app\templates\home\partials\sidemenu_groups.html
+msgid "Nothing here yet"
+msgstr "Ingenting her ennå"
+
 #: .\apps\ifi_home_app\templates\core\partials\home_navbar.html:57
 msgid "Student Unions"
 msgstr "Studentforeninger"
