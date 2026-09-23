@@ -26,8 +26,11 @@ test runner always forces `DEBUG=False` regardless of `.env`.
 ### machine_translate_subtree
 
 ```bash
-python manage.py machine_translate_subtree <page_id> <user_id>
+python manage.py machine_translate_subtree <page_id> <user_id> [--page-only]
 ```
+
+`--page-only` translates just `page_id`, not its descendants. The
+"Machine-translate now" button (`machine_translate_page` view) uses it.
 
 Not meant to be run by hand — this is the real implementation behind the
 "Translate and publish" button on the wagtail-admin "Machine-translate
@@ -81,7 +84,7 @@ running it:** copy the printed `glossary_id` into `DEEPL_GLOSSARY_ID` in
 python manage.py sync_translated_page_fields [--dry-run]
 ```
 
-Re-syncs wagtail-localize `SynchronizedField`s (`show_in_menu`, `status`,
+Re-syncs wagtail-localize `SynchronizedField`s (`status`,
 etc.) from every nb page to its existing English translation. One-off,
 historical catch-up only — `ifi_home_app/wagtail_hooks.py`'s auto-sync
 listens on Wagtail's `page_published` *signal* (not the `after_publish_page`
@@ -96,6 +99,19 @@ something to re-run periodically.
 
 Safe to re-run: re-syncing an already-synced page is a no-op. `--dry-run`
 lists what would be synced without changing anything.
+
+### link_menu_translations
+
+```bash
+python manage.py link_menu_translations
+```
+
+Registers every English `MenuGroup` copy that isn't yet a wagtail-localize
+translation of its nb group, keeping its current English text. The copies
+migration `0152_menus` created are the ones that need it. After this they
+are edited through the translation editor and synced from nb (see
+`docs/claude_context/menus.md`). Run it once after that migration, locally
+and on prod. Safe to re-run: groups that are already linked are skipped.
 
 ### link_peoply_organizations
 

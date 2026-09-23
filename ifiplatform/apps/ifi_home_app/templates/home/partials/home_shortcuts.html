@@ -1,0 +1,28 @@
+{% load i18n static article_tags %}
+{% get_shortcut_columns as columns %}
+<nav id="home-shortcuts">
+  {% for column in columns %}
+    <div class="shortcut-column">
+      {% for group in column %}
+        <div class="shortcut-card">
+          <div class="shortcut-main">
+            {% if group.url %}
+              <a href="{{ group.url }}"{% if group.external %} target="_blank" rel="noopener"{% endif %}>
+                {{ group.title }}{% if group.external %}<span aria-hidden="true">↗</span>{% endif %}
+              </a>
+            {% else %}
+              <p>{{ group.title }}</p>
+            {% endif %}
+            <span><img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="icon" width="24" height="24"></span>
+          </div>
+          {% for link in group.links %}
+            <a class="shortcut-secondary" href="{{ link.url }}"{% if link.external %} target="_blank" rel="noopener"{% endif %}>
+              {% if link.prefix %}<span class="shortcut-prefix">{{ link.prefix }} </span>{% endif %}{{ link.label }}{% if link.external %}<span aria-hidden="true">↗</span>{% endif %}
+              {% if link.description %}<span class="shortcut-description">{{ link.description }}</span>{% endif %}
+            </a>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</nav>

@@ -26,6 +26,7 @@ from ifi_home_app.models.article_models import CategoryPage
 from .constants import CATEGORY_SPECS
 from .events import EventSeedMixin
 from .helpers import SeedHelpersMixin
+from .menus import MenuSeedMixin
 from .messages import MessageSeedMixin
 from .news import NewsSeedMixin
 from .tools import ToolSeedMixin
@@ -39,6 +40,7 @@ class Command(
     EventSeedMixin,
     ToolSeedMixin,
     MessageSeedMixin,
+    MenuSeedMixin,
     BaseCommand,
 ):
     help = (
@@ -103,7 +105,7 @@ class Command(
         for title, color in CATEGORY_SPECS:
             category = self._get_or_create_page(
                 info_articles, CategoryPage, title, nb_locale,
-                color=color, show_in_menu=True,
+                color=color,
             )
             self._translate_page(category, en_locale)
 
@@ -127,6 +129,7 @@ class Command(
 
         self._seed_header_message(nb_locale, en_locale)
         self._seed_home_board_message(nb_locale, en_locale)
+        self._seed_menus(nb_locale, en_locale)
 
         # wagtail_localize's copy-for-translation path doesn't keep the
         # translated parent's `numchild` counter in sync, which makes

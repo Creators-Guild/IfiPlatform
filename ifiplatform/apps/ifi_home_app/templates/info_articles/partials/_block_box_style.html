@@ -5,7 +5,7 @@ _effective_box_style() dict (see article_models.py); `side_padding` is that
 block's own side-padding value. None for the title/meta/intro group's own
 box (see ArticlePage.get_context()'s "article-header" row) -- that group's
 side padding lives entirely in its own --header-side-padding CSS custom
-property (article_page.html/article_page.css) instead of this generic
+property (article_page.html/article_layout.css) instead of this generic
 mechanism, so None here means "leave margin-left/right alone, some other
 CSS already governs it" rather than "0". `keep_display`, when truthy, skips the
 "display: flow-root" declaration below -- for multi_column's own grid

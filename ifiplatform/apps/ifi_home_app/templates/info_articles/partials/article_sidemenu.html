@@ -1,50 +1,10 @@
-{% load static i18n article_tags wagtailcore_tags %}
-{% get_categories as categories %}
-{% get_article_index as article_index_page %}
-{% get_news_categories as news_categories %}
-{% get_news_index as news_index_page %}
+{% load static i18n %}
 
-<!-- to avoid mutiple loads of the same css if partial is used mutiple times -->
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/02_components/sidemenu.css' %}">
-{% endblock %}
+<details class="sidemenu">
+    <summary class="sidemenu-header">
+        <img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="">
+        <span class="icon-text">{% trans "Menu" %}</span>
+    </summary>
 
-<div class= "sidemenu">
-    <button type="button" class="sidemenu-close" aria-label="{% trans "Close menu" %}">&times;</button>
-    <div class="sidemenu-header" role="button" tabindex="0" aria-expanded="false">
-        <img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="menu">
-        <span class="icon-text">Menu</span>
-    </div>
-
-    <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="{% pageurl article_index_page %}">{% trans "Categories" %}</a>
-        <div class="drop-content">
-            <a class="drop-option drop-option--all" href="{% pageurl article_index_page %}">
-                {% trans "All" %}
-            </a>
-            <!-- Get category context n store in varible -->
-            {% for category in categories %}
-                <a href="{% pageurl category %}">
-                    {{category.title}}
-                </a>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="{% pageurl news_index_page %}">{% trans "News" %}</a>
-        <div class="drop-content">
-            <a class="drop-option drop-option--all" href="{% pageurl news_index_page %}">
-                {% trans "All" %}
-            </a>
-            {% for category in news_categories %}
-                <a href="{% pageurl category %}">
-                    {{category.title}}
-                </a>
-            {% endfor %}
-        </div>
-    </div>
-
-
-</div>
-<script src="{% static 'js/dropdown_menu.js' %}" defer></script>
+    {% include "home/partials/sidemenu_groups.html" %}
+</details>

@@ -42,7 +42,6 @@ from .article.pages import (
     ArticleIndexPage,
     ArticlePage,
     CategoryPage,
-    get_section_categories,
     get_section_index,
 )
 from .article.unions import StudentUnionCategoryPage, UnionPage
@@ -74,7 +73,6 @@ __all__ = [
     "ArticleIndexPage",
     "ArticlePage",
     "CategoryPage",
-    "get_section_categories",
     "get_section_index",
     "StudentUnionCategoryPage",
     "UnionPage",

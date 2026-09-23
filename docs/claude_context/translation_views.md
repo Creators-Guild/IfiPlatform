@@ -18,6 +18,11 @@ wagtail-admin URL (`wagtail_hooks.py`'s `register_admin_urls`) rather than
 under `ifi_home_app/urls.py`, so it inherits wagtail-admin's own
 login/session handling the same way wagtail-localize's own views do.
 
+`machine_translate_page` is the single-page variant: the same view logic,
+confirm screen and background launch with `page_only=True`, running the
+command with `--page-only`. It's the "Machine-translate now" button of the
+translation nudges (see `translation_nudge.md`).
+
 ### Runs as a background process, not inline
 
 Originally ran the whole translate-and-publish loop synchronously inside

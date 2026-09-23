@@ -1,0 +1,92 @@
+#home-shortcuts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: 1rem;
+    justify-content: space-around;
+    padding: 10vh 5vw;
+}
+
+#home-shortcuts .shortcut-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#home-shortcuts .shortcut-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    padding: 2rem;
+    background-color: var(--color-pastel-turq);
+    border: 1px solid var(--color-black);
+    border-radius: 8px;
+    white-space: nowrap;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    
+}
+
+#home-shortcuts .shortcut-card:is(:hover, :has(:focus-visible)) {
+    background-color: var(--color-pastel-turq-hover);
+}
+
+#home-shortcuts .shortcut-card .shortcut-main {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 1.9rem;
+}
+
+#home-shortcuts .icon {
+    width: 30px;
+    height: 30px;
+}
+
+#home-shortcuts .shortcut-card a {
+    color: var(--color-black);
+    font-weight: bold;
+    text-decoration: none;
+    transition: transform 0.1s ease, background-color 0.2s ease;
+    
+}
+
+#home-shortcuts .shortcut-main p {
+    margin: 0;
+    font-size: inherit;
+    color: var(--color-black);
+    font-weight: bold;
+}
+
+#home-shortcuts .shortcut-card a:hover {
+    text-decoration: underline;
+}
+
+#home-shortcuts .shortcut-card .shortcut-secondary {
+    display: block;
+    width: 100%;
+    max-height: 0;
+    margin-top: 0;
+    overflow: hidden;
+    white-space: normal;
+    visibility: hidden;
+    font-size: 1.3rem;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+#home-shortcuts .shortcut-card:is(:hover, :has(:focus-visible)) .shortcut-secondary {
+    max-height: 6rem;
+    margin-top: 1rem;
+    visibility: visible;
+    transition: transform 0.2s ease, opacity 0.2s ease,
+        max-height 0.2s ease 0.3s, margin-top 0.2s ease 0.3s, visibility 0s 0.3s;
+}
+
+#home-shortcuts .shortcut-description {
+    display: block;
+    font-weight: normal;
+}
+
+#home-shortcuts .shortcut-prefix {
+    font-weight: normal;
+}

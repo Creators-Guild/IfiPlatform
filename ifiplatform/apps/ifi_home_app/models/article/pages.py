@@ -52,14 +52,6 @@ def get_section_index(section):
     )
 
 
-def get_section_categories(section):
-    """Currently visible categories in `section` flagged for menu display."""
-    categories = CategoryPage.objects.live().filter(
-        locale=Locale.get_active(), show_in_menu=True
-    )
-    return [c for c in categories if c.is_visible and c.category_section == section]
-
-
 # Current tree: ArticleIndexPage -> CategoryPage -> ArticlePage
 
 
@@ -228,6 +220,7 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
         context["can_publish_page"] = self.can_publish_in_editor_mode(request.user)
         context["can_unpublish_page"] = self.can_unpublish_in_editor_mode(request.user)
         context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
+        context["translation_nudge"] = self.translation_nudge(request.user)
         overrides_by_block_id = {
             style.block_id: style
             for style in ArticleBlockStyle.objects.filter(translation_key=self.translation_key)
@@ -314,10 +307,6 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
     )
     active_until = models.DateField(null=True, blank=True)
 
-    show_in_menu = models.BooleanField(
-        default=False,
-        help_text="Show this category in dropdown/sidemenu navigation.",
-    )
 
     show_nested_tools = models.BooleanField(
         default=False,
@@ -334,7 +323,6 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
         FieldPanel("color"),
         FieldPanel("active_from"),
         FieldPanel("active_until"),
-        FieldPanel("show_in_menu"),
         FieldPanel("show_nested_tools"),
     ]
 
@@ -374,6 +362,7 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
         context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
+        context["translation_nudge"] = self.translation_nudge(request.user)
         subcategories = (
             CategoryPage.objects.child_of(self)
             .live()
@@ -451,6 +440,7 @@ class ArticleIndexPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixi
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
         context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
+        context["translation_nudge"] = self.translation_nudge(request.user)
         categories = (
             CategoryPage.objects.child_of(self)
             .live()

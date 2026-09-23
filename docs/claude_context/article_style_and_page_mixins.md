@@ -17,6 +17,36 @@ across every locale copy of one logical article, so every locale
 automatically shares one style with no sync code needed. See
 `ArticlePage.style` for how a page reaches its row (get-or-create).
 
+### content_bg_* is passed as a CSS custom property, not an inline declaration
+
+`ArticlePage`'s `content_bg_enabled`/`content_bg_color`/`content_bg_custom_color`
+reach the page through `home_base.html`'s `maincontent_style` block, which
+`article_page.html` overrides. That block emits only a **value**:
+
+    style="--content-bg: var(--color-bg-purple);"
+
+The declaration that consumes it lives in
+`ifi_home_app/static/css/05_objects/home_layout.css`:
+
+    .home-layout .maincontent { background-color: var(--content-bg, transparent); }
+
+So if `--content-bg` looks unused when grepping the CSS, that is why -- it is set
+per-request from the template. The `transparent` fallback is what keeps the
+default (override disabled) identical to before this existed: `.maincontent` has
+no background of its own in `home_layout.css`.
+
+Why a custom property rather than inlining `background-color:` directly (which is
+what this did originally): an inline declaration has the highest specificity and
+is invisible to the stylesheets, so no CSS rule can ever override or even see it.
+Inlining only the value keeps the actual declaration inside the ITCSS cascade
+where it can be read and overridden. Same pattern as `--accent-color` in
+`category_card.html` and on `.article-page` itself.
+
+Still inlining raw declarations, and candidates for the same treatment:
+`info_articles/partials/_block_box_style.html` (ArticleBlockStyle's per-block
+box: background, padding, radius, shadow, border) and
+`events/partials/event_calendar_grid.html` (a calendar block's `color_hex`).
+
 `hero_image_box_shadow_offset`/`_blur` are precomputed properties (not left
 as a raw multiplier) for the same reason as `_effective_box_style()`'s own
 `shadow_offset`/`shadow_blur` in `block_style.py` — 2/8 are `hero_image`'s

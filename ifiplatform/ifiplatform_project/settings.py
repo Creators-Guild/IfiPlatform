@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
+    "core_app.apps.DocsExcludedStaticFilesConfig",
     "django.contrib.sites",
     "django.contrib.sitemaps",
     "core_app.apps.CoreAppConfig",
@@ -220,7 +220,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # for short text, no variables*(some simple exceptions): {% trans %} in html files,
 # for longer text with variables: {% blocktrans %} in html files.
 
-LANGUAGE_CODE = "en"
+# nb is the content source of truth -- also Wagtail's default locale, so
+# admin listings (snippets, new pages) open in Norwegian. See
+# docs/claude_context/admin_locales.md.
+LANGUAGE_CODE = "nb"
 
 LANGUAGES = [
     ("en", "English"),
@@ -316,6 +319,11 @@ CACHES = {
         "LOCATION": BASE_DIR / "django_cache",
     }
 }
+# The test runner gets its own in-memory cache -- sharing django_cache with
+# the dev server let the test database's site-root paths leak into it,
+# turning every English {% pageurl %} on the dev site into None.
+if "test" in sys.argv[1:2]:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
 # How long an unverified signup (is_active=False, never clicked the emailed
 # verification link) is kept before account_app's cleanup_unverified_accounts

@@ -12,9 +12,8 @@ from .constants import NEW_STUDENT_ARTICLE_SPECS
 
 class ToolSeedMixin:
     def _seed_tool(self, praktisk_category, nb_locale, en_locale, seed_image):
-        # core_views.main_view looks this category up by the hardcoded slug
-        # "ifi-verktøy" -- plain slugify() would strip the "ø", so it's
-        # pinned explicitly here to keep the homepage's tools section working.
+        # Slug pinned explicitly -- plain slugify() would strip the "ø", and
+        # menus.py (and existing databases) look this category up by it.
         # show_nested_tools=True so this category's own page also
         # demonstrates CategoryPage.show_nested_tools (article_models.py):
         # the tool below (nested_tool_category's own direct child, i.e. this
@@ -22,7 +21,7 @@ class ToolSeedMixin:
         # not just on nested_tool_category's own page.
         tool_category = self._get_or_create_page(
             praktisk_category, CategoryPage, "Ifi verktøy", nb_locale,
-            color="turq", show_in_menu=True, slug="ifi-verktøy",
+            color="turq", slug="ifi-verktøy",
             show_nested_tools=True,
         )
         self._translate_page(tool_category, en_locale)
@@ -40,7 +39,7 @@ class ToolSeedMixin:
 
         nested_tool_category = self._get_or_create_page(
             tool_category, CategoryPage, "UiO verktøy", nb_locale,
-            color="pink", show_in_menu=False, slug="uio-verktoy",
+            color="pink", slug="uio-verktoy",
         )
         self._translate_page(nested_tool_category, en_locale)
 
@@ -57,12 +56,11 @@ class ToolSeedMixin:
         self._translate_page(nested_tool, en_locale)
 
     def _seed_new_student_articles(self, praktisk_category, nb_locale, en_locale, seed_image):
-        # core_views.main_view looks this category up by the hardcoded slug
-        # "ny-ifi-student" to power the homepage's "New Student?" dropdown
-        # (mirrors _seed_tool's pinned "ifi-verktøy" slug above).
+        # Slug pinned explicitly, like "ifi-verktøy" above -- menus.py looks
+        # this category up by it for the "New Student?" menu group.
         new_student_category = self._get_or_create_page(
             praktisk_category, CategoryPage, "Ny Ifi Student?", nb_locale,
-            slug="ny-ifi-student", color="turq", show_in_menu=False,
+            slug="ny-ifi-student", color="turq",
             intro="Her er alt du skulle trenge som en ny Ifi Student!",
         )
         self._translate_page(new_student_category, en_locale)

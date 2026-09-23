@@ -3,7 +3,6 @@
 from django.db import models
 from wagtail.admin.panels import FieldPanel
 from wagtail.fields import RichTextField
-from wagtail.snippets.models import register_snippet
 from wagtail.models import TranslatableMixin
 
 
@@ -43,7 +42,6 @@ class NewsItem(models.Model):
         return self.title
 
 
-@register_snippet
 class HomeBoardMessage(TranslatableMixin, models.Model):
     """A rotating message shown in the homepage message board (greetings, promotions, etc.)."""
 

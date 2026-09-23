@@ -2,18 +2,17 @@
 {% load i18n %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/02_components/sidemenu.css' %}">
+  <link rel="stylesheet" href="{% static 'css/06_components/sidemenu.css' %}">
 {% endblock %}
 
-<div class= "sidemenu">
-    <button type="button" class="sidemenu-close" aria-label="{% trans "Close menu" %}">&times;</button>
-    <div class="sidemenu-header" role="button" tabindex="0" aria-expanded="false">
-        <img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="{% trans "menu" %}">
+<details class="sidemenu">
+    <summary class="sidemenu-header">
+        <img class="icon" src="{% static 'images/icons/black_menu_icon.png' %}" alt="">
         <span class="icon-text">{% trans "Menu" %}</span>
-    </div>
+    </summary>
 
-    <div class= "sidemenu-item">
-        <a class="sidemenu-option" href="">{% trans "Studytools" %}</a>
+    <details class="sidemenu-item" name="sidemenu-item">
+        <summary class="sidemenu-option">{% trans "Studytools" %}</summary>
         <div class="drop-content">
             <a class="drop-option drop-option--all" href="">{% trans "All" %}</a>
             <a href="">
@@ -23,6 +22,5 @@
                 {% trans "Multiplechoice" %}
             </a>
         </div>
-    </div>
-</div>
-<script src="{% static 'js/dropdown_menu.js' %}" defer></script>
+    </details>
+</details>

@@ -1,0 +1,31 @@
+{% load i18n static wagtailcore_tags article_tags %}
+{% regroup upcoming_events by event_date as event_days %}
+<div class="home-eventsbox-days">
+    {% for day in event_days %}
+        <section class="home-eventsbox-day">
+            <h3 class="home-eventsbox-day-heading">
+                {% with tag=day.list.0.time_tag %}
+                    {% if tag == "today" %}{% trans "Today" %}
+                    {% elif tag == "tomorrow" %}{% trans "Tomorrow" %}
+                    {% else %}{{ day.grouper|date:"l"|capfirst }}{% endif %}
+                {% endwith %}
+                &ndash; {{ day.grouper|date:"j. F" }}
+            </h3>
+            <ul class="home-eventsbox-day-events">
+                {% for event in day.list %}
+                    <li>{% include "home/partials/home_eventsbox_event.html" %}</li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% empty %}
+        <p class="home-eventsbox-empty">{% trans "No upcoming events." %}</p>
+    {% endfor %}
+</div>
+{% get_event_index as event_index_page %}
+{% if event_index_page %}
+    <a class="home-eventsbox-view-all" href="{% pageurl event_index_page %}">{% trans "See all events" %}</a>
+{% endif %}
+{% include "events/partials/peoply_sync_button.html" %}
+{% if request.user.is_staff %}
+    <script src="{% static 'js/peoply_sync_button.js' %}" defer></script>
+{% endif %}

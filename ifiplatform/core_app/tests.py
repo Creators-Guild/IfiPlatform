@@ -1,7 +1,9 @@
 # pylint: disable=C0114,C0115,C0116
+import os
 import re
 import time
 
+from django.conf import settings
 from django.core.cache import cache
 from django.core.management import call_command
 from django.test import Client, RequestFactory, TestCase, TransactionTestCase, tag
@@ -14,7 +16,7 @@ class DeployNoticeTests(TestCase):
     """Covers the read side (deploy_notice context processor) of the
     site-wide deploy countdown banner -- see announce_deploy (the write
     side) and templates/partials/deploy_notice.html (the render side, one
-    include in ifi_base.html covering every page)."""
+    include in global_base.html covering every page)."""
 
     def setUp(self):
         cache.clear()
@@ -79,9 +81,11 @@ class DeployNoticeStatusViewTests(TestCase):
 
 @tag("slow")
 class SiteCrawlTests(TransactionTestCase):
-    """Crawls the whole public site starting from each locale's homepage,
-    following every internal link it finds, and fails if any of them is
-    broken. Exists because of a real incident: a stale Wagtail
+    """Crawls the whole public site starting from each locale's homepage
+    (one subtest per locale in settings.LANGUAGES; limit it with e.g.
+    CRAWL_LOCALES=en or CRAWL_LOCALES=en,nb), following every internal link
+    it finds, and fails if any of them is broken or leads into another
+    locale. Exists because of a real incident: a stale Wagtail
     site-root-paths cache silently turned every {% pageurl %} link on the
     site into a literal href="None" -- nothing caught it until someone
     clicked around by hand. See clear_cache's own docstring for the root
@@ -117,9 +121,26 @@ class SiteCrawlTests(TransactionTestCase):
         call_command("seed_dev_data", "--force")
 
     def test_crawl_finds_no_broken_links(self):
+        requested = os.environ.get("CRAWL_LOCALES")
+        locales = (
+            [code.strip() for code in requested.split(",") if code.strip()]
+            if requested
+            else [code for code, _name in settings.LANGUAGES]
+        )
+        for locale in locales:
+            with self.subTest(locale=locale):
+                self._crawl_locale(locale)
+
+    def _crawl_locale(self, locale):
+        """Crawl everything reachable from /<locale>/. The language switcher
+        is a POST form, not a link, so an href into another locale's prefix
+        means a page-link tag resolved to the wrong locale's page."""
         client = Client()
+        other_prefixes = tuple(
+            f"/{code}/" for code, _name in settings.LANGUAGES if code != locale
+        )
         # href -> page it was first discovered on, for actionable failures.
-        to_visit = {"/en/": "(start)", "/nb/": "(start)"}
+        to_visit = {f"/{locale}/": "(start)"}
         visited = set()
         broken = []
 
@@ -157,16 +178,23 @@ class SiteCrawlTests(TransactionTestCase):
                     continue
                 if not href.startswith("/") or href.startswith(self.EXCLUDED_PREFIXES):
                     continue
+                if href.startswith(other_prefixes):
+                    broken.append(
+                        f"{href!r} found on {url!r} leads out of {locale!r} "
+                        "into another locale"
+                    )
+                    continue
                 if href not in visited and href not in to_visit:
                     to_visit[href] = url
 
         self.assertLess(
             len(visited),
             self.MAX_PAGES,
-            "Crawl hit MAX_PAGES -- either the site legitimately grew this "
-            "large (raise the cap) or something is generating a link cycle.",
+            f"{locale!r} crawl hit MAX_PAGES -- either the site legitimately "
+            "grew this large (raise the cap) or something is generating a "
+            "link cycle.",
         )
 
         if broken:
             details = "\n".join(f"  - {b}" for b in broken)
-            self.fail(f"Found {len(broken)} broken link(s):\n{details}")
+            self.fail(f"Found {len(broken)} broken link(s) in {locale!r}:\n{details}")

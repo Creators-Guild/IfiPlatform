@@ -1,8 +1,4 @@
 {% load i18n static site_tags %}
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/02_components/select_language.css' %}">
-{% endblock %}
-
 {% get_current_language as LANGUAGE_CODE %}
 {% translated_page_url 'en' as en_next %}
 {% translated_page_url 'nb' as nb_next %}
@@ -35,7 +31,7 @@
     language you're already on isn't a real option, so it isn't listed --
     unlike select-language-buttons' row, which shows both with the active
     one just visually marked, since there both are always visible anyway).
-    See select_language.css's 480px block.
+    See select_language.css's 45rem block.
     {% endcomment %}
     <details class="select-language-dropdown">
         <summary class="lang-dropdown-trigger lang-btn">{{ LANGUAGE_CODE|upper }}</summary>

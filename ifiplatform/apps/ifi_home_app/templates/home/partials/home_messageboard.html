@@ -1,0 +1,87 @@
+{% load i18n static wagtailcore_tags %}
+
+{% if board_messages %}
+<div class="messageboard"{% if board_messages|length > 1 %} data-autorotate="true"{% endif %}>
+    {% for msg in board_messages %}
+        <div class="messageboard-slide{% if forloop.first %} active{% endif %}"
+             data-index="{{ forloop.counter0 }}"
+             data-duration="{{ msg.display_seconds }}">
+            <h2>{{ msg.title }}</h2>
+            <p class="messageboard-date">{{ msg.date|date:"d/m/Y" }}</p>
+            <div class="messageboard-body-wrap">
+                <div class="messageboard-body">{{ msg.body|richtext }}</div>
+                <div class="messageboard-scrollbar" aria-hidden="true">
+                    <div class="messageboard-scrollbar-thumb"></div>
+                </div>
+            </div>
+            {% comment %}
+            Mobile only (see messageboard.css/js) -- desktop keeps the
+            internal scroll above. Hidden by default; JS only reveals it
+            once it's confirmed the body text is actually clamped/
+            truncated at this width, so a short message that already fits
+            doesn't get an offer to "view more" of nothing.
+            {% endcomment %}
+            <button type="button" class="messageboard-expand">{% trans "View full message" %}</button>
+            {% if msg.sender_name %}
+                <p class="messageboard-signature">
+                    -{{ msg.sender_name }}{% if msg.sender_role %},<br>{{ msg.sender_role }}{% endif %}
+                </p>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    {% if board_messages|length > 1 %}
+        <div class="messageboard-controls">
+            <button type="button" class="messageboard-prev" aria-label="{% trans 'Previous message' %}">&larr;</button>
+            <div class="messageboard-dots">
+                {% for msg in board_messages %}
+                    <button type="button"
+                            class="messageboard-dot{% if forloop.first %} active{% endif %}"
+                            data-index="{{ forloop.counter0 }}"
+                            aria-label="{% blocktrans with n=forloop.counter %}Go to message {{ n }}{% endblocktrans %}"></button>
+                {% endfor %}
+            </div>
+            <button type="button" class="messageboard-next" aria-label="{% trans 'Next message' %}">&rarr;</button>
+        </div>
+    {% endif %}
+</div>
+
+{% comment %}
+Single shared dialog (same pattern as tool_page.html's .tool-lightbox) --
+messageboard.js populates it from whichever slide's "View full message"
+was tapped, rather than one modal per message.
+{% endcomment %}
+<div class="messageboard-modal" role="dialog" aria-modal="true" aria-label="{% trans "Message" %}" hidden>
+    {% comment %}
+    .messageboard-modal-panel itself never scrolls -- only its
+    .messageboard-modal-scroll child does. position:absolute doesn't
+    exempt an element from an ancestor's scrolling (it only takes it out
+    of normal layout flow; it still scrolls along with everything else in
+    that ancestor), so the close button and the fade below used to drift
+    away with the text instead of staying put. Splitting the scrolling
+    content into its own inner wrapper, with the close button and fade as
+    non-scrolling siblings of that wrapper instead of children of it,
+    keeps both genuinely fixed in place regardless of scroll position.
+    {% endcomment %}
+    <div class="messageboard-modal-panel">
+        <button type="button" class="messageboard-modal-close" aria-label="{% trans "Close" %}">&times;</button>
+        <div class="messageboard-modal-scroll">
+            <h2 class="messageboard-modal-title"></h2>
+            <p class="messageboard-modal-date"></p>
+            <div class="messageboard-modal-body"></div>
+            <p class="messageboard-modal-signature"></p>
+        </div>
+        {% comment %}
+        Shown via JS only when the scroll area above actually has more
+        content below than currently fits, same idea as the card's
+        truncation ellipsis but for when the full message itself is too
+        long for one screen.
+        {% endcomment %}
+        <div class="messageboard-modal-fade" aria-hidden="true">&hellip;</div>
+    </div>
+</div>
+{% endif %}
+
+{% block extra_js %}
+  <script src="{% static 'js/messageboard.js' %}" defer></script>
+{% endblock %}

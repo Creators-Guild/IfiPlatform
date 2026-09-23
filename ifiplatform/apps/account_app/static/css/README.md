@@ -1,25 +1,30 @@
 # account_app CSS structure
 
-Same ITCSS-by-cascade-order convention as the global tree (see
-`ifiplatform/static/css/README.md`) and `ifi_home_app`'s own
-(`ifiplatform/apps/ifi_home_app/static/css/README.md`), scaled down to
-this app's actual size -- no per-concern subfolders needed yet, just the
-two tiers:
+The sitewide CSS architecture (ITCSS layers, how stylesheets are loaded,
+BEM) is described in [docs/frontend.md](../../../../../docs/frontend.md).
+This file only covers what is specific to this app's CSS.
+
+Scaled down to this app's actual size -- no per-concern subfolders needed
+yet, just the two tiers, so this tree starts at 05:
 
 ```
-01_objects/     -- account_layout.css (page shell)
-02_components/  -- account_card.css, auth_card.css, profile_dropdown.css
+05_objects/     -- account_layout.css (page shell)
+06_components/  -- account_card.css, auth_card.css, profile_dropdown.css
 account_base.css
 ```
 
 `account_base.css` is the entry point, linked from every account-app
-template. It bundles `01_objects/account_layout.css`,
-`02_components/account_card.css`, and `02_components/auth_card.css` via
-`@import`. `profile_dropdown.css` is linked separately, per-template,
-where it's actually used (it also appears on non-account-app pages via
-the shared `top_header.html` partial, so it isn't something every
-account-app page needs bundled in by default).
+template. It bundles `05_objects/account_layout.css`,
+`06_components/account_card.css`, and `06_components/auth_card.css` via
+`@import`. `profile_dropdown.css` is deliberately NOT in that bundle:
+the shared `header.html` partial puts the profile dropdown on every
+page sitewide, not just this app's, so it is linked once in
+`templates/css_links/global.html` instead. It stays owned by this app
+because this app owns the dropdown.
 
-No bundler/manifest -- every template hardcodes its own `<link>` tag
-path, so moving/renaming/splitting a file here always means finding and
-updating every template that references its old path.
+This app has not adopted the block-per-tier loading described in
+[docs/frontend.md](../../../../../docs/frontend.md) yet -- its templates
+still each link `account_base.css` themselves, and it has no base
+template of its own. That works and causes no flash of unstyled content
+(the links sit in `extra_head`, so they are render-blocking), it is just
+more repetition than it needs.

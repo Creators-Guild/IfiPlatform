@@ -67,10 +67,6 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         default="active",
         help_text="Active unions are shown in the main listing, retired ones under 'Old, but not forgotten', and unknown ones (e.g. no working contact/website found) under 'Missing in action'.",
     )
-    show_in_menu = models.BooleanField(
-        default=False,
-        help_text="Show this union in the homepage navigation menu's Student Unions dropdown.",
-    )
 
     website_url = models.URLField(blank=True)
     union_links = StreamField(
@@ -218,7 +214,6 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         FieldPanel("logo"),
         FieldPanel("union_type"),
         FieldPanel("status"),
-        FieldPanel("show_in_menu"),
         FieldPanel("purpose"),
         FieldPanel("activities"),
         FieldPanel("vedtekter"),
@@ -418,6 +413,7 @@ class StudentUnionCategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWar
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
         context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
+        context["translation_nudge"] = self.translation_nudge(request.user)
         unions = (
             UnionPage.objects.child_of(self)
             .live()

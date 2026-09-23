@@ -56,6 +56,11 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("page_id", type=int)
         parser.add_argument("user_id", type=int)
+        parser.add_argument(
+            "--page-only",
+            action="store_true",
+            help="Translate just page_id, not its descendants.",
+        )
 
     def handle(self, *args, **options):
         page = Page.objects.get(pk=options["page_id"]).specific
@@ -65,7 +70,7 @@ class Command(BaseCommand):
         if machine_translator is None:
             raise CommandError("No machine translator is configured.")
 
-        pages = [page, *page.get_descendants()]
+        pages = [page] if options["page_only"] else [page, *page.get_descendants()]
 
         creator = TranslationCreator(user, [target_locale])
         for p in pages:

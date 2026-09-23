@@ -3,21 +3,9 @@
 
 {% block title %}{{ page.title }}{% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css/01_objects/home/home_layout.css' %}">
-    <link rel="stylesheet" href="{% static 'css/01_objects/home/home_page.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/shared/article_meta.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/shared/popover_base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/01_objects/union/union_page.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/union/union_info_box.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/union/union_stats.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/union/union_member_card.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/union/union_position_info.css' %}">
-    <link rel="stylesheet" href="{% static 'css/01_objects/event/event_page.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/shared/modal_base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/event/event_calendar.css' %}">
-    <link rel="stylesheet" href="{% static 'css/02_components/shared/translation_warning.css' %}">
-{% endblock extra_head %}
+{% block section_css %}
+    {% include "css_links/union.html" %}
+{% endblock section_css %}
 
 {% block sidemenu %}
     {% include "info_articles/partials/article_sidemenu.html" %}
@@ -139,7 +127,7 @@
             entirely, not just a wider class on the grid itself. Same
             "own section, own width, centered independently against
             .union-layout" pattern .union-header already uses. See
-            union_page.css's own comment on .union-main--wide for why 68rem.
+            docs/claude_context/union_page.md for why .union-main--wide is 68rem.
             {% endcomment %}
             {% if page.filled_positions %}
                 <section class="union-main union-main--wide">
@@ -171,7 +159,7 @@
                 {% comment %}
                 Guarded on the whole section, not just left empty when
                 neither renders -- .union-main + .union-main's margin-top
-                (union_page.css) would otherwise still apply to an empty,
+                (union_layout.css) would otherwise still apply to an empty,
                 zero-content article, leaving stray blank space at the
                 bottom of the page.
                 {% endcomment %}
