@@ -2,7 +2,7 @@
 (the context processor powering partials/deploy_notice.html, included in
 every page via global_base.html) reads to show a site-wide countdown banner.
 
-Meant to be run by the deploy script (.github/workflows/ci-deploy.yml)
+Meant to be run by the deploy script (deploy/deploy.sh)
 *before* the actual git reset/migrate/restart steps, against whatever code
 is currently on disk from the previous deploy -- it's the currently-running
 gunicorn workers that need to render the banner for the full warning
@@ -16,7 +16,7 @@ processes) rather than a bespoke file format, since that's exactly the
 "multiple processes need to see one shared flag" problem this also has.
 
 --clear removes the flag immediately -- run this once the actual restart
-has completed (after `sudo systemctl restart gunicorn` in ci-deploy.yml),
+has completed (after `sudo systemctl restart gunicorn` in deploy/deploy.sh),
 against the newly-deployed code. Without it, the flag would just sit there
 until its own timeout eventually expires (up to a minute after the target),
 during which a visitor's post-restart page reload (see deploy_notice.js's

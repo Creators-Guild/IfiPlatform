@@ -1,0 +1,56 @@
+name: CI
+
+# Tests + lint. Runs on every PR to main, when started by hand from the
+# Actions tab ("Run workflow", any branch), and from deploy.yml before a deploy.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# A new push to a PR cancels that PR's still-running check.
+# (Runs started by deploy.yml have no head_ref, so they're never cancelled.)
+concurrency:
+  group: ci-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  DJANGO_SECRET_KEY: dummy-secret-key-for-ci
+  DEBUG: "True"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]  # every version Django 6 supports
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      # Apps are listed explicitly: a bare `manage.py test` only finds core_app.
+      # Add new apps here.
+      - run: python ifiplatform/manage.py test core_app ifi_home_app account_app study_app yourpage_app
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt pylint==4.0.9 pylint-django==2.8.0
+      # Fails only if the overall score drops below 7/10.
+      - run: >
+          pylint --load-plugins pylint_django
+          --django-settings-module=ifiplatform_project.settings
+          --ignore-paths=ifiplatform/.*/migrations
+          --fail-under=7
+          $(git ls-files '*.py')

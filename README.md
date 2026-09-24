@@ -128,7 +128,7 @@ python manage.py test core_app ifi_home_app account_app study_app yourpage_app
 ```
 Explicit app labels, not a bare `manage.py test` — this project's own apps live grouped under `apps/` (see Project Structure below), and Django's default filesystem-based test discovery silently skips anything nested under a directory without an `__init__.py`, so a bare `manage.py test` would only run `core_app`'s tests. If you add a new app, add its label here too.
 
-CI runs this same command on every push/PR (`.github/workflows/ci-deploy.yml`) across Python 3.12–3.14, so it's worth running locally before opening a PR.
+CI runs this same command on every PR (`.github/workflows/ci.yml`) across Python 3.12–3.14, so it's worth running locally before opening a PR.
 
 To skip the slow whole-site crawler test (`core_app.tests.SiteCrawlTests`, tagged `slow` — it seeds a full page tree and makes real HTTP requests to every page on the site) for a quicker loop while iterating:
 ```bash

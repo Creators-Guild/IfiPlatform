@@ -207,8 +207,8 @@ one doesn't need to be invoked from an external scheduler by hand — the
 unit files live in [deploy/systemd/](../deploy/systemd/) and are checked
 into the repo.
 
-No manual server-side setup needed — `.github/workflows/ci-deploy.yml`'s
-deploy job copies `deploy/systemd/*` into `/etc/systemd/system/` and runs
+No manual server-side setup needed — `deploy/deploy.sh`
+copies `deploy/systemd/*` into `/etc/systemd/system/` and runs
 `daemon-reload` + `enable --now` on every deploy. This runs unconditionally
 on every deploy rather than needing its own separate first-time step
 (idempotent, a no-op once nothing's changed), and any future change to
@@ -389,7 +389,7 @@ py manage.py announce_deploy [--minutes N] [--clear]
 
 Operational, not a dev command — sets the shared "a deploy is imminent"
 flag that powers the site-wide countdown banner, read by the deploy
-workflow (`.github/workflows/ci-deploy.yml`) before restarting the server.
+script (`deploy/deploy.sh`) before restarting the server.
 You shouldn't need to run this yourself in local dev.
 
 ### clear_cache
@@ -401,7 +401,7 @@ py manage.py clear_cache
 Clears the site-wide cache (see `settings.py`'s `CACHES` — a `FileBasedCache`
 persisted on disk under `django_cache/`, so it survives server restarts and,
 notably, isn't touched by `git reset --hard` during a deploy since that
-directory is untracked). Wired into `ci-deploy.yml`, running right after
+directory is untracked). Wired into `deploy/deploy.sh`, running right after
 every deploy's gunicorn restart.
 
 Exists because of a real incident: after some deploys, Wagtail's own

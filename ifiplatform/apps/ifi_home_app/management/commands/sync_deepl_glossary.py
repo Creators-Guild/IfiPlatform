@@ -15,7 +15,7 @@ By default, just prints the new glossary_id -- copy it into
 DEEPL_GLOSSARY_ID in .env (same copy-paste flow as DJANGO_SECRET_KEY in
 README.md's setup steps) and restart the server; settings.py reads it from
 there into WAGTAILLOCALIZE_MACHINE_TRANSLATOR's GLOSSARY_IDS option.
---write-env does that .env edit itself instead -- used by ci-deploy.yml so
+--write-env does that .env edit itself instead -- used by deploy/deploy.sh so
 production never needs that manual step (a stale DEEPL_GLOSSARY_ID is what
 caused a real KeyError: 'translations' machine-translation outage once).
 
