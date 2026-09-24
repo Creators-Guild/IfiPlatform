@@ -4,15 +4,23 @@ from io import StringIO
 from unittest.mock import Mock, patch
 
 import requests
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
 from wagtail.models import Locale, Page
 
 from ifi_home_app.integrations.peoply_api import get_events
 from ifi_home_app.models.article.unions import StudentUnionCategoryPage, UnionPage
-from ifi_home_app.models.event_models import EventIndexPage, EventPage, PeoplyUnionMismatch
+from ifi_home_app.models.event_models import (
+    EventIndexPage,
+    EventPage,
+    PeoplyRemovedEvent,
+    PeoplyUnionMismatch,
+    upcoming_events_for_union,
+)
 
 SAMPLE_EVENT = {
     "id": "d01f8be8-6bd0-40ff-850d-7e3ccc04d8f5",
@@ -193,6 +201,202 @@ class SyncPeoplyEventsTests(TestCase):
         # Only the one union with an id set should have triggered a call.
         mock_get_events.assert_called_once()
         self.assertEqual(mock_get_events.call_args[0][0], "test-org-id")
+
+
+FUTURE_EVENT = {
+    **SAMPLE_EVENT,
+    "id": "future-id",
+    "urlId": "FUTURE",
+    "title": "Julebord",
+    "startDate": "2099-12-01T17:00:00.000Z",  # 18:00 Oslo
+    "endDate": "2099-12-01T21:00:00.000Z",
+}
+
+
+class SyncPeoplyUpdatesAndRemovalsTests(TestCase):
+    """sync_peoply_events treating Peoply as the source of truth: updating
+    already-synced events, and hiding/logging ones gone from Peoply."""
+
+    def setUp(self):
+        self.union = _make_union(peoply_organization_id="test-org-id")
+        self.event_index = _make_event_index()
+        patcher = patch(
+            "ifi_home_app.management.commands.check_peoply_union_matches.get_organizations",
+            return_value=[],
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        events_patcher = patch("ifi_home_app.management.commands.sync_peoply_events.get_events")
+        self.mock_get_events = events_patcher.start()
+        self.addCleanup(events_patcher.stop)
+
+    def _sync(self, events):
+        self.mock_get_events.return_value = events
+        call_command("sync_peoply_events", stdout=StringIO())
+
+    def _page(self, uid=FUTURE_EVENT["id"]):
+        return EventPage.objects.get(external_uid=uid)
+
+    def test_changes_on_peoply_update_existing_page(self):
+        self._sync([FUTURE_EVENT])
+        page = self._page()
+        original_slug = page.slug
+        page.event_type = "academic"  # editor-owned, must survive the resync
+        page.save_revision().publish()
+
+        self._sync([{
+            **FUTURE_EVENT,
+            "title": "Julebord (flyttet)",
+            "startDate": "2099-12-02T18:00:00.000Z",
+            "endDate": "2099-12-02T22:00:00.000Z",
+            "freeformAddress": "Ny adresse 1",
+            "description": "Oppdatert.",
+        }])
+
+        page = self._page()
+        self.assertEqual(page.title, "Julebord (flyttet)")
+        self.assertEqual(page.event_date.isoformat(), "2099-12-02")
+        self.assertEqual(page.event_time.strftime("%H:%M"), "19:00")
+        self.assertEqual(page.event_end_time.strftime("%H:%M"), "23:00")
+        self.assertEqual(page.location, "Ny adresse 1")
+        self.assertEqual(page.intro, "<p>Oppdatert.</p>")
+        self.assertEqual(page.slug, original_slug)
+        self.assertEqual(page.event_type, "academic")
+
+    def test_unchanged_event_gets_no_new_revision(self):
+        self._sync([FUTURE_EVENT])
+        revisions = self._page().revisions.count()
+
+        self._sync([FUTURE_EVENT])
+
+        self.assertEqual(self._page().revisions.count(), revisions)
+
+    def test_switch_to_multi_day_clears_end_time(self):
+        self._sync([FUTURE_EVENT])
+        self.assertIsNotNone(self._page().event_end_time)
+
+        self._sync([{**FUTURE_EVENT, "endDate": "2099-12-04T21:00:00.000Z"}])
+
+        page = self._page()
+        self.assertIsNone(page.event_end_time)
+        self.assertEqual(page.end_date.isoformat(), "2099-12-04")
+
+    def test_event_gone_from_peoply_is_hidden_and_logged(self):
+        self._sync([FUTURE_EVENT])
+
+        self._sync([])
+
+        page = self._page()
+        self.assertFalse(page.live)
+        removal = PeoplyRemovedEvent.objects.get(external_uid=FUTURE_EVENT["id"])
+        self.assertIsNone(removal.resolved_at)
+        self.assertEqual(removal.page_id, page.pk)
+
+    def test_past_event_missing_from_fetch_is_not_hidden(self):
+        # Peoply's afterDate filter never returns past events -- absence
+        # there isn't removal.
+        self._sync([SAMPLE_EVENT])
+
+        self._sync([])
+
+        self.assertTrue(self._page(SAMPLE_EVENT["id"]).live)
+        self.assertFalse(PeoplyRemovedEvent.objects.exists())
+
+    def test_events_of_unlinked_union_are_not_hidden(self):
+        self._sync([FUTURE_EVENT])
+        UnionPage.objects.filter(pk=self.union.pk).update(peoply_organization_id="")
+
+        self._sync([])
+
+        self.assertTrue(self._page().live)
+
+    def test_editor_unpublished_event_is_not_republished(self):
+        self._sync([FUTURE_EVENT])
+        self._page().unpublish()
+
+        self._sync([{**FUTURE_EVENT, "title": "Changed"}])
+
+        self.assertFalse(self._page().live)
+
+    def test_reappearing_event_is_restored_and_log_resolved(self):
+        self._sync([FUTURE_EVENT])
+        self._sync([])
+
+        self._sync([FUTURE_EVENT])
+
+        self.assertTrue(self._page().live)
+        removal = PeoplyRemovedEvent.objects.get(external_uid=FUTURE_EVENT["id"])
+        self.assertIsNotNone(removal.resolved_at)
+        self.assertEqual(removal.resolution, "reappeared")
+
+
+class PeoplyRemovedEventAdminTests(TestCase):
+    """PeoplyRemovedEventAdmin's archive/delete actions."""
+
+    def setUp(self):
+        self.union = _make_union(peoply_organization_id="test-org-id")
+        self.event_index = _make_event_index()
+        with patch(
+            "ifi_home_app.management.commands.check_peoply_union_matches.get_organizations",
+            return_value=[],
+        ), patch("ifi_home_app.management.commands.sync_peoply_events.get_events") as mock_get_events:
+            mock_get_events.return_value = [FUTURE_EVENT]
+            call_command("sync_peoply_events", stdout=StringIO())
+            mock_get_events.return_value = []
+            call_command("sync_peoply_events", stdout=StringIO())
+        self.removal = PeoplyRemovedEvent.objects.get(external_uid=FUTURE_EVENT["id"])
+
+        superuser = get_user_model().objects.create_superuser("admin", "admin@test.com", "pw")
+        self.client.force_login(superuser)
+
+    def _post_action(self, action):
+        return self.client.post(
+            reverse("admin:ifi_home_app_peoplyremovedevent_changelist"),
+            {"action": action, "_selected_action": [str(self.removal.pk)]},
+            follow=True,
+        )
+
+    def test_archive_republishes_under_previous_events_only(self):
+        self._post_action("archive_events")
+
+        page = EventPage.objects.get(external_uid=FUTURE_EVENT["id"])
+        self.assertTrue(page.live)
+        self.assertTrue(page.is_archived)
+        self.removal.refresh_from_db()
+        self.assertEqual(self.removal.resolution, "archived")
+
+        context = self.event_index.get_context(RequestFactory().get("/"))
+        past = [e for group in context["past_month_groups"] for e in group["events"]]
+        upcoming = [e for group in context["month_groups"] for e in group["events"]]
+        self.assertIn(page, past)
+        self.assertNotIn(page, upcoming)
+        self.assertEqual(upcoming_events_for_union(self.union), [])
+
+    def test_delete_removes_event_page(self):
+        self._post_action("delete_event_pages")
+
+        self.assertFalse(EventPage.objects.filter(external_uid=FUTURE_EVENT["id"]).exists())
+        self.removal.refresh_from_db()
+        self.assertEqual(self.removal.resolution, "deleted")
+        self.assertIsNone(self.removal.page)
+
+
+class EventPageFormTests(TestCase):
+    """EventPageForm locks PEOPLY_SYNCED_FIELDS on peoply-sourced events."""
+
+    def _form(self, page):
+        form_class = EventPage.get_edit_handler().get_form_class()
+        return form_class(instance=page, for_user=get_user_model()(is_superuser=True))
+
+    def test_synced_fields_disabled_for_peoply_event(self):
+        form = self._form(EventPage(external_source="peoply"))
+        for name in ("title", "event_date", "location", "intro"):
+            self.assertTrue(form.fields[name].disabled, name)
+        self.assertFalse(form.fields["event_type"].disabled)
+
+    def test_manual_event_fields_editable(self):
+        form = self._form(EventPage())
+        self.assertFalse(form.fields["title"].disabled)
 
 
 class CheckPeoplyUnionMatchesTests(TestCase):

@@ -50,7 +50,7 @@ def main_view(request):
     upcoming_events = (
         EventPage.objects.child_of(event_index)
         .live()
-        .filter(locale=Locale.get_active(), show_on_homepage=True)
+        .filter(locale=Locale.get_active(), show_on_homepage=True, is_archived=False)
         .filter(Q(end_date__gte=today) | Q(end_date__isnull=True, event_date__gte=today))
         .order_by("event_date", "event_time")[:6]
         if event_index

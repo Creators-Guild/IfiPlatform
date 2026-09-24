@@ -1,7 +1,9 @@
 """Admin registration for ifi_home_app models."""
 
 from django.contrib import admin, messages
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import format_html
 from django.utils.text import slugify
 
 import requests
@@ -12,6 +14,8 @@ from .integrations.peoply_api import apply_peoply_match, find_exact_match, get_o
 from .models import StudentUnion
 from .models.article.unions import StudentUnionCategoryPage, UnionPage
 from .models.event_models import (
+    EventPage,
+    PeoplyRemovedEvent,
     PeoplySyncLog,
     PeoplyOrgsWithoutUnion,
     UnionsPendingPeoplyLink,
@@ -45,6 +49,106 @@ class PeoplySyncLogAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(PeoplyRemovedEvent)
+class PeoplyRemovedEventAdmin(admin.ModelAdmin):
+    """Peoply-sourced events sync_peoply_events hid because Peoply stopped
+    returning them (see PeoplyRemovedEvent's own docstring). Superuser-only,
+    never editable -- the two actions below are the only ways to act on one:
+    archive it (republished, listed only under previous events) or delete
+    the event page for good. An open row whose event reappears on Peoply is
+    resolved by the sync itself."""
+
+    list_display = [
+        "title", "event_date", "first_seen_at", "last_seen_at", "resolution", "resolved_at", "page_link",
+    ]
+    list_filter = ["resolution"]
+    actions = ["archive_events", "delete_event_pages", "delete_selected_logs"]
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def get_actions(self, request):
+        # Built-in "delete_selected" would read as deleting the event
+        # itself -- see _PeoplyUnionMismatchAdmin.get_actions.
+        actions = super().get_actions(request)
+        actions.pop("delete_selected", None)
+        return actions
+
+    @admin.display(description="Event page")
+    def page_link(self, obj):
+        if obj.page_id is None:
+            return "-"
+        return format_html(
+            '<a href="{}">Open in Wagtail</a>', reverse("wagtailadmin_pages:edit", args=[obj.page_id])
+        )
+
+    def _open_targets(self, request, queryset):
+        """Open rows whose page still exists, or None (after messaging) if
+        the caller should stop."""
+        if not request.user.is_superuser:
+            self.message_user(request, "Only superusers can do this.", level=messages.ERROR)
+            return None
+        skipped = queryset.exclude(resolved_at__isnull=True, page__isnull=False)
+        if skipped.exists():
+            self.message_user(
+                request,
+                f"{skipped.count()} selected row(s) were already resolved or have no event page left, skipped.",
+                level=messages.WARNING,
+            )
+        return list(queryset.filter(resolved_at__isnull=True, page__isnull=False))
+
+    @admin.action(description="Archive: show under previous events")
+    def archive_events(self, request, queryset):
+        targets = self._open_targets(request, queryset)
+        if not targets:
+            return
+        for removal in targets:
+            page = removal.page.specific
+            page.is_archived = True
+            page.save_revision(user=request.user).publish(user=request.user)
+            removal.resolved_at = timezone.now()
+            removal.resolution = "archived"
+            removal.save()
+        self.message_user(request, f"Archived {len(targets)} event(s).", level=messages.SUCCESS)
+
+    @admin.action(description="Delete the selected event page(s) permanently")
+    def delete_event_pages(self, request, queryset):
+        targets = self._open_targets(request, queryset)
+        if not targets:
+            return
+        for removal in targets:
+            translation_key = removal.page.translation_key
+            # Every locale's copy (nb + its en alias/translation).
+            for page in EventPage.objects.filter(translation_key=translation_key):
+                page.delete()
+            removal.page = None  # already SET_NULL in the DB by the delete above
+            removal.resolved_at = timezone.now()
+            removal.resolution = "deleted"
+            removal.save()
+        self.message_user(request, f"Deleted {len(targets)} event(s).", level=messages.SUCCESS)
+
+    @admin.action(description="Delete selected log entries")
+    def delete_selected_logs(self, request, queryset):
+        if not request.user.is_superuser:
+            self.message_user(request, "Only superusers can do this.", level=messages.ERROR)
+            return
+        count = queryset.count()
+        queryset.delete()
+        self.message_user(request, f"Deleted {count} log entr{'y' if count == 1 else 'ies'}.")
 
 
 class _PeoplyUnionMismatchAdmin(admin.ModelAdmin):
