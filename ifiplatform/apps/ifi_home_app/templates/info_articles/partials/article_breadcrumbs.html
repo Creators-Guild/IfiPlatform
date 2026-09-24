@@ -1,7 +1,7 @@
 {% load i18n wagtailcore_tags %}
 
 {% if page %}
-    <nav aria-label="{% trans 'Breadcrumb' %}">
+    <nav class="breadcrumbs" aria-label="{% trans 'Breadcrumb' %}">
         {% with parent=page.get_parent %}
             <a href="{% pageurl parent %}" class="back-to" aria-label="{% trans 'Back' %}">
                 <span aria-hidden="true">←</span>
@@ -26,5 +26,5 @@
         <span class="current" aria-current="page">{{ page.title }}</span>
     </nav>
 {% else %}
-    <a class="back-to" href="{% url 'ifi_home' %}">{% trans "Back to Homepage" %}</a>
+    <a class="back-to breadcrumbs" href="{% url 'ifi_home' %}">{% trans "Back to Homepage" %}</a>
 {% endif %}

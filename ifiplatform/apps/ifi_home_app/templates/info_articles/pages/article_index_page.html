@@ -18,7 +18,7 @@
 {% endblock sidemenu %}
 
 {% block maincontent %}
-    <a class="back-to" href="{% url 'ifi_home' %}"><span aria-hidden="true">←</span> {% trans "Back to Homepage" %}</a>
+    <a class="back-to breadcrumbs" href="{% url 'ifi_home' %}"><span aria-hidden="true">←</span> {% trans "Back to Homepage" %}</a>
     {% if can_edit_style %}
         {% include "info_articles/partials/article_editor_mode_toggle.html" %}
         {% include "info_articles/partials/banner_style_panel.html" %}

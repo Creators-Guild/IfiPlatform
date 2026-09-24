@@ -19,6 +19,17 @@ MENU_KEYS = [
     ("shortcuts", "Homepage shortcuts"),
 ]
 
+# Inline SVGs in home/partials/shortcut_icon.html -- blank keeps the
+# generic menu icon.
+SHORTCUT_ICONS = [
+    ("info", "Info"),
+    ("news", "News"),
+    ("unions", "Student unions"),
+    ("jobs", "Jobs"),
+    ("events", "Events"),
+    ("tools", "Tools"),
+]
+
 # Checked in order for a link's thumbnail (UnionPage.logo, ToolPage.image,
 # ArticlePage.hero_image, ...).
 THUMBNAIL_FIELDS = ("logo", "image", "hero_image")
@@ -46,10 +57,17 @@ class MenuGroup(TranslatableMixin, ClusterableModel):
         blank=True,
         help_text="An external address for the heading instead of a page.",
     )
+    icon = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=SHORTCUT_ICONS,
+        help_text="Shown on the group's homepage shortcut card. Blank uses the plain menu icon.",
+    )
 
     panels = [
         FieldPanel("title"),
         FieldPanel("short_title"),
+        FieldPanel("icon"),
         MultiFieldPanel(
             [FieldPanel("link_page"), FieldPanel("link_url")],
             heading="Heading link (optional, pick at most one)",
@@ -191,15 +209,19 @@ def _resolve_link(link):
 def _resolve_group(slot):
     group = slot.group.localized
     link_page = _resolve_page(group.link_page)
-    links = [_resolve_link(link) for link in group.links.all()]
+    links = [link for link in (_resolve_link(link) for link in group.links.all()) if link]
+    url = link_page.url if link_page else group.link_url
     return {
         "title": group.title,
         "short_title": group.short_title,
-        "url": link_page.url if link_page else group.link_url,
+        "icon": slot.group.icon or group.icon,
+        "url": url,
         "external": bool(group.link_url) and not link_page,
+        # an "All" link to the heading's own target, unless a link already goes there
+        "show_all": bool(url) and all(link["url"] != url for link in links),
         "hide_on_mobile": slot.hide_on_mobile,
         "column": slot.column,
-        "links": [link for link in links if link],
+        "links": links,
     }
 
 
