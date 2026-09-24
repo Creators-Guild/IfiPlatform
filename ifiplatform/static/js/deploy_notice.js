@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // restart, kicked off server-side right as the countdown's own sleep
   // ends) a short head start before reloading -- the deploy script clears
   // the announcement once the restart completes (see announce_deploy
-  // --clear in ci-deploy.yml), so by the time this reload lands the banner
+  // --clear in deploy/deploy.sh), so by the time this reload lands the banner
   // should be gone; if the restart is still mid-flight the browser just
   // shows its own transient connection error, same as it would for anyone
   // else hitting the site at that exact moment.
