@@ -36,9 +36,9 @@ class MenuSeedMixin:
             nb_page(CategoryPage, title=title, depth=info_index.depth + 1) for title, _color in CATEGORY_SPECS
         ]
 
-        def group(titles, link_page=None, links=(), short_titles=("", "")):
+        def group(titles, link_page=None, links=(), short_titles=("", ""), icon=""):
             nb_group = MenuGroup(
-                locale=nb_locale, title=titles[0], short_title=short_titles[0], link_page=link_page
+                locale=nb_locale, title=titles[0], short_title=short_titles[0], link_page=link_page, icon=icon
             )
             for order, link in enumerate(links):
                 nb_group.links.add(MenuGroupLink(
@@ -73,30 +73,31 @@ class MenuSeedMixin:
             self.created_count += 1
             self.stdout.write(f"  created Menu: {key}")
 
-        info = group(("Infoartikkler", "Info Articles"), info_index, pages(top_categories))
-        news = group(("Nyheter", "News"), news_index, pages(children(news_index)))
-        events = group(("Arrangementer", "Events"), event_index)
+        info = group(("Infoartikkler", "Info Articles"), info_index, pages(top_categories), icon="info")
+        news = group(("Nyheter", "News"), news_index, pages(children(news_index)), icon="news")
+        events = group(("Arrangementer", "Events"), event_index, icon="events")
         help_group = group(("hJELP", "hELP"), nb_page(CategoryPage, slug="hjelp"))
         unions = group(
             ("Studentforeninger", "Student Unions"), unions_category,
             pages([nb_page(UnionPage, title="Navet"), nb_page(UnionPage, title=LONG_UNION_NAME)]),
             short_titles=("Foreninger", "Unions"),
+            icon="unions",
         )
-        tools = group(("Verktøy", "Tools"), tools_category, pages(children(tools_category)))
+        tools = group(("Verktøy", "Tools"), tools_category, pages(children(tools_category)), icon="tools")
         new_student = group(("Ny Student?", "New Student?"), new_student_category, pages(children(new_student_category)))
 
-        shortcut_info = group(("Info", "Info"), info_index, pages(top_categories[:4]))
-        shortcut_unions = group(("Foreninger", "Unions"), unions_category)
+        shortcut_info = group(("Info", "Info"), info_index, pages(top_categories[:4]), icon="info")
+        shortcut_unions = group(("Foreninger", "Unions"), unions_category, icon="unions")
         shortcut_events = group(("Arrangementer", "Events"), event_index, [
             {"page": event_index, "label": ("Alle", "All")},
             {"url": "https://peoply.app/", "label": ("Foreningsarrangementer", "Union Events"), "description": "Peoply"},
             {"url": "https://ifinavet.no/events", "label": ("Bedriftspresentasjoner", "Company Presentations"), "description": "Navet"},
             {"url": "https://dagenatifi.no/program/", "label": ("Karrieredag", "Career Day"), "description": "dagen@ifi"},
-        ])
+        ], icon="events")
         jobs = group(("Stillingsannonser", "Job Listings"), None, [
             {"url": "https://dagenatifi.no/stillingsannonser/", "label": ("dagen@ifi", "dagen@ifi"), "prefix": LISTINGS_AT},
             {"url": "https://ifinavet.no/job-listings", "label": ("Navet", "Navet"), "prefix": LISTINGS_AT},
-        ])
+        ], icon="jobs")
 
         menu("sidemenu", [(info, 1, False), (news, 1, False), (events, 1, False), (help_group, 1, False)])
         menu("home_dropmenu", [

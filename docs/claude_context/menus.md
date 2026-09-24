@@ -7,7 +7,12 @@ derived from the page tree.
 - **`MenuGroup`**: a titled, ordered list of `MenuGroupLink`s. Each link is
   a page on the site *or* an external URL. The group's own heading can link
   to a page (`link_page`) or an external URL (`link_url`), or to neither,
-  in which case it renders as plain text.
+  in which case it renders as plain text. `icon` picks one of the fixed
+  `SHORTCUT_ICONS`: inline SVGs in `home/partials/shortcut_icon.html`,
+  drawn in `currentColor`. It is shown on the group's homepage shortcut
+  card; blank keeps the plain menu icon. `get_menu()` reads it from the nb
+  group the menu slot points at, so editors set it once and English
+  follows without a translation sync.
 - **`Menu`**: one row per `key` (`sidemenu`, `home_dropmenu`,
   `shortcuts`), listing groups in order through `MenuSlot`s. A slot's
   `column` is only used by `shortcuts`, and `hide_on_mobile` only by

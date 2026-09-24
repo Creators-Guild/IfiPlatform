@@ -4,11 +4,11 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone, translation
-from wagtail.models import Locale, Page
+from wagtail.models import Locale, Page, Site
 
 from ifi_home_app.models import ArticleIndexPage
 from ifi_home_app.models.article_models import CategoryPage
-from ifi_home_app.models.menus import Menu, MenuGroup, MenuGroupLink, MenuSlot, get_menu
+from ifi_home_app.models.menus import SHORTCUT_ICONS, Menu, MenuGroup, MenuGroupLink, MenuSlot, get_menu
 from ifi_home_app.templatetags.article_tags import get_shortcut_columns
 
 
@@ -136,3 +136,33 @@ class MenuTests(TestCase):
         with translation.override("nb"):
             columns = get_shortcut_columns()
         self.assertEqual([[g["title"] for g in column] for column in columns], [["B"], ["A", "C"]])
+
+    def test_icon_comes_from_the_nb_group(self):
+        group = self._group("Nyheter", icon="news")
+        en_group = group.copy_for_translation(self.en)
+        en_group.icon = ""
+        en_group.save()
+        self._menu("shortcuts", group)
+
+        with translation.override("en"):
+            self.assertEqual(get_menu("shortcuts")[0]["icon"], "news")
+
+    def test_shortcut_icon_partial(self):
+        from django.template.loader import render_to_string  # pylint: disable=import-outside-toplevel
+
+        for icon, _label in SHORTCUT_ICONS:
+            self.assertIn("<svg", render_to_string("home/partials/shortcut_icon.html", {"icon": icon}))
+        self.assertIn("black_menu_icon", render_to_string("home/partials/shortcut_icon.html", {"icon": ""}))
+
+    def test_show_all_unless_a_link_already_goes_there(self):
+        # pages only have a URL once they're under a Site
+        Site.objects.update_or_create(is_default_site=True, defaults={"hostname": "localhost", "root_page": self.index})
+        other = self._category("Annen")
+        self._menu(
+            "sidemenu",
+            self._group("Med egen Alle", link_page=self.index, links=[{"page": self.index, "label": "Alle"}]),
+            self._group("Uten", link_page=self.index, links=[{"page": other}]),
+            self._group("Uten lenke"),
+        )
+
+        self.assertEqual([g["show_all"] for g in self._nb("sidemenu")], [False, True, False])
