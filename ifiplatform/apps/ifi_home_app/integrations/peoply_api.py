@@ -8,7 +8,7 @@ import requests
 url = "https://api.peoply.app"
 
 def get_events(union_id, after_date):
-    events = []
+    events = [] # peoply API only gives all events or nothing, everything just filters
 
     # use skip/offset and take for safety. Take caps at 500(though I doubt there will ever more than 500)
     offset = 0 # starts at 0 to get from

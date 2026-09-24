@@ -840,6 +840,14 @@ msgstr ""
 msgid "Signup at Peoply"
 msgstr "Meld deg på via Peoply"
 
+#: .\apps\ifi_home_app\templates\events\event_page.html
+msgid "This event is no longer listed on Peoply."
+msgstr "Dette arrangementet ligger ikke lenger på Peoply."
+
+#: .\apps\ifi_home_app\models\event_models.py
+msgid "Synced from Peoply -- edit it on Peoply instead."
+msgstr "Synkronisert fra Peoply -- endre det på Peoply i stedet."
+
 #: .\apps\ifi_home_app\templates\events\event_page.html:70
 msgid "Peoply"
 msgstr ""

@@ -45,7 +45,9 @@
             </div>
         {% endif %}
 
-        {% if page.peoply_url %}
+        {% if page.is_archived %}
+            <p class="event-archived-notice">{% trans "This event is no longer listed on Peoply." %}</p>
+        {% elif page.peoply_url %}
             {% if page.external_source == "peoply" and not page.signup_url %}
                 {% comment %}
                 No signup_url means Peoply's own registrationMode was
@@ -60,7 +62,7 @@
             {% endif %}
             {% include "events/partials/peoply_badge.html" with event=page show_sync_time=True %}
         {% endif %}
-        {% if page.signup_url %}
+        {% if page.signup_url and not page.is_archived %}
             <a class="event-signup-link" href="{{ page.signup_url }}" target="_blank" rel="noopener noreferrer">{% trans "Sign up" %}</a>
         {% endif %}
 

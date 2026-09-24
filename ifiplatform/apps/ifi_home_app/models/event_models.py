@@ -15,6 +15,7 @@ from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
 from taggit.models import TaggedItemBase
 from wagtail import blocks
+from wagtail.admin.forms import WagtailAdminPageForm
 from wagtail.admin.panels import FieldPanel
 from wagtail.fields import RichTextField, StreamField
 from wagtail.models import Locale, Page
@@ -287,6 +288,65 @@ class UnionsPendingPeoplyLink(PeoplyUnionMismatch):
         verbose_name_plural = "Site unions with an unlinked Peoply match"
 
 
+class PeoplyRemovedEvent(models.Model):
+    """One durable row per Peoply-sourced EventPage that sync_peoply_events
+    found missing from Peoply's own /events response (deleted or cancelled
+    there) -- the sync unpublishes the page itself, this row is what lets
+    a superuser then decide in Django admin (PeoplyRemovedEventAdmin,
+    admin.py) whether to delete it for good or archive it under "previous
+    events". Keyed by external_uid, same reopen-rather-than-duplicate
+    convention as PeoplyUnionMismatch: resolved_at/resolution are set once
+    the event reappears on Peoply or an admin acts on it, and cleared again
+    if it goes missing a second time."""
+
+    RESOLUTION_CHOICES = [
+        ("", "Open"),
+        ("reappeared", "Reappeared on Peoply"),
+        ("archived", "Archived under previous events"),
+        ("deleted", "Deleted"),
+    ]
+    external_uid = models.CharField(max_length=200, unique=True)
+    title = models.CharField(max_length=255)
+    event_date = models.DateField()
+    page = models.ForeignKey(
+        "EventPage", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    first_seen_at = models.DateTimeField(auto_now_add=True)
+    last_seen_at = models.DateTimeField(auto_now=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolution = models.CharField(max_length=20, choices=RESOLUTION_CHOICES, blank=True)
+
+    class Meta:
+        ordering = ["-last_seen_at"]
+        verbose_name = "event removed from Peoply"
+        verbose_name_plural = "Events removed from Peoply"
+
+    def __str__(self):
+        return f"{self.title} ({self.event_date})"
+
+
+# Fields sync_peoply_events overwrites from Peoply on every run -- read-only
+# in wagtail-admin for peoply-sourced events (EventPageForm below), since
+# any edit here would just be reverted by the next sync.
+PEOPLY_SYNCED_FIELDS = [
+    "title", "event_date", "event_time", "event_end_time", "end_date",
+    "location", "intro", "peoply_url", "signup_url",
+]
+
+
+class EventPageForm(WagtailAdminPageForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.external_source != "peoply":
+            return
+        for name in PEOPLY_SYNCED_FIELDS:
+            field = self.fields.get(name)
+            if field is None:
+                continue
+            field.disabled = True
+            field.help_text = _("Synced from Peoply -- edit it on Peoply instead.")
+
+
 class EventIndexPage(TranslationWarningMixin, Page):
     """Landing page listing all events."""
 
@@ -311,9 +371,11 @@ class EventIndexPage(TranslationWarningMixin, Page):
         today = timezone.localdate()
         # Same "still going" rule as is_happening_now: an event only counts
         # as past once its last day (end_date if set, else event_date) is
-        # behind us -- a week-long event isn't "past" on day 2.
-        upcoming_events = [e for e in events if (e.end_date or e.event_date) >= today]
-        past_events = [e for e in events if (e.end_date or e.event_date) < today]
+        # behind us -- a week-long event isn't "past" on day 2. An archived
+        # event (dropped from Peoply, kept by an admin -- see
+        # PeoplyRemovedEvent) is always past, whatever its date.
+        upcoming_events = [e for e in events if not e.is_archived and (e.end_date or e.event_date) >= today]
+        past_events = [e for e in events if e.is_archived or (e.end_date or e.event_date) < today]
 
         context["events"] = events
         context["month_groups"] = group_events_by_month(upcoming_events)
@@ -384,10 +446,15 @@ class EventPage(TranslationWarningMixin, Page):
         help_text="For a sub-event: show it in its parent event's homepage dropdown.",
     )
 
-    # Groundwork for a future automatic sync (e.g. Peoply/UiO ICS feeds) --
-    # unused until that exists. "" means manually created.
+    # Set by sync_peoply_events ("peoply" + Peoply's own event id) -- ""
+    # means manually created. Peoply is the source of truth for
+    # PEOPLY_SYNCED_FIELDS on these, see EventPageForm.
     external_source = models.CharField(max_length=20, blank=True)
     external_uid = models.CharField(max_length=200, blank=True)
+    is_archived = models.BooleanField(
+        default=False,
+        help_text="Removed from Peoply, but kept visible under previous events only.",
+    )
 
     related_unions = StreamField(
         [("union", event_union_block())],
@@ -436,6 +503,8 @@ class EventPage(TranslationWarningMixin, Page):
         FieldPanel("signup_url"),
         FieldPanel("info_tags"),
     ]
+
+    base_form_class = EventPageForm
 
     parent_page_types = ["ifi_home_app.EventIndexPage", "ifi_home_app.EventPage"]
     subpage_types = ["ifi_home_app.EventPage"]
@@ -783,7 +852,7 @@ def upcoming_events_for_union(union):
     today = timezone.localdate()
     candidates = (
         EventPage.objects.live()
-        .filter(locale=union.locale_id)
+        .filter(locale=union.locale_id, is_archived=False)
         .filter(
             models.Q(end_date__gte=today)
             | models.Q(end_date__isnull=True, event_date__gte=today)
@@ -800,7 +869,7 @@ def events_for_union_between(union, start_date, end_date):
     whose date falls in [start_date, end_date]."""
     candidates = (
         EventPage.objects.live()
-        .filter(locale=union.locale_id)
+        .filter(locale=union.locale_id, is_archived=False)
         .filter(event_date__lte=end_date)
         .filter(
             models.Q(end_date__gte=start_date)
