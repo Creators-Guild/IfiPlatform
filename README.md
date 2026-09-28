@@ -110,7 +110,7 @@ Useful for testing responsive/mobile layout on a real device.
 If it still doesn't load, your computer's firewall may be blocking incoming connections on port 8000 — Windows will usually prompt to allow this the first time; allow it for at least "Private networks."
 
 ### Often used commands and actions
-For a full list and explanation of this project's custom `manage.py` commands (beyond the built-in Django ones below), see [docs/management_commands.md](docs/management_commands.md).
+For a full list and explanation of this project's custom `manage.py` commands (beyond the built-in Django ones below), see [docs/operations/management_commands.md](docs/operations/management_commands.md).
 
 #### If you change a model (i.e. need a new migration)
 ```bash
@@ -147,7 +147,7 @@ If that fails because `msgfmt` (part of GNU gettext) isn't installed — common 
 ```bash
 python manage.py compile_translations
 ```
-See [docs/management_commands.md](docs/management_commands.md#compile_translations) for why this exists.
+See [docs/operations/management_commands.md](docs/operations/management_commands.md#compile_translations) for why this exists.
 #### Log in on admin interface or wagtail-admin interface
 Log in via a superuser you have created.
 ```
@@ -182,9 +182,12 @@ IfiPlatform/
 ```
 
 ## Architecture
+- All project docs, sorted by topic: see [docs/README.md](docs/README.md)
+- Tech stack: see [docs/architecture/tech_stack.md](docs/architecture/tech_stack.md)
+- Production server and deploys: see [docs/operations/prod_server.md](docs/operations/prod_server.md)
 - Feature concept map: see [docs/architecture/eraser_links.md](docs/architecture/eraser_links.md)
 - UI/design references: see [docs/design/figma_links.md](docs/design/figma_links.md)
-- Frontend architecture (how HTML templates and CSS are organized, loaded and written): see [docs/frontend.md](docs/frontend.md)
+- Frontend architecture (how HTML templates and CSS are organized, loaded and written): see [docs/architecture/frontend.md](docs/architecture/frontend.md)
 - Working with Claude (or another AI agent) in this repo? See [docs/claude_context/readme_claude.md](docs/claude_context/readme_claude.md) for where implementation-level design rationale lives (kept out of code comments to keep the code itself readable).
 - Picking up an AI-drafted doc to finish by hand? See [docs/claude_references/readme.md](docs/claude_references/readme.md) — those are starting points, not final docs.
 

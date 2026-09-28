@@ -1,7 +1,7 @@
 # account_app CSS structure
 
 The sitewide CSS architecture (ITCSS layers, how stylesheets are loaded,
-BEM) is described in [docs/frontend.md](../../../../../docs/frontend.md).
+BEM) is described in [docs/architecture/frontend.md](../../../../../docs/architecture/frontend.md).
 This file only covers what is specific to this app's CSS.
 
 Scaled down to this app's actual size -- no per-concern subfolders needed
@@ -23,7 +23,7 @@ page sitewide, not just this app's, so it is linked once in
 because this app owns the dropdown.
 
 This app has not adopted the block-per-tier loading described in
-[docs/frontend.md](../../../../../docs/frontend.md) yet -- its templates
+[docs/architecture/frontend.md](../../../../../docs/architecture/frontend.md) yet -- its templates
 still each link `account_base.css` themselves, and it has no base
 template of its own. That works and causes no flash of unstyled content
 (the links sit in `extra_head`, so they are render-blocking), it is just

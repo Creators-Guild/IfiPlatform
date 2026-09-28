@@ -1,7 +1,7 @@
 # Global templates
 
 The sitewide template structure (base templates, blocks, partials) is
-described in [docs/frontend.md](../../docs/frontend.md#html-templates).
+described in [docs/architecture/frontend.md](../../docs/architecture/frontend.md#html-templates).
 This file only covers what is specific to this folder.
 
 This is the global template folder: the site shell and the pieces every

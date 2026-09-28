@@ -1,7 +1,7 @@
 # ifi_home_app CSS structure
 
 The sitewide CSS architecture (ITCSS layers, how stylesheets are loaded,
-BEM) is described in [docs/frontend.md](../../../../../docs/frontend.md).
+BEM) is described in [docs/architecture/frontend.md](../../../../../docs/architecture/frontend.md).
 This file only covers what is specific to this app's CSS.
 
 This tree starts at 05 because it only has objects and components.
@@ -59,7 +59,7 @@ message board, shortcuts, mobile navbar).
 
 Templates never link a leaf file from `05_objects/` or `06_components/`
 directly. They include one partial per tier, and the partial holds the
-`<link>` tags -- see [docs/frontend.md](../../../../../docs/frontend.md)
+`<link>` tags -- see [docs/architecture/frontend.md](../../../../../docs/architecture/frontend.md)
 for the block-per-tier mechanism and the three rules that come with it,
 the first of which is **never use `@import`**.
 

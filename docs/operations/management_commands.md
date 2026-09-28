@@ -2,7 +2,7 @@
 
 This project's own `manage.py` commands, beyond Django's built-in ones
 (`migrate`, `createsuperuser`, `test`, `makemessages`/`compilemessages`,
-etc. — see the main [README.md](../README.md) for those), documented here
+etc. — see the main [README.md](../../README.md) for those), documented here
 in one place, sectioned by the app each command lives in.
 
 ## ifi_home_app
@@ -16,7 +16,7 @@ python manage.py seed_dev_data [--force]
 Fills a fresh local database with a dummy article tree (index pages,
 categories, a test article, a test student union, a test tool, and a
 sample event) so you're not starting from a blank site. Covered in the
-main setup flow — see [README.md](../README.md#6-fill-database-with-dummy-datarecommended).
+main setup flow — see [README.md](../../README.md#6-fill-database-with-dummy-datarecommended).
 
 Refuses to run when `DEBUG` is off, as a guard against accidentally
 seeding dummy data into what looks like a real (non-local) database.
@@ -204,7 +204,7 @@ A systemd timer runs this automatically on the production server — every 6
 hours (00:00/06:00/12:00/18:00), plus one extra run at 14:00 on weekdays.
 Unlike [`cleanup_unverified_accounts`](#cleanup_unverified_accounts), this
 one doesn't need to be invoked from an external scheduler by hand — the
-unit files live in [deploy/systemd/](../deploy/systemd/) and are checked
+unit files live in [deploy/systemd/](../../deploy/systemd/) and are checked
 into the repo.
 
 No manual server-side setup needed — `deploy/deploy.sh`
