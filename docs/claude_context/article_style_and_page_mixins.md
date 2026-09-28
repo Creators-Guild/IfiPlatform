@@ -1,5 +1,8 @@
 # models/article/style.py and models/page_mixins.py — design notes
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/models/article/style.py, ifiplatform/apps/ifi_home_app/models/page_mixins.py
+
 Context for future Claude sessions. Not a human-facing doc.
 
 ## ArticleStyle (article/style.py)

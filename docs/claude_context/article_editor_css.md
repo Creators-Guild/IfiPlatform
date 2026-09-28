@@ -1,5 +1,8 @@
 # Article editor-mode CSS — design notes
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/article_editor/article_block_panel.css, ifiplatform/apps/ifi_home_app/static/css/06_components/article_editor/article_block_trigger.css, ifiplatform/apps/ifi_home_app/static/css/06_components/article_editor/article_color_picker.css, ifiplatform/apps/ifi_home_app/static/css/06_components/article_editor/article_quick_style.css, ifiplatform/apps/ifi_home_app/static/css/06_components/article_editor/article_unsaved_changes.css
+
 Covers `ifi_home_app/static/css/06_components/article_editor/`:
 `article_block_panel.css`, `article_block_trigger.css`,
 `article_color_picker.css`, `article_quick_style.css`,

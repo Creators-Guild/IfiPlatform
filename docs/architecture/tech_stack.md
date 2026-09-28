@@ -1,5 +1,7 @@
 # Tech stack
 
+Last updated: 2026-09-28
+
 What IfiPlatform is built with, and why each piece is there. For how the
 production server runs all of this, see
 [operations/prod_server.md](../operations/prod_server.md). For getting a

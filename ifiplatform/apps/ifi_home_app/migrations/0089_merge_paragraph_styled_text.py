@@ -1,3 +1,4 @@
+# Migration gotchas for this app: docs/claude_context/migrations.md
 """Data migration for merging the 'paragraph'/'styled_text' block pair
 (top-level body, and 'text'/'styled_text' inside multi_column columns)
 into one 'paragraph' block everywhere, following the schema change in

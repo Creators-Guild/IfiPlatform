@@ -1,5 +1,8 @@
 # event_calendar.css / event_calendar_legend.css — design rationale
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/event/event_calendar.css, ifiplatform/apps/ifi_home_app/static/css/06_components/event/event_calendar_legend.css
+
 Covers `ifi_home_app/static/css/06_components/event/event_calendar.css` —
 the week/day calendar grid shared by a single event page's sub-events
 (`event_page.html`) and a union page's own weekly calendar

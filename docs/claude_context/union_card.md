@@ -1,5 +1,8 @@
 # union_card.css — design history
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/cards/union_card.css
+
 Covers `ifi_home_app/static/css/06_components/cards/union_card.css` (union
 listing card, `studentunion_category_page.html`, also used on event pages
 and as an article body block). The `height: 100%`, `.body-union-card`

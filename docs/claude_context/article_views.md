@@ -1,5 +1,8 @@
 # views/article_views.py — design notes
 
+Last updated: 2026-09-24
+Covers: ifiplatform/apps/ifi_home_app/views/article_views.py
+
 Context for future Claude sessions. Not a human-facing doc.
 
 ## BLOCK_STYLE_FIELDS

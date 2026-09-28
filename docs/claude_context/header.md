@@ -1,5 +1,8 @@
 # Site header — design rationale
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/account_app/static/css/06_components/profile_dropdown.css, ifiplatform/static/css/06_components/header.css, ifiplatform/static/css/06_components/select_language.css
+
 Covers `templates/partials/header.html` and
 `templates/partials/select_language.html`, styled by
 `static/css/06_components/header.css`,

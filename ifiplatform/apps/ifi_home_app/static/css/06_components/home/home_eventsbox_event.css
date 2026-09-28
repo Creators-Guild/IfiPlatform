@@ -1,3 +1,4 @@
+/* Design rationale: docs/claude_context/home_eventsbox.md */
 .home-eventsbox-item {
   display: grid;
   grid-template-columns: auto 1fr;

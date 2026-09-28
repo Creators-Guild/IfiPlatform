@@ -1,5 +1,8 @@
 # title_banner.css — design rationale
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/category/title_banner.css
+
 Covers `ifi_home_app/static/css/06_components/category/title_banner.css`.
 
 ## What `.title-banner` is and where its config comes from

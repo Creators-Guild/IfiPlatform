@@ -1,5 +1,7 @@
 # docs/claude_context/ — what this is
 
+Last updated: 2026-09-29
+
 This folder holds implementation-level design rationale for Claude (or any
 AI agent) working in this codebase — not for human contributors. If you're
 a person reading this, you probably don't need to be here; see the root
@@ -53,24 +55,17 @@ should read first.
   keep enough in the code to know *that* deeper context exists and where —
   never leave a change with zero trace, since that's indistinguishable
   from the reasoning simply never having been written down.
-- If a note here goes stale (the code it describes changed and the
-  rationale no longer applies), fix or delete it — a wrong note is worse
-  than no note.
+- Every note starts with a `Last updated: YYYY-MM-DD` line and a
+  `Covers:` line listing the source files that point to it (repo-relative,
+  comma-separated). Keep both current. The stale check that uses them is
+  in the root `CLAUDE.md`. A wrong note is worse than no note: fix or
+  delete it.
+- If a human doc in `docs/` already explains something, don't repeat it
+  here. Point the code at the human doc instead, or add the missing detail
+  to the human doc.
 - Not everything moves here. A short comment that's genuinely necessary
   to understand non-obvious or complicated logic right where it happens —
   a tricky edge case, a non-obvious ordering requirement, a gotcha —
   still belongs in the code itself. This folder is for the longer *why*
   and history that isn't needed just to read and safely modify the code;
   it isn't a place to default every comment to.
-
-## Running the test suite
-
-Don't reflexively run `manage.py test` after every change. For a small or
-purely cosmetic edit — CSS (spacing, alignment, color), copy/text changes,
-comment/docstring-only edits, template markup that doesn't touch template
-logic — running the full suite (or even a scoped one) burns real time and
-resources for a change the suite was never going to catch anything in.
-Save it for changes that could actually break something: model/field
-changes, template *logic* (a new `{% if %}`, a changed queryset/property),
-view/command behavior, migrations. When in doubt, running one quick,
-narrowly-scoped test is cheaper than the full suite.

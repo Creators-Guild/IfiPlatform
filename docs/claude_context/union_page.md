@@ -1,5 +1,8 @@
 # union_page.html — layout rationale
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/05_objects/union_layout.css, ifiplatform/apps/ifi_home_app/static/css/06_components/union/union_core.css, ifiplatform/apps/ifi_home_app/static/css/06_components/union/union_header.css, ifiplatform/apps/ifi_home_app/static/css/06_components/union/union_info_box.css, ifiplatform/apps/ifi_home_app/static/css/06_components/union/union_member_card.css, ifiplatform/apps/ifi_home_app/static/css/06_components/union/union_position_info.css, ifiplatform/apps/ifi_home_app/static/css/06_components/union/union_sections.css, ifiplatform/apps/ifi_home_app/templates/info_articles/pages/union_page.html
+
 Covers `ifi_home_app/templates/info_articles/pages/union_page.html` and its
 CSS: `ifi_home_app/static/css/05_objects/union_layout.css` and
 `06_components/union/union_header.css`, `union_core.css`,

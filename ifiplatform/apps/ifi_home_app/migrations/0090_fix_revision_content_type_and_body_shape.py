@@ -1,3 +1,4 @@
+# Migration gotchas for this app: docs/claude_context/migrations.md
 """Repairs the fallout from two bugs in 0089_merge_paragraph_styled_text's
 _rewrite_revisions() (see that function's own updated docstring for the
 full explanation): it filtered Revision by the wrong content-type field

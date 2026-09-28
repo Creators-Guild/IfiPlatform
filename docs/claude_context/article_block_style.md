@@ -1,5 +1,8 @@
 # models/article/block_style.py — design notes
 
+Last updated: 2026-08-15
+Covers: ifiplatform/apps/ifi_home_app/models/article/block_style.py
+
 Context for future Claude sessions working on per-block article styling. Not
 a human-facing doc — the code itself should read cleanly on its own; this is
 where the deeper "why" lives instead of as inline comments.

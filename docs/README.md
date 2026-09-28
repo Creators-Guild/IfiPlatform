@@ -1,16 +1,29 @@
 # docs/
 
+Last updated: 2026-09-29
+
 Project documentation beyond the main [README.md](../README.md). Each
 folder holds one kind of document. When you add a new doc, put it in the
-folder whose description fits, and add a line for it below.
+folder whose description fits, follow the [rules](#rules) below, and add a
+line for it to the list.
 
 ## architecture/ — how the system is built
 
+Start with the overview. Guides to how the project uses a framework (such
+as `frontend.md`) sit directly in `architecture/`. Feature docs are sorted
+into one folder per app, and features that span several apps go in
+`shared/`.
+
+- [overview.md](architecture/overview.md): the map of the whole system:
+  apps, the Wagtail page tree, and the path from request to page
 - [tech_stack.md](architecture/tech_stack.md): languages, frameworks,
   database, external services and GitHub workflows
 - [frontend.md](architecture/frontend.md): how HTML templates and CSS are
   organized, loaded and written
 - [eraser_links.md](architecture/eraser_links.md): feature concept map
+- `shared/`: cross-app features and `core_app` (no docs yet)
+- `ifi_home_app/`, `account_app/`, `study_app/`: feature docs per app (no
+  docs yet, see [Planned docs](#planned-docs))
 
 ## operations/ — how it runs in production
 
@@ -31,15 +44,38 @@ docs, testing. See [Planned docs](#planned-docs) below.
 
 - [figma_links.md](design/figma_links.md): Figma files
 
-## claude_context/ — implementation notes for AI agents
+## claude_context/ and claude_references/ — for AI agents
 
-Design rationale behind specific features, kept out of code comments. See
-[claude_context/readme_claude.md](claude_context/readme_claude.md).
+`claude_context/` holds notes written for AI agents working on the code.
+`claude_references/` holds AI-drafted starting points for docs that still
+need to be finished by hand. Neither folder is documentation for people,
+so the docs here don't link to them.
 
-## claude_references/ — AI-drafted starting points
+## Rules
 
-Drafts to finish by hand, not final docs. See
-[claude_references/readme.md](claude_references/readme.md).
+1. **Placement:** one file per feature, in the `architecture/` folder of
+   the app it belongs to (for example `architecture/ifi_home_app/events.md`).
+   A feature gets its own folder only when it grows past one file. Create
+   an app folder when you write its first doc, not before.
+2. **Cross-app features and `core_app`** go in `architecture/shared/`.
+   Guides to how the project uses a framework or tool across the whole
+   site (templates and CSS, Wagtail) go directly in `architecture/`.
+3. **README next to the code, or here?** A `README.md` inside a code
+   folder (such as `ifiplatform/templates/`) covers only that folder and
+   links here for the bigger picture. How things work together belongs in
+   `docs/`.
+4. **Developers or editors?** `architecture/` is for developers. How-tos
+   for editors, such as setting up a menu in the Wagtail admin, go in
+   `contributing/content_guide.md`.
+5. **These docs are the source of truth.** Never link to
+   `claude_context/` from a doc for people. Only the main README may link
+   to `claude_references/`. You may use the claude notes as source
+   material, but rewrite what you take for people.
+6. **Keep the overview current:** a PR that adds an app, a page type or an
+   external service also updates
+   [architecture/overview.md](architecture/overview.md).
+7. **Dates:** every doc in `docs/` starts with `Last updated: YYYY-MM-DD`
+   under its title. Change the date whenever you change the content.
 
 ## Planned docs
 
@@ -76,23 +112,46 @@ nobody can recover without them.
 - [ ] `contributing/code_review.md`: checklist and tone for reviewers, and
   what a PR needs before it can be approved.
 - [ ] `contributing/content_guide.md`: for non-developers: writing and
-  translating articles in the Wagtail admin, editor terms, images.
-- [ ] `contributing/writing_docs.md`: finished version of
-  [claude_references/writing_guidelines.md](claude_references/writing_guidelines.md).
-- [ ] Finished version of
-  [claude_references/community_goals.md](claude_references/community_goals.md),
+  translating articles in the Wagtail admin, setting up menus, editor
+  terms, images.
+- [ ] `contributing/writing_docs.md`: finished version of the AI draft
+  `claude_references/writing_guidelines.md`.
+- [ ] Finished version of the AI draft `claude_references/community_goals.md`,
   either in the main README's "About" section or as its own doc.
 - [ ] `.github/pull_request_template.md`: what changed, why, linked
   issue, how it was tested. There are issue templates but no PR template.
 
 ### Developer guides
 
-- [ ] `architecture/overview.md`: how the apps and the Wagtail page tree
+- [x] `architecture/overview.md`: how the apps and the Wagtail page tree
   fit together, the main models, and the path from request to view to
   template.
-- [ ] `architecture/translations.md`: the Norwegian/English workflow end to
-  end: wagtail-localize, DeepL and its glossary,
+- [ ] `architecture/wagtail.md`: how this project uses Wagtail:
+  pages vs snippets vs plain Django models, the page tree and
+  `subpage_types`, StreamField blocks, locales, `wagtail_hooks.py`, and how
+  to add a new page type from start to finish. Also why an app prefix
+  hides a page with the same slug, and why the hub page is never shown on
+  its own.
+- [ ] `architecture/shared/translations.md`: the Norwegian/English workflow
+  end to end: wagtail-localize, DeepL and its glossary,
   `makemessages`/`compilemessages`, locale aliases.
+- [ ] `architecture/shared/background_jobs.md`: the jobs that run outside
+  a web request: the Peoply event sync (a systemd timer), the DeepL
+  glossary sync (run by hand), and cleanup of unverified accounts (meant to
+  run on a schedule, but nothing schedules it yet). Cover how each one runs,
+  how often, where it logs, and what to do when one fails.
+- [ ] `architecture/ifi_home_app/articles.md`: article, category and index
+  pages, StreamField blocks, and article and block styles.
+- [ ] `architecture/ifi_home_app/unions_and_tools.md`: student union and
+  tool pages.
+- [ ] `architecture/ifi_home_app/events.md`: event pages, the calendar and
+  the Peoply sync.
+- [ ] `architecture/ifi_home_app/menus.md`: how menus are modelled and
+  rendered.
+- [ ] `architecture/account_app/accounts.md`: sign-up, email verification,
+  profiles and editor terms, and how `EditorTermsGateMiddleware` enforces
+  them.
+- [ ] `architecture/study_app/flashcards.md`: decks and cards.
 - [ ] `contributing/testing.md`: running tests, writing new ones, and
   adding a new app to the test list in `ci.yml`.
 - [ ] `operations/privacy_and_data.md`: which personal data is stored,

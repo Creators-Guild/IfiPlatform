@@ -1,5 +1,7 @@
 # Custom manage.py commands
 
+Last updated: 2026-09-29
+
 This project's own `manage.py` commands, beyond Django's built-in ones
 (`migrate`, `createsuperuser`, `test`, `makemessages`/`compilemessages`,
 etc. — see the main [README.md](../../README.md) for those), documented here
@@ -58,8 +60,9 @@ machine-translate-subtree`, so check `journalctl -t
 machine-translate-subtree -f`. Locally (no `systemd-cat`, e.g. Windows) it
 just inherits the runserver terminal's stdout instead.
 
-See `docs/claude_context/translation_views.md` for the full history of why
-this moved out of the request cycle.
+It runs as a separate background process, not inside the web request,
+because translating a large subtree takes longer than Gunicorn's worker
+timeout. Run inside the request, the worker was killed partway through.
 
 ### sync_deepl_glossary
 
@@ -109,8 +112,7 @@ python manage.py link_menu_translations
 Registers every English `MenuGroup` copy that isn't yet a wagtail-localize
 translation of its nb group, keeping its current English text. The copies
 migration `0152_menus` created are the ones that need it. After this they
-are edited through the translation editor and synced from nb (see
-`docs/claude_context/menus.md`). Run it once after that migration, locally
+are edited through the translation editor and synced from nb. Run it once after that migration, locally
 and on prod. Safe to re-run: groups that are already linked are skipped.
 
 ### link_peoply_organizations

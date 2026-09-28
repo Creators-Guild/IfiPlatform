@@ -47,6 +47,7 @@ urlpatterns += i18n_patterns(
     path("study/", include("study_app.urls")),
     path("account/", include("account_app.urls")),
     path("yourpage/", include("yourpage_app.urls")),
+    # Catch-all: matches every path, so keep it last. New apps go above.
     path("", include("ifi_home_app.urls")),
 )
 

@@ -1,5 +1,8 @@
 # article_header.css — design notes
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/article/article_header.css
+
 Covers `ifi_home_app/static/css/06_components/article/article_header.css`.
 Title/meta/intro are wrapped together in `.article-header`
 (`article_page.html`) so they share one hover trigger/mini panel, but each

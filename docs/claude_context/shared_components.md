@@ -1,5 +1,8 @@
 # Shared CSS components (06_components/shared/)
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/shared/block_box.css, ifiplatform/apps/ifi_home_app/static/css/06_components/shared/card_base.css, ifiplatform/apps/ifi_home_app/static/css/06_components/shared/modal_base.css, ifiplatform/apps/ifi_home_app/static/css/06_components/shared/page_title.css, ifiplatform/apps/ifi_home_app/static/css/06_components/shared/popover_base.css, ifiplatform/apps/ifi_home_app/static/css/06_components/tool/tool_lightbox.css
+
 Files under `ifiplatform/apps/ifi_home_app/static/css/06_components/shared/`.
 The three `*_base.css` files group selectors from several components and
 hold only the declarations that are identical for all of them. Anything that

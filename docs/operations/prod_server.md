@@ -1,5 +1,7 @@
 # Production server
 
+Last updated: 2026-09-28
+
 How the live IfiPlatform site is hosted, deployed and secured. For the
 software itself, see [architecture/tech_stack.md](../architecture/tech_stack.md).
 
