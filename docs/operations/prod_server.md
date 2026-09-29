@@ -1,6 +1,6 @@
 # Production server
 
-Last updated: 2026-09-28
+Last updated: 2026-09-29
 
 How the live IfiPlatform site is hosted, deployed and secured. For the
 software itself, see [architecture/tech_stack.md](../architecture/tech_stack.md).
@@ -113,12 +113,15 @@ What happens:
       effect in the same deploy.
    4. Copies and enables the systemd units from `deploy/systemd/`.
    5. `pip install -r requirements.txt`
-   6. `manage.py migrate`
-   7. `manage.py collectstatic --noinput --clear`
-   8. `manage.py sync_deepl_glossary --write-env`, but only if the glossary
+   6. Backs up the database and `media/` to `/mnt/backups` with
+      [deploy/backup/backup_db.sh](../../deploy/backup/backup_db.sh). If
+      the backup fails, the deploy stops here and nothing is migrated.
+   7. `manage.py migrate`
+   8. `manage.py collectstatic --noinput --clear`
+   9. `manage.py sync_deepl_glossary --write-env`, but only if the glossary
       terms changed. A failure here only prints a warning.
-   9. `sudo systemctl restart gunicorn`
-   10. `manage.py clear_cache` and `announce_deploy --clear` to remove the
+   10. `sudo systemctl restart gunicorn`
+   11. `manage.py clear_cache` and `announce_deploy --clear` to remove the
        banner.
 
 Only one deploy can run at a time.

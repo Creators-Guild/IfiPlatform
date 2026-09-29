@@ -37,6 +37,9 @@ done
 
 pip install -r requirements.txt
 cd ifiplatform
+# Some migrations are forward-only; their way back is this backup. If the
+# backup fails, set -e stops the deploy before anything is migrated.
+bash ../deploy/backup/backup_db.sh
 python manage.py migrate
 python manage.py collectstatic --noinput --clear
 
