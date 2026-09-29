@@ -37,6 +37,8 @@ into one folder per app, and features that span several apps go in
   backed up, how to check it, and how to restore
 - [server_setup.md](operations/server_setup.md): how to rebuild the
   production server from zero
+- [access_and_handover.md](operations/access_and_handover.md): accounts
+  and keys, and checklists for adding, removing and handing over people
 
 ## contributing/ — how to contribute (not created yet)
 
