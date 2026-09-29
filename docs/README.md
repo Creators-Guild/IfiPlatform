@@ -35,6 +35,8 @@ into one folder per app, and features that span several apps go in
   project's custom `manage.py` commands
 - [backups_and_recovery.md](operations/backups_and_recovery.md): what is
   backed up, how to check it, and how to restore
+- [server_setup.md](operations/server_setup.md): how to rebuild the
+  production server from zero
 
 ## contributing/ — how to contribute (not created yet)
 
@@ -92,7 +94,7 @@ nobody can recover without them.
 - [x] `operations/backups_and_recovery.md`: what is backed up (PostgreSQL
   and `media/`), how often, where the copies are stored *outside* the VM,
   and step-by-step restore. Test a restore at least once.
-- [ ] `operations/server_setup.md`: how to rebuild the server from zero:
+- [x] `operations/server_setup.md`: how to rebuild the server from zero:
   packages, PostgreSQL user and database, venv, `.env`, `gunicorn.service`,
   the Nginx site config, Certbot, fail2ban jails, sudo scope and NREC
   security groups. Consider also checking these config files into `deploy/`.
