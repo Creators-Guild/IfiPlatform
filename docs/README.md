@@ -33,6 +33,8 @@ into one folder per app, and features that span several apps go in
   systemctl, Nginx logs and friends to track down problems on the server
 - [management_commands.md](operations/management_commands.md): this
   project's custom `manage.py` commands
+- [backups_and_recovery.md](operations/backups_and_recovery.md): what is
+  backed up, how to check it, and how to restore
 
 ## contributing/ — how to contribute (not created yet)
 
@@ -87,7 +89,7 @@ tick it off here and add it to its folder's list above in the same PR.
 These are the risky gaps. If the server is lost or the maintainer leaves,
 nobody can recover without them.
 
-- [ ] `operations/backups_and_recovery.md`: what is backed up (PostgreSQL
+- [x] `operations/backups_and_recovery.md`: what is backed up (PostgreSQL
   and `media/`), how often, where the copies are stored *outside* the VM,
   and step-by-step restore. Test a restore at least once.
 - [ ] `operations/server_setup.md`: how to rebuild the server from zero:
