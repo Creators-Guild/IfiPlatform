@@ -53,6 +53,7 @@ fi
 # --- Delete old backups and stray temp files ---
 find "$DB_BACKUP_DIR" -name "${DB_NAME}_*.dump" -mtime +"$RETENTION_DAYS" -delete
 find "$MEDIA_BACKUP_DIR" -name "media_*.tar.gz" -mtime +"$RETENTION_DAYS" -delete
-find "$MOUNT" -name "*.tmp" -mtime +1 -delete
+# Only our own folders: $MOUNT also holds lost+found, which only root can read.
+find "$DB_BACKUP_DIR" "$MEDIA_BACKUP_DIR" -name "*.tmp" -mtime +1 -delete
 
 echo "$(date -Is) Backup completed: ${DB_FILENAME}, ${MEDIA_FILENAME}"
