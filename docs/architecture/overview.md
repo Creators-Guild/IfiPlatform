@@ -142,8 +142,9 @@ This is how the site is set up (the `seed_dev_data` command builds the same
 shape locally). The rules allow a bit more. For example, an `ArticlePage`
 may sit directly under an info or news index, but never directly under
 the hub. The `section` field on `ArticleIndexPage`
-tells the site which part a page belongs to, so news doesn't show up in the
-info-articles menu and the other way round.
+tells the site which part an index is: the home page finds the news index
+by it, and breadcrumbs leave out the hub. Menus don't use it, since editors
+pick every menu link by hand (see [ifi_home_app/menus.md](ifi_home_app/menus.md)).
 
 A guide to Wagtail itself in this project (pages vs snippets, StreamField,
 locales and how to add a new page type) is planned as
@@ -209,9 +210,10 @@ sync timer on the server, is planned as `shared/background_jobs.md`.
 | If you want to… | Look at |
 | --- | --- |
 | Change how a page looks | [frontend.md](frontend.md), then the page's template |
-| Change an article, category or index page | `apps/ifi_home_app/models/article/` |
-| Change events or the Peoply sync | `apps/ifi_home_app/models/event_models.py`, `apps/ifi_home_app/management/commands/sync_peoply_events.py` |
-| Change menus | `apps/ifi_home_app/models/menus.py` |
+| Change an article, category or index page | [ifi_home_app/articles.md](ifi_home_app/articles.md) |
+| Change student union or tool pages | [ifi_home_app/unions_and_tools.md](ifi_home_app/unions_and_tools.md) |
+| Change events or the Peoply sync | [ifi_home_app/events.md](ifi_home_app/events.md) |
+| Change menus | [ifi_home_app/menus.md](ifi_home_app/menus.md) |
 | Change the home page | `apps/ifi_home_app/views/home_views.py`, `templates/home/` in the same app |
 | Change sign-up or login | `apps/account_app/` |
 | Run or write a management command | [operations/management_commands.md](../operations/management_commands.md) |

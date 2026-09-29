@@ -1,6 +1,6 @@
 # Server toolbox
 
-Last updated: 2026-09-28
+Last updated: 2026-09-29
 
 The tools you use to find out what's going on with the production server,
 and how to use them. The goal is to teach the tools, not just list fixed
@@ -13,8 +13,8 @@ For what runs on the server and how it's set up, read
 ## The big picture
 
 - **systemd** is the program that starts and supervises everything on the
-  server: Gunicorn (the Django app), Nginx, PostgreSQL, fail2ban and the
-  Peoply sync timer. Each of these is called a **unit**. You control units
+  server: Gunicorn (the Django app), Nginx, PostgreSQL, fail2ban, the
+  Peoply sync timer and the backup timer. Each of these is called a **unit**. You control units
   with `systemctl`.
 - Everything a unit prints goes into the **journal**, systemd's central log.
   You read it with `journalctl`.
@@ -36,6 +36,7 @@ what does its log say?*
 | CSS or images missing (404)               | Did `collectstatic` run in the deploy? Then `sudo tail /var/log/nginx/error.log`   |
 | Browser warns about the certificate       | `sudo certbot certificates` and `sudo certbot renew --dry-run`                     |
 | Events from Peoply not updating           | `systemctl list-timers` and `journalctl -u sync-peoply-events -e`                  |
+| Backups missing or old                    | `journalctl -u ifiplatform-backup -e`, see [backups_and_recovery.md](backups_and_recovery.md#checking-that-it-runs) |
 | Can't SSH in                              | Your IP may be banned by fail2ban (see [fail2ban](#fail2ban)), or the NREC security group changed |
 | Deploy failed                             | The failed run in GitHub → Actions → Deploy. Its log shows the server's output     |
 | Site is slow or processes are crashing    | `free -h`, `top` and `df -h` (see [Resources](#resources-disk-memory-cpu))         |
@@ -216,8 +217,10 @@ Before anything risky (a tricky migration, manual data fixes), take a
 backup:
 
 ```bash
-sudo -u postgres pg_dump <db_name> > ~/backup_$(date +%F).sql
+bash /home/ubuntu/IfiPlatform/deploy/backup/backup_db.sh
 ```
+
+How to restore one: [backups_and_recovery.md](backups_and_recovery.md).
 
 ## fail2ban
 
@@ -270,7 +273,7 @@ When something new happens that this doc doesn't cover:
    → Django 6 + Wagtail, PostgreSQL, systemd*. **Never paste the contents
    of `.env`, passwords, keys or the server's IP address.**
 5. **Before you change anything, know how to undo it.** Test Nginx config
-   with `nginx -t`. Take a `pg_dump` before touching the database. Prefer
+   with `nginx -t`. Run the backup script before touching the database. Prefer
    reload over restart. Anything you edit in the code on the server must be
    committed and pushed, or the next deploy removes it (see
    [prod_server.md](prod_server.md#layout-on-disk)).

@@ -60,13 +60,13 @@ Blocks defined in `global_base.html`:
 | `section_css` | pages | The page family's CSS partial |
 | `page_css` | pages, rarely | CSS for one page only |
 | `extra_head` | pages | Anything else for `<head>`: meta, preloads, JS |
+| `sidemenu` | pages | The left side menu, in `<aside>` next to `<main>` |
 | `content` | the app base, or pages without one | Everything inside `<main>` |
 
 Blocks added by `home_base.html`, inside its `content`:
 
 | Block | For |
 |---|---|
-| `sidemenu` | The left side menu |
 | `maincontent` | The page's main content |
 | `maincontent_style` | Inline style on the main content wrapper, for pages that need to style it (e.g. `article_page.html`'s background) |
 

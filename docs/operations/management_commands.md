@@ -161,14 +161,21 @@ above to set it for every union at once).
 `--after` limits the sync to events starting on/after that date; defaults
 to today, so a plain run only ever picks up upcoming events.
 
-**Create-only**: an event already synced (matched by
-`external_source="peoply"` + `external_uid`, Peoply's own event ID) is
-skipped on every later run, even if it changed on Peoply's side or an
-editor has since hand-edited it here — sync only ever *adds*, it never
-overwrites or removes anything. Re-running this is a way to catch new
-events, not to keep an already-synced one's details live-updated; if a
-venue or time changes on Peoply after the fact, that has to be corrected
-on the `EventPage` by hand.
+**Peoply is the source of truth for some fields.** An event already
+synced (matched by `external_source="peoply"` + `external_uid`, Peoply's
+own event ID) gets its title, dates, times, location, intro, Peoply URL and
+sign-up URL (`PEOPLY_SYNCED_FIELDS` in `event_models.py`) overwritten on
+every run if they changed on Peoply. Those fields are read-only in the
+Wagtail admin for synced events, so no editor's change is silently
+undone. Everything else (event type, colors, tags, map links, related
+unions) is only set when the event is created, and belongs to editors
+after that. An unchanged event gets no new revision.
+
+**Removed events are unpublished, not deleted.** An event that was synced
+before but no longer comes back from Peoply is unpublished and logged as a
+`PeoplyRemovedEvent`, for a superuser to delete or archive in the Django
+admin. If it reappears on Peoply, it's published again and the log row is
+marked resolved.
 
 New events are created nb-only (untranslated) and published immediately.
 `event_type` is inferred from the title — defaults to `"social"`, upgrades
@@ -203,7 +210,8 @@ extra to run afterwards:
 #### Automatic scheduling
 
 A systemd timer runs this automatically on the production server — every 6
-hours (00:00/06:00/12:00/18:00), plus one extra run at 14:00 on weekdays.
+hours (00:00/06:00/12:00/18:00), plus extra runs at 14:00 and 16:00 on
+weekdays.
 Unlike [`cleanup_unverified_accounts`](#cleanup_unverified_accounts), this
 one doesn't need to be invoked from an external scheduler by hand — the
 unit files live in [deploy/systemd/](../../deploy/systemd/) and are checked
@@ -222,7 +230,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now sync-peoply-events.timer
 ```
 
-The 14:00 weekday run is meant as Norway-local time — `OnCalendar=` uses
+The 14:00 and 16:00 weekday runs are meant as Norway-local time — `OnCalendar=` uses
 the server's own system timezone, so check `timedatectl` on the server; if
 it reports `UTC`, either `sudo timedatectl set-timezone Europe/Oslo` or add
 an explicit ` Europe/Oslo` suffix to both `OnCalendar=` lines in
