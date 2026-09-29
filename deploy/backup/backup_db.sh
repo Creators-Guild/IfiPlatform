@@ -1,7 +1,7 @@
 #!/bin/bash
 # Backs up the PostgreSQL database and MEDIA_ROOT to the attached volume at
 # /mnt/backups. Run by:
-#   - ubuntu's cron at 05:00 (from its copy at /opt/backups/backup_db.sh)
+#   - deploy/systemd/ifiplatform-backup.timer daily at 05:00
 #   - deploy/deploy.sh right before `migrate`
 # or by hand on the server:
 #   bash deploy/backup/backup_db.sh

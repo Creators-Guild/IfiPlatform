@@ -7,6 +7,9 @@ folder holds one kind of document. When you add a new doc, put it in the
 folder whose description fits, follow the [rules](#rules) below, and add a
 line for it to the list.
 
+Known problems waiting to become GitHub issues are listed in
+[to_fix.md](to_fix.md).
+
 ## architecture/ — how the system is built
 
 Start with the overview. Guides to how the project uses a framework (such
@@ -22,8 +25,18 @@ into one folder per app, and features that span several apps go in
   organized, loaded and written
 - [eraser_links.md](architecture/eraser_links.md): feature concept map
 - `shared/`: cross-app features and `core_app` (no docs yet)
-- `ifi_home_app/`, `account_app/`, `study_app/`: feature docs per app (no
-  docs yet, see [Planned docs](#planned-docs))
+- `ifi_home_app/`: feature docs for the main site
+  - [articles.md](architecture/ifi_home_app/articles.md): article,
+    category and index pages, StreamField blocks, and article and block
+    styles
+  - [unions_and_tools.md](architecture/ifi_home_app/unions_and_tools.md):
+    student union and tool pages
+  - [events.md](architecture/ifi_home_app/events.md): event pages, the
+    calendar and the Peoply sync
+  - [menus.md](architecture/ifi_home_app/menus.md): how menus are
+    modelled and rendered
+- `account_app/`, `study_app/`: feature docs per app (no docs yet, see
+  [Planned docs](#planned-docs))
 
 ## operations/ — how it runs in production
 
@@ -33,6 +46,12 @@ into one folder per app, and features that span several apps go in
   systemctl, Nginx logs and friends to track down problems on the server
 - [management_commands.md](operations/management_commands.md): this
   project's custom `manage.py` commands
+- [backups_and_recovery.md](operations/backups_and_recovery.md): what is
+  backed up, how to check it, and how to restore
+- [server_setup.md](operations/server_setup.md): how to rebuild the
+  production server from zero
+- [access_and_handover.md](operations/access_and_handover.md): accounts
+  and keys, and checklists for adding, removing and handing over people
 
 ## contributing/ — how to contribute (not created yet)
 
@@ -87,10 +106,10 @@ tick it off here and add it to its folder's list above in the same PR.
 These are the risky gaps. If the server is lost or the maintainer leaves,
 nobody can recover without them.
 
-- [ ] `operations/backups_and_recovery.md`: what is backed up (PostgreSQL
+- [x] `operations/backups_and_recovery.md`: what is backed up (PostgreSQL
   and `media/`), how often, where the copies are stored *outside* the VM,
   and step-by-step restore. Test a restore at least once.
-- [ ] `operations/server_setup.md`: how to rebuild the server from zero:
+- [x] `operations/server_setup.md`: how to rebuild the server from zero:
   packages, PostgreSQL user and database, venv, `.env`, `gunicorn.service`,
   the Nginx site config, Certbot, fail2ban jails, sudo scope and NREC
   security groups. Consider also checking these config files into `deploy/`.
@@ -140,13 +159,13 @@ nobody can recover without them.
   glossary sync (run by hand), and cleanup of unverified accounts (meant to
   run on a schedule, but nothing schedules it yet). Cover how each one runs,
   how often, where it logs, and what to do when one fails.
-- [ ] `architecture/ifi_home_app/articles.md`: article, category and index
+- [x] `architecture/ifi_home_app/articles.md`: article, category and index
   pages, StreamField blocks, and article and block styles.
-- [ ] `architecture/ifi_home_app/unions_and_tools.md`: student union and
+- [x] `architecture/ifi_home_app/unions_and_tools.md`: student union and
   tool pages.
-- [ ] `architecture/ifi_home_app/events.md`: event pages, the calendar and
+- [x] `architecture/ifi_home_app/events.md`: event pages, the calendar and
   the Peoply sync.
-- [ ] `architecture/ifi_home_app/menus.md`: how menus are modelled and
+- [x] `architecture/ifi_home_app/menus.md`: how menus are modelled and
   rendered.
 - [ ] `architecture/account_app/accounts.md`: sign-up, email verification,
   profiles and editor terms, and how `EditorTermsGateMiddleware` enforces
