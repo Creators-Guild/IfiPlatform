@@ -187,6 +187,10 @@ if not DEBUG:
                 "propagate": False,
             },
         },
+        "django.security.DisallowedHost": {
+            "handlers": [],
+            "propagate": False,
+        },
     }
 
 # check .env  
