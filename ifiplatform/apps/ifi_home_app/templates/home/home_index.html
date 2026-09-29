@@ -7,28 +7,25 @@
 
 {% block title %}{% trans "Ifi Home" %}{% endblock %}
 
-
-<div class = "home-layout">
-    {% block sidemenu %}
-        {% include "home/partials/home_sidemenu.html" %}
-    {% endblock sidemenu %}
-    {% block maincontent %}
-        <div class="nav-dropmenus">
-            {% include "home/partials/home_navbar.html" %}
-        </div>
-        {% include "home/partials/home_shortcuts.html" %}
-        <div id="home-subcontent">
-            <div id="msg-board">{% include "home/partials/home_messageboard.html" %}</div>
-                <div class="suggestions-row">
-                    <div class="newsbar_container">
-                        <h2 class="newsbar-heading newsbar-heading--news">{% trans "Latest News" %}</h2>
-                        {% include "home/partials/home_newsbar.html" %}
-                    </div>
+{% block sidemenu %}
+    {% include "home/partials/sidemenu.html" %}
+{% endblock sidemenu %}
+{% block maincontent %}
+    <div class="nav-dropmenus">
+        {% include "home/partials/home_navbar.html" %}
+    </div>
+    {% include "home/partials/home_shortcuts.html" %}
+    <div id="home-subcontent">
+        <div id="msg-board">{% include "home/partials/home_messageboard.html" %}</div>
+            <div class="suggestions-row">
+                <div class="newsbar_container">
+                    <h2 class="newsbar-heading newsbar-heading--news">{% trans "Latest News" %}</h2>
+                    {% include "home/partials/home_newsbar.html" %}
                 </div>
             </div>
-        <div class="eventsbox_container">
-            <h2>{% blocktrans %}Happening at Ifi{% endblocktrans %}</h2>
-            {% include "home/partials/home_eventsbox.html" %}
         </div>
-    {% endblock maincontent %}
-</div>
+    <div class="eventsbox_container">
+        <h2>{% blocktrans %}Happening at Ifi{% endblocktrans %}</h2>
+        {% include "home/partials/home_eventsbox.html" %}
+    </div>
+{% endblock maincontent %}

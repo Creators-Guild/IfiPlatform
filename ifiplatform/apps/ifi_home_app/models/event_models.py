@@ -2,7 +2,7 @@
 
 Design rationale/history: docs/claude_context/event_models.md"""
 
-from datetime import date, datetime, time, timedelta
+from datetime import date, timedelta
 from itertools import groupby
 from zoneinfo import ZoneInfo
 
@@ -22,8 +22,9 @@ from wagtail.models import Locale, Page
 
 from ifi_home_app.models.article_models import HEX_COLOR_VALIDATOR, TranslationWarningMixin, article_card_block
 
-# Needed only where a clock *time* is compared against event_time
-# (live_sub_events) -- see docs/claude_context/event_models.md.
+# settings.TIME_ZONE is UTC; used where Oslo clock time matters (turning
+# Peoply's UTC times into event_time, and showing the last sync time) --
+# see docs/claude_context/event_models.md.
 SITE_TIMEZONE = ZoneInfo("Europe/Oslo")
 
 EVENT_CALENDAR_COLOR_CHOICES = [
@@ -540,32 +541,6 @@ class EventPage(TranslationWarningMixin, Page):
         return EventPage.objects.child_of(self).live().order_by("event_date", "event_time")
 
     @property
-    def live_sub_events(self):
-        """Sub-events happening at this exact moment (in progress today AND,
-        for a timed one, whose [event_time, event_end_time] window covers
-        the current clock time). See docs/claude_context/event_models.md
-        for why SITE_TIMEZONE, not the bare timezone.localtime(), applies
-        here specifically."""
-        current_time = timezone.localtime(timezone=SITE_TIMEZONE).time()
-
-        def is_live(sub_event):
-            if not sub_event.is_happening_now:
-                return False
-            if not sub_event.event_time:
-                return True
-            start = sub_event.event_time
-            end = sub_event.event_end_time
-            if end is None or end <= start:
-                # No stored end, or one that'd wrap past midnight -- nominal
-                # 1-hour fallback, clamped to the same day.
-                end = (datetime.combine(date.min, start) + timedelta(hours=1)).time()
-                if end < start:
-                    end = time(23, 59, 59)
-            return start <= current_time <= end
-
-        return [sub_event for sub_event in self.sub_events if is_live(sub_event)]
-
-    @property
     def localized_location_articles(self):
         """Linked ArticlePages resolved to the active locale -- see
         docs/claude_context/event_models.md (PageChooserBlock isn't
@@ -627,10 +602,10 @@ def _event_end_minutes(event):
         return _event_start_minutes(event) + 60
     end = event.event_end_time.hour * 60 + event.event_end_time.minute
     if end <= _event_start_minutes(event):
-        # Wraps past midnight (e.g. 22:00-00:30) -- same "ends earlier than
-        # it starts means it's actually the next day" reading
-        # live_sub_events already uses. +24h puts it in the small-hours
-        # tail of the day instead of producing a negative-height block.
+        # Wraps past midnight (e.g. 22:00-00:30): ending earlier than it
+        # starts means it's actually the next day. +24h puts it in the
+        # small-hours tail of the day instead of producing a negative-height
+        # block.
         end += 24 * 60
     return end
 

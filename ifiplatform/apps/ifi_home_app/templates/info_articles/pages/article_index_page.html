@@ -1,7 +1,7 @@
 {% extends "home_base.html" %}
 {% load i18n l10n static wagtailcore_tags wagtailimages_tags %}
 
-{% block title %}{% trans "Information Articles" %}{% endblock %}
+{% block title %}{{ page.title }}{% endblock %}
 
 {% block section_css %}
     {% include "css_links/category.html" %}
@@ -14,7 +14,7 @@
 {% endblock page_css %}
 
 {% block sidemenu %}
-    {% include "info_articles/partials/article_sidemenu.html" %}
+    {% include "home/partials/sidemenu.html" %}
 {% endblock sidemenu %}
 
 {% block maincontent %}
