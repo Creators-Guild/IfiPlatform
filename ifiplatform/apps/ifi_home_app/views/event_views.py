@@ -4,6 +4,7 @@ edit flow (see article_views.py for that side)."""
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
 from django.shortcuts import redirect
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from ifi_home_app.models.event_models import PeoplySyncLog
@@ -26,4 +27,9 @@ def force_sync_peoply_events(request):
 
     PeoplySyncLog.objects.create(user=request.user)
     call_command("sync_peoply_events")
-    return redirect(request.POST.get("next") or "/")
+    next_url = request.POST.get("next")
+    if not url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        next_url = "/"
+    return redirect(next_url)
