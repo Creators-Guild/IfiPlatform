@@ -7,6 +7,9 @@ folder holds one kind of document. When you add a new doc, put it in the
 folder whose description fits, follow the [rules](#rules) below, and add a
 line for it to the list.
 
+Known problems waiting to become GitHub issues are listed in
+[to_fix.md](to_fix.md).
+
 ## architecture/ — how the system is built
 
 Start with the overview. Guides to how the project uses a framework (such
@@ -22,8 +25,18 @@ into one folder per app, and features that span several apps go in
   organized, loaded and written
 - [eraser_links.md](architecture/eraser_links.md): feature concept map
 - `shared/`: cross-app features and `core_app` (no docs yet)
-- `ifi_home_app/`, `account_app/`, `study_app/`: feature docs per app (no
-  docs yet, see [Planned docs](#planned-docs))
+- `ifi_home_app/`: feature docs for the main site
+  - [articles.md](architecture/ifi_home_app/articles.md): article,
+    category and index pages, StreamField blocks, and article and block
+    styles
+  - [unions_and_tools.md](architecture/ifi_home_app/unions_and_tools.md):
+    student union and tool pages
+  - [events.md](architecture/ifi_home_app/events.md): event pages, the
+    calendar and the Peoply sync
+  - [menus.md](architecture/ifi_home_app/menus.md): how menus are
+    modelled and rendered
+- `account_app/`, `study_app/`: feature docs per app (no docs yet, see
+  [Planned docs](#planned-docs))
 
 ## operations/ — how it runs in production
 
@@ -146,13 +159,13 @@ nobody can recover without them.
   glossary sync (run by hand), and cleanup of unverified accounts (meant to
   run on a schedule, but nothing schedules it yet). Cover how each one runs,
   how often, where it logs, and what to do when one fails.
-- [ ] `architecture/ifi_home_app/articles.md`: article, category and index
+- [x] `architecture/ifi_home_app/articles.md`: article, category and index
   pages, StreamField blocks, and article and block styles.
-- [ ] `architecture/ifi_home_app/unions_and_tools.md`: student union and
+- [x] `architecture/ifi_home_app/unions_and_tools.md`: student union and
   tool pages.
-- [ ] `architecture/ifi_home_app/events.md`: event pages, the calendar and
+- [x] `architecture/ifi_home_app/events.md`: event pages, the calendar and
   the Peoply sync.
-- [ ] `architecture/ifi_home_app/menus.md`: how menus are modelled and
+- [x] `architecture/ifi_home_app/menus.md`: how menus are modelled and
   rendered.
 - [ ] `architecture/account_app/accounts.md`: sign-up, email verification,
   profiles and editor terms, and how `EditorTermsGateMiddleware` enforces
