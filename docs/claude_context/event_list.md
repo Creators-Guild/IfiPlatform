@@ -1,5 +1,8 @@
 # event_list.css / event_badges.css — design rationale
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/event/event_badges.css, ifiplatform/apps/ifi_home_app/static/css/06_components/event/event_list.css
+
 Covers `ifi_home_app/static/css/06_components/event/event_list.css` (the
 events index listing, `event_index_page.html`) and `event_badges.css`
 (badges/tags shared by the single event page, the events index, and the

@@ -183,12 +183,12 @@ IfiPlatform/
 
 ## Architecture
 - All project docs, sorted by topic: see [docs/README.md](docs/README.md)
+- New to the code? Start with the overview: [docs/architecture/overview.md](docs/architecture/overview.md)
 - Tech stack: see [docs/architecture/tech_stack.md](docs/architecture/tech_stack.md)
 - Production server and deploys: see [docs/operations/prod_server.md](docs/operations/prod_server.md)
 - Feature concept map: see [docs/architecture/eraser_links.md](docs/architecture/eraser_links.md)
 - UI/design references: see [docs/design/figma_links.md](docs/design/figma_links.md)
 - Frontend architecture (how HTML templates and CSS are organized, loaded and written): see [docs/architecture/frontend.md](docs/architecture/frontend.md)
-- Working with Claude (or another AI agent) in this repo? See [docs/claude_context/readme_claude.md](docs/claude_context/readme_claude.md) for where implementation-level design rationale lives (kept out of code comments to keep the code itself readable).
 - Picking up an AI-drafted doc to finish by hand? See [docs/claude_references/readme.md](docs/claude_references/readme.md) — those are starting points, not final docs.
 
 ## Tutorials

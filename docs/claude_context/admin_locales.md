@@ -1,5 +1,8 @@
 # Norwegian-only admin (`ifi_home_app/translation/admin_locales.py`)
 
+Last updated: 2026-09-24
+Covers: ifiplatform/apps/ifi_home_app/translation/admin_locales.py, ifiplatform/ifiplatform_project/settings.py
+
 Norwegian (nb) is the content source of truth. English (en) is mirrored from
 it through wagtail-localize: the `LocaleSynchronization` row (en syncs from
 nb), the translation editor, and the `page_published` sync hook. Editors

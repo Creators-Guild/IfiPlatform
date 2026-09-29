@@ -1,5 +1,8 @@
 # article_card.css — design history
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/cards/article_card.css
+
 Covers `ifi_home_app/static/css/06_components/cards/article_card.css`.
 The `height: 100%`, `.body-article-card` `--card-width`/`--card-height`
 and mobile `overflow: visible` patterns are shared with the other cards —

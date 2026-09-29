@@ -1,5 +1,7 @@
 # Community Goals (Claude draft — reference only)
 
+Last updated: 2026-08-14
+
 > **Note:** This is a Claude-authored draft kept as inspiration in `docs/claude_references/`. It is *not* the final doc — the intent is to write the real version by hand, using this (and the notes at the bottom) as a starting point, not to publish this text as-is.
 
 IfiPlatform isn't just a product to ship — it's meant to grow through the students who use it. This doc lays out why community-building and low-threshold contribution are treated as a project goal in their own right, not just a nice side effect.

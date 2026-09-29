@@ -1,3 +1,4 @@
+/* Design rationale: docs/claude_context/home_eventsbox.md */
 .eventsbox_container {
   background-color: var(--color-card-bg);
   border: 2px solid var(--color-border);

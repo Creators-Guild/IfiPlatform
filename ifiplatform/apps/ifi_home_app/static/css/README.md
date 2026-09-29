@@ -49,9 +49,7 @@ message board, shortcuts, mobile navbar).
   from the same `popover_base.css` pattern as `article_toc_overlay.css`.
 - `06_components/shared/` holds two kinds of files: genuinely
   cross-component base files (`card_base.css`, `modal_base.css`,
-  `popover_base.css` -- see `docs/claude_context/shared_components.md` for exactly which
-  declarations are shared and why some look-alike properties were
-  deliberately left out), and small standalone utilities used by more than
+  `popover_base.css`), and small standalone utilities used by more than
   one page/component (`block_box.css`, `article_meta.css`,
   `translation_warning.css`).
 
@@ -93,8 +91,9 @@ being something every template has to get right:
   `studentunion_category.html` unconditionally, even though only editor
   mode uses them, rather than in `article_editor.html`.
 - `title_banner.css` is linked after `category_header.css`,
-  `section_heading.css` and `page_title.css` -- see
-  `docs/claude_context/title_banner.md` for why.
+  `section_heading.css` and `page_title.css`. Its `.title-banner h1` rule
+  undoes the page title's underline and has the same specificity, so it
+  only wins by coming later.
 - `translation_warning.css` is linked last in every section partial:
   `06_components/article/article_header.css` also styles
   `.translation-warning`, and this one has to win.

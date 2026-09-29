@@ -1,5 +1,7 @@
 # Frontend architecture
 
+Last updated: 2026-09-29
+
 The sitewide rules for how HTML templates and CSS are organized, loaded
 and written. The global `templates/` folder and each `static/css/` folder
 also have a short `README.md` that only covers what is specific to that
@@ -162,8 +164,10 @@ Three rules:
   `.css` file -- so an `@import` is only discovered after the importing
   file has downloaded and parsed. That costs an extra round trip, and it
   delays the stylesheet past the point where scripts start measuring the
-  page, which is what produces a flash of unstyled content. See
-  `docs/claude_context/css_loading.md`.
+  page, which is what produces a flash of unstyled content.
+  `account_app`'s `account_base.css` and `study_app`'s `study_base.css`
+  still use `@import`. They should move to `css_links/` partials when
+  those apps start using the tier blocks.
 - **Never put a `<link>` in a partial that renders in the body.** These
   CSS partials are included in `<head>`, which is the whole point. A
   stylesheet reached in the body isn't render-blocking -- the browser
@@ -181,6 +185,23 @@ renaming or splitting a file means updating every `<link>` that
 references its old path. If the number of requests ever becomes a real
 problem, the answer is concatenation (e.g. `django-compressor`), not
 `@import`.
+
+### Scripts that measure the page
+
+`DOMContentLoaded` does not wait for stylesheets. A script that measures
+layout at startup (for example with `getBoundingClientRect()`) can run
+before the CSS has applied. It then measures the unstyled page, and
+Firefox warns *"Layout was forced before the page was fully loaded"*.
+Such a script should first wait until every `link[rel="stylesheet"]` has
+loaded, listening for `error` as well as `load`, so one missing file can't
+block it forever.
+
+### Favicon version number
+
+The favicon `<link>` tags in `global_base.html` end in `?v=6`. Browsers
+cache favicons very hard and only fetch them again when the URL changes.
+When the favicon image changes, bump the number on all four links at the
+same time (`?v=6` → `?v=7`). Don't remove it as cleanup.
 
 ## Structure within files: BEM (Block Element Modifier)
 

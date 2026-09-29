@@ -1,10 +1,14 @@
 # docs/claude_references/ — what this is
 
+Last updated: 2026-09-29
+
 This folder holds **Claude-authored drafts kept as inspiration** — a
 starting point for a real, human-facing doc (a README-style guide, a
 project-values writeup, a proposal), not the final version of anything.
 Nothing in here is authoritative or meant to be linked to as if it were
-finished.
+finished. Each draft's `Last updated:` date shows when it was written or
+last changed. The code and the project may have moved on since then, so
+check the facts in a draft before you reuse them.
 
 ## Why drafts live here instead of just being the doc
 

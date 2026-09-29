@@ -1,5 +1,7 @@
 # Server toolbox
 
+Last updated: 2026-09-28
+
 The tools you use to find out what's going on with the production server,
 and how to use them. The goal is to teach the tools, not just list fixed
 commands, so that when something new goes wrong you know where to look,

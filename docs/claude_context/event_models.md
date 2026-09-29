@@ -1,5 +1,8 @@
 # models/event_models.py — design notes
 
+Last updated: 2026-08-15
+Covers: ifiplatform/apps/ifi_home_app/models/event_models.py
+
 Context for future Claude sessions. Not a human-facing doc.
 
 ## Shape

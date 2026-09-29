@@ -1,5 +1,7 @@
 # Writing Docs (Claude draft — reference only)
 
+Last updated: 2026-08-15
+
 > **Note:** This is a Claude-authored draft kept as inspiration in `docs/claude_references/`. It is *not* the final doc — write the real version by hand, using this as a starting point rather than publishing it as-is.
 
 Guidelines for writing documentation in this repo — READMEs, CONTRIBUTING-style guides, `docs/` files, issue write-ups. Aimed squarely at students, many of whom are writing project documentation, or contributing to a real codebase, for the first time.

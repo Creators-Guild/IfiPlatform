@@ -1,5 +1,8 @@
 # Homepage events box — design rationale
 
+Last updated: 2026-09-23
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_eventsbox.css, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_eventsbox_event.css
+
 Covers the homepage "This month at Ifi" box:
 `home/partials/home_eventsbox.html` (the list, empty state, "See all events",
 staff Peoply button) and `home/partials/home_eventsbox_event.html` (one event
