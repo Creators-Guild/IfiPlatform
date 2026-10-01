@@ -145,7 +145,7 @@ class EventSeedMixin:
                 location=NAVET_COMPANY_PRESENTATION_LOCATION,
                 intro=(
                     f"<p>Velkommen til bedriftspresentasjon med {company}!</p>"
-                    f"<p>Arrangør: {company}<br>Mat: Pizza<br>Språk: Norsk<br>"
+                    f"<p>Arrangør: {company}<br>Mat: Pizza<br>Språk: Norsk<br/>"
                     f"Aldersgrense: 18<br>Plasser: 40</p>"
                     f"<p>Bli med for en uformell presentasjon, etterfulgt av god mat og drikke.</p>"
                 ),
