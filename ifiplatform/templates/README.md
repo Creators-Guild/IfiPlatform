@@ -14,6 +14,9 @@ under_development.html   -- placeholder page for sections not built yet
 partials/                -- included by global_base.html on every page:
                             deploy_notice, beta_notice, select_language,
                             header, footer.
+                            sidemenu/ is sitewide too, but pulled in per
+                            page through the `sidemenu` block rather than
+                            by global_base.html.
                             account_minimenu.html is not included
                             anywhere at the moment
 css_links/global.html    -- the global CSS tier, linked on every page
