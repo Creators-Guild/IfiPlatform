@@ -1,5 +1,8 @@
 # article_layout.css — design notes
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/05_objects/article_layout.css
+
 Covers `ifi_home_app/static/css/05_objects/article_layout.css`.
 
 ## `.article-page { display: flow-root }`

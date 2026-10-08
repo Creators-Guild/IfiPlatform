@@ -1,3 +1,4 @@
+# Migration gotchas for this app: docs/claude_context/migrations.md
 """Schema step 3 of 3 for re-keying ArticleBlockStyle by translation_key
 (see 0091's docstring for the full why) -- now that every row has one
 (backfilled by 0092), makes translation_key required and drops the old

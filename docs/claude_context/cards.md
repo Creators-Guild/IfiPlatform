@@ -1,5 +1,8 @@
 # Card CSS — shared patterns + category/tool cards
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/cards/category_card.css, ifiplatform/apps/ifi_home_app/static/css/06_components/cards/tool_card.css
+
 Covers `ifi_home_app/static/css/06_components/cards/category_card.css` and
 `tool_card.css`, plus the patterns all four card files share
 (`article_card.css` and `union_card.css` have their own notes,

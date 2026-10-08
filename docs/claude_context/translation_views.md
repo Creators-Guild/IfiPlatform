@@ -1,5 +1,8 @@
 # translation/views.py + machine_translate_subtree command — design notes
 
+Last updated: 2026-09-24
+Covers: ifiplatform/apps/ifi_home_app/management/commands/machine_translate_subtree.py, ifiplatform/apps/ifi_home_app/translation/deepl.py, ifiplatform/apps/ifi_home_app/translation/views.py
+
 Context for future Claude sessions. Not a human-facing doc. The actual
 translate-and-publish work lives in the `machine_translate_subtree`
 management command (`ifi_home_app/management/commands/`); `views.py` only

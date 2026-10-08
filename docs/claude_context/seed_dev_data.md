@@ -1,5 +1,8 @@
 # management/seed_dev_data/ — design notes
 
+Last updated: 2026-08-15
+Covers: ifiplatform/apps/ifi_home_app/management/seed_dev_data/events.py, ifiplatform/apps/ifi_home_app/management/seed_dev_data/helpers.py
+
 Context for future Claude sessions. Not a human-facing doc.
 
 ## events.py — ordering gotchas (don't reorder these without reading this)

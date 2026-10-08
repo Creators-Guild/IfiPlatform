@@ -1,5 +1,8 @@
 # Translation nudges (`translation/status.py`, `translation/nudge.py`)
 
+Last updated: 2026-09-24
+Covers: ifiplatform/apps/ifi_home_app/translation/nudge.py, ifiplatform/apps/ifi_home_app/translation/status.py, ifiplatform/apps/ifi_home_app/translation/views.py
+
 English is hidden from editors in the admin (see `admin_locales.md`), so
 nothing would otherwise remind them that an English copy needs work. These
 nudges make it obvious, and each one offers two actions:

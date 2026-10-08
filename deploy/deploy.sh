@@ -37,6 +37,9 @@ done
 
 pip install -r requirements.txt
 cd ifiplatform
+# Some migrations are forward-only; their way back is this backup. If the
+# backup fails, set -e stops the deploy before anything is migrated.
+bash ../deploy/backup/backup_db.sh
 python manage.py migrate
 python manage.py collectstatic --noinput --clear
 
@@ -50,5 +53,9 @@ fi
 sudo systemctl restart gunicorn
 python manage.py clear_cache              # after the restart, see clear_cache's docstring
 python manage.py announce_deploy --clear  # remove the visitor banner
+
+# Only reports drift between deploy/server_config/ and the live files; a
+# problem here must never fail a deploy that has already gone out.
+bash ../deploy/check_server_config.sh || true
 
 echo "Deploy complete."

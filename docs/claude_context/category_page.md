@@ -1,5 +1,8 @@
 # CategoryPage / ArticleIndexPage CSS — design rationale
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/05_objects/category_layout.css, ifiplatform/apps/ifi_home_app/static/css/06_components/category/category_header.css
+
 Covers `ifi_home_app/static/css/05_objects/category_layout.css` and
 `06_components/category/category_header.css`. (The banner is in
 `title_banner.md`; cards in `cards.md`.)

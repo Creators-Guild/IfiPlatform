@@ -1,5 +1,8 @@
 # event_layout.css — design rationale
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/05_objects/event_layout.css
+
 Covers `ifi_home_app/static/css/05_objects/event_layout.css` — the single
 event page's layout (`event_page.html`). The events index uses its own
 wrapper (`.event-index-page`), so none of this affects it.

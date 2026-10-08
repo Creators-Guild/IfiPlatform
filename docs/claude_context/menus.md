@@ -1,5 +1,8 @@
 # Menus (`ifi_home_app/models/menus.py`)
 
+Last updated: 2026-10-09
+Covers: ifiplatform/apps/ifi_home_app/models/menus.py, ifiplatform/apps/ifi_home_app/translation/snippets.py
+
 The sidemenu, the homepage navbar dropdowns ("home dropmenus") and the
 homepage shortcut cards are all editor-curated snippets. None of them is
 derived from the page tree.

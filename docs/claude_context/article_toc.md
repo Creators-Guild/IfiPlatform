@@ -1,5 +1,8 @@
 # Article table of contents CSS — design notes
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/article_toc/article_toc_modal.css, ifiplatform/apps/ifi_home_app/static/css/06_components/article_toc/article_toc_overlay.css, ifiplatform/apps/ifi_home_app/static/css/06_components/article_toc/article_toc_trigger.css
+
 Covers `ifi_home_app/static/css/06_components/article_toc/`:
 `article_toc_trigger.css`, `article_toc_overlay.css`,
 `article_toc_modal.css`. Behaviour is in `table_of_content.js`.

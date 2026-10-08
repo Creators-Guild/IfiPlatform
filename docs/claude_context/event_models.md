@@ -1,5 +1,8 @@
 # models/event/ — design notes
 
+Last updated: 2026-10-09
+Covers: ifiplatform/apps/ifi_home_app/models/event/
+
 Context for future Claude sessions. Not a human-facing doc.
 
 Kept at this filename after the package split: the module docstrings in
@@ -51,8 +54,10 @@ site — that's where events happen). `settings.TIME_ZONE` is `"UTC"` though
 (a storage/bookkeeping convention, not site-content), and nothing activates
 a per-request timezone, so `timezone.localtime()` alone returns UTC
 wall-clock, not Oslo's. `SITE_TIMEZONE = ZoneInfo("Europe/Oslo")` is needed
-**only** where a clock *time* is compared against `event_time`
-(`live_sub_events`) — plain calendar-day comparisons elsewhere
+**only** where Oslo clock time matters: `sync_peoply_events` turning
+Peoply's UTC times into `event_time`, and the last-sync badge
+(`get_peoply_last_synced`). (`live_sub_events`, the one model-side clock
+comparison, was removed as dead code.) Plain calendar-day comparisons elsewhere
 (`is_happening_now`, `timezone.localdate()`) don't need it: UTC and Oslo
 only ever disagree on which *day* it is within an hour or two of midnight,
 an existing edge case elsewhere on the site too, not one this introduces.

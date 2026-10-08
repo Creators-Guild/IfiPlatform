@@ -14,10 +14,10 @@ def _event_end_minutes(event):
         return _event_start_minutes(event) + 60
     end = event.event_end_time.hour * 60 + event.event_end_time.minute
     if end <= _event_start_minutes(event):
-        # Wraps past midnight (e.g. 22:00-00:30) -- same "ends earlier than
-        # it starts means it's actually the next day" reading
-        # live_sub_events already uses. +24h puts it in the small-hours
-        # tail of the day instead of producing a negative-height block.
+        # Wraps past midnight (e.g. 22:00-00:30): ending earlier than it
+        # starts means it's actually the next day. +24h puts it in the
+        # small-hours tail of the day instead of producing a negative-height
+        # block.
         end += 24 * 60
     return end
 

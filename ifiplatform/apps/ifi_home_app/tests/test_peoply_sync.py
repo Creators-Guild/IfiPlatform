@@ -149,7 +149,7 @@ class SyncPeoplyEventsTests(TestCase):
         self.assertEqual(page.event_type, "social")
         self.assertEqual(page.peoply_url, "https://peoply.app/events/TNMRSSQR")
         self.assertEqual(page.location, "Gaustadalléen 23B, 0373 Oslo")
-        self.assertIn("<br>", page.intro)  # single newline -> <br>
+        self.assertIn("<br/>", page.intro)  # single newline -> <br/>
         self.assertIn("</p><p>", page.intro)  # blank line -> paragraph break
 
         related = page.related_unions[0].value

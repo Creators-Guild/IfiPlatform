@@ -1,5 +1,8 @@
 # Article body block CSS — design notes
 
+Last updated: 2026-09-22
+Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/article/article_alignment.css, ifiplatform/apps/ifi_home_app/static/css/06_components/article/article_image.css, ifiplatform/apps/ifi_home_app/static/css/06_components/article/article_multicolumn.css
+
 Covers `ifi_home_app/static/css/06_components/article/article_alignment.css`,
 `article_image.css` and `article_multicolumn.css`.
 

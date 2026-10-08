@@ -50,10 +50,10 @@ from ifi_home_app.models.event.peoply import (
 def _plain_text_to_html(text):
     """Peoply's description is plain text with \\r\\n line breaks, not HTML
     -- RichTextField expects HTML. A blank line becomes a paragraph break, a
-    single line break becomes <br>."""
+    single line break becomes <br/>."""
     paragraphs = text.replace("\r\n", "\n").split("\n\n")
     return "".join(
-        f"<p>{escape(paragraph).replace(chr(10), '<br>')}</p>"
+        f"<p>{escape(paragraph).replace(chr(10), '<br/>')}</p>"
         for paragraph in paragraphs
         if paragraph.strip()
     )

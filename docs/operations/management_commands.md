@@ -1,8 +1,10 @@
 # Custom manage.py commands
 
+Last updated: 2026-09-29
+
 This project's own `manage.py` commands, beyond Django's built-in ones
 (`migrate`, `createsuperuser`, `test`, `makemessages`/`compilemessages`,
-etc. — see the main [README.md](../README.md) for those), documented here
+etc. — see the main [README.md](../../README.md) for those), documented here
 in one place, sectioned by the app each command lives in.
 
 ## ifi_home_app
@@ -16,7 +18,7 @@ python manage.py seed_dev_data [--force]
 Fills a fresh local database with a dummy article tree (index pages,
 categories, a test article, a test student union, a test tool, and a
 sample event) so you're not starting from a blank site. Covered in the
-main setup flow — see [README.md](../README.md#6-fill-database-with-dummy-datarecommended).
+main setup flow — see [README.md](../../README.md#6-fill-database-with-dummy-datarecommended).
 
 Refuses to run when `DEBUG` is off, as a guard against accidentally
 seeding dummy data into what looks like a real (non-local) database.
@@ -58,8 +60,9 @@ machine-translate-subtree`, so check `journalctl -t
 machine-translate-subtree -f`. Locally (no `systemd-cat`, e.g. Windows) it
 just inherits the runserver terminal's stdout instead.
 
-See `docs/claude_context/translation_views.md` for the full history of why
-this moved out of the request cycle.
+It runs as a separate background process, not inside the web request,
+because translating a large subtree takes longer than Gunicorn's worker
+timeout. Run inside the request, the worker was killed partway through.
 
 ### sync_deepl_glossary
 
@@ -109,8 +112,7 @@ python manage.py link_menu_translations
 Registers every English `MenuGroup` copy that isn't yet a wagtail-localize
 translation of its nb group, keeping its current English text. The copies
 migration `0152_menus` created are the ones that need it. After this they
-are edited through the translation editor and synced from nb (see
-`docs/claude_context/menus.md`). Run it once after that migration, locally
+are edited through the translation editor and synced from nb. Run it once after that migration, locally
 and on prod. Safe to re-run: groups that are already linked are skipped.
 
 ### link_peoply_organizations
@@ -159,14 +161,21 @@ above to set it for every union at once).
 `--after` limits the sync to events starting on/after that date; defaults
 to today, so a plain run only ever picks up upcoming events.
 
-**Create-only**: an event already synced (matched by
-`external_source="peoply"` + `external_uid`, Peoply's own event ID) is
-skipped on every later run, even if it changed on Peoply's side or an
-editor has since hand-edited it here — sync only ever *adds*, it never
-overwrites or removes anything. Re-running this is a way to catch new
-events, not to keep an already-synced one's details live-updated; if a
-venue or time changes on Peoply after the fact, that has to be corrected
-on the `EventPage` by hand.
+**Peoply is the source of truth for some fields.** An event already
+synced (matched by `external_source="peoply"` + `external_uid`, Peoply's
+own event ID) gets its title, dates, times, location, intro, Peoply URL and
+sign-up URL (`PEOPLY_SYNCED_FIELDS` in `event_models.py`) overwritten on
+every run if they changed on Peoply. Those fields are read-only in the
+Wagtail admin for synced events, so no editor's change is silently
+undone. Everything else (event type, colors, tags, map links, related
+unions) is only set when the event is created, and belongs to editors
+after that. An unchanged event gets no new revision.
+
+**Removed events are unpublished, not deleted.** An event that was synced
+before but no longer comes back from Peoply is unpublished and logged as a
+`PeoplyRemovedEvent`, for a superuser to delete or archive in the Django
+admin. If it reappears on Peoply, it's published again and the log row is
+marked resolved.
 
 New events are created nb-only (untranslated) and published immediately.
 `event_type` is inferred from the title — defaults to `"social"`, upgrades
@@ -201,10 +210,11 @@ extra to run afterwards:
 #### Automatic scheduling
 
 A systemd timer runs this automatically on the production server — every 6
-hours (00:00/06:00/12:00/18:00), plus one extra run at 14:00 on weekdays.
+hours (00:00/06:00/12:00/18:00), plus extra runs at 14:00 and 16:00 on
+weekdays.
 Unlike [`cleanup_unverified_accounts`](#cleanup_unverified_accounts), this
 one doesn't need to be invoked from an external scheduler by hand — the
-unit files live in [deploy/systemd/](../deploy/systemd/) and are checked
+unit files live in [deploy/systemd/](../../deploy/systemd/) and are checked
 into the repo.
 
 No manual server-side setup needed — `deploy/deploy.sh`
@@ -220,7 +230,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now sync-peoply-events.timer
 ```
 
-The 14:00 weekday run is meant as Norway-local time — `OnCalendar=` uses
+The 14:00 and 16:00 weekday runs are meant as Norway-local time — `OnCalendar=` uses
 the server's own system timezone, so check `timedatectl` on the server; if
 it reports `UTC`, either `sudo timedatectl set-timezone Europe/Oslo` or add
 an explicit ` Europe/Oslo` suffix to both `OnCalendar=` lines in

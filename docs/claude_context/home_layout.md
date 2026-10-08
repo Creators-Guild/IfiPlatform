@@ -1,5 +1,8 @@
 # home_layout.css — design rationale
 
+Last updated: 2026-09-24
+Covers: ifiplatform/apps/ifi_home_app/static/css/05_objects/home_layout.css, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_navbar_mobile.css
+
 Covers `ifi_home_app/static/css/05_objects/home_layout.css` (the homepage
 grid, `home/home_index.html`), plus `06_components/home/home_navbar_mobile.css`.
 `06_components/home/home_eventsbox.css` holds the card look of the

@@ -1,7 +1,7 @@
 # Global CSS
 
 The sitewide CSS architecture (ITCSS layers, how stylesheets are loaded,
-BEM) is described in [docs/frontend.md](../../../docs/frontend.md). This
+BEM) is described in [docs/architecture/frontend.md](../../../docs/architecture/frontend.md). This
 file only covers what is specific to this folder.
 
 This is the global static folder: CSS shared sitewide. Each app's own CSS

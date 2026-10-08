@@ -1,5 +1,8 @@
 # models/article/blocks.py — design notes
 
+Last updated: 2026-08-15
+Covers: ifiplatform/apps/ifi_home_app/models/article/blocks.py
+
 Context for future Claude sessions. Not a human-facing doc.
 
 ## Why every block is a function, not a shared instance

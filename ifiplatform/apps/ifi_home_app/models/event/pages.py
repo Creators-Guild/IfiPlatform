@@ -2,7 +2,7 @@
 
 Design rationale/history: docs/claude_context/event_models.md"""
 
-from datetime import date, datetime, time, timedelta
+from datetime import timedelta
 
 from django.db import models
 from django.utils import timezone
@@ -255,32 +255,6 @@ class EventPage(TranslationWarningMixin, Page):
         """How many sub-events this event has -- a COUNT query, kept out of
         the templates that only need the number."""
         return self.sub_events.count()
-
-    @property
-    def live_sub_events(self):
-        """Sub-events happening at this exact moment (in progress today AND,
-        for a timed one, whose [event_time, event_end_time] window covers
-        the current clock time). See docs/claude_context/event_models.md
-        for why SITE_TIMEZONE, not the bare timezone.localtime(), applies
-        here specifically."""
-        current_time = timezone.localtime(timezone=SITE_TIMEZONE).time()
-
-        def is_live(sub_event):
-            if not sub_event.is_happening_now:
-                return False
-            if not sub_event.event_time:
-                return True
-            start = sub_event.event_time
-            end = sub_event.event_end_time
-            if end is None or end <= start:
-                # No stored end, or one that'd wrap past midnight -- nominal
-                # 1-hour fallback, clamped to the same day.
-                end = (datetime.combine(date.min, start) + timedelta(hours=1)).time()
-                if end < start:
-                    end = time(23, 59, 59)
-            return start <= current_time <= end
-
-        return [sub_event for sub_event in self.sub_events if is_live(sub_event)]
 
     @property
     def localized_location_articles(self):

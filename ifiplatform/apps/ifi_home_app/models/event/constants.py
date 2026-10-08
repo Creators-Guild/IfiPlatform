@@ -7,8 +7,9 @@ from zoneinfo import ZoneInfo
 from django.utils.translation import gettext_lazy as _
 
 
-# Needed only where a clock *time* is compared against event_time
-# (live_sub_events) -- see docs/claude_context/event_models.md.
+# settings.TIME_ZONE is UTC; used where Oslo clock time matters (turning
+# Peoply's UTC times into event_time, and showing the last sync time) --
+# see docs/claude_context/event_models.md.
 SITE_TIMEZONE = ZoneInfo("Europe/Oslo")
 
 EVENT_CALENDAR_COLOR_CHOICES = [
