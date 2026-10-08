@@ -13,11 +13,11 @@ from wagtail.models import Locale
 from .integrations.peoply_api import apply_peoply_match, find_exact_match, get_organizations
 from .models import StudentUnion
 from .models.article.unions import StudentUnionCategoryPage, UnionPage
-from .models.event_models import (
-    EventPage,
+from .models.event.pages import EventPage
+from .models.event.peoply import (
+    PeoplyOrgsWithoutUnion,
     PeoplyRemovedEvent,
     PeoplySyncLog,
-    PeoplyOrgsWithoutUnion,
     UnionsPendingPeoplyLink,
     UnionsWithoutPeoplyOrg,
     UnionsWithStalePeoplyLink,
@@ -153,7 +153,7 @@ class PeoplyRemovedEventAdmin(admin.ModelAdmin):
 
 class _PeoplyUnionMismatchAdmin(admin.ModelAdmin):
     """Shared base for the four PeoplyUnionMismatch proxies below (see
-    their own docstrings, event_models.py, on why they're three separate
+    their own docstrings, models/event/peoply.py, on why they're three separate
     admin entries rather than one combined filterable list). Superuser-only,
     and never editable -- but deletable, so stale/no-longer-interesting rows
     (e.g. already resolved_at) can be cleaned out by hand. Safe to delete

@@ -1,6 +1,6 @@
 # Student unions and tools
 
-Last updated: 2026-09-29
+Last updated: 2026-10-09
 
 How the student union pages and the tool pages are built: the page types,
 how they are listed on category pages, the cards that show them, and how a
@@ -238,9 +238,12 @@ EventPage  (new events get related_unions = [this union, role "host"])
 - Sub-events count on their own: a union tagged only on one sub-event
   still gets that sub-event.
 
-The helper functions are in `models/event_models.py`. `UnionPage` imports
-them inside `get_context()`, not at the top of the file, to avoid a
-circular import.
+The helper functions live in `models/event/`: the queries in `queries.py`,
+the week-grid layout in `calendar_layout.py` and the date ranges in
+`dates.py`. `UnionPage` imports the two `queries.py` helpers inside
+`get_context()` rather than at the top of the file, because `queries.py`
+imports `EventPage`, which imports the article models this file belongs to.
+The others import nothing and load normally at the top.
 
 ### Setting the id
 
@@ -294,9 +297,9 @@ Paths are in `apps/ifi_home_app/`.
 | Change which tools a category lists | `CategoryPage.get_context()` in `models/article/pages.py` |
 | Change a union's board member cards | `templates/info_articles/partials/union_position_card.html`, `06_components/union/union_member_card.css` |
 | Change when the union calendar shows | `UnionPage.get_context()` and `CALENDAR_AUTO_MIN_EVENTS` |
-| Change which events count as a union's | `_tags_union()`, `upcoming_events_for_union()` and `events_for_union_between()` in `models/event_models.py` |
+| Change which events count as a union's | `_tags_union()`, `upcoming_events_for_union()` and `events_for_union_between()` in `models/event/queries.py` |
 | Change how Peoply names are matched | `find_exact_match()` in `integrations/peoply_api.py` |
-| Change the mismatch checks | `management/commands/check_peoply_union_matches.py`, the `PeoplyUnionMismatch` models in `models/event_models.py`, and `admin.py` |
+| Change the mismatch checks | `management/commands/check_peoply_union_matches.py`, the `PeoplyUnionMismatch` models in `models/event/peoply.py`, and `admin.py` |
 
 ## Gotchas
 

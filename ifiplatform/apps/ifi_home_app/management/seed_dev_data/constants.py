@@ -184,7 +184,7 @@ FADDERUKE_SUB_EVENT_UNIONS = {
 
 # (title, intro, body heading, body paragraph) -- demo content for the
 # "Ny Ifi Student?" category (see _seed_new_student_articles), so the
-# homepage's "New Student?" dropdown (home_navbar.html) has real
+# homepage's "New Student?" dropdown (navbar/navbar.html) has real
 # articles/thumbnails to show instead of its "No articles yet" fallback.
 NEW_STUDENT_ARTICLE_SPECS = [
     (

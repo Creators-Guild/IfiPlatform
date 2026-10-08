@@ -8,7 +8,7 @@
 {% endblock section_css %}
 
 {% block sidemenu %}
-    {% include "home/partials/sidemenu.html" %}
+    {% include "partials/sidemenu/sidemenu.html" %}
 {% endblock sidemenu %}
 
 {% block maincontent %}
@@ -48,14 +48,7 @@
         {% if page.is_archived %}
             <p class="event-archived-notice">{% trans "This event is no longer listed on Peoply." %}</p>
         {% elif page.peoply_url %}
-            {% if page.external_source == "peoply" and not page.signup_url %}
-                {% comment %}
-                No signup_url means Peoply's own registrationMode was
-                "PEOPLY" at sync time (sync_peoply_events only ever fills
-                signup_url for "EXTERNAL" mode) -- registering *is* clicking
-                through to Peoply, so the button says so instead of just
-                naming the site.
-                {% endcomment %}
+            {% if page.signs_up_on_peoply %}
                 <a class="event-signup-link" href="{{ page.peoply_url }}" target="_blank" rel="noopener noreferrer">{% trans "Signup at Peoply" %}</a>
             {% else %}
                 <a class="event-signup-link" href="{{ page.peoply_url }}" target="_blank" rel="noopener noreferrer">{% trans "Peoply" %}</a>
@@ -150,64 +143,27 @@
             {% endwith %}
         {% endif %}
 
-        {% with all_related_unions=page.all_related_unions %}
-        {% if all_related_unions %}
+        {% if page.all_related_unions %}
             <h2>{% trans "Involved Unions" %}</h2>
 
-            {% comment %}
-            page.all_related_unions, not page.related_unions directly --
-            rolls in every sub_event's own related_unions too (see that
-            property's docstring, event_models.py), since a parent event
-            like Fadderuke rarely has any unions tagged on itself, only on
-            its individual day-to-day sub-events.
-
-            Host(s) get their own row above everyone else -- role isn't just
-            a label here, it's the whole point of splitting the section this
-            way, so whoever's actually running the event doesn't just blend
-            into the same wrapped grid as every collaborator. Two separate
-            passes over the same list (once per role group) rather than one
-            combined loop, since a plain {% templatetag openblock %} for
-            {% templatetag closeblock %} can't filter/group on its own.
-
-            .localized before .specific -- a PageChooserBlock inside a
-            StreamField is deliberately NOT auto-translated by wagtail-
-            localize (it only does that for snippets; for Page references it
-            leaves the stored reference as the source-locale page and expects
-            the *template* to resolve it at render time -- see the comment on
-            handle_related_object_block() in wagtail_localize/segments/
-            extract.py). Without .localized here, an English event page would
-            link to and display the Norwegian union page.
-            {% endcomment %}
             <div class="event-union-list event-union-list--host">
-                {% for entry in all_related_unions %}
-                    {% with union=entry.union.localized.specific role=entry.role %}
-                        {% if union and role == "host" %}
-                            <div class="event-union-entry">
-                                <span class="event-union-role">{% trans "Host" %}</span>
-                                {% include "info_articles/partials/union_card.html" with union=union %}
-                            </div>
-                        {% endif %}
-                    {% endwith %}
+                {% for entry in page.host_unions %}
+                    <div class="event-union-entry">
+                        <span class="event-union-role">{{ entry.role_label }}</span>
+                        {% include "info_articles/partials/union_card.html" with union=entry.union %}
+                    </div>
                 {% endfor %}
             </div>
 
             <div class="event-union-list">
-                {% for entry in all_related_unions %}
-                    {% with union=entry.union.localized.specific role=entry.role %}
-                        {% if union and role != "host" %}
-                            <div class="event-union-entry">
-                                <span class="event-union-role">
-                                    {% if role == "contributor" %}{% trans "Contributor" %}
-                                    {% else %}{% trans "Collaborator" %}{% endif %}
-                                </span>
-                                {% include "info_articles/partials/union_card.html" with union=union %}
-                            </div>
-                        {% endif %}
-                    {% endwith %}
+                {% for entry in page.supporting_unions %}
+                    <div class="event-union-entry">
+                        <span class="event-union-role">{{ entry.role_label }}</span>
+                        {% include "info_articles/partials/union_card.html" with union=entry.union %}
+                    </div>
                 {% endfor %}
             </div>
         {% endif %}
-        {% endwith %}
 
         {% get_event_index as event_index_page %}
         {% if event_index_page %}

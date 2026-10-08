@@ -1,6 +1,6 @@
 # Custom manage.py commands
 
-Last updated: 2026-09-29
+Last updated: 2026-10-09
 
 This project's own `manage.py` commands, beyond Django's built-in ones
 (`migrate`, `createsuperuser`, `test`, `makemessages`/`compilemessages`,
@@ -19,6 +19,11 @@ Fills a fresh local database with a dummy article tree (index pages,
 categories, a test article, a test student union, a test tool, and a
 sample event) so you're not starting from a blank site. Covered in the
 main setup flow — see [README.md](../../README.md#6-fill-database-with-dummy-datarecommended).
+
+It also creates an `admin` / `admin` superuser, so you can reach
+django-admin and wagtail-admin without running `createsuperuser` by hand.
+That part is skipped whenever `DEBUG` is off — including under `--force`,
+unlike the rest of the seed data. Never use it anywhere reachable.
 
 Refuses to run when `DEBUG` is off, as a guard against accidentally
 seeding dummy data into what looks like a real (non-local) database.
@@ -296,7 +301,7 @@ organizations there is reported, not left to fail the event sync that
 already ran.
 
 **Persisted, not just printed**: every mismatch found is also reconciled
-against the `PeoplyUnionMismatch` model (`event_models.py`) — keyed by
+against the `PeoplyUnionMismatch` model (`models/event/peoply.py`) — keyed by
 `(kind, identifier)` (a union's `translation_key`, or a Peoply org's own
 id), so the exact same gap isn't rediscovered as "new" on every one of the
 scheduled run's 6-hourly checks. A mismatch not seen before is printed as
@@ -313,7 +318,7 @@ report itself depends on.
 the model's four `kind`s (`unlinked_union`, `stale_link`, `missing_org`,
 `pending_link`) gets its own proxy model and sidebar entry
 (`UnionsWithoutPeoplyOrg`/`UnionsWithStalePeoplyLink`/
-`PeoplyOrgsWithoutUnion`/`UnionsPendingPeoplyLink`, `event_models.py`),
+`PeoplyOrgsWithoutUnion`/`UnionsPendingPeoplyLink`, `models/event/peoply.py`),
 each backed by a manager that filters the shared table down to just that
 kind, rather than one `PeoplyUnionMismatch` listing filtered by a `kind`
 dropdown — the four read as distinct problems needing distinct fixes

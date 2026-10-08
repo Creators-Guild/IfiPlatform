@@ -1,7 +1,7 @@
 # management/seed_dev_data/ — design notes
 
-Last updated: 2026-08-15
-Covers: ifiplatform/apps/ifi_home_app/management/seed_dev_data/events.py, ifiplatform/apps/ifi_home_app/management/seed_dev_data/helpers.py
+Last updated: 2026-10-09
+Covers: ifiplatform/apps/ifi_home_app/management/seed_dev_data/events.py, ifiplatform/apps/ifi_home_app/management/seed_dev_data/helpers.py, ifiplatform/apps/ifi_home_app/management/seed_dev_data/users.py
 
 Context for future Claude sessions. Not a human-facing doc.
 

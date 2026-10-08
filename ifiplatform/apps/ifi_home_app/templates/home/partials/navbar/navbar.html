@@ -6,10 +6,10 @@
             <button class="link">
                 {% if group.url %}
                     <a class="drop-option" href="{{ group.url }}"{% if group.external %} target="_blank" rel="noopener"{% endif %}>
-                        {% include "home/partials/menu_group_title.html" %}
+                        {% include "home/partials/navbar/menu_group_title.html" %}
                     </a>
                 {% else %}
-                    <span class="drop-option">{% include "home/partials/menu_group_title.html" %}</span>
+                    <span class="drop-option">{% include "home/partials/navbar/menu_group_title.html" %}</span>
                 {% endif %}
             </button>
             <div class="drop-content">

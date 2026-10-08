@@ -43,7 +43,7 @@ should read first.
 
 - One file per source file or tightly-related cluster of files, named
   after what it documents (e.g. `event_models.md` for
-  `ifi_home_app/models/event_models.py`, `article_style_and_page_mixins.md`
+  `ifi_home_app/models/event/`, `article_style_and_page_mixins.md`
   for the two files it covers together).
 - The source file itself gets a short pointer comment/docstring back here
   — never the reverse-only link. A reader starting from the code should

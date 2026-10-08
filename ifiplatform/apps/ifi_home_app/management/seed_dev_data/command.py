@@ -31,6 +31,7 @@ from .messages import MessageSeedMixin
 from .news import NewsSeedMixin
 from .tools import ToolSeedMixin
 from .unions import UnionSeedMixin
+from .users import UserSeedMixin
 
 
 class Command(
@@ -41,12 +42,13 @@ class Command(
     ToolSeedMixin,
     MessageSeedMixin,
     MenuSeedMixin,
+    UserSeedMixin,
     BaseCommand,
 ):
     help = (
         "Populates the local dev database with a dummy nb article tree "
         "(index pages, categories, a test article per category, a student "
-        "union category with two unions, and a tool page), each translated "
+        "union category with two unions, and a tool page) plus an admin/admin superuser, each translated "
         "into a real en counterpart via wagtail_localize's PO pipeline. "
         "Re-running is a no-op for anything that already exists."
     )
@@ -67,6 +69,8 @@ class Command(
 
         self.created_count = 0
         self.skipped_count = 0
+
+        self._seed_dev_superuser()
 
         # Deliberately not wrapped in transaction.atomic(): Translation.save_target()
         # defers its actual page-content publish via transaction.on_commit(), which

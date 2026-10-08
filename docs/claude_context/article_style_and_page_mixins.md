@@ -1,6 +1,6 @@
 # models/article/style.py and models/page_mixins.py — design notes
 
-Last updated: 2026-09-22
+Last updated: 2026-10-09
 Covers: ifiplatform/apps/ifi_home_app/models/article/style.py, ifiplatform/apps/ifi_home_app/models/page_mixins.py
 
 Context for future Claude sessions. Not a human-facing doc.
@@ -59,7 +59,7 @@ reproduces that exact shadow.
 ## page_mixins.py
 
 Named `page_mixins`, not `article_mixins`: `TranslationWarningMixin` is
-used by `event_models.py`'s `EventPage`/`EventIndexPage` too, not just the
+used by `models/event/pages.py`'s `EventPage`/`EventIndexPage` too, not just the
 article/union/tool page types.
 
 ### EditorModeMixin

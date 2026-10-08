@@ -21,25 +21,24 @@
             <a class="home-eventsbox-calendar-link" href="{% pageurl event %}#event-calendar">{% trans "Click to see calendar" %}</a>
         {% endif %}
 
-        {% with unions=event.all_related_unions %}
-            {% if unions %}
-                <div class="home-eventsbox-unions">
-                    {% for entry in unions|slice:":2" %}{% if entry.union %}
-                        <a class="home-eventsbox-union-tag" href="{% pageurl entry.union.localized.specific %}">{{ entry.union.localized.title }}</a>
-                    {% endif %}{% endfor %}
-                    {% if unions|length > 2 %}
-                        <details class="home-eventsbox-more-unions">
-                            <summary class="home-eventsbox-union-tag">+{{ unions|length|add:"-2" }}</summary>
-                            {% for entry in unions|slice:"2:" %}{% if entry.union %}
-                                <a class="home-eventsbox-union-tag" href="{% pageurl entry.union.localized.specific %}">{{ entry.union.localized.title }}</a>
-                            {% endif %}{% endfor %}
-                        </details>
-                    {% endif %}
-                </div>
-            {% endif %}
-        {% endwith %}
+        {% if event.visible_union_tags %}
+            <div class="home-eventsbox-unions">
+                {% for entry in event.visible_union_tags %}
+                    <a class="home-eventsbox-union-tag" href="{% pageurl entry.union %}">{{ entry.union.title }}</a>
+                {% endfor %}
 
-        {% with sub_count=event.sub_events.count highlighted=event.highlighted_sub_events %}
+                {% if event.extra_union_tags %}
+                    <details class="home-eventsbox-more-unions">
+                        <summary class="home-eventsbox-union-tag">+{{ event.extra_union_tags|length }}</summary>
+                        {% for entry in event.extra_union_tags %}
+                            <a class="home-eventsbox-union-tag" href="{% pageurl entry.union %}">{{ entry.union.title }}</a>
+                        {% endfor %}
+                    </details>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% with sub_count=event.sub_event_count highlighted=event.highlighted_sub_events %}
             {% if highlighted %}
                 <details class="home-eventsbox-subevents">
                     <summary>{% blocktrans count counter=sub_count %}{{ counter }} sub-event{% plural %}{{ counter }} sub-events{% endblocktrans %}</summary>

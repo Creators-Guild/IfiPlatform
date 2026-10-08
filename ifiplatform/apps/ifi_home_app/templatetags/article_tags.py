@@ -5,7 +5,9 @@ from django.utils import timezone
 from wagtail.models import Locale
 
 from ifi_home_app.models import menus
-from ifi_home_app.models.event_models import EventIndexPage, PeoplySyncState, SITE_TIMEZONE
+from ifi_home_app.models.event.constants import SITE_TIMEZONE
+from ifi_home_app.models.event.pages import EventIndexPage
+from ifi_home_app.models.event.peoply import PeoplySyncState
 
 register = template.Library()
 

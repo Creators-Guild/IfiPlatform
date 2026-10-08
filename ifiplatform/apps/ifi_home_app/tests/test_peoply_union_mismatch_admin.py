@@ -9,7 +9,7 @@ from django.utils import timezone
 from wagtail.models import Locale, Page
 
 from ifi_home_app.models.article.unions import StudentUnionCategoryPage, UnionPage
-from ifi_home_app.models.event_models import PeoplyUnionMismatch
+from ifi_home_app.models.event.peoply import PeoplyUnionMismatch
 
 User = get_user_model()
 
@@ -53,7 +53,7 @@ class CreateUnionPagesForMissingOrgsActionTests(TestCase):
     bulk action -- the admin-side equivalent of check_peoply_union_matches
     --create-missing, for a superuser working from the mismatch log rather
     than a shell. Only registered on this one of the three PeoplyUnionMismatch
-    proxy admins (event_models.py) -- creating a stub only makes sense in
+    proxy admins (models/event/peoply.py) -- creating a stub only makes sense in
     the "Peoply org with no site union" direction."""
 
     def setUp(self):
@@ -233,7 +233,7 @@ class LinkSelectedUnionsActionTests(TestCase):
 
 
 class MismatchProxyListingIsolationTests(TestCase):
-    """The four PeoplyUnionMismatch proxy admins (event_models.py) each
+    """The four PeoplyUnionMismatch proxy admins (models/event/peoply.py) each
     read as a separate log -- confirms one kind's rows never leak into
     another proxy's changelist, which is the whole point of splitting them
     up instead of one combined filterable list."""

@@ -15,6 +15,8 @@ from wagtail.images.blocks import ImageChooserBlock
 from wagtail.models import Locale, Page
 
 from .blocks import union_group_block
+from ..event.calendar_layout import build_calendar_days, hour_range_for_events
+from ..event.dates import group_events_by_month, semester_bounds, week_bounds
 from ..page_mixins import BannerStyleMixin, EditorModeMixin, TranslationWarningMixin
 
 
@@ -283,18 +285,12 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         the template -- same events/partials/event_month_groups.html
         listing EventIndexPage uses) and union_calendar (this week's events
         on the reusable week-calendar grid, navigable via ?calendar_date=).
-        Imported locally to avoid a circular import -- see
-        docs/claude_context/article_unions.md."""
+        The two query helpers are imported locally: event.queries imports
+        EventPage, which imports the article models this file belongs to.
+        The calendar/date helpers import nothing, so they load normally at
+        the top -- see docs/claude_context/article_unions.md."""
         context = super().get_context(request, *args, **kwargs)
-        from ifi_home_app.models.event_models import (
-            build_calendar_days,
-            events_for_union_between,
-            group_events_by_month,
-            hour_range_for_events,
-            semester_bounds,
-            upcoming_events_for_union,
-            week_bounds,
-        )
+        from ..event.queries import events_for_union_between, upcoming_events_for_union
 
         context["upcoming_events"] = upcoming_events_for_union(self)
         context["upcoming_event_month_groups"] = group_events_by_month(context["upcoming_events"])

@@ -29,7 +29,7 @@ expected to have a working Peoply link, so they never get flagged.
   link_peoply_organizations --apply.
 
 Every mismatch found is also reconciled against PeoplyUnionMismatch (see
-that model's own docstring, event_models.py) -- a mismatch seen for the
+that model's own docstring, models/event/peoply.py) -- a mismatch seen for the
 first time is a NEW row and gets called out separately from ones already
 known about, and a previously-flagged mismatch that no longer shows up gets
 marked resolved automatically. Without this, the scheduled run below would
@@ -53,7 +53,7 @@ from wagtail.models import Locale
 
 from ifi_home_app.integrations.peoply_api import find_exact_match, get_organizations
 from ifi_home_app.models.article.unions import StudentUnionCategoryPage, UnionPage
-from ifi_home_app.models.event_models import PeoplyUnionMismatch
+from ifi_home_app.models.event.peoply import PeoplyUnionMismatch
 
 
 class Command(BaseCommand):

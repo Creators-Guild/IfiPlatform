@@ -1,6 +1,6 @@
 # Menus
 
-Last updated: 2026-09-29
+Last updated: 2026-10-09
 
 How the site's menus are stored, edited and turned into HTML. Menus are
 Wagtail snippets. Read the [architecture overview](../overview.md) first if
@@ -16,9 +16,9 @@ menu is also on every Wagtail page in `ifi_home_app`:
 
 | Menu `key` | What the visitor sees | Template |
 | --- | --- | --- |
-| `sidemenu` | The collapsible menu on the left side | `home/partials/sidemenu_groups.html` |
-| `home_dropmenu` | The row of dropdowns at the top of the home page | `home/partials/home_navbar.html` |
-| `shortcuts` | The big cards with icons on the home page | `home/partials/home_shortcuts.html` |
+| `sidemenu` | The collapsible menu on the left side | `templates/partials/sidemenu/groups.html` |
+| `home_dropmenu` | The row of dropdowns at the top of the home page | `home/partials/navbar/navbar.html` |
+| `shortcuts` | The big cards with icons on the home page | `home/partials/shortcuts/shortcuts.html` |
 
 Editors pick every link by hand in the Wagtail admin. **Nothing is built
 from the page tree.** A new page does not show up in any menu until an
@@ -114,8 +114,8 @@ Step by step, for one request:
    `sidemenu` block, which `global_base.html` puts inside
    `<aside class="sidemenu_container">`. The home page and every Wagtail
    page template (articles, categories, unions, tools, events) fill it
-   with `home/partials/sidemenu.html`, which includes
-   `home/partials/sidemenu_groups.html`.
+   with `templates/partials/sidemenu/sidemenu.html`, which includes
+   `templates/partials/sidemenu/groups.html`.
 2. The partial calls `get_menu`. It loads the `Menu` for the key. If it
    doesn't exist, you get an empty list and the menu is just empty.
 3. For each slot, `_resolve_group()` takes `slot.group.localized`: the
@@ -186,7 +186,7 @@ editor's change shows on the next page load.
 | `.../06_components/home/home_navbar_mobile.css` | Below 45rem: hides `hide_on_mobile` dropdowns, swaps in `short_title` |
 | `.../06_components/home/home_shortcuts.css` | Shortcut cards. On desktop, links appear on hover. On mobile, each card is an icon that opens a `popover` with the links |
 | `apps/ifi_home_app/static/js/shortcut_fit.js` | Fits each card title: full title, then `short_title`, then smaller text |
-| `home/partials/shortcut_icon.html` | The inline SVG for each `icon` value |
+| `home/partials/shortcuts/shortcut_icon.html` | The inline SVG for each `icon` value |
 
 The side menu and the shortcut popovers use native `<details>` and
 `popover`, so they work without JavaScript.
@@ -197,7 +197,7 @@ The side menu and the shortcut popovers use native `<details>` and
 | --- | --- |
 | Add a field to groups or links | `models/menus.py`, then `_resolve_group()` / `_resolve_link()`, then the templates |
 | Add a new menu | Add a key to `MENU_KEYS`, a migration, and a template that calls `get_menu` |
-| Add a shortcut icon | `SHORTCUT_ICONS` in `models/menus.py` (needs a migration) and `home/partials/shortcut_icon.html` |
+| Add a shortcut icon | `SHORTCUT_ICONS` in `models/menus.py` (needs a migration) and `home/partials/shortcuts/shortcut_icon.html` |
 | Change which links are hidden | `_resolve_page()` in `models/menus.py` |
 | Change how a menu looks | The template in the first table, and the CSS above |
 | Change the default menus for a new database | `management/seed_dev_data/menus.py` |

@@ -1,6 +1,6 @@
 # Events
 
-Last updated: 2026-09-29
+Last updated: 2026-10-09
 
 How events work on the site: the event pages, the event list and the
 sub-event calendar, the events box on the home page, and the sync that
@@ -40,7 +40,8 @@ ArticleIndexPage (hub)
 
 ## Models
 
-All in `apps/ifi_home_app/models/event_models.py`.
+All in `apps/ifi_home_app/models/event/` (`pages.py` for the page models,
+`peoply.py` for the sync models).
 
 ### EventIndexPage
 
@@ -240,7 +241,7 @@ article cards, the sub-events and the involved unions (hosts in their own
 row).
 
 If the event has sub-events, `calendar_days` lays them out as a week
-calendar (`build_calendar_days` in `event_models.py`):
+calendar (`build_calendar_days` in `models/event/calendar_layout.py`):
 
 - One column per day that has a timed sub-event.
 - The hour axis only spans the sub-events' own hours.
@@ -271,9 +272,10 @@ The home page is a Django view, not a Wagtail page.
 - `show_on_homepage` on, not archived
 - still running today or later, in date and time order
 
-`templates/home/partials/home_eventsbox.html` groups them by day, with
-"Today" or "Tomorrow" in the heading when it fits.
-`home_eventsbox_event.html` renders one event: time (or end date, or
+`home_views` groups them by day with `group_events_by_day()`
+(`models/event/dates.py`); `templates/home/partials/eventsbox/eventsbox.html`
+renders the groups, with "Today" or "Tomorrow" in the heading when it fits.
+`eventsbox/event.html` renders one event: time (or end date, or
 "All day"), badge, title, a "Click to see calendar" link when it has timed
 sub-events, up to two union tags plus a "+N" expander, and a sub-event
 dropdown with `highlighted_sub_events`. The expanders are native
@@ -296,14 +298,14 @@ shows who clicked.
 
 | If you want to… | Look at |
 | --- | --- |
-| Add or change an event field | `EventPage` in `models/event_models.py`, then a migration |
-| Let editors change a field the sync owns, or the other way round | `PEOPLY_SYNCED_FIELDS` in `models/event_models.py`, and `_peoply_fields` in `sync_peoply_events.py` |
+| Add or change an event field | `EventPage` in `models/event/pages.py`, then a migration |
+| Let editors change a field the sync owns, or the other way round | `PEOPLY_SYNCED_FIELDS` in `models/event/peoply.py`, and `_peoply_fields` in `sync_peoply_events.py` |
 | Change how Peoply data is turned into fields | `_peoply_fields`, `_infer_event_type` in `management/commands/sync_peoply_events.py` |
 | Change the Peoply API calls | `integrations/peoply_api.py` |
 | Change when the sync runs | `deploy/systemd/sync-peoply-events.timer` |
 | Change what counts as upcoming or past | `EventIndexPage.get_context` |
 | Change which events the home box shows | `main_view` in `views/home_views.py` |
-| Change the calendar layout or colors | `build_calendar_days`, `_resolve_calendar_color` in `models/event_models.py` |
+| Change the calendar layout or colors | `build_calendar_days`, `_resolve_calendar_color` in `models/event/calendar_layout.py` |
 | Change how an event page looks | `templates/events/event_page.html`, `static/css/06_components/event/` |
 | Handle events removed from Peoply | `PeoplyRemovedEventAdmin` in `admin.py` |
 | Test the sync | `tests/test_peoply_sync.py` (it mocks the Peoply API) |

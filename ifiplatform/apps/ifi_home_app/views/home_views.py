@@ -5,7 +5,8 @@ from django.shortcuts import render
 from django.utils import timezone
 from wagtail.models import Locale
 from ifi_home_app.models.article_models import ArticlePage, get_section_index
-from ifi_home_app.models.event_models import EventIndexPage, EventPage
+from ifi_home_app.models.event.dates import group_events_by_day
+from ifi_home_app.models.event.pages import EventIndexPage, EventPage
 
 from ..dummydata import (
     dummy_news_objects,
@@ -63,7 +64,9 @@ def main_view(request):
         "unions": unions,
         "tools": tools,
         "board_messages": board_messages,
+        "show_board_controls": len(board_messages) > 1,
         "upcoming_events": upcoming_events,
+        "upcoming_event_days": group_events_by_day(upcoming_events),
     }
 
     return render(

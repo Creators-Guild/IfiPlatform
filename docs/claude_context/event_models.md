@@ -1,9 +1,33 @@
-# models/event_models.py — design notes
+# models/event/ — design notes
 
-Last updated: 2026-08-15
-Covers: ifiplatform/apps/ifi_home_app/models/event_models.py
+Last updated: 2026-10-09
+Covers: ifiplatform/apps/ifi_home_app/models/event/
 
 Context for future Claude sessions. Not a human-facing doc.
+
+Kept at this filename after the package split: the module docstrings in
+`models/event/*.py` all point here, as do several other docs.
+
+## Layout
+
+Was one 899-line `models/event_models.py`; now a package:
+
+| module | holds |
+|---|---|
+| `constants.py` | `SITE_TIMEZONE`, `EVENT_TYPE_CHOICES`, `EVENT_CALENDAR_COLOR_CHOICES` |
+| `blocks.py` | the StreamField blocks `EventPage` uses |
+| `pages.py` | `EventPageTag`, `EventPageForm`, `EventIndexPage`, `EventPage` |
+| `peoply.py` | the Peoply sync-state/mismatch/removed-event models |
+| `calendar_layout.py` | week-grid layout; pure functions, imports nothing |
+| `dates.py` | `week_bounds`, `semester_bounds`, `group_events_by_month`; no ORM |
+| `queries.py` | `upcoming_events_for_union`, `events_for_union_between` |
+
+`__init__.py` deliberately imports nothing (same as `models/article/`), so
+that importing e.g. `event.calendar_layout` doesn't drag in the article
+models `pages.py` depends on. Model registration is done by
+`models/__init__.py`, which imports both `event.pages` and `event.peoply` —
+without that second import Django would stop seeing the Peoply models and
+`makemigrations` would propose dropping their tables.
 
 ## Shape
 
@@ -67,6 +91,42 @@ all despite its sub-events listing plenty. `host` is only kept for a union
 tagged host directly on *this* page; a union hosting one sub-event (e.g. CYB
 running one quiz night) isn't the host of the whole week, so a sub-event's
 own `host` role is capped down to `collaborator` once rolled up.
+
+Each entry's `union` is resolved to `.localized.specific` here, once, rather
+than leaving every template to remember it — same reasoning as
+`localized_location_articles` below. Dedup still happens on the raw union's
+`translation_key`, which is shared across locales, so resolving afterwards
+doesn't change which unions survive. Without the `.localized` step an English
+event page would link to and display the Norwegian union page, since a
+`PageChooserBlock` inside a StreamField is deliberately not auto-translated
+by wagtail-localize (see `handle_related_object_block()` in
+`wagtail_localize/segments/extract.py`).
+
+## host_unions / supporting_unions
+
+`event_page.html` shows hosts in their own row above everyone else: the role
+isn't just a label there, it's the point of splitting the section, so whoever
+is actually running the event doesn't blend into the same wrapped grid as
+every collaborator.
+
+That split used to be done in the template, by looping `all_related_unions`
+twice and filtering each pass on `role` — a workaround for `{% for %}` not
+being able to filter or group. These two properties do it instead, so each
+row loops a list that already contains exactly what it should show.
+
+Each `all_related_unions` entry also carries `role_label`, read from
+`UNION_ROLE_CHOICES` in `constants.py`. That list is the single source for
+the role words: `event_union_block()` uses it for the editor's dropdown, and
+the template just prints the label rather than redefining the same three
+`{% trans %}` strings.
+
+## signs_up_on_peoply
+
+True for a Peoply-sourced event with no `signup_url`, which means Peoply's
+own `registrationMode` was `"PEOPLY"` at sync time — `sync_peoply_events`
+only ever fills `signup_url` for `"EXTERNAL"` mode. Registering then *is*
+clicking through to Peoply, so `event_page.html` labels the button
+"Signup at Peoply" rather than naming an external site.
 
 ## highlighted_sub_events
 

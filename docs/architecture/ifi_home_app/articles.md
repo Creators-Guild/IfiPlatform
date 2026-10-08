@@ -1,6 +1,6 @@
 # Articles
 
-Last updated: 2026-09-29
+Last updated: 2026-10-09
 
 How information articles and news are built: the three page types
 (`ArticleIndexPage`, `CategoryPage` and `ArticlePage`), the StreamField
@@ -280,7 +280,7 @@ tree and calls its `get_context()` and `template`:
 | `ArticlePage` | `info_articles/pages/article_page.html` | `css_links/article.html` |
 
 - All three extend `home_base.html` and use the side menu from
-  `home/partials/sidemenu.html`.
+  `templates/partials/sidemenu/sidemenu.html`.
 - For editors (`can_edit_style` in the context), `page_css` also loads
   `css_links/article_editor.html`, and the template includes the panels
   and scripts.

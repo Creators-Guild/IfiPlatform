@@ -1,11 +1,11 @@
 # Homepage events box — design rationale
 
-Last updated: 2026-09-23
+Last updated: 2026-10-09
 Covers: ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_eventsbox.css, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_eventsbox_event.css
 
 Covers the homepage "This month at Ifi" box:
-`home/partials/home_eventsbox.html` (the list, empty state, "See all events",
-staff Peoply button) and `home/partials/home_eventsbox_event.html` (one event
+`home/partials/eventsbox/eventsbox.html` (the list, empty state, "See all events",
+staff Peoply button) and `home/partials/eventsbox/event.html` (one event
 row, included per event), styled by
 `ifi_home_app/static/css/06_components/home/home_eventsbox.css` (the box) and
 `home_eventsbox_event.css` (the row). The box's outer sizing/placement lives in
@@ -31,7 +31,7 @@ not `getBoundingClientRect()` — a collapsed `<details>` keeps a box.
 ## Row layout
 
 Events are grouped by date with `{% regroup upcoming_events by event_date %}`
-(`home_eventsbox.html`): one `.home-eventsbox-day` section per date, with an
+(`eventsbox.html`): one `.home-eventsbox-day` section per date, with an
 `<h3>` heading and the day's events under it. A row
 (`.home-eventsbox-item`) is a two-column grid: the start time on the left
 (`.home-eventsbox-time`; "All day" when there is none, the end date for a
@@ -49,17 +49,33 @@ Sub-event names wrap instead of being truncated, which removed the
 
 ## Time tag
 
-`EventPage.time_tag` (`event_models.py`) returns `"today"`, `"tomorrow"` or
+`EventPage.time_tag` (`models/event/pages.py`) returns `"today"`, `"tomorrow"` or
 `None` — at most one, nearest first. `"today"` reuses `is_happening_now`, so a
 multi-day event running across today counts.
 
-The pill sits on the day heading (`home_eventsbox.html`), taken from the first
+The pill sits on the day heading (`eventsbox.html`), taken from the first
 event of the group, so it shows once per day rather than per row. Colours: today
 filled green (`--color-success`), tomorrow filled turquoise.
 
 There is no separate "Happening today" section any more — it repeated events
 already listed below it, and `home_views.main_view` no longer builds
 `happening_now_events`.
+
+## Day grouping
+
+`home_views` passes `upcoming_event_days` from `group_events_by_day()`
+(`models/event/dates.py`), a sibling of the `group_events_by_month()` the
+event index and union pages use. The template used to `{% regroup %}` the
+flat list itself and then read `day.list.0.time_tag` — asking a group's first
+event what day the group was.
+
+**Known quirk, deliberately preserved:** `time_tag` reports `"today"` for an
+event already in progress, while the groups are keyed by `event_date`. A
+week-long event that began yesterday therefore renders a "Today" heading next
+to yesterday's date. `group_events_by_day()` takes `time_tag` from the first
+event rather than recomputing it from the date, specifically so the move out
+of the template changed nothing. Worth fixing on its own, with a decision
+about what such an event's heading should actually say.
 
 ## Template details
 
@@ -69,7 +85,7 @@ already listed below it, and `home_views.main_view` no longer builds
   `wagtail_localize/segments/extract.py`). Without `entry.union.localized`, an
   English homepage links to the Norwegian union pages.
 - **`event.all_related_unions`, not `event.related_unions`:** it rolls in every
-  sub-event's unions too (docstring in `event_models.py`). A week-long event
+  sub-event's unions too (docstring in `models/event/pages.py`). A week-long event
   like Fadderuke tags unions on its individual days, not on itself.
 - **Only the first 2 union tags show**, the rest behind the `+N` expander. 2
   rather than 3 because this column is narrow on a phone.
@@ -84,7 +100,7 @@ already listed below it, and `home_views.main_view` no longer builds
 ## Queries
 
 `sub_events`, `all_related_unions`, `highlighted_sub_events` and `calendar_days`
-are `@cached_property` (`event_models.py`), so a row reading several of them
+are `@cached_property` (`models/event/pages.py`), so a row reading several of them
 queries once per event rather than per access, and `sub_events.count` is free
 once anything has iterated the queryset. Measured: the box costs ~19 EventPage
 queries for 6 events; the homepage total (~236) is dominated by articles and

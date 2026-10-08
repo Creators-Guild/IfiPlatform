@@ -4,7 +4,7 @@ because three historical migrations (0028_studentunioncategorypage_unionpage,
 `ifi_home_app.models.article_models.TranslationWarningMixin` in their
 `bases=` tuples, and every existing view/templatetag/test/seed-script import
 already targets this exact path. The actual model/logic code now lives in
-page_mixins.py (shared with event_models.py) and the models/article/
+page_mixins.py (shared with models/event/) and the models/article/
 package (constants.py/blocks.py/style.py/block_style.py/pages.py/
 unions.py/tools.py) -- see those files for the real definitions."""
 

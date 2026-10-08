@@ -14,7 +14,7 @@
             {% else %}
               <p><span class="shortcut-title" data-full="{{ group.title }}" data-short="{{ group.short_title }}">{{ group.title }}</span></p>
             {% endif %}
-            <span>{% include "home/partials/shortcut_icon.html" with icon=group.icon %}</span>
+            <span>{% include "home/partials/shortcuts/shortcut_icon.html" with icon=group.icon %}</span>
           </div>
           <div class="shortcut-options" id="shortcut-options-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}" popover>
             <p class="shortcut-options-title">{{ group.title }}</p>

@@ -49,7 +49,7 @@ GLOSSARY_TERMS = {
     "Digitus": "Digitus",
     "Navet": "Navet",
     # The guild that builds/maintains IfiPlatform itself (see
-    # templates/partials/footer.html and home/partials/sidemenu.html) --
+    # templates/partials/footer.html and partials/sidemenu/sidemenu.html) --
     # renamed from "Ifi-Guild of Creators".
     "Ifi-Creators' Guild": "Ifi-Creators' Guild",
     "pub til pub":"pub crawl",

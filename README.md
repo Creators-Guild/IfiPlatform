@@ -118,6 +118,8 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 #### To create superuser/admin user
+`seed_dev_data` (step 6) already creates an `admin` / `admin` superuser for
+local development, so you usually don't need this. To make your own:
 ```bash
 python manage.py createsuperuser
 ```

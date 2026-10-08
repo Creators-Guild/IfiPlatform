@@ -1,6 +1,6 @@
 # models/article/unions.py — design notes
 
-Last updated: 2026-09-24
+Last updated: 2026-10-09
 Covers: ifiplatform/apps/ifi_home_app/management/seed_dev_data/unions.py, ifiplatform/apps/ifi_home_app/models/article/unions.py
 
 Context for future Claude sessions. Not a human-facing doc.
@@ -8,7 +8,7 @@ Context for future Claude sessions. Not a human-facing doc.
 ## UnionPage.get_context — the local import
 
 `upcoming_events_for_union` is imported inside the method, not at module
-level: `event_models.py` imports `TranslationWarningMixin` (and other
+level: `models/event/pages.py` imports `TranslationWarningMixin` (and other
 symbols) from the `models.article_models` compatibility shim, which in
 turn imports from this module — a module-level import the other way would
 be circular.
