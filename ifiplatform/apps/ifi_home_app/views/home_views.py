@@ -12,7 +12,7 @@ from ..dummydata import (
     dummy_studentunions_objects,
     dummy_tools_objects,
 )
-from ..models.home_models import HomeBoardMessage, IfiTool, NewsItem, StudentUnion
+from ..models.home_models import HomeBoardMessage, IfiTool, NewsItem, StudentUnion, OutputMagasin
 
 
 def main_view(request):

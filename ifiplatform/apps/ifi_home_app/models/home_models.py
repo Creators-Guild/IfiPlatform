@@ -4,6 +4,7 @@ from django.db import models
 from wagtail.admin.panels import FieldPanel
 from wagtail.fields import RichTextField
 from wagtail.models import TranslatableMixin
+from datetime import date
 
 
 class StudentUnion(models.Model):
@@ -90,3 +91,25 @@ class HomeBoardMessage(TranslatableMixin, models.Model):
 
     def __str__(self):
         return self.title
+
+class OutputMagasin(models.Model):
+    volum = models.PositiveSmallIntegerField()
+    theme = models.CharField(max_length=100)
+    date_published = models.DateField(default=date.today)
+    ifiavis_url = models.URLField(blank=True)
+    img = models.ForeignKey(
+        "wagtailimages.Image",
+        on_delete=models.PROTECT,
+        related_name="+",
+    )
+
+    panels = [
+        FieldPanel("volum"),
+        FieldPanel("theme"),
+        FieldPanel("date_published"),
+        FieldPanel("ifiavis_url"),
+        FieldPanel("img"),
+    ]
+
+    def __str__(self):
+        return f"Volum {self.volum}: {self.theme}"
