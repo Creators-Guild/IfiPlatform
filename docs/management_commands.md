@@ -286,7 +286,7 @@ organizations there is reported, not left to fail the event sync that
 already ran.
 
 **Persisted, not just printed**: every mismatch found is also reconciled
-against the `PeoplyUnionMismatch` model (`event_models.py`) — keyed by
+against the `PeoplyUnionMismatch` model (`models/event/peoply.py`) — keyed by
 `(kind, identifier)` (a union's `translation_key`, or a Peoply org's own
 id), so the exact same gap isn't rediscovered as "new" on every one of the
 scheduled run's 6-hourly checks. A mismatch not seen before is printed as
@@ -303,7 +303,7 @@ report itself depends on.
 the model's four `kind`s (`unlinked_union`, `stale_link`, `missing_org`,
 `pending_link`) gets its own proxy model and sidebar entry
 (`UnionsWithoutPeoplyOrg`/`UnionsWithStalePeoplyLink`/
-`PeoplyOrgsWithoutUnion`/`UnionsPendingPeoplyLink`, `event_models.py`),
+`PeoplyOrgsWithoutUnion`/`UnionsPendingPeoplyLink`, `models/event/peoply.py`),
 each backed by a manager that filters the shared table down to just that
 kind, rather than one `PeoplyUnionMismatch` listing filtered by a `kind`
 dropdown — the four read as distinct problems needing distinct fixes

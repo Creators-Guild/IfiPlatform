@@ -1,7 +1,7 @@
 """Mirrors Peoply's events into EventPages, one run per UnionPage that has a
 peoply_organization_id set (see that field's own help text).
 
-Peoply is the source of truth for PEOPLY_SYNCED_FIELDS (event_models.py):
+Peoply is the source of truth for PEOPLY_SYNCED_FIELDS (models/event/peoply.py):
 an event already synced (matched by external_source="peoply" +
 external_uid) gets those fields overwritten on every run if they changed on
 Peoply -- and they're read-only in wagtail-admin (EventPageForm) so nobody's
@@ -38,11 +38,10 @@ from wagtail.models import Locale, Site
 
 from ifi_home_app.integrations.peoply_api import get_events
 from ifi_home_app.models.article.unions import UnionPage
-from ifi_home_app.models.event_models import (
+from ifi_home_app.models.event.constants import SITE_TIMEZONE
+from ifi_home_app.models.event.pages import EventIndexPage, EventPage
+from ifi_home_app.models.event.peoply import (
     PEOPLY_SYNCED_FIELDS,
-    SITE_TIMEZONE,
-    EventIndexPage,
-    EventPage,
     PeoplyRemovedEvent,
     PeoplySyncState,
 )

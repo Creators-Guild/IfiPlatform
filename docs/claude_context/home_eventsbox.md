@@ -46,7 +46,7 @@ Sub-event names wrap instead of being truncated, which removed the
 
 ## Time tag
 
-`EventPage.time_tag` (`event_models.py`) returns `"today"`, `"tomorrow"` or
+`EventPage.time_tag` (`models/event/pages.py`) returns `"today"`, `"tomorrow"` or
 `None` — at most one, nearest first. `"today"` reuses `is_happening_now`, so a
 multi-day event running across today counts.
 
@@ -66,7 +66,7 @@ already listed below it, and `home_views.main_view` no longer builds
   `wagtail_localize/segments/extract.py`). Without `entry.union.localized`, an
   English homepage links to the Norwegian union pages.
 - **`event.all_related_unions`, not `event.related_unions`:** it rolls in every
-  sub-event's unions too (docstring in `event_models.py`). A week-long event
+  sub-event's unions too (docstring in `models/event/pages.py`). A week-long event
   like Fadderuke tags unions on its individual days, not on itself.
 - **Only the first 2 union tags show**, the rest behind the `+N` expander. 2
   rather than 3 because this column is narrow on a phone.
@@ -81,7 +81,7 @@ already listed below it, and `home_views.main_view` no longer builds
 ## Queries
 
 `sub_events`, `all_related_unions`, `highlighted_sub_events` and `calendar_days`
-are `@cached_property` (`event_models.py`), so a row reading several of them
+are `@cached_property` (`models/event/pages.py`), so a row reading several of them
 queries once per event rather than per access, and `sub_events.count` is free
 once anything has iterated the queryset. Measured: the box costs ~19 EventPage
 queries for 6 events; the homepage total (~236) is dominated by articles and

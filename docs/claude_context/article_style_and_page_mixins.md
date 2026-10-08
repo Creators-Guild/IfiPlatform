@@ -56,7 +56,7 @@ reproduces that exact shadow.
 ## page_mixins.py
 
 Named `page_mixins`, not `article_mixins`: `TranslationWarningMixin` is
-used by `event_models.py`'s `EventPage`/`EventIndexPage` too, not just the
+used by `models/event/pages.py`'s `EventPage`/`EventIndexPage` too, not just the
 article/union/tool page types.
 
 ### EditorModeMixin

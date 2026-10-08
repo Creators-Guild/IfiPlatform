@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from wagtail.models import Locale
 from ifi_home_app.models.article_models import ArticlePage, get_section_index
-from ifi_home_app.models.event_models import EventIndexPage, EventPage
+from ifi_home_app.models.event.pages import EventIndexPage, EventPage
 
 from ..dummydata import (
     dummy_news_objects,

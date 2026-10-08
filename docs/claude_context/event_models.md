@@ -1,6 +1,30 @@
-# models/event_models.py — design notes
+# models/event/ — design notes
 
 Context for future Claude sessions. Not a human-facing doc.
+
+Kept at this filename after the package split: the module docstrings in
+`models/event/*.py` all point here, as do several other docs.
+
+## Layout
+
+Was one 899-line `models/event_models.py`; now a package:
+
+| module | holds |
+|---|---|
+| `constants.py` | `SITE_TIMEZONE`, `EVENT_TYPE_CHOICES`, `EVENT_CALENDAR_COLOR_CHOICES` |
+| `blocks.py` | the StreamField blocks `EventPage` uses |
+| `pages.py` | `EventPageTag`, `EventPageForm`, `EventIndexPage`, `EventPage` |
+| `peoply.py` | the Peoply sync-state/mismatch/removed-event models |
+| `calendar_layout.py` | week-grid layout; pure functions, imports nothing |
+| `dates.py` | `week_bounds`, `semester_bounds`, `group_events_by_month`; no ORM |
+| `queries.py` | `upcoming_events_for_union`, `events_for_union_between` |
+
+`__init__.py` deliberately imports nothing (same as `models/article/`), so
+that importing e.g. `event.calendar_layout` doesn't drag in the article
+models `pages.py` depends on. Model registration is done by
+`models/__init__.py`, which imports both `event.pages` and `event.peoply` —
+without that second import Django would stop seeing the Peoply models and
+`makemigrations` would propose dropping their tables.
 
 ## Shape
 

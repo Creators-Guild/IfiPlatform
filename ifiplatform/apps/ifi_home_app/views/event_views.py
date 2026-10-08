@@ -6,7 +6,7 @@ from django.core.management import call_command
 from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
 
-from ifi_home_app.models.event_models import PeoplySyncLog
+from ifi_home_app.models.event.peoply import PeoplySyncLog
 
 
 @require_POST

@@ -42,7 +42,7 @@ one custom property is how every variant resizes the whole grid:
   hour span).
 - `2.75rem` — `.union-calendar-section .event-calendar`.
   `UnionPage.get_context` fixes a union's calendar to one hour range for
-  its whole semester (`event_models.py`'s `hour_range_for_events`,
+  its whole semester (`models/event/calendar_layout.py`'s `hour_range_for_events`,
   derived from that union's earliest/latest timed event that semester,
   `9:00`-`01:00` fallback) rather than each week resizing around its own
   events; at `3.75rem` that semester-wide (often mostly empty) range would
@@ -103,7 +103,7 @@ schedule this view mirrors makes the same choice.
 
 `.event-calendar-block--{blue,yellow,…}` suffixes are
 `EventPage.calendar_color`'s choice values (blank falls back to
-`_resolve_calendar_color`'s event_type mapping in `event_models.py`).
+`_resolve_calendar_color`'s event_type mapping in `models/event/calendar_layout.py`).
 `custom` has no rule here — its background comes from the block's inline
 style (`calendar_color_custom`, freeform hex). These `--{color}` rules
 must only ever set `background-color`: `event_calendar_legend.css`'s
