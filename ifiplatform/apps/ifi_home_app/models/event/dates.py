@@ -34,3 +34,25 @@ def semester_bounds(day):
     if day.month <= 6:
         return date(day.year, 1, 1), date(day.year, 6, 30)
     return date(day.year, 7, 1), date(day.year, 12, 31)
+
+
+def group_events_by_day(events_list):
+    """[{"date": date(...), "time_tag": "today"|"tomorrow"|None,
+    "events": [...]}, ...], consumed by the homepage events box.
+
+    `time_tag` is taken from the group's first event, not recomputed from
+    the date -- an event already in progress reports "today" even though
+    the group is keyed by its start date. See
+    docs/claude_context/home_eventsbox.md.
+    """
+    return [
+        {
+            "date": day,
+            "time_tag": day_events[0].time_tag,
+            "events": day_events,
+        }
+        for day, day_events in (
+            (day, list(group))
+            for day, group in groupby(events_list, key=lambda event: event.event_date)
+        )
+    ]

@@ -5,7 +5,7 @@ Design rationale/history: docs/claude_context/event_models.md"""
 from django.utils.translation import gettext_lazy as _
 from wagtail import blocks
 
-from .constants import EVENT_CALENDAR_COLOR_CHOICES
+from .constants import EVENT_CALENDAR_COLOR_CHOICES, UNION_ROLE_CHOICES
 
 
 def event_union_block():
@@ -23,11 +23,7 @@ def event_union_block():
             (
                 "role",
                 blocks.ChoiceBlock(
-                    choices=[
-                        ("host", _("Host")),
-                        ("contributor", _("Contributor")),
-                        ("collaborator", _("Collaborator")),
-                    ],
+                    choices=UNION_ROLE_CHOICES,
                     default="host",
                 ),
             ),

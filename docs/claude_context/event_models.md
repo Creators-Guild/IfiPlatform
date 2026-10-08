@@ -97,6 +97,32 @@ event page would link to and display the Norwegian union page, since a
 by wagtail-localize (see `handle_related_object_block()` in
 `wagtail_localize/segments/extract.py`).
 
+## host_unions / supporting_unions
+
+`event_page.html` shows hosts in their own row above everyone else: the role
+isn't just a label there, it's the point of splitting the section, so whoever
+is actually running the event doesn't blend into the same wrapped grid as
+every collaborator.
+
+That split used to be done in the template, by looping `all_related_unions`
+twice and filtering each pass on `role` — a workaround for `{% for %}` not
+being able to filter or group. These two properties do it instead, so each
+row loops a list that already contains exactly what it should show.
+
+Each `all_related_unions` entry also carries `role_label`, read from
+`UNION_ROLE_CHOICES` in `constants.py`. That list is the single source for
+the role words: `event_union_block()` uses it for the editor's dropdown, and
+the template just prints the label rather than redefining the same three
+`{% trans %}` strings.
+
+## signs_up_on_peoply
+
+True for a Peoply-sourced event with no `signup_url`, which means Peoply's
+own `registrationMode` was `"PEOPLY"` at sync time — `sync_peoply_events`
+only ever fills `signup_url` for `"EXTERNAL"` mode. Registering then *is*
+clicking through to Peoply, so `event_page.html` labels the button
+"Signup at Peoply" rather than naming an external site.
+
 ## highlighted_sub_events
 
 Today's sub-event(s) win whenever anything's scheduled today (e.g. day 3 of

@@ -38,7 +38,7 @@
             </div>
         {% endif %}
 
-        {% with sub_count=event.sub_events.count highlighted=event.highlighted_sub_events %}
+        {% with sub_count=event.sub_event_count highlighted=event.highlighted_sub_events %}
             {% if highlighted %}
                 <details class="home-eventsbox-subevents">
                     <summary>{% blocktrans count counter=sub_count %}{{ counter }} sub-event{% plural %}{{ counter }} sub-events{% endblocktrans %}</summary>

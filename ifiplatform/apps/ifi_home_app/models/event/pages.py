@@ -32,6 +32,7 @@ from .constants import (
     EVENT_CALENDAR_COLOR_CHOICES,
     EVENT_TYPE_CHOICES,
     SITE_TIMEZONE,
+    UNION_ROLE_CHOICES,
 )
 from .dates import group_events_by_month
 from .peoply import PEOPLY_SYNCED_FIELDS
@@ -229,6 +230,13 @@ class EventPage(TranslationWarningMixin, Page):
         return self.event_date <= today <= (self.end_date or self.event_date)
 
     @property
+    def signs_up_on_peoply(self):
+        """Whether signing up means clicking through to Peoply itself
+        rather than to an external form -- true for a Peoply-sourced event
+        with no signup_url. See docs/claude_context/event_models.md."""
+        return self.external_source == "peoply" and not self.signup_url
+
+    @property
     def time_tag(self):
         """"today" or "tomorrow" when the event falls on one of those, else
         None -- at most one applies, nearest first."""
@@ -241,6 +249,12 @@ class EventPage(TranslationWarningMixin, Page):
     @cached_property
     def sub_events(self):
         return EventPage.objects.child_of(self).live().order_by("event_date", "event_time")
+
+    @cached_property
+    def sub_event_count(self):
+        """How many sub-events this event has -- a COUNT query, kept out of
+        the templates that only need the number."""
+        return self.sub_events.count()
 
     @property
     def live_sub_events(self):
@@ -304,10 +318,27 @@ class EventPage(TranslationWarningMixin, Page):
         for sub_event in self.sub_events:
             add_entries(sub_event.related_unions, cap_host=True)
 
+        role_labels = dict(UNION_ROLE_CHOICES)
         return [
-            {"role": role, "union": union.localized.specific}
+            {
+                "role": role,
+                "role_label": role_labels[role],
+                "union": union.localized.specific,
+            }
             for role, union in best_by_union.values()
         ]
+
+    @property
+    def host_unions(self):
+        """all_related_unions entries running the event -- shown in their
+        own row above everyone else on the event page."""
+        return [entry for entry in self.all_related_unions if entry["role"] == "host"]
+
+    @property
+    def supporting_unions(self):
+        """all_related_unions entries helping rather than running it
+        (contributor/collaborator)."""
+        return [entry for entry in self.all_related_unions if entry["role"] != "host"]
 
     # Beyond this many union tags, the homepage events box collapses the
     # rest into a "+N" disclosure rather than letting one event's tags

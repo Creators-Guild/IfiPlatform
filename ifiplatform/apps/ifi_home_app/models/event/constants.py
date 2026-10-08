@@ -30,3 +30,13 @@ EVENT_TYPE_CHOICES = [
     ("company", _("Company presentation")),
     ("other", _("Other")),
 ]
+
+
+# Roles a union can have on an event. Single source for both the
+# ChoiceBlock in blocks.py and EventPage.all_related_unions' role_label,
+# so the words aren't defined twice.
+UNION_ROLE_CHOICES = [
+    ("host", _("Host")),
+    ("contributor", _("Contributor")),
+    ("collaborator", _("Collaborator")),
+]

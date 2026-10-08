@@ -58,6 +58,22 @@ There is no separate "Happening today" section any more — it repeated events
 already listed below it, and `home_views.main_view` no longer builds
 `happening_now_events`.
 
+## Day grouping
+
+`home_views` passes `upcoming_event_days` from `group_events_by_day()`
+(`models/event/dates.py`), a sibling of the `group_events_by_month()` the
+event index and union pages use. The template used to `{% regroup %}` the
+flat list itself and then read `day.list.0.time_tag` — asking a group's first
+event what day the group was.
+
+**Known quirk, deliberately preserved:** `time_tag` reports `"today"` for an
+event already in progress, while the groups are keyed by `event_date`. A
+week-long event that began yesterday therefore renders a "Today" heading next
+to yesterday's date. `group_events_by_day()` takes `time_tag` from the first
+event rather than recomputing it from the date, specifically so the move out
+of the template changed nothing. Worth fixing on its own, with a decision
+about what such an event's heading should actually say.
+
 ## Template details
 
 - **Union tags must go through `.localized`.** A `PageChooserBlock` inside a
