@@ -69,6 +69,7 @@ def main_view(request):
         "unions": unions,
         "tools": tools,
         "board_messages": board_messages,
+        "show_board_controls": len(board_messages) > 1,
         "upcoming_events": upcoming_events,
         "happening_now_events": happening_now_events,
     }
