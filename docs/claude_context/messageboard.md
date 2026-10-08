@@ -1,7 +1,7 @@
 # messageboard_slideshow.css / messageboard_modal.css — design rationale
 
 Covers `ifi_home_app/static/css/06_components/home/messageboard_slideshow.css`
-and `messageboard_modal.css` (`home/partials/home_messageboard.html`,
+and `messageboard_modal.css` (`home/partials/messageboard/messageboard.html`,
 `messageboard.js`).
 
 ## Why the mobile breakpoint is 72rem, and what changes there

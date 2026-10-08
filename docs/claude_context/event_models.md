@@ -63,6 +63,16 @@ tagged host directly on *this* page; a union hosting one sub-event (e.g. CYB
 running one quiz night) isn't the host of the whole week, so a sub-event's
 own `host` role is capped down to `collaborator` once rolled up.
 
+Each entry's `union` is resolved to `.localized.specific` here, once, rather
+than leaving every template to remember it — same reasoning as
+`localized_location_articles` below. Dedup still happens on the raw union's
+`translation_key`, which is shared across locales, so resolving afterwards
+doesn't change which unions survive. Without the `.localized` step an English
+event page would link to and display the Norwegian union page, since a
+`PageChooserBlock` inside a StreamField is deliberately not auto-translated
+by wagtail-localize (see `handle_related_object_block()` in
+`wagtail_localize/segments/extract.py`).
+
 ## highlighted_sub_events
 
 Today's sub-event(s) win whenever anything's scheduled today (e.g. day 3 of

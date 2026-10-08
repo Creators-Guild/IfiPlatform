@@ -1,6 +1,6 @@
-// Per-card expand/collapse for the homepage newsbar/articlesbar grids
-// (.newsbar-layout, shared by home_newsbar.html and home_articlesbar.html --
-// both load this script, hence the double-init guard). Default on load
+// Per-card expand/collapse for the homepage newsbar grid
+// (.newsbar-layout, loaded by home_newsbar.html -- the init guard below
+// keeps a repeat include from binding every handler twice). Default on load
 // matches the old CSS-only behavior this replaces (every card past the
 // first two starts collapsed) -- but only on narrow screens, same
 // (max-width: 45rem) breakpoint as .articlecard-toggle's own CSS

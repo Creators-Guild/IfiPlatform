@@ -579,7 +579,8 @@ class EventPage(TranslationWarningMixin, Page):
     @cached_property
     def all_related_unions(self):
         """This event's related_unions plus every sub_event's, deduped by
-        union keeping the highest-priority role. See
+        union keeping the highest-priority role, each resolved to
+        `.localized.specific` here rather than in every template. See
         docs/claude_context/event_models.md for the host-capping rule."""
         role_priority = {"host": 0, "collaborator": 1, "contributor": 2}
         best_by_union = {}
@@ -600,7 +601,25 @@ class EventPage(TranslationWarningMixin, Page):
         for sub_event in self.sub_events:
             add_entries(sub_event.related_unions, cap_host=True)
 
-        return [{"role": role, "union": union} for role, union in best_by_union.values()]
+        return [
+            {"role": role, "union": union.localized.specific}
+            for role, union in best_by_union.values()
+        ]
+
+    # Beyond this many union tags, the homepage events box collapses the
+    # rest into a "+N" disclosure rather than letting one event's tags
+    # push the whole list item taller than the ones around it.
+    UNION_TAGS_SHOWN = 2
+
+    @property
+    def visible_union_tags(self):
+        """all_related_unions entries shown inline on the events box."""
+        return self.all_related_unions[: self.UNION_TAGS_SHOWN]
+
+    @property
+    def extra_union_tags(self):
+        """all_related_unions entries hidden behind the "+N" disclosure."""
+        return self.all_related_unions[self.UNION_TAGS_SHOWN :]
 
     @cached_property
     def highlighted_sub_events(self):

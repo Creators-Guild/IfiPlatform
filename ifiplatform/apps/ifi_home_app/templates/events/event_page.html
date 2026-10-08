@@ -168,19 +168,10 @@
             passes over the same list (once per role group) rather than one
             combined loop, since a plain {% templatetag openblock %} for
             {% templatetag closeblock %} can't filter/group on its own.
-
-            .localized before .specific -- a PageChooserBlock inside a
-            StreamField is deliberately NOT auto-translated by wagtail-
-            localize (it only does that for snippets; for Page references it
-            leaves the stored reference as the source-locale page and expects
-            the *template* to resolve it at render time -- see the comment on
-            handle_related_object_block() in wagtail_localize/segments/
-            extract.py). Without .localized here, an English event page would
-            link to and display the Norwegian union page.
             {% endcomment %}
             <div class="event-union-list event-union-list--host">
                 {% for entry in all_related_unions %}
-                    {% with union=entry.union.localized.specific role=entry.role %}
+                    {% with union=entry.union role=entry.role %}
                         {% if union and role == "host" %}
                             <div class="event-union-entry">
                                 <span class="event-union-role">{% trans "Host" %}</span>
@@ -193,7 +184,7 @@
 
             <div class="event-union-list">
                 {% for entry in all_related_unions %}
-                    {% with union=entry.union.localized.specific role=entry.role %}
+                    {% with union=entry.union role=entry.role %}
                         {% if union and role != "host" %}
                             <div class="event-union-entry">
                                 <span class="event-union-role">

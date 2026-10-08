@@ -1,8 +1,8 @@
 # Homepage events box — design rationale
 
 Covers the homepage "This month at Ifi" box:
-`home/partials/home_eventsbox.html` (the list, empty state, "See all events",
-staff Peoply button) and `home/partials/home_eventsbox_event.html` (one event
+`home/partials/eventsbox/eventsbox.html` (the list, empty state, "See all events",
+staff Peoply button) and `home/partials/eventsbox/event.html` (one event
 row, included per event), styled by
 `ifi_home_app/static/css/06_components/home/home_eventsbox.css` (the box) and
 `home_eventsbox_event.css` (the row). The box's outer sizing/placement lives in
@@ -28,7 +28,7 @@ not `getBoundingClientRect()` — a collapsed `<details>` keeps a box.
 ## Row layout
 
 Events are grouped by date with `{% regroup upcoming_events by event_date %}`
-(`home_eventsbox.html`): one `.home-eventsbox-day` section per date, with an
+(`eventsbox.html`): one `.home-eventsbox-day` section per date, with an
 `<h3>` heading and the day's events under it. A row
 (`.home-eventsbox-item`) is a two-column grid: the start time on the left
 (`.home-eventsbox-time`; "All day" when there is none, the end date for a
@@ -50,7 +50,7 @@ Sub-event names wrap instead of being truncated, which removed the
 `None` — at most one, nearest first. `"today"` reuses `is_happening_now`, so a
 multi-day event running across today counts.
 
-The pill sits on the day heading (`home_eventsbox.html`), taken from the first
+The pill sits on the day heading (`eventsbox.html`), taken from the first
 event of the group, so it shows once per day rather than per row. Colours: today
 filled green (`--color-success`), tomorrow filled turquoise.
 

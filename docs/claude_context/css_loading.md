@@ -14,7 +14,7 @@ as images rendering at full natural size before snapping into place.
 ## Why not a `<link>` in a body partial
 
 `ifi_home_app`'s partials (`home_sidemenu.html`, `home_newsbar.html`,
-`home_eventsbox.html` and friends) used to carry their own `<link>` tags.
+`eventsbox/eventsbox.html` and friends) used to carry their own `<link>` tags.
 Those partials are `{% include %}`d inside `{% block content %}`, so the
 tags landed in `<body>` -- at one point 19 of the homepage's 22
 stylesheets. A stylesheet reached partway down the body is not

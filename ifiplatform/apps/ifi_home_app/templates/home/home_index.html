@@ -14,11 +14,11 @@
     {% endblock sidemenu %}
     {% block maincontent %}
         <div class="nav-dropmenus">
-            {% include "home/partials/home_navbar.html" %}
+            {% include "home/partials/navbar/navbar.html" %}
         </div>
-        {% include "home/partials/home_shortcuts.html" %}
+        {% include "home/partials/shortcuts/shortcuts.html" %}
         <div id="home-subcontent">
-            <div id="msg-board">{% include "home/partials/home_messageboard.html" %}</div>
+            <div id="msg-board">{% include "home/partials/messageboard/messageboard.html" %}</div>
                 <div class="suggestions-row">
                     <div class="newsbar_container">
                         <h2 class="newsbar-heading newsbar-heading--news">{% trans "Latest News" %}</h2>
@@ -28,7 +28,7 @@
             </div>
         <div class="eventsbox_container">
             <h2>{% blocktrans %}Happening at Ifi{% endblocktrans %}</h2>
-            {% include "home/partials/home_eventsbox.html" %}
+            {% include "home/partials/eventsbox/eventsbox.html" %}
         </div>
     {% endblock maincontent %}
 </div>

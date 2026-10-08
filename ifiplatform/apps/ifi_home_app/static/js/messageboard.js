@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = document.querySelector(".messageboard-modal");
   if (modal) {
     // the scrolling element -- .messageboard-modal-panel itself no longer
-    // scrolls (see the comment on it in home_messageboard.html), only this
+    // scrolls (see docs/claude_context/messageboard.md), only this
     // inner wrapper does.
     const modalScroll = modal.querySelector(".messageboard-modal-scroll");
     const modalTitle = modal.querySelector(".messageboard-modal-title");
@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
       modalTitle.textContent = title ? title.textContent : "";
       modalDate.textContent = date ? date.textContent : "";
       // .messageboard-body's content is already server-rendered/sanitized
-      // richtext (see home_messageboard.html), not raw user input being
+      // richtext (see messageboard/slide.html), not raw user input being
       // re-injected here -- just relocating already-safe markup into the
       // modal, same as it already rendered in the card.
       modalBody.innerHTML = body ? body.innerHTML : "";

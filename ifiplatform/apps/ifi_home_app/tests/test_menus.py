@@ -151,8 +151,8 @@ class MenuTests(TestCase):
         from django.template.loader import render_to_string  # pylint: disable=import-outside-toplevel
 
         for icon, _label in SHORTCUT_ICONS:
-            self.assertIn("<svg", render_to_string("home/partials/shortcut_icon.html", {"icon": icon}))
-        self.assertIn("black_menu_icon", render_to_string("home/partials/shortcut_icon.html", {"icon": ""}))
+            self.assertIn("<svg", render_to_string("home/partials/shortcuts/shortcut_icon.html", {"icon": icon}))
+        self.assertIn("black_menu_icon", render_to_string("home/partials/shortcuts/shortcut_icon.html", {"icon": ""}))
 
     def test_show_all_unless_a_link_already_goes_there(self):
         # pages only have a URL once they're under a Site

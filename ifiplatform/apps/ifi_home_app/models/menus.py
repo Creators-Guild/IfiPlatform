@@ -19,7 +19,7 @@ MENU_KEYS = [
     ("shortcuts", "Homepage shortcuts"),
 ]
 
-# Inline SVGs in home/partials/shortcut_icon.html -- blank keeps the
+# Inline SVGs in home/partials/shortcuts/shortcut_icon.html -- blank keeps the
 # generic menu icon.
 SHORTCUT_ICONS = [
     ("info", "Info"),
