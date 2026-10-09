@@ -2,13 +2,14 @@
   "name": "IfiPlatform",
   "dockerComposeFile": "../docker-compose.yml",
   "service": "web",
-  "workspaceFolder": "/workspace/ifiplatform",
+  "workspaceFolder": "/workspace",
   "forwardPorts": [8000],
   "customizations": {
     "vscode": {
       "extensions": ["ms-python.python"],
       "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python"
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "terminal.integrated.cwd": "/workspace/ifiplatform"
       }
     }
   }

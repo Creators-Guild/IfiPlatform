@@ -13,7 +13,7 @@ development only. Production doesn't use Docker (see
 | --------------------------------- | ---------------------------------------------------------- |
 | `Dockerfile.dev`                  | Builds the Django container: Python 3.12 and the packages from `requirements.txt` |
 | `docker-compose.yml`              | Runs two containers: `db` (PostgreSQL 16) and `web` (Django) |
-| `.devcontainer/devcontainer.json` | Lets VS Code open the `web` container ("Reopen in Container") |
+| `.devcontainer/devcontainer.json` | Lets VS Code open the `web` container ("Reopen in Container"). Shows the whole repo; new terminals start in `ifiplatform/` |
 | `.dockerignore`                   | Keeps the venv, local database, media and `.env` out of the build |
 
 ## What happens on start
