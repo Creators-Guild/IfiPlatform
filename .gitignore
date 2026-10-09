@@ -1,6 +1,7 @@
 venv/
 .env/
 .env
+.log
 *.pyc
 __pycache__/
 ifiplatform/media/

@@ -34,9 +34,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - run: pip install -r requirements.txt
-      # Apps are listed explicitly: a bare `manage.py test` only finds core_app.
-      # Add new apps here.
-      - run: python ifiplatform/manage.py test core_app ifi_home_app account_app study_app yourpage_app
+      - run: python ifiplatform/manage.py test
 
   lint:
     runs-on: ubuntu-latest

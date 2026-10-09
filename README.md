@@ -51,7 +51,7 @@ Go to http://localhost:8000. Log in to http://localhost:8000/admin with username
 The VS Code terminal now runs **inside** the container, so every command in this README works as written, for example:
 ```bash
 python manage.py makemigrations
-py manage.py test core_app
+py manage.py test
 ```
 You're already in the `ifiplatform/` folder and don't need a venv or a `.env` file. The website is already running and reloads when you save a file, so you don't need to run `runserver`.
 
@@ -199,15 +199,15 @@ python manage.py createsuperuser
 Fill out the terminal's questions
 #### Running tests
 ```bash
-python manage.py test core_app ifi_home_app account_app study_app yourpage_app
+python manage.py test
 ```
-Explicit app labels, not a bare `manage.py test` — this project's own apps live grouped under `apps/` (see Project Structure below), and Django's default filesystem-based test discovery silently skips anything nested under a directory without an `__init__.py`, so a bare `manage.py test` would only run `core_app`'s tests. If you add a new app, add its label here too.
+Runs the tests for every app in the project, including new ones. To test just one app, name it, e.g. `python manage.py test ifi_home_app`.
 
 CI runs this same command on every PR (`.github/workflows/ci.yml`) across Python 3.12–3.14, so it's worth running locally before opening a PR.
 
 To skip the slow whole-site crawler test (`core_app.tests.SiteCrawlTests`, tagged `slow` — it seeds a full page tree and makes real HTTP requests to every page on the site) for a quicker loop while iterating:
 ```bash
-python manage.py test core_app ifi_home_app account_app study_app yourpage_app --exclude-tag=slow
+python manage.py test --exclude-tag=slow
 ```
 #### If you change translatable text (`{% trans %}` / `_(...)`)
 Update the `.po` files with the new/changed strings:
