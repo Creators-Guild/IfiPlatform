@@ -7,9 +7,41 @@ services:
       POSTGRES_USER: ifiplatform_user
       POSTGRES_PASSWORD: devpassword
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - ifiplatform-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ifiplatform_user -d ifiplatform"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: ifiplatform-web
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DEBUG: "True"
+      DJANGO_SECRET_KEY: "dev-only-insecure-key-do-not-use-in-production"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
+      USE_POSTGRES: "True"
+      DB_NAME: ifiplatform
+      DB_USER: ifiplatform_user
+      DB_PASSWORD: devpassword
+      DB_HOST: db
+      DB_PORT: "5432"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - .:/workspace
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py seed_dev_data &&
+             python manage.py runserver 0.0.0.0:8000"
 
 volumes:
   ifiplatform-db-data:

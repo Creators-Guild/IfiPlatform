@@ -30,6 +30,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # and every existing absolute import across the codebase, stay unchanged.
 sys.path.insert(0, str(BASE_DIR / "apps"))
 
+# Django's default test discovery skips apps/ (no __init__.py); this runner makes a bare `manage.py test` run every project app.
+TEST_RUNNER = "core_app.test_runner.ProjectAppsTestRunner"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/

@@ -1,6 +1,6 @@
 # Tech stack
 
-Last updated: 2026-09-28
+Last updated: 2026-10-09
 
 What IfiPlatform is built with, and why each piece is there. For how the
 production server runs all of this, see
@@ -59,10 +59,11 @@ real views. This is controlled by `APPS_UNDER_DEVELOPMENT` in `settings.py`.
 ## Database
 
 - **Production:** PostgreSQL, running on the same server as the app.
-- **Local development:** SQLite by default (`db.sqlite3`, no setup needed).
-  To test against PostgreSQL locally, start the container in
-  [docker-compose.yml](../../docker-compose.yml) (PostgreSQL 16) and set
-  `USE_POSTGRES=True` in `.env`.
+- **Local development, Python setup:** SQLite (`db.sqlite3`, no setup
+  needed).
+- **Local development, Docker setup:**
+  [docker-compose.yml](../../docker-compose.yml) runs PostgreSQL 16 (`db`)
+  and Django (`web`). Details in [docker_setup.md](docker_setup.md).
 
 Which database is used depends on `DEBUG` and `USE_POSTGRES`. With `DEBUG`
 off, it is always PostgreSQL.
