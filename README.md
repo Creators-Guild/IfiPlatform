@@ -20,8 +20,79 @@ Note: the site is bilingual (Norwegian Bokmål + English) via wagtail-localize �
       - Minimum 3.12
       - Supported and tested on 3.12, 3.13, 3.14
     - SQLite (default, via Django)
+    - Or instead of the above: Docker (see Option A below)
 
 ## Setup
+There are two ways to set up the project. Both give you the same site and the same `manage.py` commands.
+
+- **Option A: Docker (recommended).** One step installs everything (Python, packages, a PostgreSQL database and test data).
+- **Option B: Python + SQLite (backup).** Installs Python packages directly on your computer. Use this only if Docker is too heavy for your laptop or won't install.
+
+**Not sure which to pick? Use Docker.**
+
+## Option A: Docker (recommended)
+### 1. Install the tools
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows and macOS). On Linux, install Docker Engine with the Compose plugin.
+- [Visual Studio Code](https://code.visualstudio.com/) with the **Dev Containers** extension (by Microsoft).
+
+Start Docker Desktop and leave it running.
+
+### 2. Open the project in the container
+1. Clone the repo and open the repo root folder in VS Code.
+2. VS Code shows a popup: **"Reopen in Container"**. Click it. (No popup? Open the Command Palette and run `Dev Containers: Reopen in Container`.)
+3. Wait. The first time takes a few minutes, because Docker downloads Python and PostgreSQL and installs the packages. Later starts take seconds.
+
+While it starts, the container sets up the database, fills it with test data (`seed_dev_data`) and starts the website.
+
+### 3. Open the site
+Go to http://localhost:8000. Log in to http://localhost:8000/admin with username `admin` and password `admin`.
+
+### 4. Run commands as normal
+The VS Code terminal now runs **inside** the container, so every command in this README works as written, for example:
+```bash
+python manage.py makemigrations
+py manage.py test core_app
+```
+You're already in the `ifiplatform/` folder and don't need a venv or a `.env` file. The website is already running and reloads when you save a file, so you don't need to run `runserver`.
+
+### Without VS Code
+Run these from the repo root in any terminal:
+```bash
+docker compose up -d
+```
+Builds and starts everything in the background. The site is ready at http://localhost:8000 after a minute.
+```bash
+docker compose exec web bash
+```
+Opens a terminal inside the container. From there, every `python manage.py ...` command works as normal. Type `exit` to leave.
+
+### Stopping and resetting
+```bash
+docker compose down
+```
+Stops everything. Your database is kept for next time.
+```bash
+docker compose down -v
+```
+Stops everything **and deletes the database**. Next start gives you a fresh database with new test data.
+```bash
+docker compose up -d --build
+```
+Rebuilds the container. Only needed after `requirements.txt` changes.
+
+### If something goes wrong
+- **"Port 8000 is already in use":** another `runserver` is running on your computer. Stop it (Ctrl+C in its terminal) and try again.
+- **See what the container is doing:** `docker compose logs -f web`. Press Ctrl+C to stop watching.
+- **The site stopped after a code error:** fix the error, then run `docker compose up -d` (or in VS Code: Command Palette → `Dev Containers: Rebuild Container`).
+- **Docker is too slow or won't install:** use Option B instead.
+
+The Docker database is also reachable from your own computer at `localhost:5433`, for example from a database tool (user `ifiplatform_user`, password `devpassword`).
+
+How the Docker setup works and why it's built this way: [docs/architecture/docker_setup.md](docs/architecture/docker_setup.md).
+
+## Option B: Python + SQLite (backup)
+Only use this if Docker is too heavy for your laptop or won't install.
+
 > **A note on file paths below:** "repo root" means the top-level folder you get from cloning (likely named `IfiPlatform`). 
 
 >Steps also reference the `ifiplatform/` subdirectory inside it (likely named `ifiplatform`, lowercase (*not to be confused with `ifiplatform/ifiplatform_project/`, which is just the Django settings package*) — that's where manage.py, `.env` and all the Django apps actually live. Steps say which one they're relative to.
@@ -109,7 +180,9 @@ Useful for testing responsive/mobile layout on a real device.
 
 If it still doesn't load, your computer's firewall may be blocking incoming connections on port 8000 — Windows will usually prompt to allow this the first time; allow it for at least "Private networks."
 
-### Often used commands and actions
+## Often used commands and actions
+These work the same in both setups. With Docker, run them in the container's terminal.
+
 For a full list and explanation of this project's custom `manage.py` commands (beyond the built-in Django ones below), see [docs/operations/management_commands.md](docs/operations/management_commands.md).
 
 #### If you change a model (i.e. need a new migration)

@@ -1,6 +1,6 @@
 # docs/
 
-Last updated: 2026-09-29
+Last updated: 2026-10-09
 
 Project documentation beyond the main [README.md](../README.md). Each
 folder holds one kind of document. When you add a new doc, put it in the
@@ -23,6 +23,8 @@ into one folder per app, and features that span several apps go in
   database, external services and GitHub workflows
 - [frontend.md](architecture/frontend.md): how HTML templates and CSS are
   organized, loaded and written
+- [docker_setup.md](architecture/docker_setup.md): how the local Docker
+  setup is built and why
 - [eraser_links.md](architecture/eraser_links.md): feature concept map
 - `shared/`: cross-app features and `core_app` (no docs yet)
 - `ifi_home_app/`: feature docs for the main site
