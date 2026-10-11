@@ -1,6 +1,6 @@
 # Tech stack
 
-Last updated: 2026-10-09
+Last updated: 2026-10-11
 
 What IfiPlatform is built with, and why each piece is there. For how the
 production server runs all of this, see
@@ -108,6 +108,8 @@ production are listed in
 
 - **GitHub** hosts the code, issues and pull requests.
 - **black** is used for code formatting.
+- **pylint** (with pylint-django) checks code quality. Both are in
+  `requirements.txt`, and the dev container's editor runs them.
 - **GitHub Actions** workflows in `.github/workflows/`:
 
 | Workflow                 | When it runs                                | What it does                                                     |

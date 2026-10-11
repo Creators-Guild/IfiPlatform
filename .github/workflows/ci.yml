@@ -44,7 +44,7 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
-      - run: pip install -r requirements.txt pylint==4.0.9 pylint-django==2.8.0
+      - run: pip install -r requirements.txt
       # Fails only if the overall score drops below 7/10.
       - run: >
           pylint --load-plugins pylint_django

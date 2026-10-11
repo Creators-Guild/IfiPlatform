@@ -1,6 +1,6 @@
 # docs/
 
-Last updated: 2026-10-09
+Last updated: 2026-10-11
 
 Project documentation beyond the main [README.md](../README.md). Each
 folder holds one kind of document. When you add a new doc, put it in the
@@ -182,9 +182,6 @@ nobody can recover without them.
 
 ### Small fixes to existing docs
 
-- [ ] [CONTRIBUTING.md](../CONTRIBUTING.md): pylint runs on pull requests
-  to `main`, not on every push. The contact email is still "(coming)".
-  Typo: "how high value".
-- [ ] [TUTORIALS.md](../TUTORIALS.md): links JavaScript and React
-  tutorials, but the project uses neither framework. Swap in Wagtail and
-  PostgreSQL resources.
+- [x] [CONTRIBUTING.md](../CONTRIBUTING.md): add a contact email.
+- [x] [TUTORIALS.md](../TUTORIALS.md): add Wagtail and PostgreSQL
+  resources (also added Git/GitHub and Docker).

@@ -1,9 +1,11 @@
 venv/
+.venv/
 .env/
 .env
-.log
+*.log
 *.pyc
 __pycache__/
+*.sqlite3
 ifiplatform/media/
 ifiplatform/db.sqlite3
 ifiplatform/django_cache/

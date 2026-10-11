@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import sys
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # reads .env and loads it into environment variables
 load_dotenv()
@@ -40,6 +41,12 @@ TEST_RUNNER = "core_app.test_runner.ProjectAppsTestRunner"
 # SECURITY WARNING: keep the secret key used in production secret!
 # See README.md #Setup for more information
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") # check .env
+# Without .env, DEBUG falls back to False and Django fails later with a confusing Postgres error.
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY is not set. For local development, copy "
+        "ifiplatform/.env.example to ifiplatform/.env (see README.md, Option B step 4)."
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "False") == "True" # check .env

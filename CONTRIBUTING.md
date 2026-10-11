@@ -7,17 +7,38 @@ If you've never contributed to an open source project before, don't worry — th
 ## Getting Started
  
 1. **Fork the repository** to your own GitHub account.
-2. **Clone your fork** locally (unlkess you are a collaborator):
+2. **Clone your fork** locally (unless you are a collaborator):
 ```bash
 git clone https://github.com/<your-username>/IfiPlatform.git
 cd IfiPlatform
 ```
-3. **Set up your dev environment** — see the [Setup section in the README](README.md#setup) for creating a virtual environment and installing dependencies.
+3. **Set up your dev environment** — follow the [Setup section in the README](README.md#setup). Docker is the recommended way.
 4. **Create a branch** for your change:
 ```bash
 git checkout -b <issue-type>/<short-description>
 ```
    e.g. `feature/mobile-nav`, `bug/login-redirect`, `task/setup-instructions`
+
+## Your First Contribution, Step by Step
+
+1. **Pick an issue** labeled `good first issue` in the [Issues tab](../../issues). Leave a comment saying you're taking it, so nobody else starts on the same thing.
+2. **Get the latest code and make a branch** (step 4 above).
+3. **Make your change.** The site at http://localhost:8000 reloads when you save a file, so you can check your change in the browser right away.
+4. **Run the quick tests:**
+```bash
+python manage.py test --exclude-tag=slow
+```
+5. **Check what you're about to commit** with `git status` (or the Source Control panel in VS Code). Only the files you meant to change should be listed. If you see files you didn't touch, ask before committing.
+6. **Commit and push.** You can commit several times before you push (see *Commit in small steps* below):
+```bash
+git add <the files you changed>
+git commit -m "Short description of what you changed"
+git push -u origin <your-branch-name>
+```
+7. **Open a pull request.** GitHub shows a "Compare & pull request" button after you push. Write what you changed and why, and add `Closes #<issue number>`.
+8. **Answer review comments.** To update your PR, commit and push to the same branch again.
+
+New to Git? See the Git and GitHub section in [TUTORIALS.md](TUTORIALS.md).
 
 ## Main Roles in this Repository
 1. **Committer** - Trusted developer (and part of core team) with the rights to commit and merge code directly to the main repository
@@ -35,7 +56,7 @@ However, to keep **merged code and write access** within our intended community,
 - Approved by IFI-Creators' Guild
 If you're eligible and want write access (to push branches directly, manage issues, etc.) rather than working from a fork, reach out to a **Committer** to apply to get set up as a Collaborator.
  
-If you're not currently eligible, you're still welcome to open issues and submit PRs from a fork as a Contributor — a Committer will review and merge on your behalf if the contribution is a good fit. However, note that you are not likely to be prioritized unless the contribution is how high value to the project.
+If you're not currently eligible, you're still welcome to open issues and submit PRs from a fork as a Contributor — a Committer will review and merge on your behalf if the contribution is a good fit. However, note that you are not likely to be prioritized unless the contribution is of high value to the project.
  
 ## Reporting Issues
  
@@ -76,9 +97,10 @@ git fetch origin
 git rebase origin/main
 ```
 2. Keep PRs **small and focused** — one bug fix or one feature per PR is much easier to review than a large bundle of unrelated changes.
-3. Write a clear PR description: what you changed, why, and which issue it relates to (e.g. `Closes #12`).
-4. If your change isn't finished yet but you want early feedback, open it as a **draft PR**.
-5. Be responsive to review comments — feedback is about the code, not about you. Everyone's PRs get review comments; it's a normal part of the process, not a sign something went wrong.
+3. **Commit in small steps.** Make a commit each time one piece works, with a message that says what it does (`Add date to event card`, not `fix` or `changes`). One big commit at the end is hard to review, and if something breaks, small commits make it easy to find and undo the one that caused it. Small doesn't mean tiny: one commit per typo is too much.
+4. Write a clear PR description: what you changed, why, and which issue it relates to (e.g. `Closes #12`).
+5. If your change isn't finished yet but you want early feedback, open it as a **draft PR**.
+6. Be responsive to review comments — feedback is about the code, not about you. Everyone's PRs get review comments; it's a normal part of the process, not a sign something went wrong.
 
 ## Code Style
  
@@ -86,14 +108,15 @@ git rebase origin/main
 - Keep functions and views focused — one responsibility per function where reasonable.
 - Comment non-obvious logic, but don't over-comment self-explanatory code.
 
-**Formatting:** We use [Black](https://black.readthedocs.io/) to auto-format code. It's included in `requirements.txt`, so it's installed automatically as part of your setup. Run it locally before committing:
+**Formatting:** We use [Black](https://black.readthedocs.io/) to auto-format code. It's included in `requirements.txt`, so it's installed automatically as part of your setup. Format the files you changed before committing. In the dev container, right-click in the file and choose **Format Document**. Or from the terminal:
 ```bash
-black .
+black path/to/your_file.py
 ```
+Don't run `black .` on the whole project. Many files aren't formatted yet, and your PR would change hundreds of lines you never touched.
  
-**Linting:** Pylint runs automatically in CI on every push (via GitHub Actions) and must score **7/10 or higher** to pass. You can run it locally first to catch issues early:
+**Linting:** Pylint runs automatically in CI on every pull request to `main` and must score **7/10 or higher** to pass. In the dev container, VS Code runs pylint while you type and underlines problems. To run the same check as CI, run this from the repo root in a bash terminal (the container terminal works; PowerShell doesn't):
 ```bash
-pylint --load-plugins pylint_django --django-settings-module=ifiplatform_project.settings --ignore-paths=ifiplatform/.*/migrations $(git ls-files '*.py')
+pylint --load-plugins pylint_django --django-settings-module=ifiplatform_project.settings --ignore-paths=ifiplatform/.*/migrations --fail-under=7 $(git ls-files '*.py')
 ```
 
  
@@ -102,6 +125,6 @@ pylint --load-plugins pylint_django --django-settings-module=ifiplatform_project
 If anything here is unclear, open an issue with **Type: Task** and label `docs` — improving this guide for the next contributor is a contribution too.
 
 Else, send a mail to one of the core team:
-- (coming) E-mail to contactperson
+- hkniemi@uio.no
 
 When in doubt, ask Claude

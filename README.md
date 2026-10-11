@@ -55,6 +55,15 @@ py manage.py test
 ```
 You're already in the `ifiplatform/` folder and don't need a venv or a `.env` file. The website is already running and reloads when you save a file, so you don't need to run `runserver`.
 
+### Adding your own VS Code extensions
+The container comes with the extensions this project needs (Python, Black, Pylint and Django templates). Themes and keyboard shortcuts you already have keep working. Other extensions (for example Claude Code or GitHub Copilot) have to be installed inside the container, and ones you install by hand disappear when the container is rebuilt.
+
+To get them in every container automatically, add them to your own VS Code settings (Command Palette → `Preferences: Open User Settings (JSON)`):
+```json
+"dev.containers.defaultExtensions": ["anthropic.claude-code"]
+```
+Each extension's ID is shown as "Identifier" on its page in the Extensions view. Claude Code stays logged in when the container is rebuilt.
+
 ### Without VS Code
 Run these from the repo root in any terminal:
 ```bash
@@ -74,16 +83,18 @@ Stops everything. Your database is kept for next time.
 ```bash
 docker compose down -v
 ```
-Stops everything **and deletes the database**. Next start gives you a fresh database with new test data.
+Stops everything **and deletes the database**. Next start gives you a fresh database with new test data. It also logs you out of Claude Code, if you use it.
 ```bash
 docker compose up -d --build
 ```
-Rebuilds the container. Only needed after `requirements.txt` changes.
+Rebuilds the container. Only needed after `requirements.txt` or the Docker files change. In VS Code: Command Palette → `Dev Containers: Rebuild Container`.
 
 ### If something goes wrong
 - **"Port 8000 is already in use":** another `runserver` is running on your computer. Stop it (Ctrl+C in its terminal) and try again.
 - **See what the container is doing:** `docker compose logs -f web`. Press Ctrl+C to stop watching.
-- **The site stopped after a code error:** fix the error, then run `docker compose up -d` (or in VS Code: Command Palette → `Dev Containers: Rebuild Container`).
+- **The site stopped or won't load after a code error:** the error is in the log (`docker compose logs web`). Fix it, then start the server again in the container terminal with `python manage.py runserver 0.0.0.0:8000`. If the error came from a migration, run `python manage.py migrate` first. The container keeps running while the server is stopped, so the terminal still works. Next time the container starts, the server starts by itself again.
+- **Docker Desktop won't start (Windows):** it needs WSL2 and virtualization. Run `wsl --install` in PowerShell as administrator and restart. If Docker still complains, turn on virtualization in your computer's BIOS/UEFI settings (called "Intel VT-x", "AMD-V" or "SVM"). Docker Desktop's error message usually says which one is missing.
+- **Everything is slow (Windows):** projects cloned to a Windows drive like `C:\` are slow in Docker. It's much faster to clone inside WSL: open the Ubuntu terminal, clone the repo there, run `code .` in the repo folder, then click "Reopen in Container".
 - **Docker is too slow or won't install:** use Option B instead.
 
 The Docker database is also reachable from your own computer at `localhost:5433`, for example from a database tool (user `ifiplatform_user`, password `devpassword`).
@@ -102,6 +113,10 @@ Only use this if Docker is too heavy for your laptop or won't install.
 ```bash
 py -m venv venv
 venv\Scripts\Activate.ps1
+```
+If PowerShell says running scripts is disabled, run this once and try again:
+```bash
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 #### macOS / Linux
 ```bash
@@ -130,11 +145,11 @@ Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
-Generate local Secret key and copy generated key and replace 'your-secret-key-here' inside .env with said key:
+That's enough for local development: the placeholder secret key works on your own computer, and you can ignore the rest of the file. (Any server needs a real random key. This prints one:)
 ```bash
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
-*Editing remaining if necessary. For just development, add SecretKey and leave Debug=True. Ignore the rest*
+If you skip this step, Django stops with an error saying `DJANGO_SECRET_KEY is not set`.
 
 ### 5. Run Migrations
 ```bash

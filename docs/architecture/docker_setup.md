@@ -1,6 +1,6 @@
 # Docker setup
 
-Last updated: 2026-10-09
+Last updated: 2026-10-11
 
 How the local Docker setup is built and why. To start it, see Option A in
 the main [README.md](../../README.md#option-a-docker-recommended). It is for local
@@ -13,7 +13,7 @@ development only. Production doesn't use Docker (see
 | --------------------------------- | ---------------------------------------------------------- |
 | `Dockerfile.dev`                  | Builds the Django container: Python 3.12 and the packages from `requirements.txt` |
 | `docker-compose.yml`              | Runs two containers: `db` (PostgreSQL 16) and `web` (Django) |
-| `.devcontainer/devcontainer.json` | Lets VS Code open the `web` container ("Reopen in Container"). Shows the whole repo; new terminals start in `ifiplatform/` |
+| `.devcontainer/devcontainer.json` | Lets VS Code open the `web` container ("Reopen in Container"). Shows the whole repo; new terminals start in `ifiplatform/`. Installs the editor extensions (see below) |
 | `.dockerignore`                   | Keeps the venv, local database, media and `.env` out of the build |
 
 ## What happens on start
@@ -23,6 +23,11 @@ development only. Production doesn't use Docker (see
    `seed_dev_data` skips what already exists, so it's safe to run on
    every start.
 3. The site is served at `localhost:8000`.
+4. If any of these steps fails or the server stops, the container keeps
+   running (`sleep infinity`). Without that, a broken migration or a typo
+   in `settings.py` would stop the container on every start, and VS Code
+   couldn't reopen it to fix the error. The student fixes the error and
+   runs `runserver` again in the terminal.
 
 The repo is shared into the container at `/workspace`, so file edits on
 your own computer show up right away and `runserver` reloads.
@@ -44,8 +49,31 @@ your own computer show up right away and `runserver` reloads.
 - **Database on port 5433, not 5432,** so it doesn't clash with a
   PostgreSQL the student already has installed.
 - **Start commands are written inline in `docker-compose.yml`,** not in a
-  `.sh` script. On Windows, Git can turn a script's line endings into
-  CRLF, which breaks it in Linux.
+  `.sh` script, so the whole setup is readable in one file.
+- **Line endings are always LF.** `.gitattributes` makes Git check out
+  every file with LF, even on Windows. Without it, Git on Windows turns
+  files into CRLF, and Git inside the Linux container then sees every file
+  as changed (and shell scripts break).
+- **Editor tools come with the container.** The Python, Black, Pylint and
+  Django template extensions are installed automatically. Pylint uses the
+  same plugin and settings module as CI, so the editor underlines what CI
+  would complain about. Black is the formatter but doesn't run on save,
+  because many files aren't formatted with Black yet and saving would
+  reformat whole files.
+- **A normal user, not root.** The container runs as the user `dev`.
+  Files made inside it, like new migrations, land in the shared folder on
+  the student's computer. On Linux they'd be owned by root if the
+  container ran as root, and the student couldn't edit them without
+  `sudo`. VS Code changes `dev`'s user ID to match the student's own when
+  the container starts, so the files belong to them. Without VS Code
+  (`docker compose up`), `dev` keeps ID 1000, which is the usual ID of
+  the first user on a Linux computer. Docker Desktop (Windows and macOS)
+  hides this problem either way.
+- **Claude Code stays logged in.** Its login and settings are kept in the
+  `claude-config` volume (`CLAUDE_CONFIG_DIR`), so they survive rebuilds
+  and `docker compose down`. Only `down -v` deletes them. The extension
+  isn't installed for everyone; students who want it add it themselves
+  (see the README).
 - **Code isn't copied into the image.** It's shared in instead, so the image
   only needs rebuilding when `requirements.txt` changes.
 
