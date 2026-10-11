@@ -14,6 +14,7 @@ development only. Production doesn't use Docker (see
 | `Dockerfile.dev`                  | Builds the Django container: Python 3.12 and the packages from `requirements.txt` |
 | `docker-compose.yml`              | Runs two containers: `db` (PostgreSQL 16) and `web` (Django) |
 | `.devcontainer/devcontainer.json` | Lets VS Code open the `web` container ("Reopen in Container"). Shows the whole repo; new terminals start in `ifiplatform/`. Installs the editor extensions (see below) |
+| `.vscode/settings.json`, `.vscode/extensions.json` | Editor settings and recommended extensions. Used both in the container and without Docker |
 | `.dockerignore`                   | Keeps the venv, local database, media and `.env` out of the build |
 
 ## What happens on start
@@ -57,9 +58,14 @@ your own computer show up right away and `runserver` reloads.
 - **Editor tools come with the container.** The Python, Black, Pylint and
   Django template extensions are installed automatically. Pylint uses the
   same plugin and settings module as CI, so the editor underlines what CI
-  would complain about. Black is the formatter but doesn't run on save,
-  because many files aren't formatted with Black yet and saving would
-  reformat whole files.
+  would complain about. Black formats Python files on save. The whole
+  codebase was formatted once, so saving only changes the lines you
+  edited.
+- **Editor settings live in `.vscode/`, not in `devcontainer.json`,** so
+  students who don't use Docker get the same setup. VS Code offers to
+  install the extensions from `.vscode/extensions.json`. The container
+  ignores those recommendations, so the same list is also in
+  `devcontainer.json`. Add a new extension to both.
 - **A normal user, not root.** The container runs as the user `dev`.
   Files made inside it, like new migrations, land in the shared folder on
   the student's computer. On Linux they'd be owned by root if the

@@ -15,23 +15,7 @@
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "terminal.integrated.cwd": "/workspace/ifiplatform",
-        "[python]": {
-          "editor.defaultFormatter": "ms-python.black-formatter"
-        },
-        "black-formatter.importStrategy": "fromEnvironment",
-        "pylint.importStrategy": "fromEnvironment",
-        "pylint.args": [
-          "--source-roots=/workspace/ifiplatform",
-          "--load-plugins=pylint_django",
-          "--django-settings-module=ifiplatform_project.settings"
-        ],
-        "files.associations": {
-          "**/templates/**/*.html": "django-html"
-        },
-        "emmet.includeLanguages": {
-          "django-html": "html"
-        }
+        "terminal.integrated.cwd": "/workspace/ifiplatform"
       }
     }
   }

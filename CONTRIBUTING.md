@@ -108,16 +108,17 @@ git rebase origin/main
 - Keep functions and views focused — one responsibility per function where reasonable.
 - Comment non-obvious logic, but don't over-comment self-explanatory code.
 
-**Formatting:** We use [Black](https://black.readthedocs.io/) to auto-format code. It's included in `requirements.txt`, so it's installed automatically as part of your setup. Format the files you changed before committing. In the dev container, right-click in the file and choose **Format Document**. Or from the terminal:
+**Formatting:** We use [Black](https://black.readthedocs.io/) to auto-format code. It's included in `requirements.txt`, so it's installed automatically as part of your setup. In VS Code (with or without Docker), Black formats a Python file every time you save it, so you don't need to do anything. In other editors, run this from the repo root before committing:
 ```bash
-black path/to/your_file.py
+black .
 ```
-Don't run `black .` on the whole project. Many files aren't formatted yet, and your PR would change hundreds of lines you never touched.
  
-**Linting:** Pylint runs automatically in CI on every pull request to `main` and must score **7/10 or higher** to pass. In the dev container, VS Code runs pylint while you type and underlines problems. To run the same check as CI, run this from the repo root in a bash terminal (the container terminal works; PowerShell doesn't):
+**Linting:** Pylint runs automatically in CI on every pull request to `main` and must score **7/10 or higher** to pass. In VS Code, pylint runs while you type and underlines problems. To run the same check as CI, run this from the repo root in a bash terminal (the container terminal works; PowerShell doesn't):
 ```bash
 pylint --load-plugins pylint_django --django-settings-module=ifiplatform_project.settings --ignore-paths=ifiplatform/.*/migrations --fail-under=7 $(git ls-files '*.py')
 ```
+
+**Editor settings:** `.vscode/settings.json` is shared by everyone working on the project. Change your personal preferences under the **User** tab in VS Code's settings, not the **Workspace** tab, so they don't end up in your PR.
 
  
 ## Questions?

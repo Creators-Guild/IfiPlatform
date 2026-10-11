@@ -133,6 +133,7 @@ Run from the repo root:
 ```bash
 pip install -r requirements.txt
 ```
+In VS Code, click **Install** when it offers the project's recommended extensions (Python, Black, Pylint and Django templates). Then pick your venv with Command Palette → `Python: Select Interpreter`, so the editor uses the same Black and pylint versions as everyone else. Black formats Python files when you save, just like in Docker.
 
 ### 3. Move into the ifiplatform/ folder
 manage.py, `.env` and all the Django apps live in `ifiplatform/`. Every command from here on assumes you're inside it:
