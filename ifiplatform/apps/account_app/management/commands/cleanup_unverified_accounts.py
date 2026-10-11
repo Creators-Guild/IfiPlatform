@@ -40,15 +40,19 @@ class Command(BaseCommand):
         cutoff = timezone.now() - timezone.timedelta(
             days=settings.UNVERIFIED_ACCOUNT_RETENTION_DAYS
         )
-        queryset = get_user_model().objects.filter(is_active=False, date_joined__lt=cutoff)
+        queryset = get_user_model().objects.filter(
+            is_active=False, date_joined__lt=cutoff
+        )
 
         if options["dry_run"]:
             for user in queryset:
                 self.stdout.write(f"  would delete: {user.username} ({user.email})")
-            self.stdout.write(self.style.SUCCESS(
-                f"Dry run: {queryset.count()} unverified account(s) older than "
-                f"{settings.UNVERIFIED_ACCOUNT_RETENTION_DAYS} days would be deleted."
-            ))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Dry run: {queryset.count()} unverified account(s) older than "
+                    f"{settings.UNVERIFIED_ACCOUNT_RETENTION_DAYS} days would be deleted."
+                )
+            )
             return
 
         # queryset.delete()'s own return value counts every cascaded row
@@ -56,7 +60,9 @@ class Command(BaseCommand):
         # count those separately first for an accurate message.
         account_count = queryset.count()
         queryset.delete()
-        self.stdout.write(self.style.SUCCESS(
-            f"Deleted {account_count} unverified account(s) older than "
-            f"{settings.UNVERIFIED_ACCOUNT_RETENTION_DAYS} days."
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Deleted {account_count} unverified account(s) older than "
+                f"{settings.UNVERIFIED_ACCOUNT_RETENTION_DAYS} days."
+            )
+        )

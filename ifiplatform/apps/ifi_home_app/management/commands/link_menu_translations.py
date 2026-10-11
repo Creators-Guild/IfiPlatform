@@ -19,16 +19,21 @@ class Command(BaseCommand):
         source_locale = Locale.objects.get(language_code=SOURCE_LANGUAGE_CODE)
         linked = skipped = 0
         for group in MenuGroup.objects.filter(locale=source_locale):
-            for translated in MenuGroup.objects.filter(translation_key=group.translation_key).exclude(
-                locale=source_locale
-            ):
+            for translated in MenuGroup.objects.filter(
+                translation_key=group.translation_key
+            ).exclude(locale=source_locale):
                 already = Translation.objects.filter(
-                    source__object_id=group.translation_key, target_locale=translated.locale
+                    source__object_id=group.translation_key,
+                    target_locale=translated.locale,
                 ).exists()
                 if already:
                     skipped += 1
                     continue
                 link_existing_translation(group, translated)
                 linked += 1
-                self.stdout.write(f"  linked {group.title} -> {translated.title} ({translated.locale})")
-        self.stdout.write(self.style.SUCCESS(f"Done: {linked} linked, {skipped} already linked."))
+                self.stdout.write(
+                    f"  linked {group.title} -> {translated.title} ({translated.locale})"
+                )
+        self.stdout.write(
+            self.style.SUCCESS(f"Done: {linked} linked, {skipped} already linked.")
+        )

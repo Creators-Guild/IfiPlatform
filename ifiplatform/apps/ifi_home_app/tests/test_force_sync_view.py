@@ -21,7 +21,9 @@ class ForceSyncRedirectTests(TestCase):
     def test_redirects_to_local_next(self, call_command):
         response = self.client.post(self.url, {"next": "/nb/arrangementer/"})
 
-        self.assertRedirects(response, "/nb/arrangementer/", fetch_redirect_response=False)
+        self.assertRedirects(
+            response, "/nb/arrangementer/", fetch_redirect_response=False
+        )
         call_command.assert_called_once_with("sync_peoply_events")
 
     def test_ignores_external_next(self, _call_command):

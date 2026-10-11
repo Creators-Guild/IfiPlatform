@@ -171,7 +171,8 @@ def editor_terms_response_view(request):
         profile.editor_terms_status = "disagreed"
         profile.save(update_fields=["editor_terms_status"])
         editor_groups = Group.objects.filter(
-            user=request.user, page_permissions__permission__codename__in=_PAGE_EDIT_CODENAMES
+            user=request.user,
+            page_permissions__permission__codename__in=_PAGE_EDIT_CODENAMES,
         ).distinct()
         request.user.groups.remove(*editor_groups)
         return redirect(reverse("account_settings") + "?editor_terms=disagreed")
@@ -215,7 +216,9 @@ def export_data_view(request):
                 "title": article.title,
                 "slug": article.slug,
                 "published_date": (
-                    article.published_date.isoformat() if article.published_date else None
+                    article.published_date.isoformat()
+                    if article.published_date
+                    else None
                 ),
                 "author_attribution": article.author_attribution,
             }
@@ -253,7 +256,9 @@ def delete_account_view(request):
     nickname = profile.nickname
 
     def _resolve(choice):
-        return {"real_name": real_name, "nickname": nickname, "unknown": "unknown"}[choice]
+        return {"real_name": real_name, "nickname": nickname, "unknown": "unknown"}[
+            choice
+        ]
 
     if form.cleaned_data["study_tools_action"] == "delete":
         Card.objects.filter(deck__owner=user).delete()
@@ -263,7 +268,9 @@ def delete_account_view(request):
         Deck.objects.filter(owner=user).update(owner_display_name=resolved)
 
     resolved_articles = _resolve(form.cleaned_data["articles_attribution"])
-    ArticlePage.objects.filter(author=user).update(author_display_name=resolved_articles)
+    ArticlePage.objects.filter(author=user).update(
+        author_display_name=resolved_articles
+    )
 
     user.delete()
     logout(request)

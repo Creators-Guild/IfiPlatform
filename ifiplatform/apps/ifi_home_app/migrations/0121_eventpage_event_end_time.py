@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0120_eventpage_signup_url_eventpagetag_and_more'),
+        ("ifi_home_app", "0120_eventpage_signup_url_eventpagetag_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventpage',
-            name='event_end_time',
+            model_name="eventpage",
+            name="event_end_time",
             field=models.TimeField(blank=True, null=True),
         ),
     ]

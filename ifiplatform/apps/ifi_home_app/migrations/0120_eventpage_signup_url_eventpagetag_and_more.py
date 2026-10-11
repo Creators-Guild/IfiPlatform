@@ -9,30 +9,64 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0119_eventpage_is_highlighted'),
-        ('taggit', '0006_rename_taggeditem_content_type_object_id_taggit_tagg_content_8fc721_idx'),
+        ("ifi_home_app", "0119_eventpage_is_highlighted"),
+        (
+            "taggit",
+            "0006_rename_taggeditem_content_type_object_id_taggit_tagg_content_8fc721_idx",
+        ),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventpage',
-            name='signup_url',
-            field=models.URLField(blank=True, help_text='Optional -- link to a signup/registration form for this event.'),
+            model_name="eventpage",
+            name="signup_url",
+            field=models.URLField(
+                blank=True,
+                help_text="Optional -- link to a signup/registration form for this event.",
+            ),
         ),
         migrations.CreateModel(
-            name='EventPageTag',
+            name="EventPageTag",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('content_object', modelcluster.fields.ParentalKey(on_delete=django.db.models.deletion.CASCADE, related_name='tagged_items', to='ifi_home_app.eventpage')),
-                ('tag', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(app_label)s_%(class)s_items', to='taggit.tag')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "content_object",
+                    modelcluster.fields.ParentalKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tagged_items",
+                        to="ifi_home_app.eventpage",
+                    ),
+                ),
+                (
+                    "tag",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(app_label)s_%(class)s_items",
+                        to="taggit.tag",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.AddField(
-            model_name='eventpage',
-            name='info_tags',
-            field=modelcluster.contrib.taggit.ClusterTaggableManager(blank=True, help_text='Optional -- e.g. "Bachelor", "MN students", "Food served", "Alcohol-free".', through='ifi_home_app.EventPageTag', to='taggit.Tag', verbose_name='Tags'),
+            model_name="eventpage",
+            name="info_tags",
+            field=modelcluster.contrib.taggit.ClusterTaggableManager(
+                blank=True,
+                help_text='Optional -- e.g. "Bachelor", "MN students", "Food served", "Alcohol-free".',
+                through="ifi_home_app.EventPageTag",
+                to="taggit.Tag",
+                verbose_name="Tags",
+            ),
         ),
     ]

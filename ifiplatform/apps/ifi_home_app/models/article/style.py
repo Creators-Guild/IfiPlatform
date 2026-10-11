@@ -198,7 +198,7 @@ class ArticleStyle(models.Model):
     toc_icon_size = models.FloatField(
         default=1.3,
         help_text=(
-            "Size of the table-of-contents icon (the circular \"contents\" "
+            'Size of the table-of-contents icon (the circular "contents" '
             "button next to the title), in rem. The button's own circle "
             "grows and shrinks along with it."
         ),

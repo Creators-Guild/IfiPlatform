@@ -79,7 +79,9 @@ def resend_verification_view(request):
         if form.is_valid():
             user = (
                 get_user_model()
-                .objects.filter(email__iexact=form.cleaned_data["email"], is_active=False)
+                .objects.filter(
+                    email__iexact=form.cleaned_data["email"], is_active=False
+                )
                 .first()
             )
             if user is not None:
@@ -105,7 +107,11 @@ def verify_email_view(request, uidb64, token):
     except (TypeError, ValueError, OverflowError, get_user_model().DoesNotExist):
         user = None
 
-    if user is not None and not user.is_active and default_token_generator.check_token(user, token):
+    if (
+        user is not None
+        and not user.is_active
+        and default_token_generator.check_token(user, token)
+    ):
         user.is_active = True
         user.save(update_fields=["is_active"])
         user.backend = "django.contrib.auth.backends.ModelBackend"

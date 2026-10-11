@@ -88,7 +88,9 @@ class Command(BaseCommand):
                 with transaction.atomic():
                     for translation in translations:
                         _clear_stale_glossary_translations(translation)
-                        apply_machine_translation(translation.id, user, machine_translator)
+                        apply_machine_translation(
+                            translation.id, user, machine_translator
+                        )
                         translation.save_target(user=user, publish=publish)
                 translated_count += 1
             except Exception as exc:  # pylint: disable=broad-except
@@ -98,17 +100,19 @@ class Command(BaseCommand):
                 # see this module's own docstring on why re-running later
                 # is the recovery path, not a retry loop here.
                 failed_count += 1
-                self.stdout.write(self.style.ERROR(
-                    f"    failed: {source_instance} -- {exc}"
-                ))
+                self.stdout.write(
+                    self.style.ERROR(f"    failed: {source_instance} -- {exc}")
+                )
 
             if i < total:
                 time.sleep(DEEPL_CALL_DELAY_SECONDS)
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Done: {translated_count} translated, {failed_count} failed, "
-            f"out of {total} page(s)."
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Done: {translated_count} translated, {failed_count} failed, "
+                f"out of {total} page(s)."
+            )
+        )
 
 
 def _clear_stale_glossary_translations(translation):

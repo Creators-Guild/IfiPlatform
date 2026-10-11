@@ -304,10 +304,16 @@ class IndividualUserPermissionsTests(TestCase):
     that ever changed that behavior wouldn't do so silently."""
 
     def setUp(self):
-        self.user = User.objects.create_user(username="direct_perms_only", password="pw")
+        self.user = User.objects.create_user(
+            username="direct_perms_only", password="pw"
+        )
         self.user.user_permissions.add(
-            Permission.objects.get(codename="add_page", content_type__app_label="wagtailcore"),
-            Permission.objects.get(codename="change_page", content_type__app_label="wagtailcore"),
+            Permission.objects.get(
+                codename="add_page", content_type__app_label="wagtailcore"
+            ),
+            Permission.objects.get(
+                codename="change_page", content_type__app_label="wagtailcore"
+            ),
         )
 
     def test_direct_permissions_grant_no_real_page_permission(self):
@@ -343,7 +349,9 @@ class EditorTermsGateMiddlewareTests(TestCase):
         # groups already bundle it (confirmed against the real dev DB), so
         # this custom test group needs it added explicitly to match.
         self.editor_group.permissions.add(
-            Permission.objects.get(codename="access_admin", content_type__app_label="wagtailadmin")
+            Permission.objects.get(
+                codename="access_admin", content_type__app_label="wagtailadmin"
+            )
         )
         self.wagtail_admin_url = reverse("wagtailadmin_home")
 
@@ -405,7 +413,9 @@ class EditorTermsGateMiddlewareTests(TestCase):
 
 class CleanupUnverifiedAccountsTests(TestCase):
     def _make_unverified(self, username, days_old):
-        user = User.objects.create_user(username=username, password="pw", is_active=False)
+        user = User.objects.create_user(
+            username=username, password="pw", is_active=False
+        )
         User.objects.filter(pk=user.pk).update(
             date_joined=timezone.now() - timezone.timedelta(days=days_old)
         )
@@ -422,7 +432,9 @@ class CleanupUnverifiedAccountsTests(TestCase):
         self.assertTrue(User.objects.filter(pk=user.pk).exists())
 
     def test_keeps_active_regardless_of_age(self):
-        user = User.objects.create_user(username="old_active", password="pw", is_active=True)
+        user = User.objects.create_user(
+            username="old_active", password="pw", is_active=True
+        )
         User.objects.filter(pk=user.pk).update(
             date_joined=timezone.now() - timezone.timedelta(days=30)
         )

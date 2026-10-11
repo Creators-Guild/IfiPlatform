@@ -20,7 +20,7 @@ from django.core.exceptions import ValidationError
 from wagtail_localize.models import TranslationSource
 
 SOURCE_LANGUAGE_CODE = "nb"  # the anchor/"OG" locale every other locale
-                              # mirrors -- matches ArticlePage.SOURCE_LANGUAGE_CODE
+# mirrors -- matches ArticlePage.SOURCE_LANGUAGE_CODE
 
 
 def sync_synchronized_fields(page, user=None):

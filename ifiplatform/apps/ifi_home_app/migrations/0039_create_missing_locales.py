@@ -1,6 +1,5 @@
 from django.db import migrations
 
-
 LANGUAGE_CODES = ["en", "nb"]
 
 

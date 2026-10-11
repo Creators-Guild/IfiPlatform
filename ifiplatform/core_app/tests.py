@@ -111,10 +111,16 @@ class StaticReferenceTests(TestCase):
         missing = []
         for template_dir in self._project_template_dirs():
             for template in template_dir.rglob("*.html"):
-                for path in self.STATIC_TAG_RE.findall(template.read_text(encoding="utf-8")):
+                for path in self.STATIC_TAG_RE.findall(
+                    template.read_text(encoding="utf-8")
+                ):
                     if path not in self.KNOWN_MISSING and finders.find(path) is None:
-                        missing.append(f"{path} (in {template.relative_to(settings.BASE_DIR)})")
-        self.assertEqual(missing, [], "Templates reference static files that don't exist")
+                        missing.append(
+                            f"{path} (in {template.relative_to(settings.BASE_DIR)})"
+                        )
+        self.assertEqual(
+            missing, [], "Templates reference static files that don't exist"
+        )
 
 
 @tag("slow")

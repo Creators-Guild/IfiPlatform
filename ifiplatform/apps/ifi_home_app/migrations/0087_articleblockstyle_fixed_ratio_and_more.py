@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0086_articleblockstyle_list_style'),
+        ("ifi_home_app", "0086_articleblockstyle_list_style"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='articleblockstyle',
-            name='fixed_ratio',
+            model_name="articleblockstyle",
+            name="fixed_ratio",
             field=models.BooleanField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='articleblockstyle',
-            name='height_rem',
+            model_name="articleblockstyle",
+            name="height_rem",
             field=models.FloatField(blank=True, null=True),
         ),
     ]

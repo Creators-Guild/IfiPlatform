@@ -8,7 +8,14 @@ from wagtail.models import Locale, Page, Site
 
 from ifi_home_app.models import ArticleIndexPage
 from ifi_home_app.models.article_models import CategoryPage
-from ifi_home_app.models.menus import SHORTCUT_ICONS, Menu, MenuGroup, MenuGroupLink, MenuSlot, get_menu
+from ifi_home_app.models.menus import (
+    SHORTCUT_ICONS,
+    Menu,
+    MenuGroup,
+    MenuGroupLink,
+    MenuSlot,
+    get_menu,
+)
 from ifi_home_app.templatetags.article_tags import get_shortcut_columns
 
 
@@ -18,12 +25,16 @@ class MenuTests(TestCase):
     def setUp(self):
         self.nb, _ = Locale.objects.get_or_create(language_code="nb")
         self.en, _ = Locale.objects.get_or_create(language_code="en")
-        self.index = ArticleIndexPage(locale=self.nb, title="Artikler", slug="artikler", section="info_articles")
+        self.index = ArticleIndexPage(
+            locale=self.nb, title="Artikler", slug="artikler", section="info_articles"
+        )
         Page.get_first_root_node().add_child(instance=self.index)
         self.index.save_revision().publish()
 
     def _category(self, title, **kwargs):
-        category = CategoryPage(locale=self.nb, title=title, slug=title.lower(), **kwargs)
+        category = CategoryPage(
+            locale=self.nb, title=title, slug=title.lower(), **kwargs
+        )
         self.index.add_child(instance=category)
         category.save_revision().publish()
         return category
@@ -57,22 +68,36 @@ class MenuTests(TestCase):
 
         menu = self._nb("sidemenu")
         self.assertEqual([g["title"] for g in menu], ["B", "Gruppe"])
-        self.assertEqual([link["label"] for link in menu[1]["links"]], ["Andre", "Første"])
+        self.assertEqual(
+            [link["label"] for link in menu[1]["links"]], ["Andre", "Første"]
+        )
 
     def test_skips_unpublished_and_off_season_pages(self):
         visible = self._category("Synlig")
         unpublished = self._category("Upublisert")
         unpublished.unpublish()
-        off_season = self._category("Sesong", active_until=timezone.now().date() - timedelta(days=1))
-        self._menu("sidemenu", self._group(links=[{"page": visible}, {"page": unpublished}, {"page": off_season}]))
+        off_season = self._category(
+            "Sesong", active_until=timezone.now().date() - timedelta(days=1)
+        )
+        self._menu(
+            "sidemenu",
+            self._group(
+                links=[{"page": visible}, {"page": unpublished}, {"page": off_season}]
+            ),
+        )
 
-        self.assertEqual([link["label"] for link in self._nb("sidemenu")[0]["links"]], ["Synlig"])
+        self.assertEqual(
+            [link["label"] for link in self._nb("sidemenu")[0]["links"]], ["Synlig"]
+        )
 
     def test_external_links_are_flagged(self):
-        self._menu("sidemenu", self._group(
-            link_url="https://example.com/heading",
-            links=[{"url": "https://example.com", "label": "Eksempel"}],
-        ))
+        self._menu(
+            "sidemenu",
+            self._group(
+                link_url="https://example.com/heading",
+                links=[{"url": "https://example.com", "label": "Eksempel"}],
+            ),
+        )
 
         group = self._nb("sidemenu")[0]
         self.assertTrue(group["external"])
@@ -87,7 +112,12 @@ class MenuTests(TestCase):
         self.assertEqual(group["url"], self.index.url)
 
     def test_group_rejects_both_heading_links(self):
-        group = MenuGroup(locale=self.nb, title="Begge", link_page=self.index, link_url="https://example.com")
+        group = MenuGroup(
+            locale=self.nb,
+            title="Begge",
+            link_page=self.index,
+            link_url="https://example.com",
+        )
         with self.assertRaises(ValidationError):
             group.clean()
 
@@ -135,7 +165,9 @@ class MenuTests(TestCase):
 
         with translation.override("nb"):
             columns = get_shortcut_columns()
-        self.assertEqual([[g["title"] for g in column] for column in columns], [["B"], ["A", "C"]])
+        self.assertEqual(
+            [[g["title"] for g in column] for column in columns], [["B"], ["A", "C"]]
+        )
 
     def test_icon_comes_from_the_nb_group(self):
         group = self._group("Nyheter", icon="news")
@@ -148,21 +180,42 @@ class MenuTests(TestCase):
             self.assertEqual(get_menu("shortcuts")[0]["icon"], "news")
 
     def test_shortcut_icon_partial(self):
-        from django.template.loader import render_to_string  # pylint: disable=import-outside-toplevel
+        from django.template.loader import (
+            render_to_string,
+        )  # pylint: disable=import-outside-toplevel
 
         for icon, _label in SHORTCUT_ICONS:
-            self.assertIn("<svg", render_to_string("home/partials/shortcuts/shortcut_icon.html", {"icon": icon}))
-        self.assertIn("black_menu_icon", render_to_string("home/partials/shortcuts/shortcut_icon.html", {"icon": ""}))
+            self.assertIn(
+                "<svg",
+                render_to_string(
+                    "home/partials/shortcuts/shortcut_icon.html", {"icon": icon}
+                ),
+            )
+        self.assertIn(
+            "black_menu_icon",
+            render_to_string(
+                "home/partials/shortcuts/shortcut_icon.html", {"icon": ""}
+            ),
+        )
 
     def test_show_all_unless_a_link_already_goes_there(self):
         # pages only have a URL once they're under a Site
-        Site.objects.update_or_create(is_default_site=True, defaults={"hostname": "localhost", "root_page": self.index})
+        Site.objects.update_or_create(
+            is_default_site=True,
+            defaults={"hostname": "localhost", "root_page": self.index},
+        )
         other = self._category("Annen")
         self._menu(
             "sidemenu",
-            self._group("Med egen Alle", link_page=self.index, links=[{"page": self.index, "label": "Alle"}]),
+            self._group(
+                "Med egen Alle",
+                link_page=self.index,
+                links=[{"page": self.index, "label": "Alle"}],
+            ),
             self._group("Uten", link_page=self.index, links=[{"page": other}]),
             self._group("Uten lenke"),
         )
 
-        self.assertEqual([g["show_all"] for g in self._nb("sidemenu")], [False, True, False])
+        self.assertEqual(
+            [g["show_all"] for g in self._nb("sidemenu")], [False, True, False]
+        )

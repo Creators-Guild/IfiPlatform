@@ -10,7 +10,11 @@ import requests
 from wagtail.coreutils import find_available_slug
 from wagtail.models import Locale
 
-from .integrations.peoply_api import apply_peoply_match, find_exact_match, get_organizations
+from .integrations.peoply_api import (
+    apply_peoply_match,
+    find_exact_match,
+    get_organizations,
+)
 from .models import StudentUnion
 from .models.article.unions import StudentUnionCategoryPage, UnionPage
 from .models.event.pages import EventPage
@@ -61,7 +65,13 @@ class PeoplyRemovedEventAdmin(admin.ModelAdmin):
     resolved by the sync itself."""
 
     list_display = [
-        "title", "event_date", "first_seen_at", "last_seen_at", "resolution", "resolved_at", "page_link",
+        "title",
+        "event_date",
+        "first_seen_at",
+        "last_seen_at",
+        "resolution",
+        "resolved_at",
+        "page_link",
     ]
     list_filter = ["resolution"]
     actions = ["archive_events", "delete_event_pages", "delete_selected_logs"]
@@ -93,14 +103,17 @@ class PeoplyRemovedEventAdmin(admin.ModelAdmin):
         if obj.page_id is None:
             return "-"
         return format_html(
-            '<a href="{}">Open in Wagtail</a>', reverse("wagtailadmin_pages:edit", args=[obj.page_id])
+            '<a href="{}">Open in Wagtail</a>',
+            reverse("wagtailadmin_pages:edit", args=[obj.page_id]),
         )
 
     def _open_targets(self, request, queryset):
         """Open rows whose page still exists, or None (after messaging) if
         the caller should stop."""
         if not request.user.is_superuser:
-            self.message_user(request, "Only superusers can do this.", level=messages.ERROR)
+            self.message_user(
+                request, "Only superusers can do this.", level=messages.ERROR
+            )
             return None
         skipped = queryset.exclude(resolved_at__isnull=True, page__isnull=False)
         if skipped.exists():
@@ -123,7 +136,9 @@ class PeoplyRemovedEventAdmin(admin.ModelAdmin):
             removal.resolved_at = timezone.now()
             removal.resolution = "archived"
             removal.save()
-        self.message_user(request, f"Archived {len(targets)} event(s).", level=messages.SUCCESS)
+        self.message_user(
+            request, f"Archived {len(targets)} event(s).", level=messages.SUCCESS
+        )
 
     @admin.action(description="Delete the selected event page(s) permanently")
     def delete_event_pages(self, request, queryset):
@@ -139,16 +154,22 @@ class PeoplyRemovedEventAdmin(admin.ModelAdmin):
             removal.resolved_at = timezone.now()
             removal.resolution = "deleted"
             removal.save()
-        self.message_user(request, f"Deleted {len(targets)} event(s).", level=messages.SUCCESS)
+        self.message_user(
+            request, f"Deleted {len(targets)} event(s).", level=messages.SUCCESS
+        )
 
     @admin.action(description="Delete selected log entries")
     def delete_selected_logs(self, request, queryset):
         if not request.user.is_superuser:
-            self.message_user(request, "Only superusers can do this.", level=messages.ERROR)
+            self.message_user(
+                request, "Only superusers can do this.", level=messages.ERROR
+            )
             return
         count = queryset.count()
         queryset.delete()
-        self.message_user(request, f"Deleted {count} log entr{'y' if count == 1 else 'ies'}.")
+        self.message_user(
+            request, f"Deleted {count} log entr{'y' if count == 1 else 'ies'}."
+        )
 
 
 class _PeoplyUnionMismatchAdmin(admin.ModelAdmin):
@@ -195,11 +216,15 @@ class _PeoplyUnionMismatchAdmin(admin.ModelAdmin):
     @admin.action(description="Delete selected log entries")
     def delete_selected_logs(self, request, queryset):
         if not request.user.is_superuser:
-            self.message_user(request, "Only superusers can do this.", level=messages.ERROR)
+            self.message_user(
+                request, "Only superusers can do this.", level=messages.ERROR
+            )
             return
         count = queryset.count()
         queryset.delete()
-        self.message_user(request, f"Deleted {count} log entr{'y' if count == 1 else 'ies'}.")
+        self.message_user(
+            request, f"Deleted {count} log entr{'y' if count == 1 else 'ies'}."
+        )
 
 
 @admin.register(UnionsWithoutPeoplyOrg)
@@ -233,7 +258,9 @@ class PeoplyOrgsWithoutUnionAdmin(_PeoplyUnionMismatchAdmin):
         # at all -- actions with no explicit `permissions=` are otherwise
         # shown to anyone who can view the list.
         if not request.user.is_superuser:
-            self.message_user(request, "Only superusers can do this.", level=messages.ERROR)
+            self.message_user(
+                request, "Only superusers can do this.", level=messages.ERROR
+            )
             return
 
         # queryset is already scoped to kind="missing_org" by this proxy's
@@ -243,7 +270,9 @@ class PeoplyOrgsWithoutUnionAdmin(_PeoplyUnionMismatchAdmin):
 
         if not targets:
             self.message_user(
-                request, "Nothing to create -- selection had no open mismatch.", level=messages.WARNING
+                request,
+                "Nothing to create -- selection had no open mismatch.",
+                level=messages.WARNING,
             )
             return
 
@@ -252,7 +281,9 @@ class PeoplyOrgsWithoutUnionAdmin(_PeoplyUnionMismatchAdmin):
         # ever bubbling a stack trace to a 500 page.
         try:
             nb_locale = Locale.objects.get(language_code="nb")
-            categories = StudentUnionCategoryPage.objects.live().filter(locale=nb_locale)
+            categories = StudentUnionCategoryPage.objects.live().filter(
+                locale=nb_locale
+            )
             count = categories.count()
             if count != 1:
                 self.message_user(
@@ -266,7 +297,11 @@ class PeoplyOrgsWithoutUnionAdmin(_PeoplyUnionMismatchAdmin):
             parent = categories.first()
             orgs_by_id = {org["id"]: org for org in get_organizations()}
         except (requests.RequestException, Locale.DoesNotExist) as exc:
-            self.message_user(request, f"Couldn't fetch Peoply's organizations: {exc}", level=messages.ERROR)
+            self.message_user(
+                request,
+                f"Couldn't fetch Peoply's organizations: {exc}",
+                level=messages.ERROR,
+            )
             return
 
         created = []
@@ -325,10 +360,14 @@ class UnionsPendingPeoplyLinkAdmin(_PeoplyUnionMismatchAdmin):
 
     actions = ["delete_selected_logs", "link_selected_unions"]
 
-    @admin.action(description="Link selected union(s) to their matched Peoply organization")
+    @admin.action(
+        description="Link selected union(s) to their matched Peoply organization"
+    )
     def link_selected_unions(self, request, queryset):
         if not request.user.is_superuser:
-            self.message_user(request, "Only superusers can do this.", level=messages.ERROR)
+            self.message_user(
+                request, "Only superusers can do this.", level=messages.ERROR
+            )
             return
 
         resolved_skipped = queryset.filter(resolved_at__isnull=False).count()
@@ -336,7 +375,9 @@ class UnionsPendingPeoplyLinkAdmin(_PeoplyUnionMismatchAdmin):
 
         if not targets:
             self.message_user(
-                request, "Nothing to link -- selection had no open mismatch.", level=messages.WARNING
+                request,
+                "Nothing to link -- selection had no open mismatch.",
+                level=messages.WARNING,
             )
             return
 
@@ -344,7 +385,11 @@ class UnionsPendingPeoplyLinkAdmin(_PeoplyUnionMismatchAdmin):
             nb_locale = Locale.objects.get(language_code="nb")
             orgs = get_organizations()
         except (requests.RequestException, Locale.DoesNotExist) as exc:
-            self.message_user(request, f"Couldn't fetch Peoply's organizations: {exc}", level=messages.ERROR)
+            self.message_user(
+                request,
+                f"Couldn't fetch Peoply's organizations: {exc}",
+                level=messages.ERROR,
+            )
             return
 
         linked = []
@@ -352,7 +397,9 @@ class UnionsPendingPeoplyLinkAdmin(_PeoplyUnionMismatchAdmin):
         gone = []
         for mismatch in targets:
             try:
-                union = UnionPage.objects.get(translation_key=mismatch.identifier, locale=nb_locale)
+                union = UnionPage.objects.get(
+                    translation_key=mismatch.identifier, locale=nb_locale
+                )
             except UnionPage.DoesNotExist:
                 gone.append(mismatch.label)
                 continue
@@ -360,7 +407,11 @@ class UnionsPendingPeoplyLinkAdmin(_PeoplyUnionMismatchAdmin):
             # Re-checked here, not trusted from the log row -- the union's
             # own peoply_organization_id or Peoply's own roster may have
             # changed since check_peoply_union_matches last ran.
-            org = None if union.peoply_organization_id else find_exact_match(union.title, orgs)
+            org = (
+                None
+                if union.peoply_organization_id
+                else find_exact_match(union.title, orgs)
+            )
             if org is None:
                 no_longer_matches.append(mismatch.label)
                 continue
@@ -373,7 +424,9 @@ class UnionsPendingPeoplyLinkAdmin(_PeoplyUnionMismatchAdmin):
 
         if linked:
             self.message_user(
-                request, f"Linked {len(linked)} union(s): " + ", ".join(linked), level=messages.SUCCESS
+                request,
+                f"Linked {len(linked)} union(s): " + ", ".join(linked),
+                level=messages.SUCCESS,
             )
         if no_longer_matches:
             self.message_user(
@@ -384,7 +437,9 @@ class UnionsPendingPeoplyLinkAdmin(_PeoplyUnionMismatchAdmin):
             )
         if gone:
             self.message_user(
-                request, f"{len(gone)} selected union(s) no longer exist, skipped: " + ", ".join(gone),
+                request,
+                f"{len(gone)} selected union(s) no longer exist, skipped: "
+                + ", ".join(gone),
                 level=messages.WARNING,
             )
         if resolved_skipped:

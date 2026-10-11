@@ -6,13 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0118_eventpage_related_unions'),
+        ("ifi_home_app", "0118_eventpage_related_unions"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventpage',
-            name='is_highlighted',
-            field=models.BooleanField(default=False, help_text="For a sub-event: show it in its parent event's homepage dropdown."),
+            model_name="eventpage",
+            name="is_highlighted",
+            field=models.BooleanField(
+                default=False,
+                help_text="For a sub-event: show it in its parent event's homepage dropdown.",
+            ),
         ),
     ]

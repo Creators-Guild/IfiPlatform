@@ -50,6 +50,7 @@ bare-string regression from (2). No block ids were found missing entirely
 here, since every affected block's *type* was still 'paragraph' -- a
 recognised type either way, just with the wrong value shape).
 """
+
 import json
 
 from django.db import migrations

@@ -6,7 +6,6 @@ from zoneinfo import ZoneInfo
 
 from django.utils.translation import gettext_lazy as _
 
-
 # settings.TIME_ZONE is UTC; used where Oslo clock time matters (turning
 # Peoply's UTC times into event_time, and showing the last sync time) --
 # see docs/claude_context/event_models.md.

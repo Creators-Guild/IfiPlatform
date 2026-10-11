@@ -7,18 +7,42 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0121_eventpage_event_end_time'),
+        ("ifi_home_app", "0121_eventpage_event_end_time"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventpage',
-            name='calendar_color',
-            field=models.CharField(blank=True, choices=[('', 'Auto (by event type)'), ('blue', 'Blue'), ('yellow', 'Yellow'), ('orange', 'Orange'), ('pink', 'Pink'), ('green', 'Green'), ('purple', 'Purple'), ('custom', 'Custom (hex code)')], help_text="Optional -- overrides the automatic color of this event's block in a parent event's week-calendar view.", max_length=20),
+            model_name="eventpage",
+            name="calendar_color",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("", "Auto (by event type)"),
+                    ("blue", "Blue"),
+                    ("yellow", "Yellow"),
+                    ("orange", "Orange"),
+                    ("pink", "Pink"),
+                    ("green", "Green"),
+                    ("purple", "Purple"),
+                    ("custom", "Custom (hex code)"),
+                ],
+                help_text="Optional -- overrides the automatic color of this event's block in a parent event's week-calendar view.",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='eventpage',
-            name='calendar_color_custom',
-            field=models.CharField(blank=True, help_text='Used only when Calendar color above is set to Custom.', max_length=7, validators=[django.core.validators.RegexValidator('^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$', 'Enter a valid hex color code, e.g. #ff8800 or #f80.')]),
+            model_name="eventpage",
+            name="calendar_color_custom",
+            field=models.CharField(
+                blank=True,
+                help_text="Used only when Calendar color above is set to Custom.",
+                max_length=7,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+                        "Enter a valid hex color code, e.g. #ff8800 or #f80.",
+                    )
+                ],
+            ),
         ),
     ]

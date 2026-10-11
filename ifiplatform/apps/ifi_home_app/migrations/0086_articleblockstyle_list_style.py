@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0085_alter_articlepage_body'),
+        ("ifi_home_app", "0085_alter_articlepage_body"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='articleblockstyle',
-            name='list_style',
+            model_name="articleblockstyle",
+            name="list_style",
             field=models.BooleanField(blank=True, null=True),
         ),
     ]

@@ -69,7 +69,10 @@ class PeoplyUnionMismatch(models.Model):
 
     KIND_CHOICES = [
         ("unlinked_union", "Site union has no matching Peoply organization"),
-        ("stale_link", "Site union's peoply_organization_id no longer matches any Peoply organization"),
+        (
+            "stale_link",
+            "Site union's peoply_organization_id no longer matches any Peoply organization",
+        ),
         ("missing_org", "Peoply organization has no matching UnionPage here"),
         ("pending_link", "Site union has an exact Peoply match, not linked yet"),
     ]
@@ -78,14 +81,19 @@ class PeoplyUnionMismatch(models.Model):
         max_length=64,
         help_text="UnionPage.translation_key for unlinked_union/stale_link/pending_link, Peoply organization id for missing_org.",
     )
-    label = models.CharField(max_length=255, help_text="Human-readable description, refreshed on every sighting.")
+    label = models.CharField(
+        max_length=255,
+        help_text="Human-readable description, refreshed on every sighting.",
+    )
     first_seen_at = models.DateTimeField(auto_now_add=True)
     last_seen_at = models.DateTimeField(auto_now=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["kind", "identifier"], name="unique_peoply_union_mismatch"),
+            models.UniqueConstraint(
+                fields=["kind", "identifier"], name="unique_peoply_union_mismatch"
+            ),
         ]
         ordering = ["-last_seen_at"]
 
@@ -216,6 +224,13 @@ class PeoplyRemovedEvent(models.Model):
 # in wagtail-admin for peoply-sourced events (EventPageForm below), since
 # any edit here would just be reverted by the next sync.
 PEOPLY_SYNCED_FIELDS = [
-    "title", "event_date", "event_time", "event_end_time", "end_date",
-    "location", "intro", "peoply_url", "signup_url",
+    "title",
+    "event_date",
+    "event_time",
+    "event_end_time",
+    "end_date",
+    "location",
+    "intro",
+    "peoply_url",
+    "signup_url",
 ]

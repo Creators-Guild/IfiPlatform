@@ -24,7 +24,9 @@ def warn(request, page):
         return
     buttons = [messages.button(status["editor_url"], "Open translation editor")]
     if status["machine_url"]:
-        buttons.insert(0, messages.button(status["machine_url"], "Machine-translate now"))
+        buttons.insert(
+            0, messages.button(status["machine_url"], "Machine-translate now")
+        )
     messages.warning(request, REASON_TEXT[status["reason"]], buttons=buttons)
 
 

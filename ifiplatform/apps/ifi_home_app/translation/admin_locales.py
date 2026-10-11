@@ -9,7 +9,11 @@ from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from wagtail.admin.menu import MenuItem
-from wagtail.snippets.views.chooser import ChooseResultsView, ChooseView, SnippetChooserViewSet
+from wagtail.snippets.views.chooser import (
+    ChooseResultsView,
+    ChooseView,
+    SnippetChooserViewSet,
+)
 from wagtail.snippets.views.snippets import IndexView, SnippetViewSet
 
 from .sync import SOURCE_LANGUAGE_CODE
@@ -43,7 +47,9 @@ def toggle_all_locales(request):
         raise PermissionDenied
     request.session[SESSION_KEY] = not request.session.get(SESSION_KEY, False)
     next_url = request.META.get("HTTP_REFERER")
-    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}
+    ):
         return redirect(next_url)
     return redirect(reverse("wagtailadmin_home"))
 
@@ -62,7 +68,9 @@ class ToggleAllLocalesMenuItem(MenuItem):
         return request.user.is_superuser
 
     def render_component(self, request):
-        self.label = "Hide English pages" if show_all_locales(request) else "Show English pages"
+        self.label = (
+            "Hide English pages" if show_all_locales(request) else "Show English pages"
+        )
         return super().render_component(request)
 
 
@@ -85,7 +93,9 @@ class NorwegianFirstIndexView(IndexView):
 
 class NorwegianFirstChooseMixin:
     def get_filter_form(self):
-        return self.get_filter_form_class()(_default_to_norwegian(self.request, self.request.GET))
+        return self.get_filter_form_class()(
+            _default_to_norwegian(self.request, self.request.GET)
+        )
 
 
 class NorwegianFirstChooseView(NorwegianFirstChooseMixin, ChooseView):

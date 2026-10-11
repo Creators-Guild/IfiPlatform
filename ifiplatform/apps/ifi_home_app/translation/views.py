@@ -96,8 +96,11 @@ def _machine_translate(request, page_id, page_only):
         # (e.g. Windows) -- fall back to plain inheritance there, so
         # progress still shows up directly in the runserver terminal.
         base_command = [
-            sys.executable, "manage.py", "machine_translate_subtree",
-            str(page.id), str(request.user.id),
+            sys.executable,
+            "manage.py",
+            "machine_translate_subtree",
+            str(page.id),
+            str(request.user.id),
             *(["--page-only"] if page_only else []),
         ]
         systemd_cat = shutil.which("systemd-cat")

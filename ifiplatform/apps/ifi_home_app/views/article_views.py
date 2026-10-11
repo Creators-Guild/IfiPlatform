@@ -64,7 +64,9 @@ BLOCK_STYLE_FIELDS = {
     | BOX_FIELDS
     | TEXT_COLOR_FIELDS
     | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
-    "image": {"alignment", "width_rem", "side_padding"} | BOX_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "image": {"alignment", "width_rem", "side_padding"}
+    | BOX_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
     "article_card": {"width_rem", "height_rem", "list_style", "fixed_ratio"},
     "category_card": {"width_rem", "height_rem"},
     "union_card": {"width_rem", "height_rem"},
@@ -78,10 +80,21 @@ BLOCK_STYLE_FIELDS = {
     | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
     "multi_column": {"side_padding", "gap", "column_weights"} | BOX_FIELDS,
     "column": {"side_padding"} | BOX_FIELDS,
-    "column_title": {"alignment", "font_size"} | TEXT_COLOR_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
-    "title": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
-    "meta": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
-    "intro": {"side_padding"} | BOX_FIELDS | TEXT_COLOR_FIELDS | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "column_title": {"alignment", "font_size"}
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "title": {"side_padding"}
+    | BOX_FIELDS
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "meta": {"side_padding"}
+    | BOX_FIELDS
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
+    "intro": {"side_padding"}
+    | BOX_FIELDS
+    | TEXT_COLOR_FIELDS
+    | EXCLUDE_FROM_GLOBAL_ALIGNMENT_FIELD,
     "article_header": set(BOX_FIELDS),
 }
 
@@ -94,7 +107,9 @@ def save_quick_style(request, page_id):
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.can_edit_in_editor_mode(request.user):
-        return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
+        return JsonResponse(
+            {"error": "You don't have permission to edit this page."}, status=403
+        )
 
     try:
         data = json.loads(request.body)
@@ -113,7 +128,9 @@ def save_quick_style(request, page_id):
         return JsonResponse({"error": "Invalid alignment."}, status=400)
 
     if not 0.5 <= font_size_multiplier <= 2:
-        return JsonResponse({"error": "Invalid content_font_size_multiplier."}, status=400)
+        return JsonResponse(
+            {"error": "Invalid content_font_size_multiplier."}, status=400
+        )
 
     if bg_color not in dict(COLOR_CHOICES):
         return JsonResponse({"error": "Invalid content_bg_color."}, status=400)
@@ -122,7 +139,9 @@ def save_quick_style(request, page_id):
         try:
             HEX_COLOR_VALIDATOR(bg_custom_color)
         except ValidationError:
-            return JsonResponse({"error": "Invalid content_bg_custom_color."}, status=400)
+            return JsonResponse(
+                {"error": "Invalid content_bg_custom_color."}, status=400
+            )
 
     style = page.style
     style.content_side_padding = side_padding
@@ -168,11 +187,17 @@ def save_quick_style(request, page_id):
             ).values_list("block_id", flat=True)
         )
         block_ids = [
-            block_id for block_id in alignment_capable_block_ids(page.body) if block_id not in excluded_ids
+            block_id
+            for block_id in alignment_capable_block_ids(page.body)
+            if block_id not in excluded_ids
         ]
         ArticleBlockStyle.objects.bulk_create(
             [
-                ArticleBlockStyle(translation_key=page.translation_key, block_id=block_id, alignment=alignment)
+                ArticleBlockStyle(
+                    translation_key=page.translation_key,
+                    block_id=block_id,
+                    alignment=alignment,
+                )
                 for block_id in block_ids
             ],
             update_conflicts=True,
@@ -209,7 +234,9 @@ def save_block_style(request, page_id):
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.can_edit_in_editor_mode(request.user):
-        return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
+        return JsonResponse(
+            {"error": "You don't have permission to edit this page."}, status=403
+        )
 
     try:
         data = json.loads(request.body)
@@ -234,9 +261,15 @@ def save_block_style(request, page_id):
             defaults["height_rem"] = float(data["height_rem"])
         if "gap" in allowed_fields and data.get("gap") is not None:
             defaults["gap"] = float(data["gap"])
-        if "column_weights" in allowed_fields and data.get("column_weights") is not None:
+        if (
+            "column_weights" in allowed_fields
+            and data.get("column_weights") is not None
+        ):
             defaults["column_weights"] = [float(w) for w in data["column_weights"]]
-        if "box_border_width" in allowed_fields and data.get("box_border_width") is not None:
+        if (
+            "box_border_width" in allowed_fields
+            and data.get("box_border_width") is not None
+        ):
             defaults["box_border_width"] = float(data["box_border_width"])
         if "box_radius" in allowed_fields and data.get("box_radius") is not None:
             defaults["box_radius"] = float(data["box_radius"])
@@ -244,9 +277,15 @@ def save_block_style(request, page_id):
             defaults["box_padding"] = float(data["box_padding"])
         if "box_margin" in allowed_fields and data.get("box_margin") is not None:
             defaults["box_margin"] = float(data["box_margin"])
-        if "box_shadow_strength" in allowed_fields and data.get("box_shadow_strength") is not None:
+        if (
+            "box_shadow_strength" in allowed_fields
+            and data.get("box_shadow_strength") is not None
+        ):
             defaults["box_shadow_strength"] = float(data["box_shadow_strength"])
-        if "text_shadow_strength" in allowed_fields and data.get("text_shadow_strength") is not None:
+        if (
+            "text_shadow_strength" in allowed_fields
+            and data.get("text_shadow_strength") is not None
+        ):
             defaults["text_shadow_strength"] = float(data["text_shadow_strength"])
     except (TypeError, ValueError):
         return JsonResponse({"error": "Invalid data."}, status=400)
@@ -271,18 +310,32 @@ def save_block_style(request, page_id):
 
     if "box_enabled" in allowed_fields and data.get("box_enabled") is not None:
         defaults["box_enabled"] = bool(data["box_enabled"])
-    if "box_border_visible" in allowed_fields and data.get("box_border_visible") is not None:
+    if (
+        "box_border_visible" in allowed_fields
+        and data.get("box_border_visible") is not None
+    ):
         defaults["box_border_visible"] = bool(data["box_border_visible"])
-    if "box_shadow_enabled" in allowed_fields and data.get("box_shadow_enabled") is not None:
+    if (
+        "box_shadow_enabled" in allowed_fields
+        and data.get("box_shadow_enabled") is not None
+    ):
         defaults["box_shadow_enabled"] = bool(data["box_shadow_enabled"])
-    if "text_shadow_enabled" in allowed_fields and data.get("text_shadow_enabled") is not None:
+    if (
+        "text_shadow_enabled" in allowed_fields
+        and data.get("text_shadow_enabled") is not None
+    ):
         defaults["text_shadow_enabled"] = bool(data["text_shadow_enabled"])
     if "list_style" in allowed_fields and data.get("list_style") is not None:
         defaults["list_style"] = bool(data["list_style"])
     if "fixed_ratio" in allowed_fields and data.get("fixed_ratio") is not None:
         defaults["fixed_ratio"] = bool(data["fixed_ratio"])
-    if "exclude_from_global_alignment" in allowed_fields and data.get("exclude_from_global_alignment") is not None:
-        defaults["exclude_from_global_alignment"] = bool(data["exclude_from_global_alignment"])
+    if (
+        "exclude_from_global_alignment" in allowed_fields
+        and data.get("exclude_from_global_alignment") is not None
+    ):
+        defaults["exclude_from_global_alignment"] = bool(
+            data["exclude_from_global_alignment"]
+        )
 
     # "" is a real value for these, not "unset" -- see
     # docs/claude_context/article_views.md.
@@ -304,7 +357,9 @@ def save_block_style(request, page_id):
                 try:
                     HEX_COLOR_VALIDATOR(custom_color)
                 except ValidationError:
-                    return JsonResponse({"error": f"Invalid {custom_field}."}, status=400)
+                    return JsonResponse(
+                        {"error": f"Invalid {custom_field}."}, status=400
+                    )
             defaults[custom_field] = custom_color
 
     ArticleBlockStyle.objects.update_or_create(
@@ -321,7 +376,9 @@ def save_header_style(request, page_id):
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.can_edit_in_editor_mode(request.user):
-        return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
+        return JsonResponse(
+            {"error": "You don't have permission to edit this page."}, status=403
+        )
 
     try:
         data = json.loads(request.body)
@@ -360,7 +417,9 @@ def save_hero_image_style(request, page_id):
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.can_edit_in_editor_mode(request.user):
-        return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
+        return JsonResponse(
+            {"error": "You don't have permission to edit this page."}, status=403
+        )
 
     try:
         data = json.loads(request.body)
@@ -431,7 +490,9 @@ def save_toc_icon_style(request, page_id):
     page = get_object_or_404(ArticlePage, pk=page_id).style_target
 
     if not page.can_edit_in_editor_mode(request.user):
-        return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
+        return JsonResponse(
+            {"error": "You don't have permission to edit this page."}, status=403
+        )
 
     try:
         data = json.loads(request.body)
@@ -472,7 +533,9 @@ def publish_page(request, page_id):
     page = get_object_or_404(ArticlePage, pk=page_id).publish_target
 
     if not page.can_publish_in_editor_mode(request.user):
-        return JsonResponse({"error": "You don't have permission to publish this page."}, status=403)
+        return JsonResponse(
+            {"error": "You don't have permission to publish this page."}, status=403
+        )
 
     revision = page.get_latest_revision()
     if revision is None:
@@ -500,7 +563,9 @@ def unpublish_page(request, page_id):
     page = get_object_or_404(ArticlePage, pk=page_id).publish_target
 
     if not page.can_unpublish_in_editor_mode(request.user):
-        return JsonResponse({"error": "You don't have permission to unpublish this page."}, status=403)
+        return JsonResponse(
+            {"error": "You don't have permission to unpublish this page."}, status=403
+        )
 
     page.unpublish(user=request.user)
 
@@ -522,7 +587,9 @@ def sync_mirrored_page(request, page_id):
 
     if not page.can_sync_mirrored_page(request.user):
         return JsonResponse(
-            {"error": "You don't have permission to sync this page, or there's nothing to sync."},
+            {
+                "error": "You don't have permission to sync this page, or there's nothing to sync."
+            },
             status=403,
         )
 
@@ -539,7 +606,9 @@ def save_banner_style(request, page_id):
     page = get_object_or_404(Page, pk=page_id).specific.style_target
 
     if not page.can_edit_in_editor_mode(request.user):
-        return JsonResponse({"error": "You don't have permission to edit this page."}, status=403)
+        return JsonResponse(
+            {"error": "You don't have permission to edit this page."}, status=403
+        )
 
     try:
         data = json.loads(request.body)
@@ -548,9 +617,15 @@ def save_banner_style(request, page_id):
         banner_dot_color = data.get("banner_dot_color") or ""
         banner_text_color = data.get("banner_text_color") or ""
         # blank/0 both mean "auto" -- stored as None either way.
-        width_rem = float(data["banner_width_rem"]) if data.get("banner_width_rem") else None
-        height_rem = float(data["banner_height_rem"]) if data.get("banner_height_rem") else None
-        font_size = float(data["banner_font_size"]) if data.get("banner_font_size") else None
+        width_rem = (
+            float(data["banner_width_rem"]) if data.get("banner_width_rem") else None
+        )
+        height_rem = (
+            float(data["banner_height_rem"]) if data.get("banner_height_rem") else None
+        )
+        font_size = (
+            float(data["banner_font_size"]) if data.get("banner_font_size") else None
+        )
     except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid data."}, status=400)
 
@@ -573,7 +648,9 @@ def save_banner_style(request, page_id):
         if value is not None and not bounds[0] <= value <= bounds[1]:
             return JsonResponse({"error": f"Invalid {field_name}."}, status=400)
 
-    style = PageBannerStyle.objects.get_or_create(translation_key=page.translation_key)[0]
+    style = PageBannerStyle.objects.get_or_create(translation_key=page.translation_key)[
+        0
+    ]
     style.show_banner = show_banner
     style.banner_color = banner_color
     style.banner_dot_color = banner_dot_color

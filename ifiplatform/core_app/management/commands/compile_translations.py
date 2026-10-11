@@ -53,7 +53,9 @@ class Command(BaseCommand):
             po = polib.pofile(str(po_file))
             mo_file = po_file.with_suffix(".mo")
             po.save_as_mofile(str(mo_file))
-            self.stdout.write(f"  compiled {po_file} -> {mo_file.name} ({len(po)} entries)")
+            self.stdout.write(
+                f"  compiled {po_file} -> {mo_file.name} ({len(po)} entries)"
+            )
 
         self.stdout.write(
             self.style.SUCCESS(f"Done: compiled {len(po_files)} .po file(s).")

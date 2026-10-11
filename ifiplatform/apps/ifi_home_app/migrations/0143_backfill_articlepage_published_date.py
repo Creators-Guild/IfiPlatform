@@ -2,13 +2,16 @@
 NULL (today's date, a safe placeholder) before the next migration makes
 the column NOT NULL -- published_date is becoming a required field.
 """
+
 from django.db import migrations
 from django.utils import timezone
 
 
 def backfill(apps, schema_editor):
     ArticlePage = apps.get_model("ifi_home_app", "ArticlePage")
-    ArticlePage.objects.filter(published_date__isnull=True).update(published_date=timezone.now().date())
+    ArticlePage.objects.filter(published_date__isnull=True).update(
+        published_date=timezone.now().date()
+    )
 
 
 def unbackfill(apps, schema_editor):

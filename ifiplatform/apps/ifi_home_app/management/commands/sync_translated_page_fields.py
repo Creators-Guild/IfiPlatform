@@ -55,4 +55,6 @@ class Command(BaseCommand):
         if options["dry_run"]:
             self.stdout.write(self.style.SUCCESS("Dry run: no changes made."))
         else:
-            self.stdout.write(self.style.SUCCESS(f"Synced {synced_count} translation(s)."))
+            self.stdout.write(
+                self.style.SUCCESS(f"Synced {synced_count} translation(s).")
+            )

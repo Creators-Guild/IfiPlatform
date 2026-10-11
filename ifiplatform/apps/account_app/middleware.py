@@ -31,7 +31,9 @@ class EditorTermsGateMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if _WAGTAIL_ADMIN_PATH_MARKER in request.path and is_pending_editor(request.user):
+        if _WAGTAIL_ADMIN_PATH_MARKER in request.path and is_pending_editor(
+            request.user
+        ):
             # ?editor_terms=required -- read by _account_settings_context to
             # shake the terms box, but only for this "caught mid-attempt"
             # landing, not a plain self-navigated visit to the page.

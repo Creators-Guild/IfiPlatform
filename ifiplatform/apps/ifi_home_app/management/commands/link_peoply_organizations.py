@@ -47,9 +47,11 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        unions = UnionPage.objects.live().filter(
-            locale__language_code="nb", peoply_organization_id=""
-        ).order_by("title")
+        unions = (
+            UnionPage.objects.live()
+            .filter(locale__language_code="nb", peoply_organization_id="")
+            .order_by("title")
+        )
 
         matched = []
         unmatched = []
@@ -77,14 +79,18 @@ class Command(BaseCommand):
                 self.stdout.write(f"  {union.title!r} -> {org['name']!r} ({org['id']})")
 
         if unmatched:
-            self.stdout.write(self.style.WARNING(
-                f"No confident match for {len(unmatched)} union(s) -- look these up "
-                f"by hand on peoply.app and set peoply_organization_id directly: "
-                + ", ".join(unmatched)
-            ))
+            self.stdout.write(
+                self.style.WARNING(
+                    f"No confident match for {len(unmatched)} union(s) -- look these up "
+                    f"by hand on peoply.app and set peoply_organization_id directly: "
+                    + ", ".join(unmatched)
+                )
+            )
 
         if not options["apply"]:
-            self.stdout.write("Dry run -- nothing written. Re-run with --apply to save these matches.")
+            self.stdout.write(
+                "Dry run -- nothing written. Re-run with --apply to save these matches."
+            )
             return
 
         for union, org in matched:

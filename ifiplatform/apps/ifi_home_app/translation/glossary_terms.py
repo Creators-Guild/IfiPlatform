@@ -18,10 +18,10 @@ GLOSSARY_TERMS = {
     # seed_dev_data.py) -- a Norwegian term kept as-is in the English UI
     # rather than translated (e.g. NOT "Godparent week").
     "Fadderuke": "Orientation Week",
-    "Fadder":"Buddy",
-    "Fadderbarn":"Buddychild", # please find a better translation ahah
-    "fadderbarna":"buddychildren",
-    "Fadderstyret":"The Buddy Council(Fadderstyret)",
+    "Fadder": "Buddy",
+    "Fadderbarn": "Buddychild",  # please find a better translation ahah
+    "fadderbarna": "buddychildren",
+    "Fadderstyret": "The Buddy Council(Fadderstyret)",
     "dagen@ifi": "dagen@ifi",
     "Dagen@ifi": "Dagen@ifi",
     "pub crawl": "pub til pub",
@@ -52,7 +52,7 @@ GLOSSARY_TERMS = {
     # templates/partials/footer.html and partials/sidemenu/sidemenu.html) --
     # renamed from "Ifi-Guild of Creators".
     "Ifi-Creators' Guild": "Ifi-Creators' Guild",
-    "pub til pub":"pub crawl",
+    "pub til pub": "pub crawl",
     "bar til bar": "bar crawl",
     "guildmaster": "guildmaster",
     "generalforsamling": "general meeting",

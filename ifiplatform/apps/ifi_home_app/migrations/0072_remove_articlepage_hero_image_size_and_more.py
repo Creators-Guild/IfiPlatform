@@ -6,22 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0071_remove_articleblockstyle_column_widths_and_more'),
+        ("ifi_home_app", "0071_remove_articleblockstyle_column_widths_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='articlepage',
-            name='hero_image_size',
+            model_name="articlepage",
+            name="hero_image_size",
         ),
         migrations.AddField(
-            model_name='articlepage',
-            name='hero_image_side_padding',
-            field=models.FloatField(default=0, help_text='Left/right padding, in rem (0 = none).'),
+            model_name="articlepage",
+            name="hero_image_side_padding",
+            field=models.FloatField(
+                default=0, help_text="Left/right padding, in rem (0 = none)."
+            ),
         ),
         migrations.AddField(
-            model_name='articlepage',
-            name='hero_image_width_rem',
-            field=models.FloatField(default=18, help_text='Width, in rem.'),
+            model_name="articlepage",
+            name="hero_image_width_rem",
+            field=models.FloatField(default=18, help_text="Width, in rem."),
         ),
     ]

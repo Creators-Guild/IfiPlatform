@@ -41,13 +41,20 @@ def calendar_legend_entry_block():
                 "color",
                 blocks.ChoiceBlock(
                     choices=[
-                        (key, label) for key, label in EVENT_CALENDAR_COLOR_CHOICES
+                        (key, label)
+                        for key, label in EVENT_CALENDAR_COLOR_CHOICES
                         if key not in ("", "custom")
                     ],
                     default="blue",
                 ),
             ),
-            ("label", blocks.CharBlock(max_length=60, help_text="What this color means, e.g. \"Study-relevant\".")),
+            (
+                "label",
+                blocks.CharBlock(
+                    max_length=60,
+                    help_text='What this color means, e.g. "Study-relevant".',
+                ),
+            ),
         ],
         icon="tag",
         label="Legend entry",

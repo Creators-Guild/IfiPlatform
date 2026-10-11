@@ -26,7 +26,10 @@ from .constants import (
 class EventSeedMixin:
     def _seed_events(self, artikkler, nb_locale, en_locale, seed_image):
         event_index = self._get_or_create_page(
-            artikkler, EventIndexPage, "Arrangementer", nb_locale,
+            artikkler,
+            EventIndexPage,
+            "Arrangementer",
+            nb_locale,
         )
         self._translate_page(event_index, en_locale)
 
@@ -40,7 +43,10 @@ class EventSeedMixin:
             else:
                 event_date = today + timedelta(days=offset_days)
             event = self._get_or_create_page(
-                event_index, EventPage, title, nb_locale,
+                event_index,
+                EventPage,
+                title,
+                nb_locale,
                 event_type=event_type,
                 event_date=event_date,
                 event_time=(
@@ -48,7 +54,8 @@ class EventSeedMixin:
                 ),
                 end_date=(
                     event_date + timedelta(days=end_offset_days)
-                    if end_offset_days else None
+                    if end_offset_days
+                    else None
                 ),
             )
             if title == "Fadderuke":
@@ -87,10 +94,20 @@ class EventSeedMixin:
         # docs/claude_context/seed_dev_data.md before reordering this.
         self._translate_page(fadderuke, en_locale)
 
-        for day_offset, title, event_type, start, end, color in FADDERUKE_SUB_EVENT_SPECS:
+        for (
+            day_offset,
+            title,
+            event_type,
+            start,
+            end,
+            color,
+        ) in FADDERUKE_SUB_EVENT_SPECS:
             event_date = fadderuke.event_date + timedelta(days=day_offset)
             sub_event = self._get_or_create_page(
-                fadderuke, EventPage, title, nb_locale,
+                fadderuke,
+                EventPage,
+                title,
+                nb_locale,
                 event_type=event_type,
                 event_date=event_date,
                 event_time=datetime.strptime(start, "%H:%M").time(),
@@ -121,7 +138,9 @@ class EventSeedMixin:
         navet = UnionPage.objects.get(title="Navet", locale=nb_locale)
         companies = NAVET_COMPANY_PRESENTATION_COMPANIES
         event_time = datetime.strptime(NAVET_COMPANY_PRESENTATION_TIME, "%H:%M").time()
-        event_end_time = datetime.strptime(NAVET_COMPANY_PRESENTATION_END_TIME, "%H:%M").time()
+        event_end_time = datetime.strptime(
+            NAVET_COMPANY_PRESENTATION_END_TIME, "%H:%M"
+        ).time()
 
         today = timezone.now().date()
         last_date = today + timedelta(weeks=NAVET_COMPANY_PRESENTATION_WEEKS)
@@ -137,7 +156,11 @@ class EventSeedMixin:
             title = f"Bedriftspresentasjon med {company}"
             slug = f"bedriftspresentasjon-{slugify(company)}-{event_date.isoformat()}"
             event = self._get_or_create_page(
-                event_index, EventPage, title, nb_locale, slug=slug,
+                event_index,
+                EventPage,
+                title,
+                nb_locale,
+                slug=slug,
                 event_type="company",
                 event_date=event_date,
                 event_time=event_time,

@@ -60,7 +60,9 @@ class EditorModeMixinTests(TestCase):
         self.article = _make_article()
 
     def _make_user(self, username, *, agreed=False, is_staff=False):
-        user = User.objects.create_user(username=username, password="pw", is_staff=is_staff)
+        user = User.objects.create_user(
+            username=username, password="pw", is_staff=is_staff
+        )
         user.groups.add(self.editor_group)
         Profile.objects.create(
             user=user, editor_terms_status="agreed" if agreed else "pending"
@@ -189,7 +191,11 @@ class EditorModeEndpointTests(TestCase):
         response = self.client.post(
             reverse("article_block_style", kwargs={"page_id": self.article.pk}),
             data=json.dumps(
-                {"block_id": "test-block", "block_type": "article_card", "width_rem": 999}
+                {
+                    "block_id": "test-block",
+                    "block_type": "article_card",
+                    "width_rem": 999,
+                }
             ),
             content_type="application/json",
         )
@@ -200,7 +206,11 @@ class EditorModeEndpointTests(TestCase):
         response = self.client.post(
             reverse("article_block_style", kwargs={"page_id": self.article.pk}),
             data=json.dumps(
-                {"block_id": "test-block", "block_type": "article_card", "width_rem": 20}
+                {
+                    "block_id": "test-block",
+                    "block_type": "article_card",
+                    "width_rem": 20,
+                }
             ),
             content_type="application/json",
         )

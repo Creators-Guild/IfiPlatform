@@ -54,7 +54,9 @@ def _machine_url(nb_page, user):
 
 def _status(nb_page, en_page, user, reason):
     if reason == "missing":
-        editor_url = reverse("wagtail_localize:submit_page_translation", args=[nb_page.id])
+        editor_url = reverse(
+            "wagtail_localize:submit_page_translation", args=[nb_page.id]
+        )
     else:
         editor_url = reverse("wagtailadmin_pages:edit", args=[en_page.id])
     return {
@@ -98,8 +100,9 @@ def pages_needing_translation(user=None, limit=25):
     for root in site_roots:
         on_a_site |= Q(path__startswith=root.path)
     nb_pages = list(
-        Page.objects.filter(on_a_site, locale__language_code=SOURCE_LANGUAGE_CODE)
-        .order_by("-last_published_at")
+        Page.objects.filter(
+            on_a_site, locale__language_code=SOURCE_LANGUAGE_CODE
+        ).order_by("-last_published_at")
     )
     en_by_key = {
         page.translation_key: page
@@ -108,9 +111,13 @@ def pages_needing_translation(user=None, limit=25):
         )
     }
     translation_by_key = {}
-    for translation in Translation.objects.filter(
-        target_locale=en_locale, enabled=True, source__object_id__in=list(en_by_key)
-    ).select_related("source").order_by("created_at"):
+    for translation in (
+        Translation.objects.filter(
+            target_locale=en_locale, enabled=True, source__object_id__in=list(en_by_key)
+        )
+        .select_related("source")
+        .order_by("created_at")
+    ):
         translation_by_key[translation.source.object_id] = translation
 
     statuses = []

@@ -16,7 +16,11 @@ def _value_at(obj, path):
         return getattr(obj, parts[0], "")
     relation, translation_key, field = parts
     child = next(
-        (c for c in getattr(obj, relation).all() if str(c.translation_key) == translation_key),
+        (
+            c
+            for c in getattr(obj, relation).all()
+            if str(c.translation_key) == translation_key
+        ),
         None,
     )
     return getattr(child, field, "") if child else ""

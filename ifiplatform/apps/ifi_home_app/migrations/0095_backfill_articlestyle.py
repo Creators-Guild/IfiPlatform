@@ -13,6 +13,7 @@ translation_key already has an nb page), so this is a straightforward
 one-to-one copy for this database -- the "nb wins" tie-break exists for
 correctness on any other database where a real conflict might exist.
 """
+
 from django.db import migrations
 
 STYLE_FIELDS = [
@@ -44,10 +45,14 @@ def backfill(apps, schema_editor):
     ArticlePage = apps.get_model("ifi_home_app", "ArticlePage")
     ArticleStyle = apps.get_model("ifi_home_app", "ArticleStyle")
 
-    translation_keys = set(ArticlePage.objects.values_list("translation_key", flat=True))
+    translation_keys = set(
+        ArticlePage.objects.values_list("translation_key", flat=True)
+    )
     for translation_key in translation_keys:
         pages = list(
-            ArticlePage.objects.filter(translation_key=translation_key).select_related("locale")
+            ArticlePage.objects.filter(translation_key=translation_key).select_related(
+                "locale"
+            )
         )
         nb_pages = [p for p in pages if p.locale.language_code == "nb"]
         source = nb_pages[0] if nb_pages else pages[0]
@@ -65,7 +70,10 @@ def unbackfill(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("ifi_home_app", "0094_articlestyle_alter_articlepage_content_alignment_and_more"),
+        (
+            "ifi_home_app",
+            "0094_articlestyle_alter_articlepage_content_alignment_and_more",
+        ),
     ]
 
     operations = [

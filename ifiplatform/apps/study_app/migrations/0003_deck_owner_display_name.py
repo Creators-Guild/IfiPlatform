@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('study_app', '0002_deck_unique_deck_name_per_owner'),
+        ("study_app", "0002_deck_unique_deck_name_per_owner"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='deck',
-            name='owner_display_name',
+            model_name="deck",
+            name="owner_display_name",
             field=models.CharField(blank=True, max_length=150),
         ),
     ]

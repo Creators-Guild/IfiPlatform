@@ -60,7 +60,9 @@ class MachineTranslateSubtreeCommandTests(TestCase):
         succeed (previously, one @transaction.atomic around the whole
         batch meant a single failure rolled back everything)."""
         parent = _make_page(self.nb_locale, title="Parent", slug="parent")
-        child = ArticleIndexPage(locale=self.nb_locale, title="Child", slug="child", section="hub")
+        child = ArticleIndexPage(
+            locale=self.nb_locale, title="Child", slug="child", section="hub"
+        )
         parent.add_child(instance=child)
         child.save_revision().publish()
 
@@ -91,12 +93,16 @@ class MachineTranslateSubtreeCommandTests(TestCase):
         self.assertEqual(child_translation.title, "Child")
 
     @patch("ifi_home_app.translation.deepl.DeepLTranslator.translate")
-    def test_rerun_after_partial_failure_only_retries_failed_pages(self, mock_translate):
+    def test_rerun_after_partial_failure_only_retries_failed_pages(
+        self, mock_translate
+    ):
         """Resumability, verified directly: re-running after a partial
         failure must cost zero extra DeepL calls for the page that already
         succeeded, and must translate the one that previously failed."""
         parent = _make_page(self.nb_locale, title="Parent", slug="parent")
-        child = ArticleIndexPage(locale=self.nb_locale, title="Child", slug="child", section="hub")
+        child = ArticleIndexPage(
+            locale=self.nb_locale, title="Child", slug="child", section="hub"
+        )
         parent.add_child(instance=child)
         child.save_revision().publish()
 
@@ -110,7 +116,9 @@ class MachineTranslateSubtreeCommandTests(TestCase):
         mock_translate.side_effect = fail_on_child_once
         with self.captureOnCommitCallbacks(execute=True):
             call_command("machine_translate_subtree", str(parent.id), str(self.user.id))
-        self.assertEqual(mock_translate.call_count, 2)  # parent ok, child attempted+failed
+        self.assertEqual(
+            mock_translate.call_count, 2
+        )  # parent ok, child attempted+failed
 
         should_fail["child"] = False
         with self.captureOnCommitCallbacks(execute=True):

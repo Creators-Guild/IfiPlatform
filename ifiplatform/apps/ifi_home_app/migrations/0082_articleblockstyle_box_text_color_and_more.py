@@ -7,18 +7,38 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0081_alter_articleblockstyle_block_id_and_more'),
+        ("ifi_home_app", "0081_alter_articleblockstyle_block_id_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='articleblockstyle',
-            name='box_text_color',
-            field=models.CharField(blank=True, choices=[('bg-light', 'Light'), ('turq', 'Turquoise'), ('pink', 'Pink'), ('purple', 'Purple'), ('black', 'Black'), ('custom', 'Custom (hex code)')], max_length=20),
+            model_name="articleblockstyle",
+            name="box_text_color",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("bg-light", "Light"),
+                    ("turq", "Turquoise"),
+                    ("pink", "Pink"),
+                    ("purple", "Purple"),
+                    ("black", "Black"),
+                    ("custom", "Custom (hex code)"),
+                ],
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='articleblockstyle',
-            name='box_text_custom_color',
-            field=models.CharField(blank=True, max_length=7, validators=[django.core.validators.RegexValidator('^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$', 'Enter a valid hex color code, e.g. #ff8800 or #f80.')]),
+            model_name="articleblockstyle",
+            name="box_text_custom_color",
+            field=models.CharField(
+                blank=True,
+                max_length=7,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+                        "Enter a valid hex color code, e.g. #ff8800 or #f80.",
+                    )
+                ],
+            ),
         ),
     ]

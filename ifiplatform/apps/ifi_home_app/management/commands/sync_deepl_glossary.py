@@ -49,8 +49,8 @@ class Command(BaseCommand):
             "--write-env",
             action="store_true",
             help="Rewrite DEEPL_GLOSSARY_ID in .env to the new glossary_id "
-                 "instead of just printing it. Still requires a server "
-                 "restart to take effect.",
+            "instead of just printing it. Still requires a server "
+            "restart to take effect.",
         )
 
     def handle(self, *args, **options):
@@ -61,7 +61,8 @@ class Command(BaseCommand):
             raise CommandError("DEEPL_API_KEY is not set in .env.")
 
         api_base = (
-            "https://api-free.deepl.com" if auth_key.endswith(":fx")
+            "https://api-free.deepl.com"
+            if auth_key.endswith(":fx")
             else "https://api.deepl.com"
         )
         headers = {"Authorization": f"DeepL-Auth-Key {auth_key}"}
@@ -92,15 +93,19 @@ class Command(BaseCommand):
         glossary_id = response.json()["glossary_id"]
         GlossarySyncState.touch()
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Created glossary {glossary_id} with {len(GLOSSARY_TERMS)} term(s)."
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Created glossary {glossary_id} with {len(GLOSSARY_TERMS)} term(s)."
+            )
+        )
 
         if options["write_env"]:
             self._write_env(glossary_id)
-            self.stdout.write(self.style.SUCCESS(
-                "DEEPL_GLOSSARY_ID updated in .env -- restart the server to pick it up."
-            ))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    "DEEPL_GLOSSARY_ID updated in .env -- restart the server to pick it up."
+                )
+            )
         else:
             self.stdout.write(
                 f"Now set DEEPL_GLOSSARY_ID={glossary_id} in .env and restart the server."

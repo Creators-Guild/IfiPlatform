@@ -51,7 +51,7 @@ class MenuGroup(TranslatableMixin, ClusterableModel):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="+",
-        help_text="Where the group's heading and its \"All\" link go.",
+        help_text='Where the group\'s heading and its "All" link go.',
     )
     link_url = models.URLField(
         blank=True,
@@ -89,7 +89,9 @@ class MenuGroup(TranslatableMixin, ClusterableModel):
     def clean(self):
         super().clean()
         if self.link_page and self.link_url:
-            raise ValidationError("Pick either a page or an external address for the heading, not both.")
+            raise ValidationError(
+                "Pick either a page or an external address for the heading, not both."
+            )
 
 
 class MenuGroupLink(TranslatableMixin, Orderable):
@@ -104,12 +106,14 @@ class MenuGroupLink(TranslatableMixin, Orderable):
     page = models.ForeignKey(
         Page, null=True, blank=True, on_delete=models.CASCADE, related_name="+"
     )
-    url = models.URLField(blank=True, help_text="An external address instead of a page.")
+    url = models.URLField(
+        blank=True, help_text="An external address instead of a page."
+    )
     description = models.CharField(max_length=100, blank=True)
     prefix = models.CharField(
         max_length=50,
         blank=True,
-        help_text="Optional non-bold text before the label, e.g. \"Listings at\".",
+        help_text='Optional non-bold text before the label, e.g. "Listings at".',
     )
 
     panels = [
@@ -209,7 +213,9 @@ def _resolve_link(link):
 def _resolve_group(slot):
     group = slot.group.localized
     link_page = _resolve_page(group.link_page)
-    links = [link for link in (_resolve_link(link) for link in group.links.all()) if link]
+    links = [
+        link for link in (_resolve_link(link) for link in group.links.all()) if link
+    ]
     url = link_page.url if link_page else group.link_url
     return {
         "title": group.title,

@@ -40,7 +40,7 @@ TEST_RUNNER = "core_app.test_runner.ProjectAppsTestRunner"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # See README.md #Setup for more information
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") # check .env
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")  # check .env
 # Without .env, DEBUG falls back to False and Django fails later with a confusing Postgres error.
 if not SECRET_KEY:
     raise ImproperlyConfigured(
@@ -49,9 +49,9 @@ if not SECRET_KEY:
     )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "False") == "True" # check .env
+DEBUG = os.environ.get("DEBUG", "False") == "True"  # check .env
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') # check .env
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")  # check .env
 
 SITE_ID = 1
 
@@ -203,8 +203,10 @@ if not DEBUG:
         },
     }
 
-# check .env  
-CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o]
+# check .env
+CSRF_TRUSTED_ORIGINS = [
+    o for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o
+]
 
 
 # Password validation
@@ -311,7 +313,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 # console backend (prints emails to the server log instead of sending them),
 # so local dev works with no setup. Set EMAIL_HOST in .env to switch to real
 # SMTP once there's a relay/provider to send through.
-if os.environ.get("EMAIL_HOST"): # check .env
+if os.environ.get("EMAIL_HOST"):  # check .env
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_HOST = os.environ.get("EMAIL_HOST")
     EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
@@ -321,7 +323,9 @@ if os.environ.get("EMAIL_HOST"): # check .env
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@ifiplatfform.no") # check .env
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL", "noreply@ifiplatfform.no"
+)  # check .env
 
 # File-based so the cache is shared across gunicorn worker processes --
 # the default LocMemCache is per-process, so e.g. Wagtail's site-root-paths
@@ -369,11 +373,13 @@ WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
 WAGTAILLOCALIZE_MACHINE_TRANSLATOR = {
     "CLASS": "ifi_home_app.translation.deepl.DeepLTranslator",
     "OPTIONS": {
-        "AUTH_KEY": os.environ.get("DEEPL_API_KEY"), # check .env
+        "AUTH_KEY": os.environ.get("DEEPL_API_KEY"),  # check .env
         # Set by `manage.py sync_deepl_glossary` -- see that command and
         # ifi_home_app/deepl_glossary_terms.py. Left unset, DeepL just
         # translates freely (a plain warning gets logged, not an error).
-        "GLOSSARY_IDS": {("NB", "EN"): os.environ.get("DEEPL_GLOSSARY_ID")}, # check .env
+        "GLOSSARY_IDS": {
+            ("NB", "EN"): os.environ.get("DEEPL_GLOSSARY_ID")
+        },  # check .env
     },
 }
 

@@ -22,12 +22,16 @@ class AdminLocaleTests(TestCase):
         self.nb, _ = Locale.objects.get_or_create(language_code="nb")
         self.en, _ = Locale.objects.get_or_create(language_code="en")
         self.root = Page.get_first_root_node()
-        self.nb_index = ArticleIndexPage(locale=self.nb, title="Artikler", slug="artikler", section="hub")
+        self.nb_index = ArticleIndexPage(
+            locale=self.nb, title="Artikler", slug="artikler", section="hub"
+        )
         self.root.add_child(instance=self.nb_index)
         self.nb_index.save_revision().publish()
         self.en_index = self.nb_index.copy_for_translation(self.en)
         self.en_index.save_revision().publish()
-        self.en_child = ArticleIndexPage(locale=self.en, title="Child", slug="child", section="news")
+        self.en_child = ArticleIndexPage(
+            locale=self.en, title="Child", slug="child", section="news"
+        )
         self.en_index.add_child(instance=self.en_child)
 
         self.superuser = User.objects.create_superuser("admin", "a@test.com", "pw")
@@ -44,11 +48,19 @@ class AdminLocaleTests(TestCase):
     def _root_children(self, request):
         """The indexes left at the root -- ignoring Wagtail's own default
         welcome page, which also lives there."""
-        pages = admin_locales.filter_explorer_pages(self.root, self.root.get_children(), request)
-        return set(pages.filter(pk__in=[self.nb_index.pk, self.en_index.pk]).values_list("pk", flat=True))
+        pages = admin_locales.filter_explorer_pages(
+            self.root, self.root.get_children(), request
+        )
+        return set(
+            pages.filter(pk__in=[self.nb_index.pk, self.en_index.pk]).values_list(
+                "pk", flat=True
+            )
+        )
 
     def test_explorer_root_hides_english(self):
-        self.assertEqual(self._root_children(self._request(self.editor)), {self.nb_index.pk})
+        self.assertEqual(
+            self._root_children(self._request(self.editor)), {self.nb_index.pk}
+        )
 
     def test_english_parent_still_lists_its_english_children(self):
         pages = admin_locales.filter_explorer_pages(
@@ -57,7 +69,9 @@ class AdminLocaleTests(TestCase):
         self.assertEqual(list(pages), [self.en_child.page_ptr])
 
     def test_chooser_is_norwegian_only(self):
-        pages = admin_locales.filter_chooser_pages(Page.objects.filter(depth__gt=1), self._request(self.editor))
+        pages = admin_locales.filter_chooser_pages(
+            Page.objects.filter(depth__gt=1), self._request(self.editor)
+        )
         self.assertEqual({page.locale_id for page in pages}, {self.nb.id})
 
     def test_superuser_toggle_shows_english(self):
@@ -67,7 +81,10 @@ class AdminLocaleTests(TestCase):
         )
 
     def test_toggle_is_ignored_for_non_superusers(self):
-        self.assertEqual(self._root_children(self._request(self.editor, show_all=True)), {self.nb_index.pk})
+        self.assertEqual(
+            self._root_children(self._request(self.editor, show_all=True)),
+            {self.nb_index.pk},
+        )
 
     def test_toggle_view_flips_session_flag(self):
         request = self._request(self.superuser)
@@ -90,7 +107,11 @@ class LinkExistingTranslationTests(TestCase):
 
     def test_keeps_english_text_and_registers_translation(self):
         nb_group = MenuGroup(locale=self.nb, title="Nyheter")
-        nb_group.links.add(MenuGroupLink(sort_order=0, url="https://example.com", label="Lenke", prefix="Hos"))
+        nb_group.links.add(
+            MenuGroupLink(
+                sort_order=0, url="https://example.com", label="Lenke", prefix="Hos"
+            )
+        )
         nb_group.save()
         en_group = nb_group.copy_for_translation(self.en)
         en_group.title = "News"
@@ -102,11 +123,19 @@ class LinkExistingTranslationTests(TestCase):
         link_existing_translation(nb_group, en_group)
 
         self.assertEqual(Translation.objects.filter(pk=translation.pk).count(), 1)
-        en_group = MenuGroup.objects.get(translation_key=nb_group.translation_key, locale=self.en)
+        en_group = MenuGroup.objects.get(
+            translation_key=nb_group.translation_key, locale=self.en
+        )
         self.assertEqual(en_group.title, "News")
-        self.assertEqual(MenuGroup.objects.filter(translation_key=nb_group.translation_key).count(), 2)
+        self.assertEqual(
+            MenuGroup.objects.filter(translation_key=nb_group.translation_key).count(),
+            2,
+        )
         en_link = en_group.links.get()
-        self.assertEqual((en_link.label, en_link.prefix, en_link.url), ("Link", "At", "https://example.com"))
+        self.assertEqual(
+            (en_link.label, en_link.prefix, en_link.url),
+            ("Link", "At", "https://example.com"),
+        )
 
 
 class NorwegianFirstSnippetTests(TestCase):
