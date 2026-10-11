@@ -2,8 +2,10 @@
 
 Last updated: 2026-10-11
 
-How the local Docker setup is built and why. To start it, see Option A in
-the main [README.md](../../README.md#option-a-docker-recommended). It is for local
+How the local Docker setup is built and why. To start it, see the Quick
+start in the main [README.md](../../README.md#quick-start). For day-to-day
+use and troubleshooting, see
+[contributing/docker.md](../contributing/docker.md). It is for local
 development only. Production doesn't use Docker (see
 [operations/server_setup.md](../operations/server_setup.md)).
 
@@ -43,7 +45,9 @@ your own computer show up right away and `runserver` reloads.
   `docker-compose.yml`. A student's own `ifiplatform/.env` can't override
   them, because python-dotenv never replaces a variable that is already
   set. The same `.env` keeps working with SQLite outside Docker.
-- **Same versions as production:** Python 3.12 and PostgreSQL 16.
+- **Same versions as production:** Python 3.12 and PostgreSQL 16. CI
+  also runs the tests on PostgreSQL 16, so a test that passes in the
+  container passes in CI.
 - **Ports only on your own computer.** Both ports are bound to
   `127.0.0.1`, so nobody else on the network (like event Wi-Fi) can reach
   the site with its `admin`/`admin` user, or the database.
@@ -77,9 +81,12 @@ your own computer show up right away and `runserver` reloads.
   hides this problem either way.
 - **Claude Code stays logged in.** Its login and settings are kept in the
   `claude-config` volume (`CLAUDE_CONFIG_DIR`), so they survive rebuilds
-  and `docker compose down`. Only `down -v` deletes them. The extension
+  and `docker compose down`. Only `down -v` deletes them. Shared Claude
+  Code permissions (safe commands like running the tests) are in
+  `.claude/settings.json`. Personal ones go in
+  `.claude/settings.local.json`, which Git ignores. The extension
   isn't installed for everyone; students who want it add it themselves
-  (see the README).
+  (see [contributing/docker.md](../contributing/docker.md)).
 - **Code isn't copied into the image.** It's shared in instead, so the image
   only needs rebuilding when `requirements.txt` changes.
 
