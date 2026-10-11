@@ -87,14 +87,22 @@ class EventIndexPage(TranslationWarningMixin, Page):
         # behind us -- a week-long event isn't "past" on day 2. An archived
         # event (dropped from Peoply, kept by an admin -- see
         # PeoplyRemovedEvent) is always past, whatever its date.
-        upcoming_events = [e for e in events if not e.is_archived and (e.end_date or e.event_date) >= today]
-        past_events = [e for e in events if e.is_archived or (e.end_date or e.event_date) < today]
+        upcoming_events = [
+            e
+            for e in events
+            if not e.is_archived and (e.end_date or e.event_date) >= today
+        ]
+        past_events = [
+            e for e in events if e.is_archived or (e.end_date or e.event_date) < today
+        ]
 
         context["events"] = events
         context["month_groups"] = group_events_by_month(upcoming_events)
         # Most-recently-past month first, since that's the one someone
         # skimming "past events" is most likely looking for.
-        context["past_month_groups"] = group_events_by_month(list(reversed(past_events)))
+        context["past_month_groups"] = group_events_by_month(
+            list(reversed(past_events))
+        )
         context["current_semester_year"] = today.year
         context["is_spring_semester"] = today.month <= 6
         return context
@@ -106,16 +114,26 @@ class EventPage(TranslationWarningMixin, Page):
 
     template = "events/event_page.html"
 
-    event_type = models.CharField(max_length=20, choices=EVENT_TYPE_CHOICES, default="other")
+    event_type = models.CharField(
+        max_length=20, choices=EVENT_TYPE_CHOICES, default="other"
+    )
     event_date = models.DateField()
-    event_time = models.TimeField(null=True, blank=True)  # blank = "no specific time" (e.g. week-long Fadderuke)
-    event_end_time = models.TimeField(null=True, blank=True)  # only used to size this event's block in calendar_days
+    event_time = models.TimeField(
+        null=True, blank=True
+    )  # blank = "no specific time" (e.g. week-long Fadderuke)
+    event_end_time = models.TimeField(
+        null=True, blank=True
+    )  # only used to size this event's block in calendar_days
     calendar_color = models.CharField(
-        max_length=20, choices=EVENT_CALENDAR_COLOR_CHOICES, blank=True,
+        max_length=20,
+        choices=EVENT_CALENDAR_COLOR_CHOICES,
+        blank=True,
         help_text="Optional -- overrides the automatic color of this event's block in a parent event's week-calendar view.",
     )
     calendar_color_custom = models.CharField(
-        max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR],
+        max_length=7,
+        blank=True,
+        validators=[HEX_COLOR_VALIDATOR],
         help_text="Used only when Calendar color above is set to Custom.",
     )
     end_date = models.DateField(
@@ -170,7 +188,7 @@ class EventPage(TranslationWarningMixin, Page):
         [("entry", calendar_legend_entry_block())],
         use_json_field=True,
         blank=True,
-        help_text="Optional -- explains what each sub-event calendar color means (e.g. \"Blue = Study-relevant\"), shown above the week-calendar.",
+        help_text='Optional -- explains what each sub-event calendar color means (e.g. "Blue = Study-relevant"), shown above the week-calendar.',
     )
     peoply_url = models.URLField(
         blank=True,
@@ -238,7 +256,7 @@ class EventPage(TranslationWarningMixin, Page):
 
     @property
     def time_tag(self):
-        """"today" or "tomorrow" when the event falls on one of those, else
+        """ "today" or "tomorrow" when the event falls on one of those, else
         None -- at most one applies, nearest first."""
         if self.is_happening_now:
             return "today"
@@ -248,7 +266,9 @@ class EventPage(TranslationWarningMixin, Page):
 
     @cached_property
     def sub_events(self):
-        return EventPage.objects.child_of(self).live().order_by("event_date", "event_time")
+        return (
+            EventPage.objects.child_of(self).live().order_by("event_date", "event_time")
+        )
 
     @cached_property
     def sub_event_count(self):
@@ -285,7 +305,10 @@ class EventPage(TranslationWarningMixin, Page):
                 if cap_host and role == "host":
                     role = "collaborator"
                 key = union.translation_key
-                if key not in best_by_union or role_priority[role] < role_priority[best_by_union[key][0]]:
+                if (
+                    key not in best_by_union
+                    or role_priority[role] < role_priority[best_by_union[key][0]]
+                ):
                     best_by_union[key] = (role, union)
 
         add_entries(self.related_unions, cap_host=False)

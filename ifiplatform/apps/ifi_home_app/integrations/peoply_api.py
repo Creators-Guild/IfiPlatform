@@ -7,34 +7,35 @@ import requests
 
 url = "https://api.peoply.app"
 
+
 def get_events(union_id, after_date):
-    events = [] # peoply API only gives all events or nothing, everything just filters
+    events = []  # peoply API only gives all events or nothing, everything just filters
 
     # use skip/offset and take for safety. Take caps at 500(though I doubt there will ever more than 500)
-    offset = 0 # starts at 0 to get from
+    offset = 0  # starts at 0 to get from
     # think of this as getting pages (max 500 event on each). If full page, means you have to chekc next page
     while True:
         response = requests.get(
             url + "/events",
             params={
                 "organizationId": union_id,
-                "afterDate": after_date.isoformat(), # safetycall to make sure right formatting
+                "afterDate": after_date.isoformat(),  # safetycall to make sure right formatting
                 "orderBy": "startDate",
-                "orderDirection": "asc", # ascending
+                "orderDirection": "asc",  # ascending
                 "skip": offset,
                 "take": 500,
             },
-            timeout=10, # don't wait forever(ex. server down)
+            timeout=10,  # don't wait forever(ex. server down)
         )
         response.raise_for_status()  # fail loudly on an outage/bad request instead of choking on .json() below
 
         page = response.json()
         events += page
-        take = len(page) # to check actual count
-        if take < 500: # not a full page, means no more pages after
+        take = len(page)  # to check actual count
+        if take < 500:  # not a full page, means no more pages after
             break
 
-        offset +=take # used to figure out next pagenr
+        offset += take  # used to figure out next pagenr
 
     return events
 
@@ -79,7 +80,9 @@ def find_exact_match(title, candidates):
     title_lower = title.lower()
     for org in candidates:
         url_id = org["urlId"]
-        if org["name"].lower() == title_lower or (url_id and url_id.lower() == title_lower):
+        if org["name"].lower() == title_lower or (
+            url_id and url_id.lower() == title_lower
+        ):
             return org
     return None
 

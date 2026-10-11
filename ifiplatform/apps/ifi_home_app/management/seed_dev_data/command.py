@@ -87,34 +87,49 @@ class Command(
         root = Page.get_first_root_node()
 
         artikkler = self._get_or_create_page(
-            root, ArticleIndexPage, "Artikkler", nb_locale,
+            root,
+            ArticleIndexPage,
+            "Artikkler",
+            nb_locale,
             section="hub",
         )
         self._set_default_site_root(artikkler)
         self._translate_page(artikkler, en_locale)
 
         nyheter = self._get_or_create_page(
-            artikkler, ArticleIndexPage, "Nyheter", nb_locale,
+            artikkler,
+            ArticleIndexPage,
+            "Nyheter",
+            nb_locale,
             section="news",
         )
         self._translate_page(nyheter, en_locale)
         self._seed_news_articles(nyheter, nb_locale, en_locale)
 
         info_articles = self._get_or_create_page(
-            artikkler, ArticleIndexPage, "Informasjonsartikkler", nb_locale,
+            artikkler,
+            ArticleIndexPage,
+            "Informasjonsartikkler",
+            nb_locale,
             section="info_articles",
         )
         self._translate_page(info_articles, en_locale)
 
         for title, color in CATEGORY_SPECS:
             category = self._get_or_create_page(
-                info_articles, CategoryPage, title, nb_locale,
+                info_articles,
+                CategoryPage,
+                title,
+                nb_locale,
                 color=color,
             )
             self._translate_page(category, en_locale)
 
             article = self._get_or_create_page(
-                category, ArticlePage, "Testartikkel", nb_locale,
+                category,
+                ArticlePage,
+                "Testartikkel",
+                nb_locale,
                 intro="En test-artikkel generert av seed-scriptet.",
                 published_date=timezone.now().date(),
                 body=self._build_article_body(),
@@ -125,7 +140,9 @@ class Command(
                 self._seed_student_unions(category, nb_locale, en_locale, seed_image)
             elif title == "Praktisk":
                 self._seed_tool(category, nb_locale, en_locale, seed_image)
-                self._seed_new_student_articles(category, nb_locale, en_locale, seed_image)
+                self._seed_new_student_articles(
+                    category, nb_locale, en_locale, seed_image
+                )
 
         self._seed_events(artikkler, nb_locale, en_locale, seed_image)
 

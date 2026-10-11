@@ -15,7 +15,9 @@ class MessageSeedMixin:
         message = HeaderMessage.objects.filter(text=text, locale=nb_locale).first()
         if message is None:
             message = HeaderMessage.objects.create(
-                text=RichText(text), is_active=True, locale=nb_locale,
+                text=RichText(text),
+                is_active=True,
+                locale=nb_locale,
             )
             self.created_count += 1
             self.stdout.write(f"  created HeaderMessage: {BANNER_TEXT}")

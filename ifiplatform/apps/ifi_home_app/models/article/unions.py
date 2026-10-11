@@ -80,7 +80,7 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
                         (
                             "label",
                             blocks.CharBlock(
-                                help_text="e.g. \"Bli medlem\", \"Meld interesse\", \"Søk verv\"."
+                                help_text='e.g. "Bli medlem", "Meld interesse", "Søk verv".'
                             ),
                         ),
                         ("url", blocks.URLBlock()),
@@ -168,7 +168,7 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
                             "role_nickname",
                             blocks.CharBlock(
                                 required=False,
-                                help_text="Optional informal name for the role, e.g. \"Guild Master\" for \"Leader\".",
+                                help_text='Optional informal name for the role, e.g. "Guild Master" for "Leader".',
                             ),
                         ),
                         (
@@ -179,9 +179,11 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
                         (
                             "responsibilities",
                             blocks.ListBlock(
-                                blocks.RichTextBlock(features=["bold", "italic"], required=False),
+                                blocks.RichTextBlock(
+                                    features=["bold", "italic"], required=False
+                                ),
                                 required=False,
-                                help_text="One responsibility per item -- each renders as its own stacked box under a \"Responsibilities\" heading. Bold/italic supported, no links/lists.",
+                                help_text='One responsibility per item -- each renders as its own stacked box under a "Responsibilities" heading. Bold/italic supported, no links/lists.',
                             ),
                         ),
                         (
@@ -193,14 +195,14 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
                                     ("opening_soon", "Opening soon"),
                                 ],
                                 default="filled",
-                                help_text="\"Open now\"/\"Opening soon\" also list this position under Open Positions, even if it has a sitting member too.",
+                                help_text='"Open now"/"Opening soon" also list this position under Open Positions, even if it has a sitting member too.',
                             ),
                         ),
                         (
                             "availability_note",
                             blocks.CharBlock(
                                 required=False,
-                                help_text="Optional -- shown next to the Open Positions badge, e.g. \"After the next general assembly (generalforsamling)\".",
+                                help_text='Optional -- shown next to the Open Positions badge, e.g. "After the next general assembly (generalforsamling)".',
                             ),
                         ),
                     ]
@@ -248,7 +250,8 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         of filled_positions, so one entry can appear in both (see
         docs/claude_context/article_unions.md)."""
         return [
-            block for block in self.sitting_members
+            block
+            for block in self.sitting_members
             if block.value.get("availability", "filled") != "filled"
         ]
 
@@ -293,7 +296,9 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         from ..event.queries import events_for_union_between, upcoming_events_for_union
 
         context["upcoming_events"] = upcoming_events_for_union(self)
-        context["upcoming_event_month_groups"] = group_events_by_month(context["upcoming_events"])
+        context["upcoming_event_month_groups"] = group_events_by_month(
+            context["upcoming_events"]
+        )
 
         # Needed either way: "auto" uses its count to decide visibility,
         # and (once shown) every mode uses it to fix the calendar's hour
@@ -312,7 +317,11 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
         if show_calendar:
             calendar_date_param = request.GET.get("calendar_date")
             try:
-                calendar_date = date.fromisoformat(calendar_date_param) if calendar_date_param else timezone.localdate()
+                calendar_date = (
+                    date.fromisoformat(calendar_date_param)
+                    if calendar_date_param
+                    else timezone.localdate()
+                )
             except ValueError:
                 calendar_date = timezone.localdate()
 
@@ -329,7 +338,9 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
             hour_range = hour_range_for_events(semester_events) or (9, 25)
 
             context["union_calendar"] = {
-                "grid": build_calendar_days(week_events, day_range=day_range, hour_range=hour_range),
+                "grid": build_calendar_days(
+                    week_events, day_range=day_range, hour_range=hour_range
+                ),
                 # Raw dates, not a pre-built label string -- formatted with
                 # Django's |date filter in the template so it stays locale-aware
                 # (nb/en), same convention as event_list-style dates elsewhere.
@@ -344,7 +355,9 @@ class UnionPage(TranslationWarningMixin, Page):  # pylint: disable=too-many-ance
 
 
 # Model for the category listing all student unions
-class StudentUnionCategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+class StudentUnionCategoryPage(
+    EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, Page
+):  # pylint: disable=too-many-ancestors
     """A category page whose only children are student union pages."""
 
     template = "info_articles/pages/studentunion_category_page.html"
@@ -434,7 +447,7 @@ class StudentUnionCategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWar
                 )
 
         context["program_unions"] = active_unions.filter(union_type="program")
-        context["other_unions"] = (
-            active_unions.exclude(id__in=curated_ids).exclude(union_type="program")
+        context["other_unions"] = active_unions.exclude(id__in=curated_ids).exclude(
+            union_type="program"
         )
         return context

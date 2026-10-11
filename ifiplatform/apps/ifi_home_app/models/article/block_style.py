@@ -52,7 +52,12 @@ BLOCK_STYLE_DEFAULTS = {
         "text_shadow_color": "",
         "text_shadow_custom_color": "",
     },
-    "article_card": {"width_rem": 22, "height_rem": 0, "list_style": False, "fixed_ratio": True},
+    "article_card": {
+        "width_rem": 22,
+        "height_rem": 0,
+        "list_style": False,
+        "fixed_ratio": True,
+    },
     "category_card": {"width_rem": 18, "height_rem": 0},
     "union_card": {"width_rem": 18, "height_rem": 0},
     "tool_card": {"width_rem": 20, "height_rem": 0},
@@ -108,7 +113,9 @@ def _effective_box_style(override):
     defaults = BLOCK_STYLE_DEFAULTS["box"]
     return {
         "enabled": (
-            override.box_enabled if override and override.box_enabled is not None else defaults["enabled"]
+            override.box_enabled
+            if override and override.box_enabled is not None
+            else defaults["enabled"]
         ),
         "border_width": (
             override.box_border_width
@@ -131,10 +138,14 @@ def _effective_box_style(override):
             else defaults["border_visible"]
         ),
         "radius": (
-            override.box_radius if override and override.box_radius is not None else defaults["radius"]
+            override.box_radius
+            if override and override.box_radius is not None
+            else defaults["radius"]
         ),
         "bg_color": (
-            override.box_bg_color if override and override.box_bg_color else defaults["bg_color"]
+            override.box_bg_color
+            if override and override.box_bg_color
+            else defaults["bg_color"]
         ),
         "bg_custom_color": (
             override.box_bg_custom_color
@@ -142,10 +153,14 @@ def _effective_box_style(override):
             else defaults["bg_custom_color"]
         ),
         "padding": (
-            override.box_padding if override and override.box_padding is not None else defaults["padding"]
+            override.box_padding
+            if override and override.box_padding is not None
+            else defaults["padding"]
         ),
         "margin": (
-            override.box_margin if override and override.box_margin is not None else defaults["margin"]
+            override.box_margin
+            if override and override.box_margin is not None
+            else defaults["margin"]
         ),
         "shadow_enabled": (
             override.box_shadow_enabled
@@ -189,7 +204,11 @@ def _effective_heading_style(override, defaults, font_size_multiplier=1.0):
     """Effective font_size/side_padding/alignment/box for one heading-shaped
     piece of text (an actual heading block, or anything reusing the same
     options -- e.g. a multi_column column's own title)."""
-    raw_font_size = override.font_size if override and override.font_size is not None else defaults["font_size"]
+    raw_font_size = (
+        override.font_size
+        if override and override.font_size is not None
+        else defaults["font_size"]
+    )
     return {
         "font_size": raw_font_size,
         # scaled by ArticleStyle.content_font_size_multiplier; kept separate
@@ -202,11 +221,17 @@ def _effective_heading_style(override, defaults, font_size_multiplier=1.0):
             else defaults["side_padding"]
         ),
         "alignment": (
-            override.alignment if override and override.alignment else defaults["alignment"]
+            override.alignment
+            if override and override.alignment
+            else defaults["alignment"]
         ),
-        "exclude_from_global_alignment": bool(override.exclude_from_global_alignment) if override else False,
+        "exclude_from_global_alignment": (
+            bool(override.exclude_from_global_alignment) if override else False
+        ),
         "text_color": (
-            override.text_color if override and override.text_color else defaults["text_color"]
+            override.text_color
+            if override and override.text_color
+            else defaults["text_color"]
         ),
         "text_custom_color": (
             override.text_custom_color
@@ -249,7 +274,9 @@ def _effective_heading_style(override, defaults, font_size_multiplier=1.0):
     }
 
 
-def _effective_block_styles(body_stream, overrides_by_block_id, font_size_multiplier=1.0):
+def _effective_block_styles(
+    body_stream, overrides_by_block_id, font_size_multiplier=1.0
+):
     """Recursively walks a body StreamValue (or a column's own nested
     content) to {block_id: {...effective style}} for every heading/
     paragraph/image/multi_column block, including synthesized ids for an
@@ -266,9 +293,13 @@ def _effective_block_styles(body_stream, overrides_by_block_id, font_size_multip
             defaults = BLOCK_STYLE_DEFAULTS["image"]
             styles[block_id] = {
                 "alignment": (
-                    override.alignment if override and override.alignment else defaults["alignment"]
+                    override.alignment
+                    if override and override.alignment
+                    else defaults["alignment"]
                 ),
-                "exclude_from_global_alignment": bool(override.exclude_from_global_alignment) if override else False,
+                "exclude_from_global_alignment": (
+                    bool(override.exclude_from_global_alignment) if override else False
+                ),
                 "width_rem": (
                     override.width_rem
                     if override and override.width_rem is not None
@@ -303,22 +334,35 @@ def _effective_block_styles(body_stream, overrides_by_block_id, font_size_multip
                 BLOCK_STYLE_DEFAULTS["image_caption_body"],
                 font_size_multiplier,
             )
-        elif block.block_type in ("article_card", "category_card", "union_card", "tool_card"):
+        elif block.block_type in (
+            "article_card",
+            "category_card",
+            "union_card",
+            "tool_card",
+        ):
             defaults = BLOCK_STYLE_DEFAULTS[block.block_type]
             card_style = {
                 "width_rem": (
-                    override.width_rem if override and override.width_rem is not None else defaults["width_rem"]
+                    override.width_rem
+                    if override and override.width_rem is not None
+                    else defaults["width_rem"]
                 ),
                 "height_rem": (
-                    override.height_rem if override and override.height_rem is not None else defaults["height_rem"]
+                    override.height_rem
+                    if override and override.height_rem is not None
+                    else defaults["height_rem"]
                 ),
             }
             if block.block_type == "article_card":
                 card_style["list_style"] = (
-                    override.list_style if override and override.list_style is not None else defaults["list_style"]
+                    override.list_style
+                    if override and override.list_style is not None
+                    else defaults["list_style"]
                 )
                 card_style["fixed_ratio"] = (
-                    override.fixed_ratio if override and override.fixed_ratio is not None else defaults["fixed_ratio"]
+                    override.fixed_ratio
+                    if override and override.fixed_ratio is not None
+                    else defaults["fixed_ratio"]
                 )
             styles[block_id] = card_style
         elif block.block_type == "multi_column":
@@ -331,7 +375,11 @@ def _effective_block_styles(body_stream, overrides_by_block_id, font_size_multip
                     if override and override.side_padding is not None
                     else defaults["side_padding"]
                 ),
-                "gap": override.gap if override and override.gap is not None else defaults["gap"],
+                "gap": (
+                    override.gap
+                    if override and override.gap is not None
+                    else defaults["gap"]
+                ),
                 "column_weights": (
                     override_weights
                     if override_weights and len(override_weights) == len(own_weights)
@@ -352,11 +400,15 @@ def _effective_block_styles(body_stream, overrides_by_block_id, font_size_multip
                 }
                 title_id = f"{column_id}-title"
                 styles[title_id] = _effective_heading_style(
-                    overrides_by_block_id.get(title_id), BLOCK_STYLE_DEFAULTS["heading"], font_size_multiplier
+                    overrides_by_block_id.get(title_id),
+                    BLOCK_STYLE_DEFAULTS["heading"],
+                    font_size_multiplier,
                 )
                 styles.update(
                     _effective_block_styles(
-                        bound_column.value["content"], overrides_by_block_id, font_size_multiplier
+                        bound_column.value["content"],
+                        overrides_by_block_id,
+                        font_size_multiplier,
                     )
                 )
     return styles
@@ -381,7 +433,9 @@ class ArticleBlockStyle(models.Model):
     Design rationale/history: docs/claude_context/article_block_style.md"""
 
     translation_key = models.UUIDField()
-    block_id = models.CharField(max_length=48)  # a few synthetic ids run longer than a plain block UUID
+    block_id = models.CharField(
+        max_length=48
+    )  # a few synthetic ids run longer than a plain block UUID
 
     side_padding = models.FloatField(null=True, blank=True)
     alignment = models.CharField(
@@ -417,7 +471,9 @@ class ArticleBlockStyle(models.Model):
 
     box_enabled = models.BooleanField(null=True, blank=True)
     box_border_width = models.FloatField(null=True, blank=True)
-    box_border_color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
+    box_border_color = models.CharField(
+        max_length=20, choices=COLOR_CHOICES, blank=True
+    )
     box_border_custom_color = models.CharField(
         max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
     )
@@ -435,7 +491,9 @@ class ArticleBlockStyle(models.Model):
     )
     text_shadow_enabled = models.BooleanField(null=True, blank=True)
     text_shadow_strength = models.FloatField(null=True, blank=True)
-    text_shadow_color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
+    text_shadow_color = models.CharField(
+        max_length=20, choices=COLOR_CHOICES, blank=True
+    )
     text_shadow_custom_color = models.CharField(
         max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
     )
@@ -444,7 +502,9 @@ class ArticleBlockStyle(models.Model):
 
     box_shadow_enabled = models.BooleanField(null=True, blank=True)
     box_shadow_strength = models.FloatField(null=True, blank=True)
-    box_shadow_color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
+    box_shadow_color = models.CharField(
+        max_length=20, choices=COLOR_CHOICES, blank=True
+    )
     box_shadow_custom_color = models.CharField(
         max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
     )
@@ -459,6 +519,7 @@ class ArticleBlockStyle(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["translation_key", "block_id"], name="unique_article_block_style"
+                fields=["translation_key", "block_id"],
+                name="unique_article_block_style",
             )
         ]

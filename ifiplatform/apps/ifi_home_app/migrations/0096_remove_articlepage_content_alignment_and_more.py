@@ -8,98 +8,99 @@ way to repopulate the values this migration didn't capture anywhere
 reversible. Recovery, if ever needed, is restore-from-backup-and-reapply-
 forward, not reverse-in-place.
 """
+
 from django.db import migrations
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0095_backfill_articlestyle'),
+        ("ifi_home_app", "0095_backfill_articlestyle"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='articlepage',
-            name='content_alignment',
+            model_name="articlepage",
+            name="content_alignment",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='content_bg_color',
+            model_name="articlepage",
+            name="content_bg_color",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='content_bg_custom_color',
+            model_name="articlepage",
+            name="content_bg_custom_color",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='content_bg_enabled',
+            model_name="articlepage",
+            name="content_bg_enabled",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='content_font_size',
+            model_name="articlepage",
+            name="content_font_size",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='content_side_padding',
+            model_name="articlepage",
+            name="content_side_padding",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='header_side_padding',
+            model_name="articlepage",
+            name="header_side_padding",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='hero_image_box_border_radius',
+            model_name="articlepage",
+            name="hero_image_box_border_radius",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='hero_image_box_color',
+            model_name="articlepage",
+            name="hero_image_box_color",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='hero_image_box_custom_color',
+            model_name="articlepage",
+            name="hero_image_box_custom_color",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='hero_image_boxed',
+            model_name="articlepage",
+            name="hero_image_boxed",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='hero_image_position',
+            model_name="articlepage",
+            name="hero_image_position",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='hero_image_side_padding',
+            model_name="articlepage",
+            name="hero_image_side_padding",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='hero_image_width_rem',
+            model_name="articlepage",
+            name="hero_image_width_rem",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='intro_alignment',
+            model_name="articlepage",
+            name="intro_alignment",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='intro_font_size',
+            model_name="articlepage",
+            name="intro_font_size",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='meta_alignment',
+            model_name="articlepage",
+            name="meta_alignment",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='meta_font_size',
+            model_name="articlepage",
+            name="meta_font_size",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='title_alignment',
+            model_name="articlepage",
+            name="title_alignment",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='title_font_size',
+            model_name="articlepage",
+            name="title_font_size",
         ),
         migrations.RemoveField(
-            model_name='articlepage',
-            name='toc_icon_size',
+            model_name="articlepage",
+            name="toc_icon_size",
         ),
     ]

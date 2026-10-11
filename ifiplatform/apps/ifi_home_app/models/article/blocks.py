@@ -198,7 +198,10 @@ def _body_content_blocks():
                                                 ),
                                                 ("image", article_image_block()),
                                                 ("article_card", article_card_block()),
-                                                ("category_card", category_card_block()),
+                                                (
+                                                    "category_card",
+                                                    category_card_block(),
+                                                ),
                                                 ("union_card", union_card_block()),
                                                 ("tool_card", tool_card_block()),
                                             ],

@@ -1,6 +1,6 @@
 # Architecture overview
 
-Last updated: 2026-09-29
+Last updated: 2026-10-11
 
 A map of how IfiPlatform fits together: which app does what, how pages are
 organized, and what happens between a browser request and the HTML that
@@ -169,7 +169,9 @@ How Django matches URLs in general is in the
 There is one settings file: `ifiplatform/ifiplatform_project/settings.py`.
 Anything that differs between your machine and production comes from the
 `.env` file in `ifiplatform/`. The setup steps are in the main
-[README.md](../../README.md), and the production keys are in
+[README.md](../../README.md) and
+[contributing/setup_without_docker.md](../contributing/setup_without_docker.md),
+and the production keys are in
 [operations/prod_server.md](../operations/prod_server.md#environment-variables).
 
 | | Local development | Production |
@@ -187,8 +189,9 @@ The site is bilingual. `nb` is the main language: content is written in
 Norwegian first and then translated to English, with wagtail-localize and
 DeepL machine translation. Each language has its own copy of the page tree.
 Texts in templates and Python code are translated with Django's own
-`{% trans %}` / `_()` and the files in `ifiplatform/locale/`. The main
-[README.md](../../README.md) shows the commands. A full guide is planned as
+`{% trans %}` / `_()` and the files in `ifiplatform/locale/`.
+[contributing/everyday_commands.md](../contributing/everyday_commands.md#translations)
+shows the commands. A full guide is planned as
 `shared/translations.md`.
 
 ## External services

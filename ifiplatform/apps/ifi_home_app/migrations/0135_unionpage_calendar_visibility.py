@@ -6,13 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0134_alter_eventpage_signup_url'),
+        ("ifi_home_app", "0134_alter_eventpage_signup_url"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='unionpage',
-            name='calendar_visibility',
-            field=models.CharField(choices=[('auto', 'Automatic -- hide when there are 4 or fewer events this semester'), ('always', 'Always show'), ('never', 'Never show')], default='auto', help_text="Whether to show this union's events calendar on its page.", max_length=10),
+            model_name="unionpage",
+            name="calendar_visibility",
+            field=models.CharField(
+                choices=[
+                    (
+                        "auto",
+                        "Automatic -- hide when there are 4 or fewer events this semester",
+                    ),
+                    ("always", "Always show"),
+                    ("never", "Never show"),
+                ],
+                default="auto",
+                help_text="Whether to show this union's events calendar on its page.",
+                max_length=10,
+            ),
         ),
     ]

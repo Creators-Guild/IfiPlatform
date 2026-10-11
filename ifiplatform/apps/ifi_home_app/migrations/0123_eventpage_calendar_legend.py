@@ -7,13 +7,46 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0122_eventpage_calendar_color_and_more'),
+        ("ifi_home_app", "0122_eventpage_calendar_color_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventpage',
-            name='calendar_legend',
-            field=wagtail.fields.StreamField([('entry', 2)], blank=True, block_lookup={0: ('wagtail.blocks.ChoiceBlock', [], {'choices': [('blue', 'Blue'), ('yellow', 'Yellow'), ('orange', 'Orange'), ('pink', 'Pink'), ('green', 'Green'), ('purple', 'Purple')]}), 1: ('wagtail.blocks.CharBlock', (), {'help_text': 'What this color means, e.g. "Study-relevant".', 'max_length': 60}), 2: ('wagtail.blocks.StructBlock', [[('color', 0), ('label', 1)]], {'icon': 'tag', 'label': 'Legend entry'})}, help_text='Optional -- explains what each sub-event calendar color means (e.g. "Blue = Study-relevant"), shown above the week-calendar.'),
+            model_name="eventpage",
+            name="calendar_legend",
+            field=wagtail.fields.StreamField(
+                [("entry", 2)],
+                blank=True,
+                block_lookup={
+                    0: (
+                        "wagtail.blocks.ChoiceBlock",
+                        [],
+                        {
+                            "choices": [
+                                ("blue", "Blue"),
+                                ("yellow", "Yellow"),
+                                ("orange", "Orange"),
+                                ("pink", "Pink"),
+                                ("green", "Green"),
+                                ("purple", "Purple"),
+                            ]
+                        },
+                    ),
+                    1: (
+                        "wagtail.blocks.CharBlock",
+                        (),
+                        {
+                            "help_text": 'What this color means, e.g. "Study-relevant".',
+                            "max_length": 60,
+                        },
+                    ),
+                    2: (
+                        "wagtail.blocks.StructBlock",
+                        [[("color", 0), ("label", 1)]],
+                        {"icon": "tag", "label": "Legend entry"},
+                    ),
+                },
+                help_text='Optional -- explains what each sub-event calendar color means (e.g. "Blue = Study-relevant"), shown above the week-calendar.',
+            ),
         ),
     ]

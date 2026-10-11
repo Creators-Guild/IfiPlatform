@@ -34,14 +34,23 @@ services:
       DB_PASSWORD: devpassword
       DB_HOST: db
       DB_PORT: "5432"
+      # Keeps the Claude Code login in the claude-config volume, so it survives rebuilds.
+      CLAUDE_CONFIG_DIR: /home/dev/.claude
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
       - .:/workspace
+      - claude-config:/home/dev/.claude
+    init: true
+    # sleep infinity keeps the container running if a start step fails, so
+    # the VS Code terminal still works for fixing the error.
     command: >
       sh -c "python manage.py migrate &&
              python manage.py seed_dev_data &&
-             python manage.py runserver 0.0.0.0:8000"
+             python manage.py runserver 0.0.0.0:8000;
+             echo 'The server stopped. Fix the error above, then run: python manage.py runserver 0.0.0.0:8000';
+             sleep infinity"
 
 volumes:
   ifiplatform-db-data:
+  claude-config:

@@ -65,9 +65,7 @@ class Migration(migrations.Migration):
             name="translation_key",
             field=models.UUIDField(default=uuid.uuid4, editable=False),
         ),
-        migrations.RunPython(
-            assign_unique_translation_keys, migrations.RunPython.noop
-        ),
+        migrations.RunPython(assign_unique_translation_keys, migrations.RunPython.noop),
         migrations.AlterUniqueTogether(
             name="headermessage",
             unique_together={("translation_key", "locale")},

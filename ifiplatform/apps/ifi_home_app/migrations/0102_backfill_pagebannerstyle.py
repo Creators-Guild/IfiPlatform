@@ -30,7 +30,12 @@ def backfill(apps, schema_editor):
                 """,
                 [True],
             )
-            for translation_key, language_code, banner_color, banner_text_color in cursor.fetchall():
+            for (
+                translation_key,
+                language_code,
+                banner_color,
+                banner_text_color,
+            ) in cursor.fetchall():
                 is_nb = language_code == "nb"
                 if translation_key not in chosen or is_nb:
                     chosen[translation_key] = (banner_color, banner_text_color)

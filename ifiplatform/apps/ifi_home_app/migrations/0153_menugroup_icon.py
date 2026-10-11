@@ -22,20 +22,34 @@ def set_default_icons(apps, schema_editor):
     for group in MenuGroup.objects.filter(locale__language_code="nb", icon=""):
         icon = ICON_BY_NB_TITLE.get(group.title)
         if icon:
-            MenuGroup.objects.filter(translation_key=group.translation_key, icon="").update(icon=icon)
+            MenuGroup.objects.filter(
+                translation_key=group.translation_key, icon=""
+            ).update(icon=icon)
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0152_menus'),
+        ("ifi_home_app", "0152_menus"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='menugroup',
-            name='icon',
-            field=models.CharField(blank=True, choices=[('info', 'Info'), ('news', 'News'), ('unions', 'Student unions'), ('jobs', 'Jobs'), ('events', 'Events'), ('tools', 'Tools')], help_text="Shown on the group's homepage shortcut card. Blank uses the plain menu icon.", max_length=20),
+            model_name="menugroup",
+            name="icon",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("info", "Info"),
+                    ("news", "News"),
+                    ("unions", "Student unions"),
+                    ("jobs", "Jobs"),
+                    ("events", "Events"),
+                    ("tools", "Tools"),
+                ],
+                help_text="Shown on the group's homepage shortcut card. Blank uses the plain menu icon.",
+                max_length=20,
+            ),
         ),
         migrations.RunPython(set_default_icons, migrations.RunPython.noop),
     ]

@@ -21,7 +21,12 @@ from .block_style import (
     _effective_box_style,
 )
 from .style import ArticleStyle
-from ..page_mixins import BannerStyleMixin, EditorModeMixin, TranslationWarningMixin, editor_mode_allowed
+from ..page_mixins import (
+    BannerStyleMixin,
+    EditorModeMixin,
+    TranslationWarningMixin,
+    editor_mode_allowed,
+)
 from .tools import ToolPage
 from .unions import StudentUnionCategoryPage
 from ...translation.sync import SOURCE_LANGUAGE_CODE
@@ -55,7 +60,9 @@ def get_section_index(section):
 # Current tree: ArticleIndexPage -> CategoryPage -> ArticlePage
 
 
-class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+class ArticlePage(
+    EditorModeMixin, TranslationWarningMixin, Page
+):  # pylint: disable=too-many-ancestors
     """A single article page, published under a CategoryPage."""
 
     template = "info_articles/pages/article_page.html"
@@ -152,7 +159,10 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
         chain once `author` is deleted."""
         if self.author_id:
             if self.author_attribution == "nickname":
-                nickname = getattr(self.author, "profile", None) and self.author.profile.nickname
+                nickname = (
+                    getattr(self.author, "profile", None)
+                    and self.author.profile.nickname
+                )
                 if nickname:
                     return nickname
             return self.author.get_full_name() or self.author.username
@@ -174,7 +184,9 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
         """This article's shared ArticleStyle row, keyed by translation_key
         (same row across every locale). Created with defaults on first
         access."""
-        return ArticleStyle.objects.get_or_create(translation_key=self.translation_key)[0]
+        return ArticleStyle.objects.get_or_create(translation_key=self.translation_key)[
+            0
+        ]
 
     # aliases the shared constant so existing SOURCE_LANGUAGE_CODE
     # references keep working unchanged.
@@ -216,30 +228,44 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
         context["quick_style_defaults"] = ArticleStyle.quick_style_defaults()
         context["page_is_live"] = self.live
         context["page_has_unpublished_changes"] = self.has_unpublished_changes
-        context["page_has_pending_publish"] = (not self.live) or self.has_unpublished_changes
+        context["page_has_pending_publish"] = (
+            not self.live
+        ) or self.has_unpublished_changes
         context["can_publish_page"] = self.can_publish_in_editor_mode(request.user)
         context["can_unpublish_page"] = self.can_unpublish_in_editor_mode(request.user)
         context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
         context["translation_nudge"] = self.translation_nudge(request.user)
         overrides_by_block_id = {
             style.block_id: style
-            for style in ArticleBlockStyle.objects.filter(translation_key=self.translation_key)
+            for style in ArticleBlockStyle.objects.filter(
+                translation_key=self.translation_key
+            )
         }
         block_styles = _effective_block_styles(
-            self.body, overrides_by_block_id, font_size_multiplier=self.style.content_font_size_multiplier
+            self.body,
+            overrides_by_block_id,
+            font_size_multiplier=self.style.content_font_size_multiplier,
         )
         for pseudo_id in ("article-title", "article-meta", "article-intro"):
             override = overrides_by_block_id.get(pseudo_id)
             block_styles[pseudo_id] = {
                 "side_padding": (
-                    override.side_padding if override and override.side_padding is not None else 0
+                    override.side_padding
+                    if override and override.side_padding is not None
+                    else 0
                 ),
                 "box": _effective_box_style(override),
-                "text_color": override.text_color if override and override.text_color else "",
-                "text_custom_color": (
-                    override.text_custom_color if override and override.text_custom_color else ""
+                "text_color": (
+                    override.text_color if override and override.text_color else ""
                 ),
-                "text_shadow_enabled": bool(override.text_shadow_enabled) if override else False,
+                "text_custom_color": (
+                    override.text_custom_color
+                    if override and override.text_custom_color
+                    else ""
+                ),
+                "text_shadow_enabled": (
+                    bool(override.text_shadow_enabled) if override else False
+                ),
                 "text_shadow_strength": (
                     override.text_shadow_strength
                     if override and override.text_shadow_strength is not None
@@ -258,7 +284,9 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
                     else 1
                 ),
                 "text_shadow_color": (
-                    override.text_shadow_color if override and override.text_shadow_color else ""
+                    override.text_shadow_color
+                    if override and override.text_shadow_color
+                    else ""
                 ),
                 "text_shadow_custom_color": (
                     override.text_shadow_custom_color
@@ -274,7 +302,9 @@ class ArticlePage(EditorModeMixin, TranslationWarningMixin, Page):  # pylint: di
         return context
 
 
-class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+class CategoryPage(
+    EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, Page
+):  # pylint: disable=too-many-ancestors
     """A category of articles, optionally shown only during a specific date range."""
 
     template = "info_articles/pages/article_category_page.html"
@@ -306,7 +336,6 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
         help_text="Leave blank for a category that should always be visible.",
     )
     active_until = models.DateField(null=True, blank=True)
-
 
     show_nested_tools = models.BooleanField(
         default=False,
@@ -391,7 +420,9 @@ class CategoryPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, P
         return context
 
 
-class ArticleIndexPage(EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, Page):  # pylint: disable=too-many-ancestors
+class ArticleIndexPage(
+    EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, Page
+):  # pylint: disable=too-many-ancestors
     """Landing page listing all article categories and suggested articles."""
 
     template = "info_articles/pages/article_index_page.html"

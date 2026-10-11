@@ -87,9 +87,7 @@ def _machine_translate_subtree_button(page, user, view_name=None, next_url=None)
 
 
 hooks.register("register_page_header_buttons", _machine_translate_subtree_button)
-hooks.register(
-    "register_page_listing_more_buttons", _machine_translate_subtree_button
-)
+hooks.register("register_page_listing_more_buttons", _machine_translate_subtree_button)
 
 
 @receiver(page_published)

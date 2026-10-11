@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0060_alter_articlepage_intro'),
+        ("ifi_home_app", "0060_alter_articlepage_intro"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='articlepage',
-            name='content_alignment',
-            field=models.CharField(choices=[('left', 'Left'), ('center', 'Center'), ('right', 'Right')], default='left', help_text='Default alignment for the title, meta, intro and any plain heading/paragraph content. Blocks with their own alignment option (styled text, images, multi-column) override this individually.', max_length=20),
+            model_name="articlepage",
+            name="content_alignment",
+            field=models.CharField(
+                choices=[("left", "Left"), ("center", "Center"), ("right", "Right")],
+                default="left",
+                help_text="Default alignment for the title, meta, intro and any plain heading/paragraph content. Blocks with their own alignment option (styled text, images, multi-column) override this individually.",
+                max_length=20,
+            ),
         ),
     ]

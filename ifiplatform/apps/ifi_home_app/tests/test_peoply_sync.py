@@ -38,7 +38,9 @@ def _fake_response(json_data, status_code=200):
     response.json.return_value = json_data
     response.status_code = status_code
     if status_code >= 400:
-        response.raise_for_status.side_effect = requests.HTTPError(f"{status_code} error")
+        response.raise_for_status.side_effect = requests.HTTPError(
+            f"{status_code} error"
+        )
     return response
 
 
@@ -158,7 +160,11 @@ class SyncPeoplyEventsTests(TestCase):
 
     @patch("ifi_home_app.management.commands.sync_peoply_events.get_events")
     def test_bedriftspresentasjon_title_is_tagged_company(self, mock_get_events):
-        company_event = {**SAMPLE_EVENT, "id": "other-id", "title": "Bedriftspresentasjon med DNB"}
+        company_event = {
+            **SAMPLE_EVENT,
+            "id": "other-id",
+            "title": "Bedriftspresentasjon med DNB",
+        }
         mock_get_events.return_value = [company_event]
 
         call_command("sync_peoply_events")
@@ -225,7 +231,9 @@ class SyncPeoplyUpdatesAndRemovalsTests(TestCase):
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        events_patcher = patch("ifi_home_app.management.commands.sync_peoply_events.get_events")
+        events_patcher = patch(
+            "ifi_home_app.management.commands.sync_peoply_events.get_events"
+        )
         self.mock_get_events = events_patcher.start()
         self.addCleanup(events_patcher.stop)
 
@@ -243,14 +251,18 @@ class SyncPeoplyUpdatesAndRemovalsTests(TestCase):
         page.event_type = "academic"  # editor-owned, must survive the resync
         page.save_revision().publish()
 
-        self._sync([{
-            **FUTURE_EVENT,
-            "title": "Julebord (flyttet)",
-            "startDate": "2099-12-02T18:00:00.000Z",
-            "endDate": "2099-12-02T22:00:00.000Z",
-            "freeformAddress": "Ny adresse 1",
-            "description": "Oppdatert.",
-        }])
+        self._sync(
+            [
+                {
+                    **FUTURE_EVENT,
+                    "title": "Julebord (flyttet)",
+                    "startDate": "2099-12-02T18:00:00.000Z",
+                    "endDate": "2099-12-02T22:00:00.000Z",
+                    "freeformAddress": "Ny adresse 1",
+                    "description": "Oppdatert.",
+                }
+            ]
+        )
 
         page = self._page()
         self.assertEqual(page.title, "Julebord (flyttet)")
@@ -338,14 +350,18 @@ class PeoplyRemovedEventAdminTests(TestCase):
         with patch(
             "ifi_home_app.management.commands.check_peoply_union_matches.get_organizations",
             return_value=[],
-        ), patch("ifi_home_app.management.commands.sync_peoply_events.get_events") as mock_get_events:
+        ), patch(
+            "ifi_home_app.management.commands.sync_peoply_events.get_events"
+        ) as mock_get_events:
             mock_get_events.return_value = [FUTURE_EVENT]
             call_command("sync_peoply_events", stdout=StringIO())
             mock_get_events.return_value = []
             call_command("sync_peoply_events", stdout=StringIO())
         self.removal = PeoplyRemovedEvent.objects.get(external_uid=FUTURE_EVENT["id"])
 
-        superuser = get_user_model().objects.create_superuser("admin", "admin@test.com", "pw")
+        superuser = get_user_model().objects.create_superuser(
+            "admin", "admin@test.com", "pw"
+        )
         self.client.force_login(superuser)
 
     def _post_action(self, action):
@@ -374,7 +390,9 @@ class PeoplyRemovedEventAdminTests(TestCase):
     def test_delete_removes_event_page(self):
         self._post_action("delete_event_pages")
 
-        self.assertFalse(EventPage.objects.filter(external_uid=FUTURE_EVENT["id"]).exists())
+        self.assertFalse(
+            EventPage.objects.filter(external_uid=FUTURE_EVENT["id"]).exists()
+        )
         self.removal.refresh_from_db()
         self.assertEqual(self.removal.resolution, "deleted")
         self.assertIsNone(self.removal.page)
@@ -418,7 +436,9 @@ class CheckPeoplyUnionMatchesTests(TestCase):
 
         self.assertIn("Every union and Peoply organization matches up", out.getvalue())
 
-    def test_union_with_no_id_but_exact_match_is_reported_pending_link_not_missing_org(self):
+    def test_union_with_no_id_but_exact_match_is_reported_pending_link_not_missing_org(
+        self,
+    ):
         union = _make_union(title="CYB", slug="cyb")
         self._patch_organizations([_fake_org(id="org-1", name="CYB", urlId="cyb")])
 
@@ -436,7 +456,9 @@ class CheckPeoplyUnionMatchesTests(TestCase):
 
     def test_union_with_no_id_and_no_name_match_is_reported_unlinked(self):
         _make_union(title="Mystery Union", slug="mystery-union")
-        self._patch_organizations([_fake_org(id="org-1", name="Unrelated Org", urlId="unrelated")])
+        self._patch_organizations(
+            [_fake_org(id="org-1", name="Unrelated Org", urlId="unrelated")]
+        )
 
         out = StringIO()
         call_command("check_peoply_union_matches", stdout=out)
@@ -475,9 +497,9 @@ class CheckPeoplyUnionMatchesTests(TestCase):
 
     def test_create_missing_creates_draft_stub_under_sole_category(self):
         category = _make_union_category()
-        self._patch_organizations([
-            _fake_org(id="org-1", name="New Org", websiteUrl="https://neworg.example")
-        ])
+        self._patch_organizations(
+            [_fake_org(id="org-1", name="New Org", websiteUrl="https://neworg.example")]
+        )
 
         out = StringIO()
         call_command("check_peoply_union_matches", "--create-missing", stdout=out)
@@ -515,14 +537,19 @@ class CheckPeoplyUnionMatchesTests(TestCase):
         self.assertNotIn("NEW:", out.getvalue())
         self.assertIn("(already known)", out.getvalue())
         self.assertEqual(
-            PeoplyUnionMismatch.objects.filter(kind="missing_org", identifier="org-1").count(), 1
+            PeoplyUnionMismatch.objects.filter(
+                kind="missing_org", identifier="org-1"
+            ).count(),
+            1,
         )
 
     def test_mismatch_no_longer_present_is_marked_resolved(self):
         self._patch_organizations([_fake_org(id="org-1", name="New Org")])
         call_command("check_peoply_union_matches", stdout=StringIO())  # first sighting
 
-        self._patch_organizations([])  # org-1 gone (e.g. someone linked/created the union)
+        self._patch_organizations(
+            []
+        )  # org-1 gone (e.g. someone linked/created the union)
         out = StringIO()
         call_command("check_peoply_union_matches", stdout=out)
 
@@ -543,7 +570,10 @@ class CheckPeoplyUnionMatchesTests(TestCase):
 
         self.assertIn("NEW:", out.getvalue())
         self.assertEqual(
-            PeoplyUnionMismatch.objects.filter(kind="missing_org", identifier="org-1").count(), 1
+            PeoplyUnionMismatch.objects.filter(
+                kind="missing_org", identifier="org-1"
+            ).count(),
+            1,
         )
         record = PeoplyUnionMismatch.objects.get(kind="missing_org", identifier="org-1")
         self.assertIsNone(record.resolved_at)

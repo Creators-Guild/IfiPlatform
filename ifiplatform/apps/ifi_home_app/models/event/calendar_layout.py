@@ -71,8 +71,12 @@ def build_calendar_days(events, day_range=None, hour_range=None):
 
     if not timed and day_range is None and hour_range is None:
         return {
-            "hour_start": 0, "hour_end": 0, "hour_marks": [], "hour_count": 0,
-            "days": [], "untimed": untimed,
+            "hour_start": 0,
+            "hour_end": 0,
+            "hour_marks": [],
+            "hour_count": 0,
+            "days": [],
+            "untimed": untimed,
         }
 
     start_minutes = _event_start_minutes
@@ -91,7 +95,9 @@ def build_calendar_days(events, day_range=None, hour_range=None):
     total_minutes = (hour_end - hour_start) * 60
 
     days = []
-    for day_date in day_range if day_range is not None else sorted({e.event_date for e in timed}):
+    for day_date in (
+        day_range if day_range is not None else sorted({e.event_date for e in timed})
+    ):
         day_events = sorted(
             (e for e in timed if e.event_date == day_date),
             key=lambda e: (start_minutes(e), end_minutes(e)),
@@ -102,15 +108,21 @@ def build_calendar_days(events, day_range=None, hour_range=None):
             for event in cluster:
                 col, col_count = columns[event]
                 color_key, color_hex = _resolve_calendar_color(event)
-                blocks.append({
-                    "event": event,
-                    "top_pct": _pct(start_minutes(event) - hour_start * 60, total_minutes),
-                    "height_pct": _pct(end_minutes(event) - start_minutes(event), total_minutes),
-                    "left_pct": _pct(col, col_count),
-                    "width_pct": _pct(1, col_count),
-                    "color_key": color_key,
-                    "color_hex": color_hex,
-                })
+                blocks.append(
+                    {
+                        "event": event,
+                        "top_pct": _pct(
+                            start_minutes(event) - hour_start * 60, total_minutes
+                        ),
+                        "height_pct": _pct(
+                            end_minutes(event) - start_minutes(event), total_minutes
+                        ),
+                        "left_pct": _pct(col, col_count),
+                        "width_pct": _pct(1, col_count),
+                        "color_key": color_key,
+                        "color_hex": color_hex,
+                    }
+                )
         days.append({"date": day_date, "events": blocks})
 
     hour_marks = [
@@ -141,7 +153,9 @@ _AUTO_CALENDAR_COLOR_BY_EVENT_TYPE = {
 
 def _resolve_calendar_color(event):
     """The (color_key, custom_hex) this event's calendar block renders with."""
-    color = event.calendar_color or _AUTO_CALENDAR_COLOR_BY_EVENT_TYPE.get(event.event_type, "orange")
+    color = event.calendar_color or _AUTO_CALENDAR_COLOR_BY_EVENT_TYPE.get(
+        event.event_type, "orange"
+    )
     if color == "custom" and event.calendar_color_custom:
         return "custom", event.calendar_color_custom
     return color, None
@@ -181,7 +195,9 @@ def _assign_columns(cluster, start_minutes, end_minutes):
     column_of = {}
     for event in cluster:
         s, e = start_minutes(event), end_minutes(event)
-        col = next((i for i, end in enumerate(columns_end) if end <= s), len(columns_end))
+        col = next(
+            (i for i, end in enumerate(columns_end) if end <= s), len(columns_end)
+        )
         if col == len(columns_end):
             columns_end.append(e)
         else:

@@ -64,6 +64,8 @@ class Command(BaseCommand):
         # disappear once the new server is up anyway, not at this exact
         # second.
         cache.set(DEPLOY_NOTICE_CACHE_KEY, target, timeout=minutes * 60 + 60)
-        self.stdout.write(self.style.SUCCESS(
-            f"Deploy notice set: restart expected in {minutes} minute(s)."
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Deploy notice set: restart expected in {minutes} minute(s)."
+            )
+        )

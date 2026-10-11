@@ -1,10 +1,10 @@
 # Custom manage.py commands
 
-Last updated: 2026-10-09
+Last updated: 2026-10-11
 
 This project's own `manage.py` commands, beyond Django's built-in ones
 (`migrate`, `createsuperuser`, `test`, `makemessages`/`compilemessages`,
-etc. — see the main [README.md](../../README.md) for those), documented here
+etc. — see [contributing/everyday_commands.md](../contributing/everyday_commands.md) for those), documented here
 in one place, sectioned by the app each command lives in.
 
 ## ifi_home_app
@@ -18,7 +18,8 @@ python manage.py seed_dev_data [--force]
 Fills a fresh local database with a dummy article tree (index pages,
 categories, a test article, a test student union, a test tool, and a
 sample event) so you're not starting from a blank site. Covered in the
-main setup flow — see [README.md](../../README.md#6-fill-database-with-dummy-datarecommended).
+main setup flow: Docker runs it on every start, and without Docker it's step 6 of
+[contributing/setup_without_docker.md](../contributing/setup_without_docker.md).
 
 It also creates an `admin` / `admin` superuser, so you can reach
 django-admin and wagtail-admin without running `createsuperuser` by hand.

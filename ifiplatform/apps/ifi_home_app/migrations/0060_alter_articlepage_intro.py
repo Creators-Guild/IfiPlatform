@@ -7,13 +7,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0059_articlepage_content_side_padding_and_more'),
+        ("ifi_home_app", "0059_articlepage_content_side_padding_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='articlepage',
-            name='intro',
+            model_name="articlepage",
+            name="intro",
             field=wagtail.fields.RichTextField(blank=True),
         ),
     ]

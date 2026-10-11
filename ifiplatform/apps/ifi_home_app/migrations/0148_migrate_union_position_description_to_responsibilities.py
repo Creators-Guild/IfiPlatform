@@ -21,6 +21,7 @@ the worst case if it ever happens is that revision's responsibilities show
 empty (the old description key is just ignored), not a crash. Deliberately
 out of scope here.
 """
+
 import json
 import re
 import uuid

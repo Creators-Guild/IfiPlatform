@@ -40,6 +40,7 @@ segment extraction with an unrelated TypeError
 moment it's resynced -- a pre-existing data-quality issue, not something
 this migration should touch or attempt to fix.
 """
+
 from django.db import migrations
 
 

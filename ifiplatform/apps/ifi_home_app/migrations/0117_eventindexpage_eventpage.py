@@ -9,39 +9,91 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0116_articlepage_author_attribution_and_more'),
-        ('wagtailcore', '0097_baselogentry_uuid_action_timestamp_indexes'),
+        ("ifi_home_app", "0116_articlepage_author_attribution_and_more"),
+        ("wagtailcore", "0097_baselogentry_uuid_action_timestamp_indexes"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='EventIndexPage',
+            name="EventIndexPage",
             fields=[
-                ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.page')),
-                ('intro', wagtail.fields.RichTextField(blank=True)),
+                (
+                    "page_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="wagtailcore.page",
+                    ),
+                ),
+                ("intro", wagtail.fields.RichTextField(blank=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=(ifi_home_app.models.article_models.TranslationWarningMixin, 'wagtailcore.page'),
+            bases=(
+                ifi_home_app.models.article_models.TranslationWarningMixin,
+                "wagtailcore.page",
+            ),
         ),
         migrations.CreateModel(
-            name='EventPage',
+            name="EventPage",
             fields=[
-                ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.page')),
-                ('event_type', models.CharField(choices=[('social', 'Social'), ('deadline', 'Deadline'), ('academic', 'Academic'), ('company', 'Company presentation'), ('other', 'Other')], default='other', max_length=20)),
-                ('event_date', models.DateField()),
-                ('event_time', models.TimeField(blank=True, null=True)),
-                ('end_date', models.DateField(blank=True, help_text='Optional -- for events spanning more than one day.', null=True)),
-                ('location', models.CharField(blank=True, max_length=200)),
-                ('intro', wagtail.fields.RichTextField(blank=True)),
-                ('show_on_homepage', models.BooleanField(default=True, help_text="Whether this event can appear in the homepage's upcoming-events box.")),
-                ('external_source', models.CharField(blank=True, max_length=20)),
-                ('external_uid', models.CharField(blank=True, max_length=200)),
+                (
+                    "page_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="wagtailcore.page",
+                    ),
+                ),
+                (
+                    "event_type",
+                    models.CharField(
+                        choices=[
+                            ("social", "Social"),
+                            ("deadline", "Deadline"),
+                            ("academic", "Academic"),
+                            ("company", "Company presentation"),
+                            ("other", "Other"),
+                        ],
+                        default="other",
+                        max_length=20,
+                    ),
+                ),
+                ("event_date", models.DateField()),
+                ("event_time", models.TimeField(blank=True, null=True)),
+                (
+                    "end_date",
+                    models.DateField(
+                        blank=True,
+                        help_text="Optional -- for events spanning more than one day.",
+                        null=True,
+                    ),
+                ),
+                ("location", models.CharField(blank=True, max_length=200)),
+                ("intro", wagtail.fields.RichTextField(blank=True)),
+                (
+                    "show_on_homepage",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Whether this event can appear in the homepage's upcoming-events box.",
+                    ),
+                ),
+                ("external_source", models.CharField(blank=True, max_length=20)),
+                ("external_uid", models.CharField(blank=True, max_length=200)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=(ifi_home_app.models.article_models.TranslationWarningMixin, 'wagtailcore.page'),
+            bases=(
+                ifi_home_app.models.article_models.TranslationWarningMixin,
+                "wagtailcore.page",
+            ),
         ),
     ]

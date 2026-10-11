@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0075_alter_articlepage_body'),
+        ("ifi_home_app", "0075_alter_articlepage_body"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='articlepage',
-            name='show_in_newsbar',
+            model_name="articlepage",
+            name="show_in_newsbar",
         ),
     ]

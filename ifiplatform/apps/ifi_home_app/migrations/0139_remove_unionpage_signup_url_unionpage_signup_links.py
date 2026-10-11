@@ -28,7 +28,10 @@ def copy_signup_url_to_signup_links(apps, schema_editor):
         page.signup_links = [
             {
                 "type": "link",
-                "value": {"label": "Sign up / register interest", "url": page.signup_url},
+                "value": {
+                    "label": "Sign up / register interest",
+                    "url": page.signup_url,
+                },
                 "id": str(uuid.uuid4()),
             }
         ]
@@ -62,7 +65,9 @@ class Migration(migrations.Migration):
                 help_text="Optional -- one or more sign-up/interest links, each with its own label (e.g. a membership form, a volunteer sign-up).",
             ),
         ),
-        migrations.RunPython(copy_signup_url_to_signup_links, migrations.RunPython.noop),
+        migrations.RunPython(
+            copy_signup_url_to_signup_links, migrations.RunPython.noop
+        ),
         migrations.RemoveField(
             model_name="unionpage",
             name="signup_url",

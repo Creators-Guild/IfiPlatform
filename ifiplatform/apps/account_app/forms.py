@@ -138,9 +138,11 @@ class AccountDeleteForm(forms.Form):
         nickname = getattr(getattr(self.user, "profile", None), "nickname", "")
         wants_nickname = "nickname" in (
             cleaned_data.get("articles_attribution"),
-            cleaned_data.get("study_tools_attribution")
-            if cleaned_data.get("study_tools_action") == "keep"
-            else None,
+            (
+                cleaned_data.get("study_tools_attribution")
+                if cleaned_data.get("study_tools_action") == "keep"
+                else None
+            ),
         )
         if wants_nickname and not nickname:
             raise forms.ValidationError(

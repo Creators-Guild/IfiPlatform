@@ -13,7 +13,8 @@ class ProjectAppsTestRunner(DiscoverRunner):
                 dict.fromkeys(
                     config.name
                     for config in apps.get_app_configs()
-                    if config.path.startswith(base) and "site-packages" not in config.path
+                    if config.path.startswith(base)
+                    and "site-packages" not in config.path
                 )
             )
         return super().build_suite(test_labels, **kwargs)

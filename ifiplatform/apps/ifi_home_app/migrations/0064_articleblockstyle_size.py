@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0063_articleblockstyle'),
+        ("ifi_home_app", "0063_articleblockstyle"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='articleblockstyle',
-            name='size',
-            field=models.CharField(blank=True, choices=[('small', 'Small'), ('medium', 'Medium'), ('large', 'Large')], max_length=20),
+            model_name="articleblockstyle",
+            name="size",
+            field=models.CharField(
+                blank=True,
+                choices=[("small", "Small"), ("medium", "Medium"), ("large", "Large")],
+                max_length=20,
+            ),
         ),
     ]

@@ -39,6 +39,7 @@ ORM access is safe there. It has its own two gotchas instead though (wrong
 content_type field, and its 'body' entry being a JSON *string* rather than
 an already-parsed list) -- see _rewrite_revisions()'s own docstring.
 """
+
 import json
 
 from django.db import migrations

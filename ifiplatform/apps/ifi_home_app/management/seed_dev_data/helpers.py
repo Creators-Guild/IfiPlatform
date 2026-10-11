@@ -11,7 +11,11 @@ from wagtail.coreutils import find_available_slug
 from wagtail.images.models import Image
 from wagtail.models import Site
 from wagtail.rich_text import RichText
-from wagtail_localize.models import LocaleSynchronization, Translation, TranslationSource
+from wagtail_localize.models import (
+    LocaleSynchronization,
+    Translation,
+    TranslationSource,
+)
 
 from .constants import ARTICLE_BODY, SEED_IMAGE_PATH, SEED_IMAGE_TITLE, TRANSLATIONS
 
@@ -64,11 +68,15 @@ class SeedHelpersMixin:
 
     # -- generic helpers ---------------------------------------------------
 
-    def _get_or_create_page(self, parent, model, title, locale, slug=None, **field_kwargs):
+    def _get_or_create_page(
+        self, parent, model, title, locale, slug=None, **field_kwargs
+    ):
         slug = slug or slugify(title)
-        existing = model.objects.child_of(parent).filter(
-            slug=slug, locale_id=locale.id
-        ).first()
+        existing = (
+            model.objects.child_of(parent)
+            .filter(slug=slug, locale_id=locale.id)
+            .first()
+        )
         if existing:
             self.skipped_count += 1
             return existing

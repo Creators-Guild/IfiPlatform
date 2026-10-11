@@ -91,7 +91,9 @@ def _peoply_fields(event):
         "event_time": start.time(),
         "event_end_time": None,
         "end_date": None,
-        "location": (event.get("freeformAddress") or event.get("locationName") or "")[:200],
+        "location": (event.get("freeformAddress") or event.get("locationName") or "")[
+            :200
+        ],
         "intro": _plain_text_to_html(event.get("description") or ""),
         "peoply_url": f"https://peoply.app/events/{event['urlId']}",
         # Only ever set when Peoply's own registrationMode is "EXTERNAL" --
@@ -117,10 +119,9 @@ def _peoply_fields(event):
         # real multi-day event; treated as ending within the start day for
         # is_happening_now's purposes, even though the clock time is
         # technically past midnight.
-        next_day_early_morning = (
-            end.date() == start.date() + timedelta(days=1)
-            and end.time() < time(6, 0)
-        )
+        next_day_early_morning = end.date() == start.date() + timedelta(
+            days=1
+        ) and end.time() < time(6, 0)
         if end.date() == start.date() or next_day_early_morning:
             fields["event_end_time"] = end.time()
         else:
@@ -130,13 +131,19 @@ def _peoply_fields(event):
 
 def _host_translation_key(page):
     for entry in page.related_unions:
-        if entry.block_type == "union" and entry.value["role"] == "host" and entry.value["union"]:
+        if (
+            entry.block_type == "union"
+            and entry.value["role"] == "host"
+            and entry.value["union"]
+        ):
             return entry.value["union"].translation_key
     return None
 
 
 def _starts_on_or_after(page, after_date):
-    start = datetime.combine(page.event_date, page.event_time or time.min, tzinfo=SITE_TIMEZONE)
+    start = datetime.combine(
+        page.event_date, page.event_time or time.min, tzinfo=SITE_TIMEZONE
+    )
     return start >= after_date
 
 
@@ -155,8 +162,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         after_date = (
-            datetime.strptime(options["after"], "%Y-%m-%d").replace(tzinfo=dt_timezone.utc)
-            if options["after"] else timezone.now()
+            datetime.strptime(options["after"], "%Y-%m-%d").replace(
+                tzinfo=dt_timezone.utc
+            )
+            if options["after"]
+            else timezone.now()
         )
 
         try:
@@ -166,7 +176,9 @@ class Command(BaseCommand):
 
         event_index = EventIndexPage.objects.live().filter(locale=nb_locale).first()
         if event_index is None:
-            raise CommandError("No live nb EventIndexPage found to create synced events under.")
+            raise CommandError(
+                "No live nb EventIndexPage found to create synced events under."
+            )
 
         unions = UnionPage.objects.live().exclude(peoply_organization_id="")
         # A union's nb/en translations share the same peoply_organization_id
@@ -179,9 +191,18 @@ class Command(BaseCommand):
             if union.translation_key in seen_translation_keys:
                 continue
             seen_translation_keys.add(union.translation_key)
-            fetched += [(union, event) for event in get_events(union.peoply_organization_id, after_date)]
+            fetched += [
+                (union, event)
+                for event in get_events(union.peoply_organization_id, after_date)
+            ]
 
-        counts = {"created": 0, "updated": 0, "unchanged": 0, "restored": 0, "hidden": 0}
+        counts = {
+            "created": 0,
+            "updated": 0,
+            "unchanged": 0,
+            "restored": 0,
+            "hidden": 0,
+        }
         fetched_uids = set()
 
         for union, event in fetched:
@@ -222,7 +243,9 @@ class Command(BaseCommand):
                 counts["unchanged"] += 1
                 continue
 
-            changed = any(getattr(page, name) != fields[name] for name in PEOPLY_SYNCED_FIELDS)
+            changed = any(
+                getattr(page, name) != fields[name] for name in PEOPLY_SYNCED_FIELDS
+            )
             if changed or restoring:
                 for name, value in fields.items():
                     setattr(page, name, value)
@@ -230,16 +253,20 @@ class Command(BaseCommand):
                 page.save_revision().publish()
                 if restoring:
                     counts["restored"] += 1
-                    self.stdout.write(f"  restored EventPage (back on Peoply): {event['title']}")
+                    self.stdout.write(
+                        f"  restored EventPage (back on Peoply): {event['title']}"
+                    )
                 else:
                     counts["updated"] += 1
                     self.stdout.write(f"  updated EventPage: {event['title']}")
             else:
                 counts["unchanged"] += 1
 
-        candidates = EventPage.objects.live().filter(
-            external_source="peoply", locale=nb_locale, is_archived=False
-        ).exclude(external_uid__in=fetched_uids)
+        candidates = (
+            EventPage.objects.live()
+            .filter(external_source="peoply", locale=nb_locale, is_archived=False)
+            .exclude(external_uid__in=fetched_uids)
+        )
         for page in candidates:
             if not _starts_on_or_after(page, after_date):
                 continue
@@ -264,10 +291,14 @@ class Command(BaseCommand):
         Site.clear_site_root_paths_cache()
 
         PeoplySyncState.touch()
-        self.stdout.write(self.style.SUCCESS(
-            "Done: {created} created, {updated} updated, {unchanged} unchanged, "
-            "{restored} restored, {hidden} hidden (gone from Peoply).".format(**counts)
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                "Done: {created} created, {updated} updated, {unchanged} unchanged, "
+                "{restored} restored, {hidden} hidden (gone from Peoply).".format(
+                    **counts
+                )
+            )
+        )
 
         # Read-only (never passes --create-missing here) -- just so the
         # union/organization mismatch warnings reach the same

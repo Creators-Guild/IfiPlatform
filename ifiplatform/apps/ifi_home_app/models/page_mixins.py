@@ -71,7 +71,9 @@ class EditorModeMixin:
         banner also shows on the en alias/translation of an outdated page."""
         target = self.style_target
         if target.locale.language_code != SOURCE_LANGUAGE_CODE:
-            target = target.get_translation_or_none(Locale.objects.get(language_code=SOURCE_LANGUAGE_CODE))
+            target = target.get_translation_or_none(
+                Locale.objects.get(language_code=SOURCE_LANGUAGE_CODE)
+            )
         if target is None or not editor_mode_allowed(target, user, "edit"):
             return None
         return translation_status(target, user)
@@ -87,9 +89,15 @@ class PageBannerStyle(models.Model):
     translation_key = models.UUIDField(unique=True)
 
     show_banner = models.BooleanField(default=False)
-    banner_color = models.CharField(max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR])
-    banner_dot_color = models.CharField(max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR])
-    banner_text_color = models.CharField(max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR])
+    banner_color = models.CharField(
+        max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
+    )
+    banner_dot_color = models.CharField(
+        max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
+    )
+    banner_text_color = models.CharField(
+        max_length=7, blank=True, validators=[HEX_COLOR_VALIDATOR]
+    )
 
     # blank falls back to a fixed default (60/14rem in the templates) --
     # no meaningful "auto" here, unlike ArticleBlockStyle.width_rem/height_rem.
@@ -105,4 +113,6 @@ class BannerStyleMixin:
 
     @cached_property
     def banner_style(self):
-        return PageBannerStyle.objects.get_or_create(translation_key=self.translation_key)[0]
+        return PageBannerStyle.objects.get_or_create(
+            translation_key=self.translation_key
+        )[0]

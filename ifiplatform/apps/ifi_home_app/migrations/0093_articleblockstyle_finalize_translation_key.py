@@ -26,6 +26,7 @@ the same as anywhere else in this project's history of hard-to-reverse
 migrations: restore from a pre-migration backup and reapply forward only,
 don't try to fix the reverse path in place.
 """
+
 from django.db import migrations, models
 
 
@@ -52,7 +53,8 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="articleblockstyle",
             constraint=models.UniqueConstraint(
-                fields=["translation_key", "block_id"], name="unique_article_block_style"
+                fields=["translation_key", "block_id"],
+                name="unique_article_block_style",
             ),
         ),
     ]

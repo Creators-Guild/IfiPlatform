@@ -17,18 +17,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0090_fix_revision_content_type_and_body_shape'),
+        ("ifi_home_app", "0090_fix_revision_content_type_and_body_shape"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='articleblockstyle',
-            name='translation_key',
+            model_name="articleblockstyle",
+            name="translation_key",
             field=models.UUIDField(null=True),
         ),
         migrations.AlterField(
-            model_name='articleblockstyle',
-            name='article',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='block_styles', to='ifi_home_app.articlepage'),
+            model_name="articleblockstyle",
+            name="article",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="block_styles",
+                to="ifi_home_app.articlepage",
+            ),
         ),
     ]

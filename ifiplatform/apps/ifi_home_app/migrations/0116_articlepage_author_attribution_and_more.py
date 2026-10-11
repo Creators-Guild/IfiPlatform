@@ -6,18 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ifi_home_app', '0115_unionpage_show_in_menu'),
+        ("ifi_home_app", "0115_unionpage_show_in_menu"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='articlepage',
-            name='author_attribution',
-            field=models.CharField(choices=[('real_name', 'Real name'), ('nickname', 'Nickname')], default='real_name', help_text="Which identity to credit the author under, if they've set a nickname.", max_length=20),
+            model_name="articlepage",
+            name="author_attribution",
+            field=models.CharField(
+                choices=[("real_name", "Real name"), ("nickname", "Nickname")],
+                default="real_name",
+                help_text="Which identity to credit the author under, if they've set a nickname.",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='articlepage',
-            name='author_display_name',
+            model_name="articlepage",
+            name="author_display_name",
             field=models.CharField(blank=True, max_length=150),
         ),
     ]

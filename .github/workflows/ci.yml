@@ -1,7 +1,8 @@
 name: CI
 
-# Tests + lint. Runs on every PR to main, when started by hand from the
-# Actions tab ("Run workflow", any branch), and from deploy.yml before a deploy.
+# Tests (on PostgreSQL) + lint (Black and pylint). Runs on every PR to main,
+# when started by hand from the Actions tab ("Run workflow", any branch), and
+# from deploy.yml before a deploy.
 on:
   pull_request:
     branches: [main]
@@ -24,6 +25,28 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Tests run on PostgreSQL 16, the same database as production and Docker.
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ifiplatform
+          POSTGRES_USER: ifiplatform_user
+          POSTGRES_PASSWORD: devpassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ifiplatform_user -d ifiplatform"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      USE_POSTGRES: "True"
+      DB_NAME: ifiplatform
+      DB_USER: ifiplatform_user
+      DB_PASSWORD: devpassword
+      DB_HOST: localhost
+      DB_PORT: "5432"
     strategy:
       matrix:
         python-version: ["3.12", "3.13", "3.14"]  # every version Django 6 supports
@@ -44,7 +67,9 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
-      - run: pip install -r requirements.txt pylint==4.0.9 pylint-django==2.8.0
+      - run: pip install -r requirements.txt
+      # Fails if any file isn't formatted. Fix with `black .` from the repo root.
+      - run: black --check .
       # Fails only if the overall score drops below 7/10.
       - run: >
           pylint --load-plugins pylint_django

@@ -15,6 +15,7 @@ data in the first place), zero (translation_key, block_id) collisions.
 The dedup step is still included for correctness on any other database
 where an en-locale row might already exist independently.
 """
+
 from django.db import migrations
 
 
@@ -35,7 +36,9 @@ def backfill_and_dedupe(apps, schema_editor):
     for key, rows in groups.items():
         if len(rows) <= 1:
             continue
-        nb_rows = [r for r in rows if r.article and r.article.locale.language_code == "nb"]
+        nb_rows = [
+            r for r in rows if r.article and r.article.locale.language_code == "nb"
+        ]
         keep = nb_rows[0] if nb_rows else rows[0]
         for row in rows:
             if row.pk != keep.pk:
