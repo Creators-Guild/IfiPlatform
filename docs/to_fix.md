@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-09-29
+Last updated: 2026-10-11
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -174,6 +174,18 @@ folder.
 - [ ] **The Editor mode "On/Off" label is always English.**
   `static/js/article_editor_mode.js` replaces the translated text with
   hard-coded English.
+- [ ] **Images with text in them can't get an English version** after the
+  planned translation redesign (one Norwegian page tree, English shown as
+  translated text on top of it). Today wagtail-localize lets an English
+  page use a different image; the redesign shares every image between
+  both languages, so a poster or diagram with Norwegian writing on it
+  stays Norwegian on the English site. Not fixed in the redesign. Possible
+  fix: an optional "English version" image field next to images, used on
+  `/en/` when set.
+- [ ] **Search after the translation redesign.** The site has no public
+  search today. If it gets one later, Wagtail's search index will only
+  hold the Norwegian text, since English is no longer stored as pages, so
+  English search needs its own index of the translated text.
 - [ ] **Two union headings are Norwegian in the code.** "Programspesifikke
   foreninger" and "Andre foreninger" are Norwegian `{% trans %}` strings in
   `studentunion_category_page.html`, while every other heading is English.
