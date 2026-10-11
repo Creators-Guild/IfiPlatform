@@ -55,11 +55,19 @@ into one folder per app, and features that span several apps go in
 - [access_and_handover.md](operations/access_and_handover.md): accounts
   and keys, and checklists for adding, removing and handing over people
 
-## contributing/ — how to contribute (not created yet)
+## contributing/ — how to contribute
 
 Guides for contributors beyond the basics in
-[CONTRIBUTING.md](../CONTRIBUTING.md): reviewing, writing content, writing
-docs, testing. See [Planned docs](#planned-docs) below.
+[CONTRIBUTING.md](../CONTRIBUTING.md). More are planned (reviewing,
+writing content, writing docs, testing), see [Planned docs](#planned-docs)
+below.
+
+- [docker.md](contributing/docker.md): using the Docker setup day to day:
+  your own extensions, stopping and resetting, and fixing problems
+- [setup_without_docker.md](contributing/setup_without_docker.md): the
+  Python + SQLite setup, for when Docker won't work
+- [everyday_commands.md](contributing/everyday_commands.md): migrations,
+  tests, translations and the admin pages
 
 ## design/ — UI and visual design
 
@@ -139,7 +147,7 @@ nobody can recover without them.
   `claude_references/writing_guidelines.md`.
 - [ ] Finished version of the AI draft `claude_references/community_goals.md`,
   either in the main README's "About" section or as its own doc.
-- [ ] `.github/pull_request_template.md`: what changed, why, linked
+- [x] `.github/pull_request_template.md`: what changed, why, linked
   issue, how it was tested. There are issue templates but no PR template.
 
 ### Developer guides

@@ -45,7 +45,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")  # check .env
 if not SECRET_KEY:
     raise ImproperlyConfigured(
         "DJANGO_SECRET_KEY is not set. For local development, copy "
-        "ifiplatform/.env.example to ifiplatform/.env (see README.md, Option B step 4)."
+        "ifiplatform/.env.example to ifiplatform/.env (see docs/contributing/setup_without_docker.md, step 4)."
     )
 
 # SECURITY WARNING: don't run with debug turned on in production!

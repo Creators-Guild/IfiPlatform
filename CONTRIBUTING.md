@@ -6,23 +6,18 @@ If you've never contributed to an open source project before, don't worry — th
 
 ## Getting Started
  
-1. **Fork the repository** to your own GitHub account.
-2. **Clone your fork** locally (unless you are a collaborator):
+1. **Fork, clone and set up** by following the [Quick start in the README](README.md#quick-start). It forks the repo, clones your fork, connects the `upstream` remote this guide uses, and starts the site in Docker. Can't use Docker? See [setup without Docker](docs/contributing/setup_without_docker.md). Collaborators with write access clone the main repo directly and use `origin` wherever this guide says `upstream`.
+2. **Get the latest code and create a branch** for your change:
 ```bash
-git clone https://github.com/<your-username>/IfiPlatform.git
-cd IfiPlatform
-```
-3. **Set up your dev environment** — follow the [Setup section in the README](README.md#setup). Docker is the recommended way.
-4. **Create a branch** for your change:
-```bash
-git checkout -b <issue-type>/<short-description>
+git fetch upstream
+git checkout -b <issue-type>/<short-description> upstream/main
 ```
    e.g. `feature/mobile-nav`, `bug/login-redirect`, `task/setup-instructions`
 
 ## Your First Contribution, Step by Step
 
 1. **Pick an issue** labeled `good first issue` in the [Issues tab](../../issues). Leave a comment saying you're taking it, so nobody else starts on the same thing.
-2. **Get the latest code and make a branch** (step 4 above).
+2. **Get the latest code and make a branch** (step 2 above).
 3. **Make your change.** The site at http://localhost:8000 reloads when you save a file, so you can check your change in the browser right away.
 4. **Run the quick tests:**
 ```bash
@@ -35,7 +30,7 @@ git add <the files you changed>
 git commit -m "Short description of what you changed"
 git push -u origin <your-branch-name>
 ```
-7. **Open a pull request.** GitHub shows a "Compare & pull request" button after you push. Write what you changed and why, and add `Closes #<issue number>`.
+7. **Open a pull request.** GitHub shows a "Compare & pull request" button after you push. The description box is filled with a short template: write what you changed and why, add `Closes #<issue number>`, and tick the checklist.
 8. **Answer review comments.** To update your PR, commit and push to the same branch again.
 
 New to Git? See the Git and GitHub section in [TUTORIALS.md](TUTORIALS.md).
@@ -91,10 +86,10 @@ There are no rules you have to follow regarding the templates, but it is **highl
  
 ## Submitting a Pull Request
  
-1. Make sure your branch is up to date with `main` before opening a PR:
+1. Make sure your branch is up to date with the main repo's `main` before opening a PR (collaborators: `origin` instead of `upstream`):
 ```bash
-git fetch origin
-git rebase origin/main
+git fetch upstream
+git rebase upstream/main
 ```
 2. Keep PRs **small and focused** — one bug fix or one feature per PR is much easier to review than a large bundle of unrelated changes.
 3. **Commit in small steps.** Make a commit each time one piece works, with a message that says what it does (`Add date to event card`, not `fix` or `changes`). One big commit at the end is hard to review, and if something breaks, small commits make it easy to find and undo the one that caused it. Small doesn't mean tiny: one commit per typo is too much.
@@ -108,7 +103,7 @@ git rebase origin/main
 - Keep functions and views focused — one responsibility per function where reasonable.
 - Comment non-obvious logic, but don't over-comment self-explanatory code.
 
-**Formatting:** We use [Black](https://black.readthedocs.io/) to auto-format code. It's included in `requirements.txt`, so it's installed automatically as part of your setup. In VS Code (with or without Docker), Black formats a Python file every time you save it, so you don't need to do anything. In other editors, run this from the repo root before committing:
+**Formatting:** We use [Black](https://black.readthedocs.io/) to auto-format code. It's included in `requirements.txt`, so it's installed automatically as part of your setup. In VS Code (with or without Docker), Black formats a Python file every time you save it, so you don't need to do anything. CI checks every pull request with `black --check` and fails if a file isn't formatted. In other editors, run this from the repo root before committing:
 ```bash
 black .
 ```

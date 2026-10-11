@@ -12,7 +12,7 @@ RUN apt-get update \
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
-# Lets the README's Windows-style `py manage.py ...` work inside the container too.
+# Lets the docs' Windows-style `py manage.py ...` work inside the container too.
 RUN ln -s /usr/local/bin/python /usr/local/bin/py
 
 # A normal user instead of root, so files made in the container (like new
