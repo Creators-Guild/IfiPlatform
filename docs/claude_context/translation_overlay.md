@@ -1,19 +1,22 @@
 # English overlay (translation/*.py, models/translation.py) — design notes
 
 Last updated: 2026-10-12
-Covers: ifiplatform/apps/ifi_home_app/translation/page_segments.py, ifiplatform/apps/ifi_home_app/translation/stored_translations.py, ifiplatform/apps/ifi_home_app/translation/english_overlay.py, ifiplatform/apps/ifi_home_app/translation/english_urls.py, ifiplatform/apps/ifi_home_app/models/translation.py, ifiplatform/apps/ifi_home_app/management/commands/update_translation_snapshot.py
+Covers: ifiplatform/apps/ifi_home_app/translation/page_segments.py, ifiplatform/apps/ifi_home_app/translation/stored_translations.py, ifiplatform/apps/ifi_home_app/translation/english_overlay.py, ifiplatform/apps/ifi_home_app/translation/english_urls.py, ifiplatform/apps/ifi_home_app/translation/auto_translate.py, ifiplatform/apps/ifi_home_app/translation/english_editor.py, ifiplatform/apps/ifi_home_app/models/translation.py, ifiplatform/apps/ifi_home_app/management/commands/update_translation_snapshot.py, ifiplatform/apps/ifi_home_app/management/commands/translate_english.py
 
 Context for future Claude sessions. Not a human-facing doc. The plan and
 its decisions: `docs/claude_references/translation_redesign.md`.
 
 ## Status
 
-Built in step 1, **inert until the switch-over (step 3)**: English is only
-turned on by the English preview mode. The two-tree wagtail-localize setup
-(translation/sync.py, status.py, snippets.py, ...) still runs the site.
-`english_overlay.translation_status()` is the new per-piece status; it is
-not `translation/status.py`'s `translation_status()` (two-tree, removed at
-the switch-over).
+Steps 1–3 built (plan: `docs/claude_references/translation_redesign.md`).
+Step 3 is the **switch-over**: `WAGTAIL_I18N_ENABLED = False`, one
+Norwegian tree, English shown under /en/ by `EnglishDisplayMiddleware`.
+A database still holding the English tree is converted by
+`manage.py switch_to_english_overlay --apply` (deploy.sh runs it after
+`migrate`; it does nothing once switched). Code still left from the
+two-tree setup (translation/sync.py, views.py, snippets.py, deepl's
+adapter class, the old sync view/JS, `publish_target`) is dead and goes in
+step 4; `LEGACY_IMPORTERS` in test_translated_fields_guard lists it.
 
 ## Model attribute: `translated_fields`, not `translatable_fields`
 
@@ -114,3 +117,109 @@ names block types so struct-field renames are caught even where two block
 types share a field name; a block **type** rename keeps the stored form and
 moves nothing (the message says so). `manage.py update_translation_snapshot`
 rewrites the file.
+
+## auto_translate.py (DeepL in the background)
+
+- **Timer + table, not a task queue** (decided in step 2): django-tasks
+  0.12's database backend moved to a separate 0.x package. Publishing a page
+  (`page_published` signal: editor, scheduled, workflows, commands; never
+  draft saves) or saving a translated snippet (`post_save`, skipped for
+  `raw`) upserts a `WaitingForEnglish` row. `manage.py translate_english`
+  runs every minute (`deploy/systemd/ifiplatform-translate.timer`; a run
+  still busy isn't started twice) and `--nightly` at 03:30.
+- `translate_waiting()` locks each row with `select_for_update(skip_locked)`
+  while translating, so an overlapping nightly run skips it, and a publish
+  during the DeepL call waits and then inserts a fresh row (translated next
+  minute) instead of being lost. `fill_missing()` runs in a savepoint, so a
+  DB error still lets the failure be recorded on the row.
+- Failures: `attempts`, `last_error`, retried after 2, 4, 8 … 60 minutes.
+  Unpublished pages and deleted objects drop their row.
+- DeepL output that fails `check_english()` is stored with `has_error`
+  (shows as missing), and `drop_failed_machine_rows()` deletes those before
+  the next try, because `save_machine()` is insert-only.
+- English slug: set once from the first English title
+  (`set_english_slug_if_missing`), never from later title changes.
+- Nightly: `forget_stale_glossary_rows()` (DeepL rows with a glossary term,
+  older than `GlossarySyncState`), mark everything whose
+  `translation_status()` has missing or errors, translate, then
+  `cleanup()` (cleanup also runs with auto-translate off).
+- No DeepL key (`settings.DEEPL_API_KEY`): nothing is marked and nothing is
+  sent; tests patch `deepl.translate_texts`.
+- `fill_missing_many(objects)`: all missing pieces of several objects in
+  as few DeepL requests as possible (50 texts each); `fill_missing` is the
+  one-object case. Used for a menu group with its links and whole menus.
+- `request_subtree(page)` ("Machine-translate subtree"): marks the page and
+  its live descendants with `requested_by_person=True`; with automatic
+  translation off, `translate_waiting()` only processes such rows. Queued,
+  not done in the request: a big tree takes minutes.
+- `deepl.translate_texts` raises an `HTTPError` with DeepL's own message
+  plus a hint (404 with a glossary set = `DEEPL_GLOSSARY_ID` doesn't exist
+  on that DeepL account; `sync_deepl_glossary` recreates glossaries under
+  new IDs, so a stale ID is a realistic failure).
+
+## english_editor.py
+
+- Each form row carries its object, path and **the Norwegian the editor
+  saw**; a fix is saved against that, never the text at save time (if the
+  Norwegian changed meanwhile, the fix attaches to the old text and the new
+  text gets DeepL). Rows refused by `check_english()` re-render with the
+  error.
+- A menu group's editor also lists its links (`get_all_child_relations`):
+  each link is its own object in the tables.
+- Header links: back to the Norwegian object (`AdminURLFinder` edit URL),
+  "View in English" (live pages), and the subtree confirm view.
+  `machine_translate_menu` (button on `Menu` snippet rows) DeepL-fills a
+  whole menu (groups + links) synchronously in one batch.
+- The English slug field must render "" for a page without one (a None
+  rendered as "None" would be saved as the slug "none").
+- `StoredEnglishViewSet`: the read-only superuser list
+  (`SuperusersMayLookPolicy`: superusers may "view", nobody may add/change/
+  delete). The only reader of SegmentTranslation besides
+  stored_translations.py.
+
+## Routing, links and the middleware (switch-over)
+
+- `english_urls.install()` replaces Wagtail's `Page.route` and
+  `Page.get_url_parts` (not a page mixin): breadcrumbs, child lists and
+  plain `Page` links need English addresses too. Addresses follow the
+  language prefix (`wants_english_address()`), not `english_active()`.
+- `get_url_parts`: the original call (which, with i18n off, reverses with
+  the active language's prefix) then the path rebuilt from English slugs;
+  the site root's depth comes from its `root_path`. A page not in the tree
+  yet (new page preview) keeps the original parts.
+- `route`: English slug first, then Norwegian slug; a Norwegian slug
+  under /en/ for a page that has an English slug raises
+  `MovedToEnglishAddress`, which the middleware's `process_exception`
+  turns into a 301.
+- `EnglishDisplayMiddleware` (after LocaleMiddleware): `request_scope()`
+  for every request, `english()` for GET/HEAD under /en/ outside
+  `/wagtail-admin/` and `/admin/`. TemplateResponses render inside it.
+- `set_english_slug()` creates Wagtail redirects (old -> new English
+  address, page + live descendants) when a live page's English address
+  changes, including the first DeepL slug replacing the Norwegian
+  fallback. The switch-over passes `redirect=False` and makes its own.
+- Sitemap: Django's i18n sitemap (`i18n`, `languages`, `alternates`), one
+  entry per page per language.
+
+## switch_to_english_overlay (one-time)
+
+Dry run unless `--apply` (everything in one transaction, rolled back).
+Order: format check (our pieces must be a subset of wagtail-localize's own
+extraction for every Norwegian object, else stop), copy English from
+`StringTranslation` (manual -> human, machine -> deepl; English-first
+snippets reversed), pair English typed straight into English copies by
+place (menus), keep English slugs that differ, repoint references to
+English objects (FKs and rich text links on snippets; anything else
+stops), redirects for changed English addresses (English-only pages: to
+the Norwegian twin with the same Peoply id, else the nearest ancestor),
+delete wagtail-localize's rows, the English pages/snippets and locale
+(Root's locale moved to nb first). Hard checks: Norwegian object counts
+unchanged, pieces with English after >= before. Rehearsed on a prod copy.
+
+Migration 0157 deletes an *unused* "en" locale (fresh databases get one
+from 0039); databases with English content keep it for the command.
+
+## status.py and nudges
+
+Rewired onto these tables: see `translation_nudge.md`. Tests force
+`DEEPL_API_KEY = ""` (settings.py), whatever .env says.

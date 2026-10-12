@@ -1,15 +1,21 @@
-"""English slugs: storing them, building /en/ paths from them, and finding
-a page by one. The only code that reads or writes the EnglishSlug table.
+"""English slugs: storing them, building /en/ addresses from them, routing
+/en/ requests by them, and redirecting when one changes. The only code that
+reads or writes the EnglishSlug table.
 
-Hooked into routing and links (route() / get_url_parts()) at the
-switch-over; see docs/claude_references/translation_redesign.md.
+install() puts routing and links on Wagtail's own Page (route() and
+get_url_parts()), so every page type and plain Page objects (breadcrumbs,
+child lists) get English addresses under /en/.
 
 Design rationale: docs/claude_context/translation_overlay.md"""
 
 from contextlib import contextmanager
 from contextvars import ContextVar
 
+from django.http import Http404
+from django.urls import reverse
+from django.utils import translation
 from django.utils.text import slugify
+from wagtail.contrib.redirects.models import Redirect
 from wagtail.models import Page
 
 from ..models.translation import EnglishSlug
@@ -35,6 +41,12 @@ def _remembered(key, load):
     if key not in memo:
         memo[key] = load()
     return memo[key]
+
+
+def _forget_slugs():
+    memo = _request_memo.get()
+    if memo is not None:
+        memo.pop("slugs", None)
 
 
 def _english_slugs():
@@ -65,12 +77,12 @@ def path_slug(page_id, norwegian_slug):
     return _english_slugs().get(page_id) or norwegian_slug
 
 
-def english_url_path(page, site_root):
-    """`page`'s path below `site_root` with English slugs, e.g.
-    "student-life/freshers-week/". Empty for the root itself."""
+def english_url_path(page, root_depth):
+    """`page`'s path below its site root (at `root_depth`) with English
+    slugs, e.g. "student-life/freshers-week/". Empty for the root itself."""
     tree, step = _tree(), Page.steplen
     parts = []
-    for depth in range(site_root.depth + 1, page.depth + 1):
+    for depth in range(root_depth + 1, page.depth + 1):
         pk, slug = tree[page.path[: depth * step]]
         parts.append(path_slug(pk, slug) + "/")
     return "".join(parts)
@@ -79,8 +91,7 @@ def english_url_path(page, site_root):
 def find_child(parent, slug):
     """For routing under /en/: (child, by_english). The child of `parent`
     whose English slug is `slug`, else the one whose Norwegian slug is, with
-    by_english False (the caller redirects if that child has an English
-    slug). (None, False) if neither exists."""
+    by_english False. (None, False) if neither exists."""
     children = parent.get_children()
     english_ids = [pk for pk, english in _english_slugs().items() if english == slug]
     child = children.filter(pk__in=english_ids).first() if english_ids else None
@@ -89,11 +100,102 @@ def find_child(parent, slug):
     return children.filter(slug=slug).first(), False
 
 
-def set_english_slug(page, wanted, source, user=None):
+# --- Routing and links on Wagtail's Page -------------------------------------
+
+
+class MovedToEnglishAddress(Exception):
+    """A Norwegian slug under /en/ for a page that has an English slug.
+    english_overlay.EnglishDisplayMiddleware turns it into a permanent
+    redirect to the English address."""
+
+    def __init__(self, page, rest):
+        super().__init__(page.pk)
+        self.page, self.rest = page, rest
+
+    def url(self, request):
+        with translation.override("en"):
+            base = self.page.get_url(request) or "/en/"
+        return base + "".join(f"{part}/" for part in self.rest)
+
+
+def wants_english_address():
+    """Addresses follow the language prefix (Django's active language), not
+    english_active(): every link built under /en/ uses English slugs, also
+    on POST/AJAX where English text is off."""
+    return translation.get_language() == "en"
+
+
+_original_route = Page.route
+_original_get_url_parts = Page.get_url_parts
+
+
+def _route(self, request, path_components):
+    if not path_components or not wants_english_address():
+        return _original_route(self, request, path_components)
+    child, by_english = find_child(self, path_components[0])
+    if child is None:
+        raise Http404
+    if not by_english and english_slug(child):
+        raise MovedToEnglishAddress(child, path_components[1:])
+    child._cached_parent_obj = self
+    return child.specific.route(request, path_components[1:])
+
+
+def _get_url_parts(self, request=None):
+    parts = _original_get_url_parts(self, request=request)
+    if not parts or parts[2] is None or not wants_english_address():
+        return parts
+    site_id, root_url, _ = parts
+    root_paths = [
+        root
+        for root in self._get_relevant_site_root_paths(request)
+        if root.site_id == site_id
+    ]
+    if not root_paths:
+        return parts
+    root_depth = root_paths[0].root_path.rstrip("/").count("/") + 1
+    try:
+        relative = english_url_path(self, root_depth)
+    except KeyError:  # not saved in the tree yet (e.g. a new page's preview)
+        return parts
+    return site_id, root_url, reverse("wagtail_serve", args=(relative,))
+
+
+def install():
+    """Called once from IfiHomeAppConfig.ready()."""
+    Page.route = _route
+    Page.get_url_parts = _get_url_parts
+
+
+# --- Changing English slugs ---------------------------------------------------
+
+
+def _english_urls(page):
+    """{page id: English address} for `page` and its live descendants."""
+    pages = [page] + list(page.get_descendants().live())
+    with translation.override("en"):
+        return {each.pk: each.get_url() for each in pages}
+
+
+def _redirect(old, new):
+    Redirect.objects.update_or_create(
+        old_path=Redirect.normalise_path(old),
+        site=None,
+        defaults={
+            "redirect_link": new,
+            "redirect_page": None,
+            "is_permanent": True,
+            "automatically_created": True,
+        },
+    )
+
+
+def set_english_slug(page, wanted, source, user=None, redirect=True):
     """Saves `page`'s English slug from `wanted` (any text, slugified), made
     unique among its siblings with -2, -3, ...: never equal to a sibling's
-    English slug or Norwegian slug (the fallback address). Returns the slug
-    saved."""
+    English slug or Norwegian slug (the fallback address). If the English
+    addresses of a live page and its descendants change, the old ones
+    redirect to the new. Returns the slug saved."""
     base = slugify(wanted, allow_unicode=True) or page.slug
     siblings = page.get_siblings(inclusive=False)
     taken = set(siblings.values_list("slug", flat=True))
@@ -104,13 +206,19 @@ def set_english_slug(page, wanted, source, user=None):
     while slug in taken:
         number += 1
         slug = f"{base}-{number}"
-    EnglishSlug.objects.update_or_create(
-        page_id=page.pk,
-        defaults={"slug": slug, "source": source, "updated_by": user},
-    )
-    memo = _request_memo.get()
-    if memo is not None:
-        memo.pop("slugs", None)
+    with request_scope():
+        before = _english_urls(page) if redirect and page.live else {}
+        EnglishSlug.objects.update_or_create(
+            page_id=page.pk,
+            defaults={"slug": slug, "source": source, "updated_by": user},
+        )
+        _forget_slugs()
+        after = _english_urls(page) if before else {}
+    _forget_slugs()
+    for page_id, old in before.items():
+        new = after.get(page_id)
+        if old and new and old != new:
+            _redirect(old, new)
     return slug
 
 

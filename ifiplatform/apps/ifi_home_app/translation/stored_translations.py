@@ -16,7 +16,7 @@ from .page_segments import Segment, extract_segments
 ROWS_ATTR = "_english_rows"
 
 
-def _key(page):
+def object_key(page):
     """(content type id, object id). Pages use their specific type, so a
     plain Page and its .specific share rows."""
     if isinstance(page, Page):
@@ -32,7 +32,7 @@ def lookup(page):
         if page.pk is None:
             rows = {}
         else:
-            content_type_id, object_id = _key(page)
+            content_type_id, object_id = object_key(page)
             rows = {
                 (row.segment_path, row.norwegian_hash): row
                 for row in SegmentTranslation.objects.filter(
@@ -59,7 +59,7 @@ def _forget(page):
 def save_human(page, segment, english, user):
     """A person's English for `segment` (the place + Norwegian text they were
     looking at). Always replaces what's there, DeepL or human."""
-    content_type_id, object_id = _key(page)
+    content_type_id, object_id = object_key(page)
     SegmentTranslation.objects.update_or_create(
         content_type_id=content_type_id,
         object_id=object_id,
@@ -77,11 +77,18 @@ def save_human(page, segment, english, user):
     _forget(page)
 
 
-def save_machine(page, english_by_piece):
-    """DeepL's English, {Segment: English}. Insert-only, in one statement
+def save_machine(page, english_by_piece, failed=None):
+    """DeepL's English, {Segment: English}; `failed` is {Segment: (English,
+    error)} for output that can't be put back (stored with has_error, so it
+    is shown as missing and retried). Insert-only, in one statement
     (INSERT ... ON CONFLICT DO NOTHING): fills places with no row yet and
     never touches an existing row, so a human fix always wins."""
-    content_type_id, object_id = _key(page)
+    content_type_id, object_id = object_key(page)
+    pieces = [(segment, english, "") for segment, english in english_by_piece.items()]
+    pieces += [
+        (segment, english, error)
+        for segment, (english, error) in (failed or {}).items()
+    ]
     SegmentTranslation.objects.bulk_create(
         [
             SegmentTranslation(
@@ -92,12 +99,79 @@ def save_machine(page, english_by_piece):
                 norwegian_hash=segment.norwegian_hash,
                 english_text=english,
                 source="deepl",
+                has_error=bool(error),
+                error=error,
             )
-            for segment, english in english_by_piece.items()
+            for segment, english, error in pieces
         ],
         ignore_conflicts=True,
     )
     _forget(page)
+
+
+def import_rows(page, rows):
+    """Copies existing English in (the switch-over): `rows` are
+    (Segment, English, source, user, has_error, error) tuples. Insert-only:
+    a row already there wins, so import the most trusted rows first."""
+    content_type_id, object_id = object_key(page)
+    SegmentTranslation.objects.bulk_create(
+        [
+            SegmentTranslation(
+                content_type_id=content_type_id,
+                object_id=object_id,
+                segment_path=segment.path,
+                norwegian_text=segment.norwegian_text,
+                norwegian_hash=segment.norwegian_hash,
+                english_text=english,
+                source=source,
+                translated_by=user,
+                has_error=has_error,
+                error=error,
+            )
+            for segment, english, source, user, has_error, error in rows
+        ],
+        ignore_conflicts=True,
+    )
+    _forget(page)
+
+
+def drop_failed_machine_rows(page):
+    """Deletes `page`'s DeepL rows marked has_error, so they're retried."""
+    content_type_id, object_id = object_key(page)
+    SegmentTranslation.objects.filter(
+        content_type_id=content_type_id,
+        object_id=object_id,
+        source="deepl",
+        has_error=True,
+    ).delete()
+    _forget(page)
+
+
+def forget_stale_glossary_rows(terms, synced_at):
+    """Deletes DeepL rows containing a glossary term (case-insensitive, like
+    DeepL's own matching) that predate the glossary's last sync, so they're
+    redone with the current glossary. Returns the number deleted."""
+    if not terms or synced_at is None:
+        return 0
+    lowered = [term.lower() for term in terms]
+    stale = [
+        pk
+        for pk, text in SegmentTranslation.objects.filter(
+            source="deepl", updated_at__lt=synced_at
+        ).values_list("pk", "norwegian_text")
+        if any(term in text.lower() for term in lowered)
+    ]
+    return SegmentTranslation.objects.filter(pk__in=stale).delete()[0]
+
+
+def objects_with_errors():
+    """{(content type id, object id)} of everything with English that
+    couldn't be put back (has_error)."""
+    return set(
+        SegmentTranslation.objects.filter(has_error=True).values_list(
+            "content_type_id", "object_id"
+        )
+    )
 
 
 def missing_segments(page):

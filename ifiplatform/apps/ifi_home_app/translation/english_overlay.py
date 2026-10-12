@@ -11,6 +11,7 @@ from dataclasses import dataclass
 
 from django.db import connections
 from django.db.backends.signals import connection_created
+from django.http import HttpResponsePermanentRedirect
 from django.utils import translation
 
 logger = logging.getLogger(__name__)
@@ -225,3 +226,42 @@ class EnglishPreviewMixin:
             if hasattr(response, "render"):
                 response.render()  # templates render lazily, outside this block otherwise
             return response
+
+
+_ADMIN_PATHS = ("/wagtail-admin/", "/admin/")
+
+
+def shows_english(request):
+    """English text is shown for GET/HEAD requests under /en/, outside the
+    admin. POST/AJAX and the admin always see Norwegian."""
+    return (
+        request.method in ("GET", "HEAD")
+        and translation.get_language() == "en"
+        and not any(marker in request.path for marker in _ADMIN_PATHS)
+    )
+
+
+class EnglishDisplayMiddleware:
+    """Turns English on while a page is shown under /en/ (must come after
+    LocaleMiddleware, which picks the language from the address), loads
+    English slugs at most once per request, and redirects a Norwegian slug
+    under /en/ to the English address."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from .english_urls import request_scope
+
+        with request_scope():
+            if shows_english(request):
+                with english():
+                    return self.get_response(request)
+            return self.get_response(request)
+
+    def process_exception(self, request, exception):
+        from .english_urls import MovedToEnglishAddress
+
+        if isinstance(exception, MovedToEnglishAddress):
+            return HttpResponsePermanentRedirect(exception.url(request))
+        return None

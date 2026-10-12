@@ -34,15 +34,10 @@ from wagtail_localize.operations import TranslationCreator
 from wagtail_localize.views.edit_translation import apply_machine_translation
 
 from ifi_home_app.models import GlossarySyncState
+from ifi_home_app.translation.deepl import DEEPL_CALL_DELAY_SECONDS
 from ifi_home_app.translation.glossary_terms import GLOSSARY_TERMS
 
 TARGET_LANGUAGE_CODE = "en"
-
-# Gap between DeepL calls -- one page's worth of untranslated segments per
-# call. Without this, a real subtree (164 pages the night this was added)
-# fires DeepL requests back-to-back with no gap at all, which is what
-# tripped DeepL's own rate limiting in the first place.
-DEEPL_CALL_DELAY_SECONDS = 1
 
 
 class Command(BaseCommand):

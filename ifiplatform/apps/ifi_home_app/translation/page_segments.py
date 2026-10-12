@@ -90,13 +90,19 @@ def check_translated_field(model, name):
         )
 
 
-def _place(path):
+def place_of(path):
     """`path` with block ids replaced by *, e.g. "body.*.text"."""
     return _BLOCK_ID.sub("*", path)
 
 
+def is_translated_place(model, path):
+    """True if `path` (a stored path, e.g. "body.<block id>.text") is one
+    of `model`'s translated places."""
+    return place_of(path) in places(model).values()
+
+
 def _is_excluded(model, path):
-    return _place(path) in getattr(model, "untranslated_block_paths", ())
+    return place_of(path) in getattr(model, "untranslated_block_paths", ())
 
 
 def _stored_value(page, name):
@@ -113,7 +119,8 @@ def _segment_values(model, field, value):
     if isinstance(field, StreamField):
         values = StreamFieldSegmentExtractor(field).handle_stream_block(value)
     elif isinstance(field, RichTextField):
-        template, strings = extract_strings(value or "")
+        # a RichText object until the field is saved and loaded again
+        template, strings = extract_strings(getattr(value, "source", value) or "")
         values = [TemplateSegmentValue("", "html", template, len(strings))] + [
             StringSegmentValue("", string, attrs=attrs) for string, attrs in strings
         ]
@@ -136,8 +143,10 @@ def extract_segments(page, field_name=None):
     for name in names:
         field = model._meta.get_field(name)
         for value in _segment_values(model, field, _stored_value(page, name)):
-            if isinstance(value, StringSegmentValue) and not _is_excluded(
-                model, value.path
+            if (
+                isinstance(value, StringSegmentValue)
+                and not value.is_empty()  # e.g. an empty optional block field
+                and not _is_excluded(model, value.path)
             ):
                 segments.append(Segment(value.path, value.string.data))
     return list(dict.fromkeys(segments))
@@ -177,6 +186,16 @@ def apply_translations(page, field_name, translations):
         strings = [(value.string, value.attrs) for value in values[1:]]
         return restore_strings(values[0].template, strings)
     return values[0].string.render_text() if values else norwegian
+
+
+def stored_form(text):
+    """Plain text in stored form (HTML-escaped, newlines as <br>)."""
+    return StringValue.from_plaintext(text).data
+
+
+def plain_text(stored_text):
+    """Stored-form text as plain text (tags removed, entities unescaped)."""
+    return StringValue(stored_text).render_text()
 
 
 def check_english(segment, english):

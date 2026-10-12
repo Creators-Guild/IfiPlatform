@@ -114,7 +114,7 @@ group or message").
 | `page_segments.py` | split a field into text pieces, put English back | `Segment`, `extract_segments(page, field)`, `apply_translations(page, field, translations)` |
 | `stored_translations.py` | the only code that reads/writes the `SegmentTranslation` table (plain functions, not a class) | `lookup(page)`, `save_human(...)`, `save_machine(...)`, `cleanup()` |
 | `english_overlay.py` | the automatic part | `TranslatedFieldsMixin`, `english_active()`, `raw_norwegian()`, `block_english_writes`, `translation_status(page)` |
-| `auto_translate.py` | DeepL in the background | `fill_missing(page)`, pending marker, nightly catch-up |
+| `auto_translate.py` | DeepL in the background | `fill_missing(page)`, `request_english(page)`, `translate_waiting()`, nightly catch-up |
 | `english_urls.py` | English slugs: storing, routing, building `/en/` links | `english_slug(page)`, `set_english_slug(...)`, `english_url_path(page)`, `find_child(parent, slug)` |
 
 `translation/deepl.py` becomes a plain DeepL client (direct HTTP with
@@ -340,25 +340,35 @@ test checks they're gone. Wagtail's own locale UI disappears with i18n off.
 
 ## Automatic translation
 
-- **On publish** (pages) and **on save** (snippets): queue `fill_missing`.
-  Only new/changed pieces go to DeepL. Not on draft saves. Pages hook the
-  `page_published` **signal**, not the edit view, so scheduled
-  publishing, workflow approvals, Peoply sync and commands trigger it too
-  (same pattern as `wagtail_hooks.py:93` today).
-- **Queue:** `django-tasks` (already installed) on its own backend alias
-  `translation` (database backend), one `db_worker` systemd service.
-  DeepL calls run one at a time, survive restarts, failures are recorded.
-  Wagtail's own tasks stay on `default`.
-- **Nightly job** (systemd timer): translate anything missing, then run
-  cleanup. Cleanup runs even when auto-translate is off.
+- **On publish** (pages) and **on save** (snippets): mark the object
+  "waiting for English". Only new/changed pieces go to DeepL. Not on draft
+  saves. Pages hook the `page_published` **signal**, not the edit view, so
+  scheduled publishing, workflow approvals, Peoply sync and commands
+  trigger it too (same pattern as `wagtail_hooks.py:93` today). Until the
+  switch-over only Norwegian-locale objects are marked.
+- **Queue: a small table + a systemd timer** (decided 2026-10-12 in step 2;
+  replaces `django-tasks` + `db_worker`, whose database backend moved to a
+  separate 0.x package). `WaitingForEnglish` holds one row per object
+  waiting; `manage.py translate_english` runs every minute
+  (`ifiplatform-translate.timer`, same pattern as the backup timer),
+  translates what's waiting one object at a time and deletes the row.
+  Survives restarts (rows in the database); failures recorded on the row
+  (`attempts`, `last_error`) and retried with a growing wait (2, 4, 8 …
+  up to 60 minutes). English appears up to about a minute after
+  publishing. No always-running service.
+- **Nightly job** (`translate_english --nightly`, its own timer): mark
+  everything with missing English as waiting and translate it (only when
+  auto-translate is on), then run cleanup (always).
 - **Keeps:** glossary, `translation/deepl.py` (rewritten as our own
-  client), `DEEPL_CALL_DELAY_SECONDS`, `_clear_stale_glossary_translations`
-  (only `deepl` rows).
-- **"Machine-translate now"** button: manual fallback, same task.
+  client; wagtail-localize's subclass stays as a thin adapter over it until
+  the switch-over), `DEEPL_CALL_DELAY_SECONDS`,
+  `_clear_stale_glossary_translations` (only `deepl` rows).
+- **"Machine-translate now"** button in the English editor: translates
+  that object right away (manual fallback, works when auto-translate is
+  off).
 - **Previews** never call DeepL.
-- **Local dev / tests:** no DeepL key → auto-translate does nothing; the
-  `translation` queue uses the immediate backend, so no worker is needed
-  locally.
+- **Local dev / tests:** no DeepL key → nothing is marked waiting and no
+  DeepL calls happen; tests swap in a fake client.
 
 **Admin setting** (`wagtail.contrib.settings`, built in;
 `TranslationSettings.auto_translate`, default on, superusers only):
@@ -372,8 +382,8 @@ test checks they're gone. Wagtail's own locale UI disappears with i18n off.
 ## "Not translated yet" banner
 
 One rule: **some English is missing (or has an error) → banner shown,
-unless a translation job started less than 10 minutes ago** (pending
-marker).
+unless the object has been waiting for English less than 10 minutes**
+(its `WaitingForEnglish` row).
 
 This covers every case without a list of exceptions:
 
@@ -434,6 +444,18 @@ Dry-run report lists: fallback-copied pages, pages whose structure differs
 from nb, language-specific images/links (lost), references to repoint,
 English addresses that will change.
 
+**Prod data survey (2026-10-12, prod copy):** 261 en pages (85 aliases),
+1,096 wagtail-localize English strings (1,080 machine, 16 manual), 5
+snippet translation sources (4 of them written in English first and
+translated to nb: copied the other way round), English menu groups typed
+straight into en copies (fallback pairing), 0 segment overrides, and 2
+stray references (nb header messages linking to en tool pages). **English-
+only pages: deleted** (user decision): 4 union duplicates created Aug 18
+(each has a Norwegian page with the same Peoply ID and the same text;
+their /en/ addresses redirect to the twin's English address) and "Kar", an
+empty never-published draft. Any other English-only page makes the dry
+run list it.
+
 ## Rehearsal on a copy of the production database (required)
 
 1. **Get the copy:** newest `.dump` via `scp` (see
@@ -464,8 +486,8 @@ Deploy only after a clean final rehearsal, with a fresh backup right before.
 |---|---|
 | 0 | **Done 2026-10-12** (see Step 0 results). Quick check: translated fields on one `ArticlePage` + one `MenuGroup` with its links; StreamField, rich text with several sentences, nested blocks, page links stay nb; reading `title` doesn't translate `body`; every read is caught; English never reaches the database; a re-fetched `.specific` is English; English slugs; wagtail-localize works with i18n off; list its admin buttons; measure the home page and an article list. |
 | 1 | **Done 2026-10-12** (38 new tests, full suite 190 passing). Translation module (`page_segments`, `stored_translations`, `english_overlay`, `english_urls` storage functions), `SegmentTranslation` + `EnglishSlug` models, guard A, `translated_fields` on every model + rename protection, English preview mode. **Site works as today.** |
-| 2 | English editor (incl. slug), read-only superuser list, own DeepL client, auto-translate task + worker, setting. **Site works as today**; English rows fill in for the Norwegian pages. |
-| 3 | **Switch-over**: migration command (dry + real, incl. English slugs), deletion, flip setting, middleware, slug routing + links, remove locale filters and `.localized`, switcher, sitemap, banner, hide wagtail-localize UI, nudges rewired, seed data rewritten |
+| 2 | **Done 2026-10-12** (23 new tests, full suite 213 passing; queue = timer + `WaitingForEnglish`, see Automatic translation). English editor (incl. slug), read-only superuser list, own DeepL client, auto-translate task + worker, setting. **Site works as today**; English rows fill in for the Norwegian pages. |
+| 3 | **Done 2026-10-12** (212 tests passing; rehearsal below). **Switch-over**: migration command (dry + real, incl. English slugs), deletion, flip setting, middleware, slug routing + links (incl. redirects when an English slug changes), remove locale filters and `.localized`, switcher, sitemap, banner, hide wagtail-localize UI, nudges rewired, editor-mode link to the English editor (replacing the sync button), drop the `is_norwegian()` checks and `deepl.DeepLTranslator` adapter, seed data rewritten |
 
 Why this order (changed 2026-10-12, when starting step 1): everything that
 assumes "only Norwegian pages exist" must land together with the
@@ -479,7 +501,37 @@ The model attribute is called `translated_fields`, not
 attribute itself and keeps syncing the two trees until the switch-over,
 so reusing that name would break the current sync.
 | 3b | Rehearsal on a copy of the production database |
-| 4 | Remove dead code; docs (contributor doc `docs/architecture/shared/translations.md`, claude_context notes, `to_fix.md`) |
+| 4 | Remove dead code; docs (contributor doc `docs/architecture/shared/translations.md`, `docs/operations/prod_server.md` + management_commands.md for the two translate timers and `translate_english`, claude_context notes, `to_fix.md`) |
+
+### Step 3 rehearsal results (2026-10-12, prod copy)
+
+- `switch_to_english_overlay --apply`: 11 s; 794 wagtail-localize pieces
+  + 15 English-first + 17 typed menu pieces copied; 763 pieces shown in
+  English before -> 763 stored after (of 1,341; 578 left for DeepL); 121
+  English slugs kept; 2 references repointed; 5 redirects; 5 English-only
+  pages deleted (as decided); 1 English-only menu link lost ("UIO
+  Verktøy" in the English "Tools" menu).
+- All 488 old addresses requested: 235/235 /nb/ work; /en/ 234 work, 5
+  redirect correctly, **14 now 404 because their Norwegian page is
+  unpublished** while the English copy was still live (the "unpublish only
+  hits nb" bug): 7 company presentations, 3 articles (incl. "Om
+  IfiPlattform"), 2 tools, 2 categories ("Fadderuka", "Arrangementer").
+  Their English addresses are unchanged, so republishing in Norwegian
+  brings them back. Editors decide which should be public.
+- English titles match (17 "mismatches" were HTML-escaped apostrophes, plus
+  the 2 duplicates redirecting to their twins).
+- Crawl of the switched site: 241 pages per language, 0 broken links, 0
+  `href="None"`, 0 English pages linking into /nb/.
+- Found while testing: dev and prod share one DeepL account, and
+  `sync_deepl_glossary` deletes/recreates the glossary by name, so running
+  it anywhere breaks the others' `DEEPL_GLOSSARY_ID` (local was already
+  stale). Errors now say so.
+
+Added in step 3 at the user's request (editors had them before):
+"Machine-translate subtree" (page header/more menu and the English
+editor; queued, works with auto-translate off), "Machine-translate menu"
+(Menu snippet rows; groups + links in one DeepL batch), and links from the
+English editor back to the Norwegian object and to the English page.
 
 ### Step 0 results (2026-10-12)
 
@@ -571,7 +623,7 @@ rebuild.
 | Only last translator kept | full history later |
 | Own code to maintain (editor, worker, module) | net code still goes down |
 | Not standard Wagtail | contributor doc |
-| New server service (`db_worker`) | operations doc; pages still show if it's down |
+| Two new systemd timers (`translate_english` every minute + nightly) | operations doc; pages still show if they stop |
 | Renaming a field orphans its translations | snapshot test blocks the PR and says how to fix; `rename_segment_path` helper |
 | Rollback = restore backup | rehearsal first |
 | Search (none today) needs an English index if added | noted in `to_fix.md` |

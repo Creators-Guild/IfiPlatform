@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
+    "wagtail.contrib.settings",
     "wagtail.contrib.sitemaps",
     "wagtail.embeds",
     "wagtail.sites",
@@ -85,7 +86,6 @@ INSTALLED_APPS = [
     "wagtail.admin",
     "wagtail",
     "wagtail_localize",
-    "wagtail_localize.locales",
     "modelcluster",
     "taggit",
 ]
@@ -94,6 +94,8 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
+    # after LocaleMiddleware: needs the language picked from the address
+    "ifi_home_app.translation.english_overlay.EnglishDisplayMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -236,9 +238,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # for short text, no variables*(some simple exceptions): {% trans %} in html files,
 # for longer text with variables: {% blocktrans %} in html files.
 
-# nb is the content source of truth -- also Wagtail's default locale, so
-# admin listings (snippets, new pages) open in Norwegian. See
-# docs/claude_context/admin_locales.md.
+# nb is the content source of truth and the only page tree; English is shown
+# under /en/ from stored text pieces (ifi_home_app/translation/).
 LANGUAGE_CODE = "nb"
 
 LANGUAGES = [
@@ -364,24 +365,32 @@ LOGOUT_REDIRECT_URL = "/"  # where the user will be redirected when finished log
 WAGTAILADMIN_BASE_URL = "http://localhost:8000"  # for local development
 WAGTAIL_SITE_NAME = "Iif Platform"
 # Wagtail translation support
-WAGTAIL_I18N_ENABLED = True
+# Off: one Norwegian page tree; English is stored as text pieces and shown
+# under /en/ (ifi_home_app/translation/). Django's i18n_patterns still gives
+# /nb/ and /en/ addresses.
+WAGTAIL_I18N_ENABLED = False
 WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
     ("en", "English"),
     ("nb", "Norwegian Bokmål"),
 ]
-# Machine translation setup
-# CLASS points at ifi_home_app's own subclass (adds raise_for_status() --
-# see translation/deepl.py), not wagtail_localize's stock one.
+# Machine translation: our own DeepL client (translation/deepl.py). Without
+# a key, nothing is sent to DeepL (local dev, tests).
+DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")  # check .env
+# Set by `manage.py sync_deepl_glossary` -- see that command and
+# ifi_home_app/translation/glossary_terms.py. Left unset, DeepL just
+# translates freely.
+DEEPL_GLOSSARY_ID = os.environ.get("DEEPL_GLOSSARY_ID", "")  # check .env
+# Tests never talk to DeepL, whatever .env says (tests that need it patch
+# translation/deepl.py).
+if "test" in sys.argv[1:2]:
+    DEEPL_API_KEY = DEEPL_GLOSSARY_ID = ""
+# The two-tree wagtail-localize setup, until the switch-over: its CLASS is a
+# thin adapter over the client above.
 WAGTAILLOCALIZE_MACHINE_TRANSLATOR = {
     "CLASS": "ifi_home_app.translation.deepl.DeepLTranslator",
     "OPTIONS": {
-        "AUTH_KEY": os.environ.get("DEEPL_API_KEY"),  # check .env
-        # Set by `manage.py sync_deepl_glossary` -- see that command and
-        # ifi_home_app/deepl_glossary_terms.py. Left unset, DeepL just
-        # translates freely (a plain warning gets logged, not an error).
-        "GLOSSARY_IDS": {
-            ("NB", "EN"): os.environ.get("DEEPL_GLOSSARY_ID")
-        },  # check .env
+        "AUTH_KEY": DEEPL_API_KEY,
+        "GLOSSARY_IDS": {("NB", "EN"): DEEPL_GLOSSARY_ID},
     },
 }
 

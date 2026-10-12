@@ -1,6 +1,6 @@
 # models/article/style.py and models/page_mixins.py — design notes
 
-Last updated: 2026-10-09
+Last updated: 2026-10-12
 Covers: ifiplatform/apps/ifi_home_app/models/article/style.py, ifiplatform/apps/ifi_home_app/models/page_mixins.py
 
 Context for future Claude sessions. Not a human-facing doc.
@@ -84,9 +84,12 @@ concerns separated.
   those live as `ArticlePage`'s own methods, reusing `editor_mode_allowed()`
   directly rather than being forced through a `style_target` every other
   page type also has to carry.
-- `can_sync_mirrored_page`: unlike publish/unpublish, this one *is* shared
-  by all four page types, since it's just a plain edit action
-  (`translation/sync.py`) rather than a Wagtail publish action.
+- `english_editor_url`: the editor-mode "English" link (replaced the
+  two-tree "Sync mirrored page" button at the switch-over). Shared by all
+  four page types, since it's a plain edit action, not a Wagtail publish
+  action. Since the switch-over there are no alias pages, so
+  `style_target` is always the page itself; kept as the single place
+  saves are routed through.
 
 ### PageBannerStyle
 

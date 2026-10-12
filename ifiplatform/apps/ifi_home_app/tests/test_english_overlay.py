@@ -289,6 +289,17 @@ class StorageTests(OverlayTestCase):
         self.assertIn(Segment("title", "Fadderuke"), missing)
         self.assertNotIn(Segment("hero_image_caption", "Studenter på plenen"), missing)
 
+    def test_empty_text_is_not_a_piece(self):
+        page = self.fresh()
+        page.hero_image_caption = ""
+        page.body = [("multi_column", {"columns": [{"title": "", "content": []}]})]
+        page.save_revision().publish()
+        paths = [
+            segment.path for segment in page_segments.extract_segments(self.fresh())
+        ]
+        self.assertNotIn("hero_image_caption", paths)
+        self.assertFalse([path for path in paths if path.startswith("body")])
+
     def test_check_english(self):
         segment = Segment("intro", 'Les <a id="a1">her</a>')
         page_segments.check_english(segment, 'Read <a id="a1">here</a>')
@@ -385,12 +396,14 @@ class EnglishSlugTests(OverlayTestCase):
     def test_path_falls_back_to_norwegian_slug(self):
         root = Page.get_first_root_node()
         self.assertEqual(
-            english_urls.english_url_path(self.article, root), "artikler/fadderuke/"
+            english_urls.english_url_path(self.article, root.depth),
+            "artikler/fadderuke/",
         )
         english_urls.set_english_slug(self.index, "Articles", "deepl")
         english_urls.set_english_slug(self.article, "Freshers' week", "deepl")
         self.assertEqual(
-            english_urls.english_url_path(self.article, root), "articles/freshers-week/"
+            english_urls.english_url_path(self.article, root.depth),
+            "articles/freshers-week/",
         )
 
     def test_find_child(self):
@@ -411,10 +424,10 @@ class EnglishSlugTests(OverlayTestCase):
     def test_one_query_per_request_scope(self):
         root = Page.get_first_root_node()
         with english_urls.request_scope():
-            english_urls.english_url_path(self.article, root)
+            english_urls.english_url_path(self.article, root.depth)
             with self.assertNumQueries(0):
-                english_urls.english_url_path(self.article, root)
-                english_urls.english_url_path(self.index, root)
+                english_urls.english_url_path(self.article, root.depth)
+                english_urls.english_url_path(self.index, root.depth)
 
 
 @override_settings(ALLOWED_HOSTS=["*"])

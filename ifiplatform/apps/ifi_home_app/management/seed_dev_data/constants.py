@@ -251,11 +251,10 @@ LOREM_IPSUM = (
     "commodo consequat."
 )
 
-# nb -> en for every translatable string this script writes. Fed through
-# wagtail_localize's real PO import/export pipeline (see _translate_page)
-# rather than just hand-writing a second copy of every field. Anything not
-# listed here (image files, choice fields, urls, the placeholder name/email)
-# falls back to the source-language value untouched.
+# nb -> en for every translatable string this script writes, keyed by the
+# Norwegian in stored form (see _translate_page). Anything not listed here
+# (image files, choice fields, urls, the placeholder name/email) shows the
+# Norwegian under /en/.
 TRANSLATIONS = {
     "Artikkler": "Articles",
     "Nyheter": "News",

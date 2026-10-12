@@ -10,14 +10,11 @@ Design rationale/history: docs/claude_context/article_style_and_page_mixins.md""
 
 from account_app.permissions import is_pending_editor
 from django.utils.functional import cached_property
-from wagtail.models import Locale
-from wagtail_localize.models import TranslationSource
 
 from django.db import models
 
 from .article.constants import HEX_COLOR_VALIDATOR
 from ..translation.status import page_needs_translation, translation_status
-from ..translation.sync import SOURCE_LANGUAGE_CODE
 
 
 class TranslationWarningMixin:
@@ -53,28 +50,21 @@ class EditorModeMixin:
     def can_edit_in_editor_mode(self, user):
         return editor_mode_allowed(self.style_target, user, "edit")
 
-    def can_sync_mirrored_page(self, user):
-        """Whether `user` may push this page's synchronized fields to its
-        translations right now: needs edit permission, this page must be
-        the nb ("OG") copy, and it needs an existing translation to push to."""
+    def english_editor_url(self, user):
+        """The English editor for this page (editor mode's "English" link),
+        or None unless `user` may edit it."""
+        from ..translation.english_editor import editor_url
+
         target = self.style_target
-        if target.locale.language_code != SOURCE_LANGUAGE_CODE:
-            return False
         if not editor_mode_allowed(target, user, "edit"):
-            return False
-        source = TranslationSource.objects.get_for_instance_or_none(target)
-        return source is not None and source.translations.filter(enabled=True).exists()
+            return None
+        return editor_url(target)
 
     def translation_nudge(self, user):
-        """translation_status() of this page's nb copy, for the editor-mode
-        banner -- None unless `user` may edit it. Resolved to nb so the
-        banner also shows on the en alias/translation of an outdated page."""
+        """translation_status() of this page, for the editor-mode banner --
+        None unless `user` may edit it."""
         target = self.style_target
-        if target.locale.language_code != SOURCE_LANGUAGE_CODE:
-            target = target.get_translation_or_none(
-                Locale.objects.get(language_code=SOURCE_LANGUAGE_CODE)
-            )
-        if target is None or not editor_mode_allowed(target, user, "edit"):
+        if not editor_mode_allowed(target, user, "edit"):
             return None
         return translation_status(target, user)
 

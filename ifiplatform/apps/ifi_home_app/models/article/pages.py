@@ -49,13 +49,8 @@ def _articles_including_drafts_for_editor(queryset, listing_page, user):
 
 
 def get_section_index(section):
-    """The site's live ArticleIndexPage for `section` ('info_articles' or 'news'),
-    in the active locale."""
-    return (
-        ArticleIndexPage.objects.live()
-        .filter(locale=Locale.get_active(), section=section)
-        .first()
-    )
+    """The site's live ArticleIndexPage for `section` ('info_articles' or 'news')."""
+    return ArticleIndexPage.objects.live().filter(section=section).first()
 
 
 # Current tree: ArticleIndexPage -> CategoryPage -> ArticlePage
@@ -241,7 +236,7 @@ class ArticlePage(
         ) or self.has_unpublished_changes
         context["can_publish_page"] = self.can_publish_in_editor_mode(request.user)
         context["can_unpublish_page"] = self.can_unpublish_in_editor_mode(request.user)
-        context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
+        context["english_editor_url"] = self.english_editor_url(request.user)
         context["translation_nudge"] = self.translation_nudge(request.user)
         overrides_by_block_id = {
             style.block_id: style
@@ -403,22 +398,16 @@ class CategoryPage(
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
-        context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
+        context["english_editor_url"] = self.english_editor_url(request.user)
         context["translation_nudge"] = self.translation_nudge(request.user)
-        subcategories = (
-            CategoryPage.objects.child_of(self)
-            .live()
-            .filter(locale=Locale.get_active())
-        )
+        subcategories = CategoryPage.objects.child_of(self).live()
         context["main_subcategories"], context["seasonal_subcategories"] = (
             _split_categories_by_season(subcategories)
         )
-        context["union_categories"] = (
-            StudentUnionCategoryPage.objects.child_of(self)
-            .live()
-            .filter(locale=Locale.get_active())
-        )
-        articles = ArticlePage.objects.child_of(self).filter(locale=Locale.get_active())
+        context["union_categories"] = StudentUnionCategoryPage.objects.child_of(
+            self
+        ).live()
+        articles = ArticlePage.objects.child_of(self)
         context["articles"] = _articles_including_drafts_for_editor(
             articles, self, request.user
         ).order_by("-published_date")
@@ -427,9 +416,7 @@ class CategoryPage(
             if self.show_nested_tools
             else ToolPage.objects.child_of(self)
         )
-        context["tools"] = (
-            tools_query.live().filter(locale=Locale.get_active()).order_by("title")
-        )
+        context["tools"] = tools_query.live().order_by("title")
         return context
 
 
@@ -488,31 +475,18 @@ class ArticleIndexPage(
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         context["can_edit_style"] = self.can_edit_in_editor_mode(request.user)
-        context["can_sync_mirrored_page"] = self.can_sync_mirrored_page(request.user)
+        context["english_editor_url"] = self.english_editor_url(request.user)
         context["translation_nudge"] = self.translation_nudge(request.user)
-        categories = (
-            CategoryPage.objects.child_of(self)
-            .live()
-            .filter(locale=Locale.get_active())
-        )
+        categories = CategoryPage.objects.child_of(self).live()
         context["main_categories"], context["seasonal_categories"] = (
             _split_categories_by_season(categories)
         )
-        context["union_categories"] = (
-            StudentUnionCategoryPage.objects.child_of(self)
-            .live()
-            .filter(locale=Locale.get_active())
-        )
-        suggested_articles = ArticlePage.objects.descendant_of(self).filter(
-            locale=Locale.get_active()
-        )
+        context["union_categories"] = StudentUnionCategoryPage.objects.child_of(
+            self
+        ).live()
+        suggested_articles = ArticlePage.objects.descendant_of(self)
         context["suggested_articles"] = _articles_including_drafts_for_editor(
             suggested_articles, self, request.user
         ).order_by("-published_date")[:4]
-        context["tools"] = (
-            ToolPage.objects.child_of(self)
-            .live()
-            .filter(locale=Locale.get_active())
-            .order_by("title")
-        )
+        context["tools"] = ToolPage.objects.child_of(self).live().order_by("title")
         return context

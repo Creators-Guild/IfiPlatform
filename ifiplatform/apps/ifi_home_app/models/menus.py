@@ -180,10 +180,10 @@ def _thumbnail(page):
 
 
 def _resolve_page(page):
-    """The live, visible version of `page` in the active locale, or None."""
+    """`page` (specific) if it's live and visible, else None."""
     if page is None:
         return None
-    page = page.specific.localized
+    page = page.specific
     if not page.live:
         return None
     if isinstance(page, CategoryPage) and not page.is_visible:
@@ -215,7 +215,7 @@ def _resolve_link(link):
 
 
 def _resolve_group(slot):
-    group = slot.group.localized
+    group = slot.group
     link_page = _resolve_page(group.link_page)
     links = [
         link for link in (_resolve_link(link) for link in group.links.all()) if link
@@ -224,7 +224,7 @@ def _resolve_group(slot):
     return {
         "title": group.title,
         "short_title": group.short_title,
-        "icon": slot.group.icon or group.icon,
+        "icon": group.icon,
         "url": url,
         "external": bool(group.link_url) and not link_page,
         # an "All" link to the heading's own target, unless a link already goes there
@@ -236,8 +236,9 @@ def _resolve_group(slot):
 
 
 def get_menu(key):
-    """The Menu with this key, resolved to plain dicts for the active locale:
-    one per group, in order. Empty if the menu hasn't been set up."""
+    """The Menu with this key, resolved to plain dicts (English labels under
+    /en/, via the English overlay): one per group, in order. Empty if the
+    menu hasn't been set up."""
     menu = Menu.objects.filter(key=key).first()
     if menu is None:
         return []

@@ -1,6 +1,6 @@
 # translation/views.py + machine_translate_subtree command — design notes
 
-Last updated: 2026-09-24
+Last updated: 2026-10-12
 Covers: ifiplatform/apps/ifi_home_app/management/commands/machine_translate_subtree.py, ifiplatform/apps/ifi_home_app/translation/deepl.py, ifiplatform/apps/ifi_home_app/translation/views.py
 
 Context for future Claude sessions. Not a human-facing doc. The actual
@@ -59,15 +59,14 @@ Fixed three ways at once, moving the real work to the
 - **A small delay between DeepL calls** (`DEEPL_CALL_DELAY_SECONDS` in the
   command) so requests aren't fired at DeepL back-to-back -- the direct fix
   for the rate-limit-shaped failure.
-- **`ifi_home_app.translation.deepl.DeepLTranslator`** subclasses
-  wagtail_localize's own `DeepLTranslator` to add the missing
-  `raise_for_status()` (same pattern as
-  `core_app.storage.LenientManifestStaticFilesStorage` subclassing
-  `ManifestStaticFilesStorage` -- extend the third-party class rather than
-  patch/vendor it). Wired in via `WAGTAILLOCALIZE_MACHINE_TRANSLATOR["CLASS"]`
-  in `settings.py`. Now a bad DeepL response surfaces as a real, readable
-  `HTTPError` in the per-page failure log instead of a bare JSON decode
-  error.
+- **`ifi_home_app.translation.deepl.translate_texts()`** is our own DeepL
+  client: the same request wagtail-localize's `DeepLTranslator` sends, but
+  with `raise_for_status()` first and batches of 50 texts. A bad DeepL
+  response surfaces as a real, readable `HTTPError` in the per-page failure
+  log instead of a bare JSON decode error. `deepl.DeepLTranslator` (wired
+  in via `WAGTAILLOCALIZE_MACHINE_TRANSLATOR["CLASS"]`) is now a thin
+  adapter over it for the two-tree setup, deleted at the switch-over. The
+  delay constant lives in `deepl.py` too.
 
 **Resumable by construction, not by any added retry logic.**
 `apply_machine_translation()` already skips any segment with an existing

@@ -1,7 +1,7 @@
-"""Editor-facing nudges to translate a page right away, now that English is
-hidden in the admin: a warning message after publishing and on the edit
-view, a dashboard panel, and a "Needs translation" button in the explorer.
-All run on translation_status() (status.py).
+"""Editor-facing nudges when a page's English is missing or out of date and
+DeepL isn't on its way: a warning message after publishing and on the edit
+view, a dashboard panel, and a "Needs translation" button in the explorer,
+each linking to the English editor. All run on status.py.
 
 Design rationale: docs/claude_context/translation_nudge.md"""
 
@@ -22,11 +22,7 @@ def warn(request, page):
     status = translation_status(page, request.user)
     if status is None:
         return
-    buttons = [messages.button(status["editor_url"], "Open translation editor")]
-    if status["machine_url"]:
-        buttons.insert(
-            0, messages.button(status["machine_url"], "Machine-translate now")
-        )
+    buttons = [messages.button(status["editor_url"], "Open English editor")]
     messages.warning(request, REASON_TEXT[status["reason"]], buttons=buttons)
 
 
@@ -48,17 +44,6 @@ def listing_status_button(page, user, next_url=None):
             icon_name="warning",
             priority=5,
             attrs={"title": REASON_TEXT[status["reason"]]},
-        )
-
-
-def machine_translate_button(page, user, view_name=None, next_url=None):
-    status = translation_status(page, user)
-    if status is not None and status["machine_url"]:
-        yield ListingButton(
-            "Machine-translate now",
-            status["machine_url"],
-            icon_name="doc-empty-inverse",
-            priority=59,
         )
 
 

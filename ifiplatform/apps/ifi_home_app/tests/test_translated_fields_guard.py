@@ -25,16 +25,13 @@ PROJECT = Path(settings.BASE_DIR)
 # Shrinks to nothing then.
 LEGACY_IMPORTERS = {
     "apps/ifi_home_app/management/commands/link_menu_translations.py",
+    "apps/ifi_home_app/management/commands/switch_to_english_overlay.py",
     "apps/ifi_home_app/management/commands/machine_translate_subtree.py",
     "apps/ifi_home_app/management/commands/sync_translated_page_fields.py",
-    "apps/ifi_home_app/management/seed_dev_data/helpers.py",
-    "apps/ifi_home_app/models/page_mixins.py",
     "apps/ifi_home_app/translation/deepl.py",
     "apps/ifi_home_app/translation/snippets.py",
-    "apps/ifi_home_app/translation/status.py",
     "apps/ifi_home_app/translation/sync.py",
     "apps/ifi_home_app/translation/views.py",
-    "apps/ifi_home_app/wagtail_hooks.py",
 }
 ALLOWED_IMPORTERS = {"apps/ifi_home_app/translation/page_segments.py"}
 

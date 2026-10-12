@@ -24,14 +24,14 @@ from .constants import (
 
 
 class EventSeedMixin:
-    def _seed_events(self, artikkler, nb_locale, en_locale, seed_image):
+    def _seed_events(self, artikkler, nb_locale, seed_image):
         event_index = self._get_or_create_page(
             artikkler,
             EventIndexPage,
             "Arrangementer",
             nb_locale,
         )
-        self._translate_page(event_index, en_locale)
+        self._translate_page(event_index)
 
         today = timezone.now().date()
         fadderuke = None
@@ -63,12 +63,12 @@ class EventSeedMixin:
                 # translates it itself, at the right point in the sequence.
                 fadderuke = event
             else:
-                self._translate_page(event, en_locale)
+                self._translate_page(event)
 
-        self._seed_fadderuke_sub_events(fadderuke, nb_locale, en_locale, seed_image)
-        self._seed_navet_company_presentations(event_index, nb_locale, en_locale)
+        self._seed_fadderuke_sub_events(fadderuke, nb_locale, seed_image)
+        self._seed_navet_company_presentations(event_index, nb_locale)
 
-    def _seed_fadderuke_sub_events(self, fadderuke, nb_locale, en_locale, seed_image):
+    def _seed_fadderuke_sub_events(self, fadderuke, nb_locale, seed_image):
         """Fills Fadderuke with a full Mon-Fri programme (see
         FADDERUKE_SUB_EVENT_SPECS) and its own calendar-color legend, so
         EventPage.calendar_days has a realistic week to lay out instead of
@@ -80,7 +80,7 @@ class EventSeedMixin:
             ]
             fadderuke.save_revision().publish()
 
-        unions = self._seed_fadderuke_unions(nb_locale, en_locale, seed_image)
+        unions = self._seed_fadderuke_unions(nb_locale, seed_image)
 
         # Fadderstyret hosts the whole week -- see
         # docs/claude_context/seed_dev_data.md.
@@ -92,7 +92,7 @@ class EventSeedMixin:
 
         # Must happen before any sub-event below is translated -- see
         # docs/claude_context/seed_dev_data.md before reordering this.
-        self._translate_page(fadderuke, en_locale)
+        self._translate_page(fadderuke)
 
         for (
             day_offset,
@@ -125,9 +125,9 @@ class EventSeedMixin:
                 ]
                 sub_event.save_revision().publish()
 
-            self._translate_page(sub_event, en_locale)
+            self._translate_page(sub_event)
 
-    def _seed_navet_company_presentations(self, event_index, nb_locale, en_locale):
+    def _seed_navet_company_presentations(self, event_index, nb_locale):
         """Recurring Tue/Thu "company presentation" EventPages for Navet --
         its real Peoply events were removed, so sync_peoply_events no
         longer produces any for it; this keeps its calendar looking
@@ -176,4 +176,4 @@ class EventSeedMixin:
             if not event.related_unions:
                 event.related_unions = [("union", {"union": navet, "role": "host"})]
                 event.save_revision().publish()
-            self._translate_page(event, en_locale)
+            self._translate_page(event)

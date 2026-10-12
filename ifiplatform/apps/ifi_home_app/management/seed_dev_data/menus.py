@@ -11,7 +11,6 @@ from ifi_home_app.models.article_models import (
     UnionPage,
 )
 from ifi_home_app.models.menus import Menu, MenuGroup, MenuGroupLink, MenuSlot
-from ifi_home_app.translation.snippets import link_existing_translation
 
 from .constants import CATEGORY_SPECS, LONG_UNION_NAME
 
@@ -19,7 +18,7 @@ LISTINGS_AT = ("Annonser hos", "Listings at")
 
 
 class MenuSeedMixin:
-    def _seed_menus(self, nb_locale, en_locale):
+    def _seed_menus(self, nb_locale):
         if Menu.objects.exists():
             self.skipped_count += 1
             return
@@ -62,16 +61,20 @@ class MenuSeedMixin:
                 )
             nb_group.save()
 
-            en_group = nb_group.copy_for_translation(en_locale)
-            en_group.title, en_group.short_title = titles[1], short_titles[1]
-            for en_link, link in zip(en_group.links.all(), links):
-                en_link.label = link.get("label", ("", ""))[1]
-                en_link.prefix = link.get("prefix", ("", ""))[1]
-            en_group.save()
-            link_existing_translation(nb_group, en_group)
+            self._store_english(
+                nb_group, {"title": titles[1], "short_title": short_titles[1]}
+            )
+            for nb_link, link in zip(nb_group.links.all(), links):
+                self._store_english(
+                    nb_link,
+                    {
+                        "label": link.get("label", ("", ""))[1],
+                        "prefix": link.get("prefix", ("", ""))[1],
+                    },
+                )
 
-            self.created_count += 2
-            self.stdout.write(f"  created MenuGroup (+en): {titles[0]}")
+            self.created_count += 1
+            self.stdout.write(f"  created MenuGroup: {titles[0]}")
             return nb_group
 
         def pages(page_list):

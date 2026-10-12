@@ -9,6 +9,8 @@ class IfiHomeAppConfig(AppConfig):
     name = "ifi_home_app"
 
     def ready(self):
-        from .translation import english_overlay
+        from .translation import auto_translate, english_overlay, english_urls
 
         english_overlay.install()
+        english_urls.install()
+        auto_translate.connect_signals()
