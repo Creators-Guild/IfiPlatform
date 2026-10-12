@@ -330,11 +330,13 @@ DEFAULT_FROM_EMAIL = os.environ.get(
 # File-based so the cache is shared across gunicorn worker processes --
 # the default LocMemCache is per-process, so e.g. Wagtail's site-root-paths
 # cache could go stale in some workers after a Site/page change until every
-# worker restarted.
+# worker restarted. One subfolder per database, so two servers on different
+# databases (e.g. dev and a restored prod copy) never read each other's
+# site-root paths.
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": BASE_DIR / "django_cache",
+        "LOCATION": BASE_DIR / "django_cache" / Path(DATABASES["default"]["NAME"]).name,
     }
 }
 # The test runner gets its own in-memory cache -- sharing django_cache with

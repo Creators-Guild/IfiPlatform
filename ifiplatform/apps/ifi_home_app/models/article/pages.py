@@ -29,6 +29,7 @@ from ..page_mixins import (
 )
 from .tools import ToolPage
 from .unions import StudentUnionCategoryPage
+from ...translation.english_overlay import EnglishPreviewMixin
 from ...translation.sync import SOURCE_LANGUAGE_CODE
 
 
@@ -61,11 +62,18 @@ def get_section_index(section):
 
 
 class ArticlePage(
-    EditorModeMixin, TranslationWarningMixin, Page
+    EnglishPreviewMixin, EditorModeMixin, TranslationWarningMixin, Page
 ):  # pylint: disable=too-many-ancestors
     """A single article page, published under a CategoryPage."""
 
     template = "info_articles/pages/article_page.html"
+    translated_fields = [
+        "intro",
+        "hero_image_title",
+        "hero_image_alt",
+        "hero_image_caption",
+        "body",
+    ]
 
     intro = RichTextField(blank=True)
     # hero_image itself and its title/alt/caption are content; how it's
@@ -303,11 +311,16 @@ class ArticlePage(
 
 
 class CategoryPage(
-    EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, Page
+    EnglishPreviewMixin,
+    EditorModeMixin,
+    BannerStyleMixin,
+    TranslationWarningMixin,
+    Page,
 ):  # pylint: disable=too-many-ancestors
     """A category of articles, optionally shown only during a specific date range."""
 
     template = "info_articles/pages/article_category_page.html"
+    translated_fields = ["intro", "general_info"]
 
     intro = RichTextField(blank=True)
     general_info = RichTextField(
@@ -421,11 +434,16 @@ class CategoryPage(
 
 
 class ArticleIndexPage(
-    EditorModeMixin, BannerStyleMixin, TranslationWarningMixin, Page
+    EnglishPreviewMixin,
+    EditorModeMixin,
+    BannerStyleMixin,
+    TranslationWarningMixin,
+    Page,
 ):  # pylint: disable=too-many-ancestors
     """Landing page listing all article categories and suggested articles."""
 
     template = "info_articles/pages/article_index_page.html"
+    translated_fields = ["intro", "general_info"]
 
     intro = RichTextField(blank=True)
     general_info = RichTextField(

@@ -1,6 +1,6 @@
 # models/event/ — design notes
 
-Last updated: 2026-10-09
+Last updated: 2026-10-12
 Covers: ifiplatform/apps/ifi_home_app/models/event/
 
 Context for future Claude sessions. Not a human-facing doc.

@@ -13,6 +13,8 @@ __all__ = [
     "MenuGroup",
     "MenuGroupLink",
     "MenuSlot",
+    "EnglishSlug",
+    "SegmentTranslation",
 ]
 
 from .home_models import *
@@ -22,3 +24,4 @@ from .event.pages import EventIndexPage, EventPage
 from .event import peoply  # noqa: F401 -- imported so Django registers its models
 from .glossary_models import GlossarySyncState
 from .menus import Menu, MenuGroup, MenuGroupLink, MenuSlot
+from .translation import EnglishSlug, SegmentTranslation

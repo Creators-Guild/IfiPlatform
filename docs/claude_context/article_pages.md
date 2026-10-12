@@ -1,6 +1,6 @@
 # models/article/pages.py — design notes
 
-Last updated: 2026-08-15
+Last updated: 2026-10-12
 Covers: ifiplatform/apps/ifi_home_app/models/article/pages.py
 
 Context for future Claude sessions. Not a human-facing doc.

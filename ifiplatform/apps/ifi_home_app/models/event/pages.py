@@ -36,6 +36,7 @@ from .constants import (
 )
 from .dates import group_events_by_month
 from .peoply import PEOPLY_SYNCED_FIELDS
+from ...translation.english_overlay import EnglishPreviewMixin
 
 
 class EventPageTag(TaggedItemBase):
@@ -60,10 +61,11 @@ class EventPageForm(WagtailAdminPageForm):
             field.help_text = _("Synced from Peoply -- edit it on Peoply instead.")
 
 
-class EventIndexPage(TranslationWarningMixin, Page):
+class EventIndexPage(EnglishPreviewMixin, TranslationWarningMixin, Page):
     """Landing page listing all events."""
 
     template = "events/event_index_page.html"
+    translated_fields = ["intro"]
 
     intro = RichTextField(blank=True)
 
@@ -108,11 +110,12 @@ class EventIndexPage(TranslationWarningMixin, Page):
         return context
 
 
-class EventPage(TranslationWarningMixin, Page):
+class EventPage(EnglishPreviewMixin, TranslationWarningMixin, Page):
     """A single event -- covers dated events, week-long events (via
     end_date), and deadlines through the same shape."""
 
     template = "events/event_page.html"
+    translated_fields = ["location", "intro", "location_map_links", "calendar_legend"]
 
     event_type = models.CharField(
         max_length=20, choices=EVENT_TYPE_CHOICES, default="other"

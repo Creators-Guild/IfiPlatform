@@ -39,6 +39,8 @@ class MenuGroup(TranslatableMixin, ClusterableModel):
     """A titled, ordered list of links, placed into one or more Menus.
     Registered as a snippet in wagtail_hooks.py (Norwegian-first listing)."""
 
+    translated_fields = ["title", "short_title"]
+
     title = models.CharField(max_length=100)
     short_title = models.CharField(
         max_length=50,
@@ -96,6 +98,8 @@ class MenuGroup(TranslatableMixin, ClusterableModel):
 
 class MenuGroupLink(TranslatableMixin, Orderable):
     """One link in a MenuGroup: a page on the site or an external address."""
+
+    translated_fields = ["label", "description", "prefix"]
 
     group = ParentalKey(MenuGroup, on_delete=models.CASCADE, related_name="links")
     label = models.CharField(
