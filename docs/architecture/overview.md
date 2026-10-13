@@ -133,7 +133,8 @@ ArticleIndexPage (hub)
 ```
 
 - **(hub), (info_articles), (news)** are the index page's `section` field.
-- **The hub** is the site's root page. There is one per language.
+- **The hub** is the site's root page. There is one, in Norwegian; English
+  is shown on the same pages (see [shared/translations.md](shared/translations.md)).
 - **CategoryPage** examples: "Sosialt", "Praktisk", and "Siste nytt"
   under news. Categories can be nested.
 - **EventPage** can hold sub-events (more `EventPage`s).

@@ -55,14 +55,13 @@ class TranslationsNeededPanel(Component):
     def __init__(self, user):
         self.total, self.statuses = pages_needing_translation(user)
 
-    def render_html(self, parent_context=None):
-        if not self.total:
-            return ""
-        return super().render_html(parent_context)
-
     def get_context_data(self, parent_context=None):
         return {
-            "heading": f"Needs English translation ({self.total})",
+            "heading": (
+                f"Needs English translation ({self.total})"
+                if self.total
+                else "English translation"
+            ),
             "total": self.total,
             "statuses": self.statuses,
         }

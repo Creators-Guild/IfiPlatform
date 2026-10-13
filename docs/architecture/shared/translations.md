@@ -106,6 +106,11 @@ Translation settings**.
   draft shows Norwegian for new text, because previews never call DeepL.
 - Dashboard panel and page notices list pages whose English is missing or
   failed.
+- **The admin's own language** follows its address: `/nb/wagtail-admin/`
+  is Norwegian, `/en/wagtail-admin/` English. The "English" / "Norsk" item
+  in the sidebar switches between them. A language picked in Account →
+  Preferences overrides the address. The content in the admin is always
+  the Norwegian you edit, whatever the admin's language.
 
 ## Adding or changing a field
 

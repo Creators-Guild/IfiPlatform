@@ -144,6 +144,7 @@ class TranslationNudgeTests(TestCase):
         self.assertNotIn("Needs translation", explore_html)
         home_html = self.client.get(reverse("wagtailadmin_home")).content.decode()
         self.assertNotIn("Needs English translation", home_html)
+        self.assertIn("All English is up to date", home_html)
 
     def test_wagtail_localize_ui_is_gone(self):
         self.client.force_login(self.user)

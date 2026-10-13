@@ -1,6 +1,6 @@
 # Translation nudges (`translation/status.py`, `translation/nudge.py`)
 
-Last updated: 2026-10-12
+Last updated: 2026-10-13
 Covers: ifiplatform/apps/ifi_home_app/translation/nudge.py, ifiplatform/apps/ifi_home_app/translation/status.py
 
 Context for future Claude sessions. Not a human-facing doc. Since the
@@ -31,7 +31,10 @@ is the plan's one banner rule.
 - **After publishing / edit view**: a Wagtail warning message (edit view on
   GET only, so it doesn't pile up). Right after publishing the page is
   normally waiting for DeepL, so no message.
-- **Dashboard**: `TranslationsNeededPanel` via `pages_needing_translation()`.
+- **Dashboard**: `TranslationsNeededPanel` via `pages_needing_translation()`,
+  under "How this site works" (30) and "Shortcuts" (40), both in
+  `admin_dashboard.py`; this panel is 50.
+  Always shown: "All English is up to date" when nothing is stuck.
   Lists only pages stuck waiting longer than `PENDING_MINUTES` or with
   `has_error` rows -- not a scan of every page, which took 1.5–2.5 s per
   dashboard load on prod data.

@@ -247,6 +247,10 @@ LANGUAGES = [
     ("nb", "Norwegian Bokmål"),
 ]
 
+# The admin follows the address (/nb/ or /en/) unless a user picks one of
+# these in Account -> Preferences.
+WAGTAILADMIN_PERMITTED_LANGUAGES = [("nb", "Norsk"), ("en", "English")]
+
 USE_I18N = True  # support for mutiple languages
 USE_L10N = True  # support for formatting dates/times/numbers to active language
 TIME_ZONE = "UTC"

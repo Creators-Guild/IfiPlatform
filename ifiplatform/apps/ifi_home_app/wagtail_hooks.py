@@ -7,11 +7,16 @@ snippets' registration, and hiding what's left of wagtail-localize's admin
 -- add further hooks here rather than starting new files, unless a hook is
 specific enough to a single feature area to warrant its own module."""
 
+from django.templatetags.static import static
 from django.urls import path
+from django.utils.html import format_html
 from wagtail import hooks
+from wagtail.admin.menu import MenuItem
+from wagtail.admin.ui.sidebar import LinkMenuItem
 from wagtail.snippets.models import register_snippet
 
 from .models import HeaderMessage, HomeBoardMessage, MenuGroup
+from . import admin_dashboard
 from .translation import english_editor, nudge
 
 
@@ -52,6 +57,45 @@ for _snippet_model in (HeaderMessage, HomeBoardMessage, MenuGroup):
 
 hooks.register("after_publish_page", nudge.warn_after_publish)
 hooks.register("before_edit_page", nudge.warn_on_edit)
+hooks.register("construct_homepage_panels", admin_dashboard.add_dashboard_panel)
+
+
+class LanguageSwitchMenuItem(MenuItem):
+    """Sidebar link to the same admin page in the other language. The admin
+    speaks the language of its address (/nb/ or /en/) unless a user picked
+    one in Account -> Preferences."""
+
+    OTHER = {"nb": ("en", "English"), "en": ("nb", "Norsk")}
+
+    def _target(self, request):
+        language = request.path.split("/")[1]
+        if language not in self.OTHER:
+            return None
+        other, label = self.OTHER[language]
+        return label, f"/{other}" + request.get_full_path()[len(language) + 1 :]
+
+    def is_shown(self, request):
+        return self._target(request) is not None
+
+    def render_component(self, request):
+        label, url = self._target(request)
+        return LinkMenuItem(self.name, label, url, icon_name=self.icon_name)
+
+
+@hooks.register("register_admin_menu_item")
+def register_language_switch():
+    return LanguageSwitchMenuItem(
+        "Language", "", name="language", icon_name="site", order=10500
+    )
+
+
+@hooks.register("insert_global_admin_css")
+def dashboard_panel_css():
+    return format_html(
+        '<link rel="stylesheet" href="{}">',
+        static("css/06_components/admin/dashboard_panel.css"),
+    )
+
 hooks.register("construct_homepage_panels", nudge.add_dashboard_panel)
 hooks.register("register_page_listing_buttons", nudge.listing_status_button)
 
