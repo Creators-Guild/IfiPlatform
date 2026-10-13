@@ -1,6 +1,6 @@
 # Tech stack
 
-Last updated: 2026-10-11
+Last updated: 2026-10-13
 
 What IfiPlatform is built with, and why each piece is there. For how the
 production server runs all of this, see
@@ -14,7 +14,7 @@ local copy running, see the main [README.md](../../README.md).
 | Language           | Python (CI tests 3.12, 3.13 and 3.14)                |
 | Web framework      | Django 6.0                                           |
 | CMS / admin        | Wagtail 7.4                                          |
-| Translation        | wagtail-localize + DeepL machine translation         |
+| Translation        | Own English overlay + DeepL machine translation      |
 | Database           | PostgreSQL (production), SQLite (local default)      |
 | Frontend           | Django templates, plain CSS (ITCSS + BEM)            |
 | Web server         | Nginx (reverse proxy, HTTPS) + Gunicorn (WSGI)       |
@@ -32,8 +32,20 @@ The exact version of every Python package is pinned in
   at `/<lang>/wagtail-admin/`. Wagtail brings its own helpers with it: `django-modelcluster`,
   `django-treebeard` (the page tree), `django-taggit` (tags) and `Willow`
   (image handling).
-- **wagtail-localize**: keeps a Norwegian Bokmål (`nb`, the default) and an
-  English (`en`) version of each page in sync.
+
+  **Upgrades: we stay on Wagtail's long-term support (LTS) releases.**
+  7.4 is LTS, with security fixes until November 2027; the releases in
+  between (8.0, 8.1, 8.2) are supported for only a few months each. Take
+  patch releases (7.4.x) when they come out. The next upgrade is to the
+  next LTS, probably 8.3. The admin's "upgrade available" banner only
+  announces LTS releases (`WAGTAIL_ENABLE_UPDATE_CHECK = "lts"`).
+  Wagtail 8's "custom base page model" can't be used here: it only works
+  for new projects, since it decides which database table every page
+  lives in.
+- **wagtail-localize**: only used to split page fields into text pieces
+  for translation, inside `ifi_home_app/translation/page_segments.py`.
+  The translations themselves are stored in the project's own tables (see
+  [shared/translations.md](shared/translations.md)).
 - **Django REST framework**: in `requirements.txt`, but not wired up yet
   (not in `INSTALLED_APPS`, no API endpoints).
 - **psycopg 3**: the PostgreSQL driver.
@@ -83,7 +95,10 @@ deploy.
 
 A **file-based cache** (`ifiplatform/django_cache/`) is shared by all
 Gunicorn worker processes, so a change seen by one worker is seen by all.
-Tests use a separate in-memory cache.
+Each database gets its own subfolder (`django_cache/<database name>/`), so
+two local servers on different databases, such as the dev database and a
+restored copy of production, never share cached data. Tests use a separate
+in-memory cache.
 
 ## External services
 
