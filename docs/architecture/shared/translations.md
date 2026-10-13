@@ -136,6 +136,11 @@ model. A test compares it with the models:
 
 - **You added or removed a translated field on purpose:** run
   `python manage.py update_translation_snapshot` and commit the file.
+- **Never change how fields are split into pieces.**
+  `tests/test_segment_format.py` pins the exact pieces for example
+  content. If it fails after a wagtail-localize upgrade, every stored
+  English piece would stop matching; fix the extraction, don't update the
+  test's file.
 - **You renamed a field, or a field inside a block:** the stored English
   is keyed by the old name. Move it in the migration that renames the
   field. The failing test prints the exact line to add, which looks like:
@@ -159,7 +164,8 @@ model. A test compares it with the models:
 - **Querying around the model shows Norwegian.** `.values("title")`,
   `.values_list()`, raw SQL and `annotate()` don't go through the fields,
   so they return Norwegian on `/en/`. Load objects instead when the text
-  is shown to visitors.
+  is shown to visitors. `tests/test_english_crawl.py` stores fake English
+  for everything and crawls `/en/`, so a leak like this fails the tests.
 - **Never save during display.** English is only switched on for
   `GET`/`HEAD` requests under `/en/` and for the English preview. While it
   is on, any write to a page, snippet or revision table is refused with

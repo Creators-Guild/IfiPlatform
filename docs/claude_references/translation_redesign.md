@@ -561,6 +561,12 @@ English editor back to the Norwegian object and to the English page.
 - No `cleanup_segment_translations` command exists: cleanup runs in
   `translate_english --nightly` only.
 - Full suite: 212 passing.
+- Added afterwards (same day): the two planned tests that were missing,
+  golden format (`tests/test_segment_format.py` + `golden_segments.json`)
+  and the fake-English crawl (`tests/test_english_crawl.py`, checked to
+  fail when menu English is removed). Also: seed has complete English,
+  `MenuGroupLink.prefix` -> `label_prefix` (0159, mapped in the switch-over),
+  Wagtail 7.4.3. Suite: 223 passing.
 
 ### Step 0 results (2026-10-12)
 

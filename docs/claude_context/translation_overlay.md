@@ -75,7 +75,14 @@ URL, email, slug and non-text fields.
 - Stored text = wagtail-localize's `StringValue.data` (escaped, links as
   `<a id="a1">`); hash = `uuid5(HASH_NAMESPACE, text)` with their String
   namespace copied in as our constant. Migrated rows match only because of
-  this; a test pins it. Never change either.
+  this; a test pins it. Never change either. `tests/test_segment_format.py`
+  + `golden_segments.json` pin whole objects' pieces (paths, texts,
+  hashes) with fixed block ids: the check for a wagtail-localize upgrade or
+  replacement. Never regenerate the JSON to make it pass.
+- `tests/test_english_crawl.py` (slow): fake English (`EN·` + Norwegian)
+  for every piece of the seeded site, crawl /en/, fail on any text node
+  that is exactly a Norwegian plain-text piece. Catches code that reads
+  around the fields.
 - Related-object segments (page/image choosers) are dropped: links and
   images stay Norwegian. Override segments (hrefs) are kept so rich text
   reassembles.
