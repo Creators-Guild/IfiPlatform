@@ -261,3 +261,22 @@ Rewired onto these tables: see `translation_nudge.md`. Tests force
   contain a glossary term and predate the sync
   (`stored_translations.forget_stale_glossary_rows`, case-insensitive like
   DeepL's own matching); human rows are never touched.
+
+## Wagtail upgrades (checked 2026-10-13 against 8.0)
+
+Staying on LTS (7.4.x; next 8.3). What a major upgrade must re-check,
+since this module patches Wagtail internals:
+- `Page.route` / `Page.get_url_parts` replaced in `english_urls.install()`
+  (8.0: same signatures; `_get_relevant_site_root_paths(cache_object)`
+  unchanged).
+- `wagtail.contrib.redirects.signal_handlers.create_redirects` replaced
+  (8.0: still a module global looked up by the handlers).
+- Translated-field descriptors on Wagtail's `Page` (8.0: `Page` =
+  `AbstractPage` + `DefaultBasePageMixin`, swappable via
+  `WAGTAIL_PAGE_MODEL`; fields still concrete on `Page`).
+- 8.0 wants custom viewset policies registered:
+  `register_permission_policy(SegmentTranslation, SuperusersMayLookPolicy(...))`
+  for `english_editor.StoredEnglishViewSet` (otherwise a deprecation
+  warning).
+- wagtail-localize must support the target (1.14.5 supports 8.x); only
+  `page_segments.py` uses it (plus the switch-over until prod is switched).

@@ -250,6 +250,8 @@ LANGUAGES = [
 # The admin follows the address (/nb/ or /en/) unless a user picks one of
 # these in Account -> Preferences.
 WAGTAILADMIN_PERMITTED_LANGUAGES = [("nb", "Norsk"), ("en", "English")]
+# We stay on Wagtail LTS releases, so the admin only announces those.
+WAGTAIL_ENABLE_UPDATE_CHECK = "lts"
 
 USE_I18N = True  # support for mutiple languages
 USE_L10N = True  # support for formatting dates/times/numbers to active language

@@ -48,5 +48,5 @@ typing_extensions==4.16.0
 tzdata==2026.2
 urllib3==2.7.0
 wagtail-localize==1.13.1
-wagtail==7.4.2
+wagtail==7.4.3
 Willow==1.12.0

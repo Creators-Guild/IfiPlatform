@@ -32,6 +32,16 @@ The exact version of every Python package is pinned in
   at `/<lang>/wagtail-admin/`. Wagtail brings its own helpers with it: `django-modelcluster`,
   `django-treebeard` (the page tree), `django-taggit` (tags) and `Willow`
   (image handling).
+
+  **Upgrades: we stay on Wagtail's long-term support (LTS) releases.**
+  7.4 is LTS, with security fixes until November 2027; the releases in
+  between (8.0, 8.1, 8.2) are supported for only a few months each. Take
+  patch releases (7.4.x) when they come out. The next upgrade is to the
+  next LTS, probably 8.3. The admin's "upgrade available" banner only
+  announces LTS releases (`WAGTAIL_ENABLE_UPDATE_CHECK = "lts"`).
+  Wagtail 8's "custom base page model" can't be used here: it only works
+  for new projects, since it decides which database table every page
+  lives in.
 - **wagtail-localize**: only used to split page fields into text pieces
   for translation, inside `ifi_home_app/translation/page_segments.py`.
   The translations themselves are stored in the project's own tables (see

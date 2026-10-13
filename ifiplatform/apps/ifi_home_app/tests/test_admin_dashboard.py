@@ -1,8 +1,10 @@
 # pylint: disable=C0114,C0115,C0116
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
+from django.conf import settings
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from django.utils import translation
 
 from ifi_home_app.admin_dashboard import ShortcutsPanel
 
@@ -50,6 +52,11 @@ class AdminLanguageTests(TestCase):
     def setUp(self):
         admin = get_user_model().objects.create_superuser("kari", "k@test.com", "pw")
         self.client.force_login(admin)
+
+    def tearDown(self):
+        # LocaleMiddleware leaves /en/'s language active in this thread;
+        # later tests would run in English.
+        translation.activate(settings.LANGUAGE_CODE)
 
     def test_admin_speaks_the_language_of_its_address(self):
         nb_html = self.client.get("/nb/wagtail-admin/").content.decode()
