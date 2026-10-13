@@ -34,9 +34,7 @@ class ShortcutsPanel(Component):
             ("Pages", pages_url, "doc-empty-inverse"),
             ("Snippets", reverse("wagtailsnippets:index"), "snippet"),
         ]
-        if image_permissions.user_has_any_permission(
-            user, ["add", "change", "delete"]
-        ):
+        if image_permissions.user_has_any_permission(user, ["add", "change", "delete"]):
             shortcuts.append(("Images", reverse("wagtailimages:index"), "image"))
 
         settings = [
@@ -55,7 +53,9 @@ class ShortcutsPanel(Component):
             ),
             ("Sites", reverse("wagtailsites:index"), "wagtailcore.change_site"),
         ]
-        settings = [(label, url) for label, url, perm in settings if user.has_perm(perm)]
+        settings = [
+            (label, url) for label, url, perm in settings if user.has_perm(perm)
+        ]
         if user.is_superuser:
             settings.append(("Stored English", reverse("stored_english:index")))
         return {"shortcuts": shortcuts, "settings": settings}

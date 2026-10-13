@@ -45,7 +45,9 @@ class ShortcutsPanelTests(TestCase):
         self.assertIn("How this site works", html)
         self.assertIn('<details class="dashboard-guide">', html)  # starts closed
         self.assertLess(html.index('id="guide'), html.index('id="shortcuts'))
-        self.assertLess(html.index('id="shortcuts'), html.index('id="translations-needed'))
+        self.assertLess(
+            html.index('id="shortcuts'), html.index('id="translations-needed')
+        )
 
 
 class AdminLanguageTests(TestCase):

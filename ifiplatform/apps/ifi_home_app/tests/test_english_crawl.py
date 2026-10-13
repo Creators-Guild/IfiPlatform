@@ -80,7 +80,10 @@ class FakeEnglishCrawlTests(TestCase):
                 continue
             visited.add(url)
             response = self.client.get(url, follow=True)
-            if response.status_code != 200 or "text/html" not in response["Content-Type"]:
+            if (
+                response.status_code != 200
+                or "text/html" not in response["Content-Type"]
+            ):
                 continue
             html = response.content.decode()
             parser = _VisibleText()

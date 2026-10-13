@@ -193,7 +193,9 @@ class ApplyTests(SwitchTests):
         )
         self.run_switch("--apply")
         row = SegmentTranslation.objects.get(norwegian_text="Stillinger hos")
-        self.assertEqual((row.segment_path, row.english_text), ("label_prefix", "Jobs at"))
+        self.assertEqual(
+            (row.segment_path, row.english_text), ("label_prefix", "Jobs at")
+        )
 
     def test_norwegian_link_to_english_page_is_repointed(self):
         message = HeaderMessage.objects.create(

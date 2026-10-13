@@ -83,7 +83,11 @@ def golden_objects():
             {
                 "type": "image",
                 "id": IDS["image"],
-                "value": {"image": None, "alt_text": "Kart", "caption": "Kart over Ifi"},
+                "value": {
+                    "image": None,
+                    "alt_text": "Kart",
+                    "caption": "Kart over Ifi",
+                },
             },
             {
                 "type": "multi_column",
@@ -131,7 +135,11 @@ def golden_objects():
                             "id": IDS["duty_1"],
                             "value": "<p>Driver <i>Navet</i>.</p>",
                         },
-                        {"type": "item", "id": IDS["duty_2"], "value": "<p>Frivillige.</p>"},
+                        {
+                            "type": "item",
+                            "id": IDS["duty_2"],
+                            "value": "<p>Frivillige.</p>",
+                        },
                     ],
                     "availability": "opening_soon",
                     "availability_note": "Etter generalforsamlingen",
@@ -154,7 +162,9 @@ def golden_objects():
         ],
     )
 
-    link = MenuGroupLink(label="Ifi", description="Peoply", label_prefix="Stillinger hos")
+    link = MenuGroupLink(
+        label="Ifi", description="Peoply", label_prefix="Stillinger hos"
+    )
     return {"article": article, "union": union, "menu_link": link}
 
 

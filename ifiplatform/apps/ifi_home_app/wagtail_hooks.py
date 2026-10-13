@@ -96,6 +96,7 @@ def dashboard_panel_css():
         static("css/06_components/admin/dashboard_panel.css"),
     )
 
+
 hooks.register("construct_homepage_panels", nudge.add_dashboard_panel)
 hooks.register("register_page_listing_buttons", nudge.listing_status_button)
 

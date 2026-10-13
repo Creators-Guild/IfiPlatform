@@ -94,6 +94,4 @@ def apply_peoply_match(union, org):
     needs a Wagtail revision."""
     from ifi_home_app.models.article.unions import UnionPage
 
-    UnionPage.objects.filter(pk=union.pk).update(
-        peoply_organization_id=org["id"]
-    )
+    UnionPage.objects.filter(pk=union.pk).update(peoply_organization_id=org["id"])
