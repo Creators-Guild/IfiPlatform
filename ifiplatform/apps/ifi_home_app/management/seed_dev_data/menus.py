@@ -69,6 +69,8 @@ class MenuSeedMixin:
                     {
                         "label": link.get("label", ("", ""))[1],
                         "prefix": link.get("prefix", ("", ""))[1],
+                        # names (Peoply, Navet), the same in English
+                        "description": link.get("description", ""),
                     },
                 )
 

@@ -8,6 +8,7 @@ from django.utils.text import slugify
 
 from ifi_home_app.models import EventIndexPage, EventPage
 from ifi_home_app.models.article_models import UnionPage
+from ifi_home_app.translation import english_urls
 
 from .constants import (
     EVENT_SPECS,
@@ -176,4 +177,11 @@ class EventSeedMixin:
             if not event.related_unions:
                 event.related_unions = [("union", {"union": navet, "role": "host"})]
                 event.save_revision().publish()
+            if english_urls.english_slug(event) is None:
+                english_urls.set_english_slug(
+                    event,
+                    f"company-presentation-{slugify(company)}-{event_date.isoformat()}",
+                    "deepl",
+                    redirect=False,
+                )
             self._translate_page(event)

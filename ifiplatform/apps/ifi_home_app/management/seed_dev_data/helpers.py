@@ -14,7 +14,32 @@ from wagtail.rich_text import RichText
 
 from ifi_home_app.translation import english_urls, page_segments, stored_translations
 
-from .constants import ARTICLE_BODY, SEED_IMAGE_PATH, SEED_IMAGE_TITLE, TRANSLATIONS
+from .constants import (
+    ARTICLE_BODY,
+    SAME_IN_ENGLISH,
+    SEED_IMAGE_PATH,
+    SEED_IMAGE_TITLE,
+    TRANSLATIONS,
+)
+
+# The tables above are written as plain text, but pieces are stored escaped
+# ("Paint &amp; Sip"), so look them up in that form too.
+_STORED_TRANSLATIONS = {
+    page_segments.stored_form(norwegian): page_segments.stored_form(english)
+    for norwegian, english in TRANSLATIONS.items()
+}
+_STORED_SAME = {page_segments.stored_form(text) for text in SAME_IN_ENGLISH}
+
+
+def _seed_english(stored_text):
+    """English for one stored Norwegian piece, or None if the seed has none."""
+    if stored_text in TRANSLATIONS:
+        return TRANSLATIONS[stored_text]
+    if stored_text in _STORED_TRANSLATIONS:
+        return _STORED_TRANSLATIONS[stored_text]
+    if stored_text in SAME_IN_ENGLISH or stored_text in _STORED_SAME:
+        return stored_text
+    return None
 
 
 class SeedHelpersMixin:
@@ -27,18 +52,21 @@ class SeedHelpersMixin:
         ]
 
     def _translate_page(self, obj):
-        """Stores English for `obj` (a page or snippet) from TRANSLATIONS, as
-        DeepL would; a page also gets its English slug from its English
-        title. Text with no entry stays Norwegian. Re-runnable: English
-        that's already stored is kept."""
-        english = {
-            segment: TRANSLATIONS[segment.norwegian_text]
-            for segment in page_segments.extract_segments(obj)
-            if segment.norwegian_text in TRANSLATIONS
-        }
+        """Stores English for `obj` (a page or snippet) from TRANSLATIONS
+        and SAME_IN_ENGLISH, as DeepL would; a page also gets its English
+        slug from its English title. Text with no entry stays Norwegian.
+        Re-runnable: English that's already stored is kept."""
+        english = {}
+        for segment in page_segments.extract_segments(obj):
+            text = _seed_english(segment.norwegian_text)
+            if text is not None:
+                english[segment] = text
         if english:
             stored_translations.save_machine(obj, english)
-        title = english.get(page_segments.Segment("title", getattr(obj, "title", "")))
+        title = next(
+            (text for segment, text in english.items() if segment.path == "title"),
+            None,
+        )
         if isinstance(obj, Page) and title and english_urls.english_slug(obj) is None:
             english_urls.set_english_slug(
                 obj, page_segments.plain_text(title), "deepl", redirect=False
