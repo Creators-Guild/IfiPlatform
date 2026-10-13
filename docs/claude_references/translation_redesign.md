@@ -500,7 +500,7 @@ The model attribute is called `translated_fields`, not
 `translatable_fields`: wagtail-localize reads a `translatable_fields`
 attribute itself and keeps syncing the two trees until the switch-over,
 so reusing that name would break the current sync.
-| 3b | Rehearsal on a copy of the production database |
+| 3b | **Done 2026-10-13** (see Step 3b results). Rehearsal on a copy of the production database |
 | 4 | **Done 2026-10-13** (see Step 4 results). Remove dead code; docs (contributor doc `docs/architecture/shared/translations.md`, `docs/operations/prod_server.md` + management_commands.md for the two translate timers and `translate_english`, claude_context notes, `to_fix.md`) |
 
 ### Step 3 rehearsal results (2026-10-12, prod copy)
@@ -532,6 +532,30 @@ Added in step 3 at the user's request (editors had them before):
 editor; queued, works with auto-translate off), "Machine-translate menu"
 (Menu snippet rows; groups + links in one DeepL batch), and links from the
 English editor back to the Norwegian object and to the English page.
+
+### Step 3b results (2026-10-13, fresh prod copy, final code)
+
+Same dump as step 3 (content up to 2026-10-08), freshly restored. Steps
+as in deploy.sh: `migrate` (0155-0159, 16 s), `switch_to_english_overlay`
+dry run, then `--apply` (11 s, report identical to step 3); a second
+`--apply` does nothing. "Before" crawled on main's code.
+
+- Old addresses: same result as step 3 (235/235 /nb/, 234 /en/ unchanged,
+  5 redirect, the same 14 404s). Titles match on every unchanged address.
+- Crawl of the switched site: 470 sitemap URLs, 482 pages, 0 errors, 0
+  `href="None"`, 0 English pages linking into /nb/. `/nb/` home text
+  identical before and after.
+- No references to the 260 deleted pages (text/JSON, foreign keys,
+  reference index). The 10 human pieces keep `translated_by`. 0 error rows.
+- `translate_english --nightly` (DeepL off): cleanup removed 59 unused
+  rows (older Norwegian versions); still 763 of 1,341 pieces in English.
+- Speed: same or faster (fewer queries); `/en/events/` 74 -> 134 ms.
+- Full suite on Wagtail 7.4.3: 223 passing.
+- English "Tools" menu had drifted from Norwegian; it now shows the
+  Norwegian links (Peoply, IFI Rom, Grade Web). Lost from English: UIO
+  Tools, Ifi Tools, Student ID+ (the report names only the first).
+- Old code returns 500 on every page between `migrate` (0159 renames
+  `menugrouplink.prefix`) and the gunicorn restart, about 30 s.
 
 ### Step 4 results (2026-10-13)
 
