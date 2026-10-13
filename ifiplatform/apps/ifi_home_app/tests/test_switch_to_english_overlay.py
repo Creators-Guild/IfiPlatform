@@ -11,7 +11,7 @@ from django.test import TestCase
 from django.utils import timezone
 from wagtail.contrib.redirects.models import Redirect
 from wagtail.models import Locale, Page, Site
-from wagtail_localize.models import StringTranslation
+from wagtail_localize.models import StringTranslation, TranslationSource
 from wagtail_localize.operations import TranslationCreator
 
 from ifi_home_app.models import (
@@ -20,6 +20,7 @@ from ifi_home_app.models import (
     EnglishSlug,
     HeaderMessage,
     MenuGroup,
+    MenuGroupLink,
     SegmentTranslation,
 )
 from ifi_home_app.translation.english_overlay import english
@@ -170,6 +171,29 @@ class ApplyTests(SwitchTests):
         row = SegmentTranslation.objects.get(norwegian_text="Studentliv")
         self.assertEqual((row.english_text, row.source), ("Student life", "human"))
         self.assertFalse(MenuGroup.objects.filter(pk=copy.pk).exists())
+
+    def test_english_under_a_renamed_field_is_kept(self):
+        # Prod's wagtail-localize records predate MenuGroupLink.prefix ->
+        # label_prefix, so they still say "links.<key>.prefix".
+        group = MenuGroup(locale=self.nb, title="Jobb")
+        group.links.add(MenuGroupLink(label="Ifi", label_prefix="Stillinger hos"))
+        group.save()
+        source, _ = TranslationSource.get_or_create_from_instance(group)
+        segment = source.stringsegment_set.select_related("context", "string").get(
+            context__path__endswith=".label_prefix"
+        )
+        segment.context.path = segment.context.path.replace(".label_prefix", ".prefix")
+        segment.context.save()
+        StringTranslation.objects.create(
+            translation_of=segment.string,
+            locale=self.en,
+            context=segment.context,
+            data="Jobs at",
+            translation_type=StringTranslation.TRANSLATION_TYPE_MACHINE,
+        )
+        self.run_switch("--apply")
+        row = SegmentTranslation.objects.get(norwegian_text="Stillinger hos")
+        self.assertEqual((row.segment_path, row.english_text), ("label_prefix", "Jobs at"))
 
     def test_norwegian_link_to_english_page_is_repointed(self):
         message = HeaderMessage.objects.create(

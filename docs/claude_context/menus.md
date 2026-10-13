@@ -35,11 +35,22 @@ Any restructure or slug rename broke them silently. A tree-driven redesign
 rejected as too implicit for editors. Explicit picks are easier to explain
 and don't depend on where pages sit.
 
+## label_prefix, not prefix
+
+Renamed in migration 0159: a form field called `prefix` shadows
+`form.prefix` in Wagtail's inline panel template
+(`{{ child.form.prefix }}` builds the child's ids; Django templates try
+`form["prefix"]` first, a BoundField), so the Links panel rendered its
+own markup as text. The migration moves stored English
+(`rename_segment_path`); `switch_to_english_overlay.RENAMED_PLACES` maps
+wagtail-localize's old `links.<key>.prefix` records. `get_menu()` still
+hands templates a `"prefix"` key.
+
 ## Translation
 
 - Since the English overlay switch-over there is one set of groups (nb).
   `MenuGroup.translated_fields` (title, short_title) and
-  `MenuGroupLink.translated_fields` (label, description, prefix) show in
+  `MenuGroupLink.translated_fields` (label, description, label_prefix) show in
   English under /en/ by themselves (see `translation_overlay.md`); each
   link is its own object in the English tables, and the English editor of
   a group lists its links too.

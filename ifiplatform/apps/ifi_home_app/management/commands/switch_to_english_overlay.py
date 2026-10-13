@@ -241,6 +241,11 @@ def _check_format(objects):
     return mismatches
 
 
+# Fields renamed since wagtail-localize recorded their pieces: (model name,
+# old place) -> new place.
+RENAMED_PLACES = {("MenuGroupLink", "prefix"): "label_prefix"}
+
+
 def _resolve_child(obj, path):
     """wagtail-localize stores a child object's pieces under its parent
     ("links.<link key>.label"); we store them on the child itself."""
@@ -288,6 +293,8 @@ def _rows_from_localize(english, norwegian, nb_objects, report):
             )
             continue
         target, path = _resolve_child(obj, record.context.path)
+        if target is not None:
+            path = RENAMED_PLACES.get((type(target).__name__, path), path)
         if target is None or not page_segments.is_translated_place(type(target), path):
             report.skipped_technical[
                 f"{record.context.object.content_type.model}: "

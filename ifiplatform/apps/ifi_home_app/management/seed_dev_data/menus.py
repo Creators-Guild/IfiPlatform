@@ -54,7 +54,7 @@ class MenuSeedMixin:
                         page=link.get("page"),
                         url=link.get("url", ""),
                         label=link.get("label", ("", ""))[0],
-                        prefix=link.get("prefix", ("", ""))[0],
+                        label_prefix=link.get("prefix", ("", ""))[0],
                         description=link.get("description", ""),
                     )
                 )
@@ -68,7 +68,7 @@ class MenuSeedMixin:
                     nb_link,
                     {
                         "label": link.get("label", ("", ""))[1],
-                        "prefix": link.get("prefix", ("", ""))[1],
+                        "label_prefix": link.get("prefix", ("", ""))[1],
                         # names (Peoply, Navet), the same in English
                         "description": link.get("description", ""),
                     },

@@ -99,7 +99,7 @@ class MenuGroup(TranslatableMixin, ClusterableModel):
 class MenuGroupLink(TranslatableMixin, Orderable):
     """One link in a MenuGroup: a page on the site or an external address."""
 
-    translated_fields = ["label", "description", "prefix"]
+    translated_fields = ["label", "description", "label_prefix"]
 
     group = ParentalKey(MenuGroup, on_delete=models.CASCADE, related_name="links")
     label = models.CharField(
@@ -114,7 +114,9 @@ class MenuGroupLink(TranslatableMixin, Orderable):
         blank=True, help_text="An external address instead of a page."
     )
     description = models.CharField(max_length=100, blank=True)
-    prefix = models.CharField(
+    # Not "prefix": Wagtail's inline panel template reads form.prefix (the
+    # formset prefix), and a field of that name shadows it.
+    label_prefix = models.CharField(
         max_length=50,
         blank=True,
         help_text='Optional non-bold text before the label, e.g. "Listings at".',
@@ -125,7 +127,7 @@ class MenuGroupLink(TranslatableMixin, Orderable):
         FieldPanel("page"),
         FieldPanel("url"),
         FieldPanel("description"),
-        FieldPanel("prefix"),
+        FieldPanel("label_prefix"),
     ]
 
     class Meta(Orderable.Meta):
@@ -198,7 +200,7 @@ def _resolve_link(link):
             "url": link.url,
             "external": True,
             "description": link.description,
-            "prefix": link.prefix,
+            "prefix": link.label_prefix,
             "image": None,
         }
     page = _resolve_page(link.page)
@@ -209,7 +211,7 @@ def _resolve_link(link):
         "url": page.url,
         "external": False,
         "description": link.description,
-        "prefix": link.prefix,
+        "prefix": link.label_prefix,
         "image": _thumbnail(page),
     }
 

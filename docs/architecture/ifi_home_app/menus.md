@@ -59,7 +59,7 @@ both languages (see [Languages](#languages)).
 | --- | --- |
 | `page` / `url` | Exactly one of them. `clean()` checks this |
 | `label` | Link text. Blank means "use the page's own title" |
-| `prefix` | Optional non-bold text before the label, like "Listings at" (shortcuts only) |
+| `label_prefix` | Optional non-bold text before the label, like "Listings at" (shortcuts only) |
 | `description` | Optional small text under the label (shortcuts only) |
 
 **`Menu`**: one row per `key`. The key is unique, so there are at most
@@ -82,7 +82,7 @@ Which fields each menu actually shows:
 | `short_title` | no | yes, on mobile | yes, if the title doesn't fit |
 | `icon` | no | no | yes |
 | Link thumbnail | no | yes | no |
-| `prefix`, `description` | no | no | yes |
+| `label_prefix`, `description` | no | no | yes |
 
 ## Editing in the Wagtail admin
 
@@ -153,6 +153,10 @@ There is one set of groups and menus. English is shown on top of them on
 
 ## Gotchas
 
+- **Don't name a field `prefix`** on a model edited in an inline panel.
+  Wagtail's panel template reads the form's own `prefix`, and a field with
+  that name replaces it, which breaks the whole panel. That's why the field
+  is `label_prefix`.
 - **An empty menu is silent.** If a `Menu` row is missing, the menu is
   simply not rendered. Run `seed_dev_data` locally to get the default
   menus.

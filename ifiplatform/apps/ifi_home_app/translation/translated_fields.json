@@ -91,6 +91,6 @@
   "ifi_home_app.MenuGroupLink": {
     "description": "description",
     "label": "label",
-    "prefix": "prefix"
+    "label_prefix": "label_prefix"
   }
 }
