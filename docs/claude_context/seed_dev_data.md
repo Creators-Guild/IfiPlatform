@@ -19,8 +19,7 @@ Context for future Claude sessions. Not a human-facing doc.
 ## helpers.py — _translate_page / _store_english
 
 Since the English overlay switch-over the seed builds one Norwegian tree
-and no English locale (an "en" locale would make
-`switch_to_english_overlay` think the database isn't switched yet).
+and no English locale.
 `_translate_page(obj)` stores English for every piece whose Norwegian is
 a key in `constants.TRANSLATIONS` (matched raw and in stored form: pieces
 are escaped, "Paint &amp; Sip", the table isn't), or is in

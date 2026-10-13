@@ -20,11 +20,6 @@ from ifi_home_app.translation.page_segments import SNAPSHOT_PATH, current_places
 
 PROJECT = Path(settings.BASE_DIR)
 
-# The one-time switch-over reads wagtail-localize's tables; delete it (and
-# this entry) once production has been switched.
-LEGACY_IMPORTERS = {
-    "apps/ifi_home_app/management/commands/switch_to_english_overlay.py",
-}
 ALLOWED_IMPORTERS = {"apps/ifi_home_app/translation/page_segments.py"}
 
 
@@ -134,17 +129,11 @@ class WagtailLocalizeIsolationTests(SimpleTestCase):
                     names = [node.module]
                 if any(name.split(".")[0] == "wagtail_localize" for name in names):
                     importers.add(relative)
-        unexpected = importers - ALLOWED_IMPORTERS - LEGACY_IMPORTERS
         self.assertEqual(
-            unexpected,
+            importers - ALLOWED_IMPORTERS,
             set(),
             "Only translation/page_segments.py may import wagtail-localize. "
             "Use page_segments' functions instead.",
-        )
-        self.assertEqual(
-            LEGACY_IMPORTERS - importers,
-            set(),
-            "These no longer import wagtail-localize: remove them from LEGACY_IMPORTERS.",
         )
 
 

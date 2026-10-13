@@ -95,12 +95,6 @@ def place_of(path):
     return _BLOCK_ID.sub("*", path)
 
 
-def is_translated_place(model, path):
-    """True if `path` (a stored path, e.g. "body.<block id>.text") is one
-    of `model`'s translated places."""
-    return place_of(path) in places(model).values()
-
-
 def _is_excluded(model, path):
     return place_of(path) in getattr(model, "untranslated_block_paths", ())
 

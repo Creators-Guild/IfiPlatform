@@ -41,10 +41,6 @@ cd ifiplatform
 # backup fails, set -e stops the deploy before anything is migrated.
 bash ../deploy/backup/backup_db.sh
 python manage.py migrate
-# One-time switch to one Norwegian page tree with stored English: does
-# nothing once switched. Rehearsed on a prod copy first; a failure rolls
-# back and stops the deploy before the restart.
-python manage.py switch_to_english_overlay --apply
 python manage.py collectstatic --noinput --clear
 
 # DeepL glossaries can't be edited, only recreated -- so only re-sync when

@@ -77,24 +77,6 @@ Superusers can switch automatic translation off under Settings →
 Translation settings in the Wagtail admin. The "Machine-translate now"
 button in the English editor still works then.
 
-### switch_to_english_overlay
-
-```bash
-python manage.py switch_to_english_overlay [--apply]
-```
-
-One-time move from the old setup (a separate English copy of every page
-and snippet, made by wagtail-localize) to the current one (only Norwegian
-pages, with English stored as translated text). It copies the existing
-English, keeps the existing English addresses, adds redirects for the few
-that change, and then deletes the English copies.
-
-Dry run by default: it does the whole switch inside a transaction, prints
-a report, and rolls back. `--apply` keeps the result. `deploy/deploy.sh`
-runs it with `--apply` after `migrate`. Once a database has been switched
-it prints "Already switched" and does nothing. Delete this command once
-production has been switched.
-
 ### update_translation_snapshot
 
 ```bash

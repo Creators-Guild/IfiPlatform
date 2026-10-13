@@ -42,8 +42,7 @@ Renamed in migration 0159: a form field called `prefix` shadows
 (`{{ child.form.prefix }}` builds the child's ids; Django templates try
 `form["prefix"]` first, a BoundField), so the Links panel rendered its
 own markup as text. The migration moves stored English
-(`rename_segment_path`); `switch_to_english_overlay.RENAMED_PLACES` maps
-wagtail-localize's old `links.<key>.prefix` records. `get_menu()` still
+(`rename_segment_path`). `get_menu()` still
 hands templates a `"prefix"` key.
 
 ## Translation

@@ -9,10 +9,11 @@ Last updated: 2026-10-13
 
 Redesign: one Norwegian page tree, English as a translation overlay.
 
-**Status: frozen (2026-10-12).** Change this plan only if step 0 fails or
-the build hits a real blocker. New ideas go to Later phases, not into
-this build. Step 0 is done; its findings changed only the database
-guard (guard A), see Step 0 results.
+**Status: done and in production (2026-10-13).** All steps built,
+deployed and switched; the one-time `switch_to_english_overlay` command
+was deleted afterwards. The real explanation for people is
+`docs/architecture/shared/translations.md`. Only "Later phases" remain,
+as optional extras.
 
 ## In one minute
 
@@ -568,9 +569,9 @@ dry run, then `--apply` (11 s, report identical to step 3); a second
   `article_views`, `sync_locale_trees` and the `translation_key` dedup in
   the Peoply sync, `apply_peoply_match`'s multi-copy write and the admin's
   multi-copy event delete.
-- `LEGACY_IMPORTERS` holds only `switch_to_english_overlay` (its test
-  builds the two-tree fixture with wagtail-localize directly). Delete the
-  command, its test and its deploy.sh line once prod has been switched.
+- `LEGACY_IMPORTERS` held only `switch_to_english_overlay`. After prod was
+  switched, the command, its test, its deploy.sh line, `import_rows` and
+  `is_translated_place` were deleted and `LEGACY_IMPORTERS` removed.
 - Kept on purpose: `translation_key` on the style tables and as the
   Peoply union-mismatch identifier (one page per key now; re-keying needs a
   data migration). `test_force_sync_view.py` tests the Peoply "Sync now"

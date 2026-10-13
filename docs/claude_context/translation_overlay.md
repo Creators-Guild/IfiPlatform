@@ -8,16 +8,10 @@ its decisions: `docs/claude_references/translation_redesign.md`.
 
 ## Status
 
-Steps 1–4 built (plan: `docs/claude_references/translation_redesign.md`).
-Step 3 is the **switch-over**: `WAGTAIL_I18N_ENABLED = False`, one
-Norwegian tree, English shown under /en/ by `EnglishDisplayMiddleware`.
-A database still holding the English tree is converted by
-`manage.py switch_to_english_overlay --apply` (deploy.sh runs it after
-`migrate`; it does nothing once switched). Step 4 deleted the two-tree
-code. The switch-over command is the only file besides page_segments.py
-that still imports wagtail-localize (`LEGACY_IMPORTERS` in
-test_translated_fields_guard); delete it, its deploy.sh line and its test
-once production has been switched. `translation_key` stays on the style
+Done and in production (plan: `docs/claude_references/translation_redesign.md`):
+`WAGTAIL_I18N_ENABLED = False`, one Norwegian tree, English shown under
+/en/ by `EnglishDisplayMiddleware`. Only `page_segments.py` imports
+wagtail-localize (test_translated_fields_guard). `translation_key` stays on the style
 tables (`ArticleStyle`, `ArticleBlockStyle`, `PageBannerStyle`) and as
 the identifier of Peoply union mismatches: one page per key now, so it's
 harmless and re-keying would need a data migration.
@@ -208,7 +202,7 @@ rewrites the file.
 - `set_english_slug()` creates Wagtail redirects (old -> new English
   address, page + live descendants) when a live page's English address
   changes, including the first DeepL slug replacing the Norwegian
-  fallback. The switch-over passes `redirect=False` and makes its own.
+  fallback. `redirect=False` is for fresh data (the seed).
 - **Moves and Norwegian slug changes** (step 4): Wagtail's redirects app
   compares a page's old and new address, but under "en" our
   `get_url_parts` reads the tree as it is *now*, so both look equal; its
@@ -226,23 +220,13 @@ rewrites the file.
 - Sitemap: Django's i18n sitemap (`i18n`, `languages`, `alternates`), one
   entry per page per language.
 
-## switch_to_english_overlay (one-time)
+## The switch-over (done, command deleted)
 
-Dry run unless `--apply` (everything in one transaction, rolled back).
-Order: format check (our pieces must be a subset of wagtail-localize's own
-extraction for every Norwegian object, else stop), copy English from
-`StringTranslation` (manual -> human, machine -> deepl; English-first
-snippets reversed), pair English typed straight into English copies by
-place (menus), keep English slugs that differ, repoint references to
-English objects (FKs and rich text links on snippets; anything else
-stops), redirects for changed English addresses (English-only pages: to
-the Norwegian twin with the same Peoply id, else the nearest ancestor),
-delete wagtail-localize's rows, the English pages/snippets and locale
-(Root's locale moved to nb first). Hard checks: Norwegian object counts
-unchanged, pieces with English after >= before. Rehearsed on a prod copy.
-
-Migration 0157 deletes an *unused* "en" locale (fresh databases get one
-from 0039); databases with English content keep it for the command.
+Production was switched with `switch_to_english_overlay` (one-time;
+deleted afterwards, see git history and the plan's rehearsal results). It
+copied wagtail-localize's English into `SegmentTranslation`, kept English
+slugs, repointed references and deleted the English tree. Migration 0157
+deletes an *unused* "en" locale on fresh databases.
 
 ## status.py and nudges
 
@@ -286,4 +270,4 @@ since this module patches Wagtail internals:
   for `english_editor.StoredEnglishViewSet` (otherwise a deprecation
   warning).
 - wagtail-localize must support the target (1.14.5 supports 8.x); only
-  `page_segments.py` uses it (plus the switch-over until prod is switched).
+  `page_segments.py` uses it.

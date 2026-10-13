@@ -129,18 +129,13 @@ What happens:
       [deploy/backup/backup_db.sh](../../deploy/backup/backup_db.sh). If
       the backup fails, the deploy stops here and nothing is migrated.
    7. `manage.py migrate`
-   8. `manage.py switch_to_english_overlay --apply`: the one-time switch to
-      English stored as translated text (see
-      [management_commands.md](management_commands.md#switch_to_english_overlay)).
-      Does nothing once the database has been switched. A failure rolls
-      back and stops the deploy before the restart.
-   9. `manage.py collectstatic --noinput --clear`
-   10. `manage.py sync_deepl_glossary --write-env`, but only if the glossary
+   8. `manage.py collectstatic --noinput --clear`
+   9. `manage.py sync_deepl_glossary --write-env`, but only if the glossary
       terms changed. A failure here only prints a warning.
-   11. `sudo systemctl restart gunicorn`
-   12. `manage.py clear_cache` and `announce_deploy --clear` to remove the
+   10. `sudo systemctl restart gunicorn`
+   11. `manage.py clear_cache` and `announce_deploy --clear` to remove the
        banner.
-   13. Compares the config copies in
+   12. Compares the config copies in
        [deploy/server_config/](../../deploy/server_config/) with the live
        files on the server. Any difference shows up as a yellow warning on
        the run's page in GitHub Actions. It never fails the deploy.

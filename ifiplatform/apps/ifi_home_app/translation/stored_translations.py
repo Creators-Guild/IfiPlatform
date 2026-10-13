@@ -109,32 +109,6 @@ def save_machine(page, english_by_piece, failed=None):
     _forget(page)
 
 
-def import_rows(page, rows):
-    """Copies existing English in (the switch-over): `rows` are
-    (Segment, English, source, user, has_error, error) tuples. Insert-only:
-    a row already there wins, so import the most trusted rows first."""
-    content_type_id, object_id = object_key(page)
-    SegmentTranslation.objects.bulk_create(
-        [
-            SegmentTranslation(
-                content_type_id=content_type_id,
-                object_id=object_id,
-                segment_path=segment.path,
-                norwegian_text=segment.norwegian_text,
-                norwegian_hash=segment.norwegian_hash,
-                english_text=english,
-                source=source,
-                translated_by=user,
-                has_error=has_error,
-                error=error,
-            )
-            for segment, english, source, user, has_error, error in rows
-        ],
-        ignore_conflicts=True,
-    )
-    _forget(page)
-
-
 def drop_failed_machine_rows(page):
     """Deletes `page`'s DeepL rows marked has_error, so they're retried."""
     content_type_id, object_id = object_key(page)
