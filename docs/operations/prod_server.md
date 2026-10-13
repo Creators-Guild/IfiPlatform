@@ -1,6 +1,6 @@
 # Production server
 
-Last updated: 2026-09-29
+Last updated: 2026-10-13
 
 How the live IfiPlatform site is hosted, deployed and secured. For the
 software itself, see [architecture/tech_stack.md](../architecture/tech_stack.md).
@@ -71,6 +71,8 @@ by git, so deploys leave them alone.
 | `fail2ban.service`          | Bans IPs after repeated failed logins or scans                       | Ubuntu package              |
 | `sync-peoply-events.timer`  | Runs `sync_peoply_events` at 00/06/12/18:00 daily, plus 14:00 and 16:00 on weekdays | [deploy/systemd/](../../deploy/systemd/) |
 | `ifiplatform-backup.timer`  | Backs up the database and `media/` daily at 05:00                    | [deploy/systemd/](../../deploy/systemd/) |
+| `ifiplatform-translate.timer` | Runs `translate_english` every minute: DeepL English for newly published pages and saved menus/messages | [deploy/systemd/](../../deploy/systemd/) |
+| `ifiplatform-translate-nightly.timer` | Runs `translate_english --nightly` at 03:30: catches up on missing English, cleans up old translation rows | [deploy/systemd/](../../deploy/systemd/) |
 
 Unit files in `deploy/systemd/` are copied to `/etc/systemd/system/` and
 enabled on every deploy, so you change them by editing the repo, not the
@@ -127,13 +129,18 @@ What happens:
       [deploy/backup/backup_db.sh](../../deploy/backup/backup_db.sh). If
       the backup fails, the deploy stops here and nothing is migrated.
    7. `manage.py migrate`
-   8. `manage.py collectstatic --noinput --clear`
-   9. `manage.py sync_deepl_glossary --write-env`, but only if the glossary
+   8. `manage.py switch_to_english_overlay --apply`: the one-time switch to
+      English stored as translated text (see
+      [management_commands.md](management_commands.md#switch_to_english_overlay)).
+      Does nothing once the database has been switched. A failure rolls
+      back and stops the deploy before the restart.
+   9. `manage.py collectstatic --noinput --clear`
+   10. `manage.py sync_deepl_glossary --write-env`, but only if the glossary
       terms changed. A failure here only prints a warning.
-   10. `sudo systemctl restart gunicorn`
-   11. `manage.py clear_cache` and `announce_deploy --clear` to remove the
+   11. `sudo systemctl restart gunicorn`
+   12. `manage.py clear_cache` and `announce_deploy --clear` to remove the
        banner.
-   12. Compares the config copies in
+   13. Compares the config copies in
        [deploy/server_config/](../../deploy/server_config/) with the live
        files on the server. Any difference shows up as a yellow warning on
        the run's page in GitHub Actions. It never fails the deploy.
@@ -179,10 +186,11 @@ problems, is explained in [server_toolbox.md](server_toolbox.md).
 ```bash
 sudo certbot renew --dry-run        # certificate auto-renewal still works
 systemctl status gunicorn nginx postgresql fail2ban
-systemctl list-timers               # sync-peoply-events and ifiplatform-backup are scheduled
+systemctl list-timers               # sync-peoply-events, ifiplatform-backup and both ifiplatform-translate timers are scheduled
 journalctl -u ifiplatform-backup -n 5   # last backups say "Backup completed"
 journalctl -u gunicorn -n 100       # recent app errors (Django logs errors here)
 journalctl -u sync-peoply-events    # last Peoply sync runs
+journalctl -u ifiplatform-translate -n 20   # DeepL errors (quota, glossary ID) show up here
 sudo fail2ban-client status         # active jails and ban counts
 df -h                               # disk space (the VM only has 20 GB)
 ```

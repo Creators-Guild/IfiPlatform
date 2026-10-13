@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-10-11
+Last updated: 2026-10-13
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -24,31 +24,10 @@ folder.
   `models/article/blocks.py`. Fix: add `-2`, `-3` to repeated ids.
 - [ ] **Hand-picked union groups show retired and unpublished unions.**
   The `union_groups` cards on a `StudentUnionCategoryPage` aren't filtered
-  for live, language or status. Where: `StudentUnionCategoryPage.get_context()`
+  for live or status. Where: `StudentUnionCategoryPage.get_context()`
   in `models/article/unions.py`.
-- [ ] **The sync doesn't filter unions by language.** It loops over live
-  unions in every language, so a new event's host in `related_unions` can
-  point at the English copy of the union. Pages still display correctly
-  (templates use `.localized`), but the stored data is inconsistent. Where:
-  `management/commands/sync_peoply_events.py`. Fix: only use nb unions.
 - [ ] **`--after` is read as midnight UTC**, not Oslo midnight. Where:
   `management/commands/sync_peoply_events.py`.
-- [ ] **The "DRAFT" banner doesn't show on the English version** of a
-  draft article. Likely cause: the banner checks `page_is_live`, which is
-  the English page's own `live` flag, while Publish and Unpublish in
-  Editor mode act on the Norwegian copy (`publish_target`). Where:
-  `ArticlePage.get_context()` in `models/article/pages.py`,
-  `templates/info_articles/pages/article_page.html`. Fix: base the banner
-  on the Norwegian copy's status.
-- [ ] **Menu edits don't reach the English menus.** Changes to the home
-  shortcuts and to menu groups (`MenuGroup`, `MenuGroupLink`) only show on
-  the Norwegian site. The English groups are separate wagtail-localize
-  translations, and nothing copies changes over: pages get their synced
-  fields copied on publish (the `page_published` receiver in
-  `wagtail_hooks.py`), but snippets have no such hook. Editors have to
-  sync each translated group by hand. Where: `models/menus.py`,
-  `wagtail_hooks.py`. Fix: sync the English group when a Norwegian group
-  is saved, the way pages do on publish.
 
 ## Features
 
@@ -87,11 +66,11 @@ folder.
   - Remove it from the `subpage_types` of `CategoryPage` and the
     info-articles index (`models/article/pages.py`,
     `models/article/unions.py`).
-  - Move the existing union category page, in Norwegian and English. Check
-    that the English copies move with it.
+  - Move the existing union category page (English follows, since it's
+    the same page).
   - **Every union URL changes.** Wagtail's redirects app is installed and
     should create redirects from the old URLs automatically when the page
-    is moved in the admin. Check that they appear under Settings →
+    is moved in the admin (also for the English addresses). Check that they appear under Settings →
     Redirects, so links from outside, such as Peoply, keep working.
   - Replace the purple union category card on category pages with a link
     or an info article that points to the unions page.
@@ -174,18 +153,15 @@ folder.
 - [ ] **The Editor mode "On/Off" label is always English.**
   `static/js/article_editor_mode.js` replaces the translated text with
   hard-coded English.
-- [ ] **Images with text in them can't get an English version** after the
-  planned translation redesign (one Norwegian page tree, English shown as
-  translated text on top of it). Today wagtail-localize lets an English
-  page use a different image; the redesign shares every image between
-  both languages, so a poster or diagram with Norwegian writing on it
-  stays Norwegian on the English site. Not fixed in the redesign. Possible
-  fix: an optional "English version" image field next to images, used on
-  `/en/` when set.
-- [ ] **Search after the translation redesign.** The site has no public
-  search today. If it gets one later, Wagtail's search index will only
-  hold the Norwegian text, since English is no longer stored as pages, so
-  English search needs its own index of the translated text.
+- [ ] **Images with text in them can't get an English version.** Every
+  image is shared between Norwegian and English, so a poster or diagram
+  with Norwegian writing on it stays Norwegian on the English site.
+  Possible fix: an optional "English version" image field next to images,
+  used on `/en/` when set.
+- [ ] **Search needs an English index.** The site has no public search
+  today. If it gets one later, Wagtail's search index will only hold the
+  Norwegian text, since English isn't stored as pages, so English search
+  needs its own index of the translated text.
 - [ ] **Two union headings are Norwegian in the code.** "Programspesifikke
   foreninger" and "Andre foreninger" are Norwegian `{% trans %}` strings in
   `studentunion_category_page.html`, while every other heading is English.
@@ -201,14 +177,8 @@ folder.
 - [ ] `ArticleStyle` help texts name `article_page.css` and
   `category_page.css`, which don't exist (the real files are
   `article_layout.css`, `article_header.css` and `page_title.css`).
-- [ ] `translation/sync.py` says `publish_page` calls the sync itself. It
-  relies on the `page_published` signal.
 - [ ] `save_banner_style` says blank or 0 means "auto". There is no auto;
   blank falls back to a fixed default.
-- [ ] The `link_peoply_organizations` docstring suggests
-  `peoply_organization_id` is copied to English by the publish hook. It
-  isn't a synced field; it works because `apply_peoply_match()` writes
-  every language copy.
 - [ ] Template comments say `.union-group-row` is in `category_card.css`
   (it's in `05_objects/category_layout.css`), and the union and tool card
   partials point to `article_models.py` (the blocks are in

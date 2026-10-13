@@ -384,15 +384,6 @@ DEEPL_GLOSSARY_ID = os.environ.get("DEEPL_GLOSSARY_ID", "")  # check .env
 # translation/deepl.py).
 if "test" in sys.argv[1:2]:
     DEEPL_API_KEY = DEEPL_GLOSSARY_ID = ""
-# The two-tree wagtail-localize setup, until the switch-over: its CLASS is a
-# thin adapter over the client above.
-WAGTAILLOCALIZE_MACHINE_TRANSLATOR = {
-    "CLASS": "ifi_home_app.translation.deepl.DeepLTranslator",
-    "OPTIONS": {
-        "AUTH_KEY": DEEPL_API_KEY,
-        "GLOSSARY_IDS": {("NB", "EN"): DEEPL_GLOSSARY_ID},
-    },
-}
 
 # Umami
 UMAMI_SCRIPT_URL = os.environ.get("UMAMI_SCRIPT_URL", "")

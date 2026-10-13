@@ -1,6 +1,6 @@
 # Tech stack
 
-Last updated: 2026-10-12
+Last updated: 2026-10-13
 
 What IfiPlatform is built with, and why each piece is there. For how the
 production server runs all of this, see
@@ -14,7 +14,7 @@ local copy running, see the main [README.md](../../README.md).
 | Language           | Python (CI tests 3.12, 3.13 and 3.14)                |
 | Web framework      | Django 6.0                                           |
 | CMS / admin        | Wagtail 7.4                                          |
-| Translation        | wagtail-localize + DeepL machine translation         |
+| Translation        | Own English overlay + DeepL machine translation      |
 | Database           | PostgreSQL (production), SQLite (local default)      |
 | Frontend           | Django templates, plain CSS (ITCSS + BEM)            |
 | Web server         | Nginx (reverse proxy, HTTPS) + Gunicorn (WSGI)       |
@@ -32,8 +32,10 @@ The exact version of every Python package is pinned in
   at `/<lang>/wagtail-admin/`. Wagtail brings its own helpers with it: `django-modelcluster`,
   `django-treebeard` (the page tree), `django-taggit` (tags) and `Willow`
   (image handling).
-- **wagtail-localize**: keeps a Norwegian Bokmål (`nb`, the default) and an
-  English (`en`) version of each page in sync.
+- **wagtail-localize**: only used to split page fields into text pieces
+  for translation, inside `ifi_home_app/translation/page_segments.py`.
+  The translations themselves are stored in the project's own tables (see
+  [shared/translations.md](shared/translations.md)).
 - **Django REST framework**: in `requirements.txt`, but not wired up yet
   (not in `INSTALLED_APPS`, no API endpoints).
 - **psycopg 3**: the PostgreSQL driver.

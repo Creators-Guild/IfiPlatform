@@ -6,8 +6,9 @@ docs/claude_context/translation_overlay.md."""
 from django.contrib.auth import get_user_model
 from django.db import connection, transaction
 from django.test import TestCase, override_settings
-from django.utils import timezone
-from wagtail.models import Locale, Page
+from django.utils import timezone, translation
+from wagtail.contrib.redirects.models import Redirect
+from wagtail.models import Locale, Page, Site
 
 from ifi_home_app.models import (
     ArticleIndexPage,
@@ -428,6 +429,81 @@ class EnglishSlugTests(OverlayTestCase):
             with self.assertNumQueries(0):
                 english_urls.english_url_path(self.article, root.depth)
                 english_urls.english_url_path(self.index, root.depth)
+
+
+class AddressChangeRedirectTests(OverlayTestCase):
+    def setUp(self):
+        super().setUp()
+        site = Site.objects.get(is_default_site=True)
+        site.root_page = Page.get_first_root_node()
+        site.save()
+        english_urls.set_english_slug(self.index, "Articles", "human")
+        self.other = ArticleIndexPage(
+            locale=self.nb, title="Annet", slug="annet", section="news"
+        )
+        Page.get_first_root_node().add_child(instance=self.other)
+        self.other.save_revision().publish()
+
+    def redirects(self):
+        return {
+            redirect.old_path: redirect.link
+            for redirect in Redirect.objects.select_related("redirect_page")
+        }
+
+    def redirects_after(self, change, admin_language):
+        """Redirects made by change() with the admin in admin_language;
+        rolled back afterwards."""
+        with transaction.atomic():
+            with translation.override(admin_language):
+                with self.captureOnCommitCallbacks(execute=True):
+                    change()
+            redirects = self.redirects()
+            transaction.set_rollback(True)
+        return redirects
+
+    def test_moved_page_redirects_in_both_languages(self):
+        english_urls.set_english_slug(self.article, "Freshers' week", "human")
+
+        def move():
+            ArticlePage.objects.get(pk=self.article.pk).move(
+                ArticleIndexPage.objects.get(pk=self.other.pk), pos="last-child"
+            )
+
+        for language in ("nb", "en"):
+            redirects = self.redirects_after(move, language)
+            self.assertEqual(
+                redirects.get("/en/articles/freshers-week"),
+                "/en/annet/freshers-week/",
+                language,
+            )
+            self.assertIn("/nb/artikler/fadderuke", redirects, language)
+            # Wagtail's handler under "en" used to delete every redirect.
+            self.assertIn("/en/artikler", redirects, language)
+
+    def test_norwegian_slug_change_moves_english_fallback_address(self):
+        def rename():
+            page = ArticlePage.objects.get(pk=self.article.pk)
+            page.slug = "fadderuka"
+            page.save_revision().publish()
+
+        for language in ("nb", "en"):
+            redirects = self.redirects_after(rename, language)
+            self.assertEqual(
+                redirects.get("/en/articles/fadderuke"),
+                "/en/articles/fadderuka/",
+                language,
+            )
+            self.assertIn("/nb/artikler/fadderuke", redirects, language)
+
+    def test_english_slug_keeps_english_address_on_norwegian_slug_change(self):
+        english_urls.set_english_slug(self.article, "Freshers' week", "human")
+        page = ArticlePage.objects.get(pk=self.article.pk)
+        page.slug = "fadderuka"
+        with self.captureOnCommitCallbacks(execute=True):
+            page.save_revision().publish()
+        redirects = self.redirects()
+        self.assertIn("/nb/artikler/fadderuke", redirects)
+        self.assertNotIn("/en/articles/freshers-week", redirects)
 
 
 @override_settings(ALLOWED_HOSTS=["*"])

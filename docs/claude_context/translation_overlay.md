@@ -1,22 +1,26 @@
 # English overlay (translation/*.py, models/translation.py) — design notes
 
-Last updated: 2026-10-12
-Covers: ifiplatform/apps/ifi_home_app/translation/page_segments.py, ifiplatform/apps/ifi_home_app/translation/stored_translations.py, ifiplatform/apps/ifi_home_app/translation/english_overlay.py, ifiplatform/apps/ifi_home_app/translation/english_urls.py, ifiplatform/apps/ifi_home_app/translation/auto_translate.py, ifiplatform/apps/ifi_home_app/translation/english_editor.py, ifiplatform/apps/ifi_home_app/models/translation.py, ifiplatform/apps/ifi_home_app/management/commands/update_translation_snapshot.py, ifiplatform/apps/ifi_home_app/management/commands/translate_english.py
+Last updated: 2026-10-13
+Covers: ifiplatform/apps/ifi_home_app/translation/page_segments.py, ifiplatform/apps/ifi_home_app/translation/stored_translations.py, ifiplatform/apps/ifi_home_app/translation/english_overlay.py, ifiplatform/apps/ifi_home_app/translation/english_urls.py, ifiplatform/apps/ifi_home_app/translation/auto_translate.py, ifiplatform/apps/ifi_home_app/translation/deepl.py, ifiplatform/apps/ifi_home_app/translation/english_editor.py, ifiplatform/apps/ifi_home_app/models/translation.py, ifiplatform/apps/ifi_home_app/management/commands/update_translation_snapshot.py, ifiplatform/apps/ifi_home_app/management/commands/translate_english.py
 
 Context for future Claude sessions. Not a human-facing doc. The plan and
 its decisions: `docs/claude_references/translation_redesign.md`.
 
 ## Status
 
-Steps 1–3 built (plan: `docs/claude_references/translation_redesign.md`).
+Steps 1–4 built (plan: `docs/claude_references/translation_redesign.md`).
 Step 3 is the **switch-over**: `WAGTAIL_I18N_ENABLED = False`, one
 Norwegian tree, English shown under /en/ by `EnglishDisplayMiddleware`.
 A database still holding the English tree is converted by
 `manage.py switch_to_english_overlay --apply` (deploy.sh runs it after
-`migrate`; it does nothing once switched). Code still left from the
-two-tree setup (translation/sync.py, views.py, snippets.py, deepl's
-adapter class, the old sync view/JS, `publish_target`) is dead and goes in
-step 4; `LEGACY_IMPORTERS` in test_translated_fields_guard lists it.
+`migrate`; it does nothing once switched). Step 4 deleted the two-tree
+code. The switch-over command is the only file besides page_segments.py
+that still imports wagtail-localize (`LEGACY_IMPORTERS` in
+test_translated_fields_guard); delete it, its deploy.sh line and its test
+once production has been switched. `translation_key` stays on the style
+tables (`ArticleStyle`, `ArticleBlockStyle`, `PageBannerStyle`) and as
+the identifier of Peoply union mismatches: one page per key now, so it's
+harmless and re-keying would need a data migration.
 
 ## Model attribute: `translated_fields`, not `translatable_fields`
 
@@ -198,6 +202,20 @@ rewrites the file.
   address, page + live descendants) when a live page's English address
   changes, including the first DeepL slug replacing the Norwegian
   fallback. The switch-over passes `redirect=False` and makes its own.
+- **Moves and Norwegian slug changes** (step 4): Wagtail's redirects app
+  compares a page's old and new address, but under "en" our
+  `get_url_parts` reads the tree as it is *now*, so both look equal; its
+  empty batch then deletes **every** automatically created redirect
+  (`BatchRedirectCreator.pre_process` filters on an empty `Q()`). Found when
+  an admin running in English moved a page in a test. `install()` therefore
+  replaces `wagtail.contrib.redirects.signal_handlers.create_redirects` with
+  a wrapper that runs it in Norwegian (Wagtail's handlers look the name up
+  at call time). English redirects come from our own `pre_page_move`/
+  `post_page_move` handlers (addresses before/after) and `page_slug_changed`
+  (only for pages without an English slug, whose /en/ address uses the
+  Norwegian slug; old addresses derived by swapping the slug in the new
+  prefix, since the signal fires after the save). `page_slug_changed` is
+  sent on commit: tests need `captureOnCommitCallbacks`.
 - Sitemap: Django's i18n sitemap (`i18n`, `languages`, `alternates`), one
   entry per page per language.
 
@@ -223,3 +241,23 @@ from 0039); databases with English content keep it for the command.
 
 Rewired onto these tables: see `translation_nudge.md`. Tests force
 `DEEPL_API_KEY = ""` (settings.py), whatever .env says.
+
+## deepl.py (our DeepL client)
+
+- `translate_texts()` sends the same request wagtail-localize's
+  DeepLTranslator did (NB -> EN, `tag_handling=xml`, glossary), in batches
+  of 50, and checks the HTTP status first. History: wagtail-localize's
+  client called `response.json()` without `raise_for_status()`, so a rate
+  limit or quota answer showed up as an opaque `JSONDecodeError` (seen on a
+  164-page bulk translation). `DEEPL_CALL_DELAY_SECONDS` paces
+  `translate_waiting()` between objects for the same reason.
+- No wagtail-localize machine translator is configured any more
+  (`WAGTAILLOCALIZE_MACHINE_TRANSLATOR` removed in step 4); its admin UI is
+  hidden.
+- Glossary: `sync_deepl_glossary` deletes and recreates the glossary by
+  name (DeepL glossaries can't be edited) and records `GlossarySyncState`.
+  Dev and prod share one DeepL account, so running it anywhere invalidates
+  the others' `DEEPL_GLOSSARY_ID`. The nightly run redoes DeepL rows that
+  contain a glossary term and predate the sync
+  (`stored_translations.forget_stale_glossary_rows`, case-insensitive like
+  DeepL's own matching); human rows are never touched.

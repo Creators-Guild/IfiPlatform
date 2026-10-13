@@ -190,8 +190,8 @@ class TranslationStatus:
 
 def translation_status(page):
     """How much of `page` has English, for nudges, dashboard, banner and the
-    English editor. (Not translation/status.py's translation_status, which
-    compares the two page trees and goes away at the switch-over.)"""
+    English editor. (translation/status.py's translation_status turns these
+    counts into a nudge for one user.)"""
     from . import page_segments, stored_translations
 
     rows = stored_translations.lookup(page)

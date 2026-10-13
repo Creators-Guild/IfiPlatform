@@ -4,7 +4,6 @@ stored English -- see docs/claude_references/translation_redesign.md
 ("Migration") and docs/claude_context/translation_overlay.md."""
 
 from io import StringIO
-from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
@@ -13,7 +12,7 @@ from django.utils import timezone
 from wagtail.contrib.redirects.models import Redirect
 from wagtail.models import Locale, Page, Site
 from wagtail_localize.models import StringTranslation
-from wagtail_localize.strings import StringValue
+from wagtail_localize.operations import TranslationCreator
 
 from ifi_home_app.models import (
     ArticleIndexPage,
@@ -26,8 +25,27 @@ from ifi_home_app.models import (
 from ifi_home_app.translation.english_overlay import english
 
 
-def _fake_translate(source_locale, target_locale, strings):
-    return {string: StringValue(f"[EN] {string.data}") for string in strings}
+def _translate_tree(page, locale, user):
+    """The old two-tree setup: a published English copy of page and its
+    descendants, every piece "machine-translated" as "[EN] <Norwegian>"."""
+    creator = TranslationCreator(user, [locale])
+    for p in [page, *page.get_descendants()]:
+        creator.create_translations(p)
+    for source, translations in creator.mappings.items():
+        for segment in source.stringsegment_set.select_related("string"):
+            StringTranslation.objects.get_or_create(
+                translation_of=segment.string,
+                locale=locale,
+                context_id=segment.context_id,
+                defaults={
+                    "data": f"[EN] {segment.string.data}",
+                    "translation_type": StringTranslation.TRANSLATION_TYPE_MACHINE,
+                },
+            )
+        for translation in translations:
+            translation.save_target(
+                user=user, publish=source.get_source_instance().live
+            )
 
 
 class SwitchTests(TestCase):
@@ -47,17 +65,7 @@ class SwitchTests(TestCase):
         site.root_page = self.index
         site.save()
         self.article = self._article("Fadderuke", "fadderuke")
-        with patch(
-            "ifi_home_app.translation.deepl.DeepLTranslator.translate",
-            side_effect=_fake_translate,
-        ):
-            with self.captureOnCommitCallbacks(execute=True):
-                call_command(
-                    "machine_translate_subtree",
-                    str(self.index.id),
-                    str(self.user.id),
-                    stdout=StringIO(),
-                )
+        _translate_tree(self.index, self.en, self.user)
         self.en_index = self.index.get_translation(self.en)
         self.en_article = self.article.get_translation(self.en)
 

@@ -4,19 +4,23 @@ reads or writes the EnglishSlug table.
 
 install() puts routing and links on Wagtail's own Page (route() and
 get_url_parts()), so every page type and plain Page objects (breadcrumbs,
-child lists) get English addresses under /en/.
+child lists) get English addresses under /en/, and connects the redirects
+for moved pages and changed Norwegian slugs.
 
 Design rationale: docs/claude_context/translation_overlay.md"""
 
 from contextlib import contextmanager
 from contextvars import ContextVar
 
+from django.conf import settings
 from django.http import Http404
 from django.urls import reverse
 from django.utils import translation
 from django.utils.text import slugify
 from wagtail.contrib.redirects.models import Redirect
+from wagtail.contrib.redirects import signal_handlers as redirect_signal_handlers
 from wagtail.models import Page
+from wagtail.signals import page_slug_changed, post_page_move, pre_page_move
 
 from ..models.translation import EnglishSlug
 
@@ -165,6 +169,10 @@ def install():
     """Called once from IfiHomeAppConfig.ready()."""
     Page.route = _route
     Page.get_url_parts = _get_url_parts
+    redirect_signal_handlers.create_redirects = _create_redirects_in_norwegian
+    pre_page_move.connect(_before_page_move, dispatch_uid="english_before_move")
+    post_page_move.connect(_after_page_move, dispatch_uid="english_after_move")
+    page_slug_changed.connect(_after_slug_change, dispatch_uid="english_slug_change")
 
 
 # --- Changing English slugs ---------------------------------------------------
@@ -188,6 +196,13 @@ def _redirect(old, new):
             "automatically_created": True,
         },
     )
+
+
+def _redirect_changed(before, after):
+    for page_id, old in before.items():
+        new = after.get(page_id)
+        if old and new and old != new:
+            _redirect(old, new)
 
 
 def set_english_slug(page, wanted, source, user=None, redirect=True):
@@ -215,10 +230,7 @@ def set_english_slug(page, wanted, source, user=None, redirect=True):
         _forget_slugs()
         after = _english_urls(page) if before else {}
     _forget_slugs()
-    for page_id, old in before.items():
-        new = after.get(page_id)
-        if old and new and old != new:
-            _redirect(old, new)
+    _redirect_changed(before, after)
     return slug
 
 
@@ -228,3 +240,55 @@ def set_english_slug_if_missing(page, english_title):
     if english_slug(page) is None:
         return set_english_slug(page, english_title, "deepl")
     return None
+
+
+# --- Moved pages and changed Norwegian slugs ---------------------------------
+# Wagtail's own redirects (wagtail.contrib.redirects) compare a page's old and
+# new address. Under "en" our get_url_parts() reads the tree as it is now, so
+# both look the same, and its empty batch then deletes EVERY automatically
+# created redirect (BatchRedirectCreator.pre_process filters on an empty Q).
+# So Wagtail's part always runs in Norwegian, and these add the English.
+
+_wagtail_create_redirects = redirect_signal_handlers.create_redirects
+
+
+def _create_redirects_in_norwegian(*args, **kwargs):
+    with translation.override(settings.LANGUAGE_CODE):
+        return _wagtail_create_redirects(*args, **kwargs)
+
+
+_english_before_move = {}
+
+
+def _before_page_move(instance, url_path_before, url_path_after, **kwargs):
+    if url_path_before != url_path_after and instance.live:
+        with request_scope():
+            _english_before_move[instance.pk] = _english_urls(instance)
+
+
+def _after_page_move(instance, **kwargs):
+    before = _english_before_move.pop(instance.pk, None)
+    if before:
+        with request_scope():
+            _redirect_changed(before, _english_urls(instance))
+
+
+def _after_slug_change(instance_before, instance, **kwargs):
+    """Without an English slug, a page's /en/ address uses its Norwegian
+    slug, so the English addresses move with it."""
+    if not instance.live:
+        return
+    with request_scope():
+        if english_slug(instance) is not None:
+            return
+        after = _english_urls(instance)
+    new_prefix = after.get(instance.pk) or ""
+    if not new_prefix.endswith(f"/{instance.slug}/"):
+        return
+    old_prefix = new_prefix[: -len(instance.slug) - 1] + f"{instance_before.slug}/"
+    before = {
+        pk: old_prefix + url[len(new_prefix) :]
+        for pk, url in after.items()
+        if url and url.startswith(new_prefix)
+    }
+    _redirect_changed(before, after)

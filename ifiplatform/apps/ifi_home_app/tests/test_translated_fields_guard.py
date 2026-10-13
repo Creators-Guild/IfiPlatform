@@ -20,18 +20,10 @@ from ifi_home_app.translation.page_segments import SNAPSHOT_PATH, current_places
 
 PROJECT = Path(settings.BASE_DIR)
 
-# Two-tree translation code that still imports wagtail-localize; deleted or
-# rewired at the switch-over (docs/claude_references/translation_redesign.md).
-# Shrinks to nothing then.
+# The one-time switch-over reads wagtail-localize's tables; delete it (and
+# this entry) once production has been switched.
 LEGACY_IMPORTERS = {
-    "apps/ifi_home_app/management/commands/link_menu_translations.py",
     "apps/ifi_home_app/management/commands/switch_to_english_overlay.py",
-    "apps/ifi_home_app/management/commands/machine_translate_subtree.py",
-    "apps/ifi_home_app/management/commands/sync_translated_page_fields.py",
-    "apps/ifi_home_app/translation/deepl.py",
-    "apps/ifi_home_app/translation/snippets.py",
-    "apps/ifi_home_app/translation/sync.py",
-    "apps/ifi_home_app/translation/views.py",
 }
 ALLOWED_IMPORTERS = {"apps/ifi_home_app/translation/page_segments.py"}
 

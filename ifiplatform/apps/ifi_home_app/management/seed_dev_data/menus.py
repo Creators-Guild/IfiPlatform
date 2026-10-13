@@ -1,8 +1,7 @@
 """Menu seeding: the MenuGroups and the three Menus (sidemenu, home
 dropmenus, homepage shortcuts) -- same layout migration 0152_menus builds
-for existing databases. Each group gets an en copy via copy_for_translation,
-with its title and link labels swapped for English, then registered with
-wagtail-localize so it's mirrored from nb (translation/snippets.py)."""
+for existing databases. Each group's title and link labels get stored
+English (_store_english)."""
 
 from ifi_home_app.models import ArticleIndexPage, EventIndexPage
 from ifi_home_app.models.article_models import (

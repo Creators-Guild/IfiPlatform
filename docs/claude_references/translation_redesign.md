@@ -1,6 +1,6 @@
 # Translation redesign (Claude draft — reference only)
 
-Last updated: 2026-10-12
+Last updated: 2026-10-13
 
 > **Note:** This is a Claude-authored plan kept in `docs/claude_references/`
 > (see [readme.md](readme.md)). It is the working plan for the
@@ -173,7 +173,7 @@ text".
 - Later: full author + editors history instead of `translated_by`.
 
 **Cleanup** (`stored_translations.cleanup()`, called by the nightly job
-and the `cleanup_segment_translations` command;
+(`translate_english --nightly`; no separate command was built);
 compared with the **published** page, so drafts never delete anything):
 1. page/snippet deleted → delete its rows
 2. place no longer on the page → delete its rows
@@ -501,7 +501,7 @@ The model attribute is called `translated_fields`, not
 attribute itself and keeps syncing the two trees until the switch-over,
 so reusing that name would break the current sync.
 | 3b | Rehearsal on a copy of the production database |
-| 4 | Remove dead code; docs (contributor doc `docs/architecture/shared/translations.md`, `docs/operations/prod_server.md` + management_commands.md for the two translate timers and `translate_english`, claude_context notes, `to_fix.md`) |
+| 4 | **Done 2026-10-13** (see Step 4 results). Remove dead code; docs (contributor doc `docs/architecture/shared/translations.md`, `docs/operations/prod_server.md` + management_commands.md for the two translate timers and `translate_english`, claude_context notes, `to_fix.md`) |
 
 ### Step 3 rehearsal results (2026-10-12, prod copy)
 
@@ -532,6 +532,35 @@ Added in step 3 at the user's request (editors had them before):
 editor; queued, works with auto-translate off), "Machine-translate menu"
 (Menu snippet rows; groups + links in one DeepL batch), and links from the
 English editor back to the Norwegian object and to the English page.
+
+### Step 4 results (2026-10-13)
+
+- Deleted: `translation/sync.py`, `snippets.py`, `views.py`, the
+  `machine_translate_subtree`, `link_menu_translations` and
+  `sync_translated_page_fields` commands (+ test, confirm template), the
+  `DeepLTranslator` adapter and `WAGTAILLOCALIZE_MACHINE_TRANSLATOR`,
+  `sync_mirrored_page` (view, URL, JS), `publish_target`,
+  `SOURCE_LANGUAGE_CODE`, `style_target`, the en-copy publish/unpublish in
+  `article_views`, `sync_locale_trees` and the `translation_key` dedup in
+  the Peoply sync, `apply_peoply_match`'s multi-copy write and the admin's
+  multi-copy event delete.
+- `LEGACY_IMPORTERS` holds only `switch_to_english_overlay` (its test
+  builds the two-tree fixture with wagtail-localize directly). Delete the
+  command, its test and its deploy.sh line once prod has been switched.
+- Kept on purpose: `translation_key` on the style tables and as the
+  Peoply union-mismatch identifier (one page per key now; re-keying needs a
+  data migration). `test_force_sync_view.py` tests the Peoply "Sync now"
+  button, not the two-tree sync, so it stays.
+- Found and fixed: moving a page (or changing a Norwegian slug) made no
+  English redirect, and with the admin in English Wagtail's own redirect
+  handler saw no change under our `get_url_parts` and its empty batch
+  **deleted every automatically created redirect**. Wagtail's
+  `create_redirects` now always runs in Norwegian, and our own handlers add
+  the English redirects (`english_urls.py`; tests in
+  `AddressChangeRedirectTests`).
+- No `cleanup_segment_translations` command exists: cleanup runs in
+  `translate_english --nightly` only.
+- Full suite: 212 passing.
 
 ### Step 0 results (2026-10-12)
 

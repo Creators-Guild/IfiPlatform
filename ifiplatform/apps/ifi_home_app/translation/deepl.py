@@ -1,5 +1,4 @@
-"""Our DeepL client, plus a thin wagtail-localize adapter the two-tree setup
-uses until the switch-over -- see docs/claude_context/translation_views.md.
+"""Our DeepL client -- see docs/claude_context/translation_overlay.md.
 
 translate_texts() sends the same request wagtail-localize's DeepLTranslator
 did (NB -> EN, XML tag handling, glossary), but checks the HTTP status
@@ -8,10 +7,6 @@ requests.HTTPError instead of an opaque JSON error."""
 
 import requests
 from django.conf import settings
-from wagtail_localize.machine_translators.deepl import (
-    DeepLTranslator as BaseDeepLTranslator,
-)
-from wagtail_localize.strings import StringValue
 
 # Pause between DeepL calls, so batches aren't fired back-to-back.
 DEEPL_CALL_DELAY_SECONDS = 1
@@ -71,16 +66,3 @@ def _error_text(response):
     elif response.status_code == 456:
         text += " The DeepL character quota is used up."
     return text
-
-
-class DeepLTranslator(BaseDeepLTranslator):
-    """wagtail-localize's machine translator for the two-tree setup
-    (WAGTAILLOCALIZE_MACHINE_TRANSLATOR), delegating to translate_texts().
-    Deleted at the switch-over."""
-
-    def translate(self, source_locale, target_locale, strings):
-        english = translate_texts([string.data for string in strings])
-        return {
-            string: StringValue(text)
-            for string, text in zip(strings, english, strict=True)
-        }

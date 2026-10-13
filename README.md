@@ -9,10 +9,10 @@ Goals:
 - A collection of study tools to build and represent study-resources (ex. flashcards, multiple choice, mock exam etc.)
 - A low-threshold way for students — including those with little to no development experience — to contribute to and help shape the platform, building an open community around it
 
-Note: the site is bilingual (Norwegian Bokmål + English) via wagtail-localize — new content pages generally need both locales.
+Note: the site is bilingual (Norwegian Bokmål + English). Pages are written in Norwegian; DeepL fills in the English, and editors can correct it. See [docs/architecture/shared/translations.md](docs/architecture/shared/translations.md).
 
 ## Tech stack
-Django + Wagtail (Python, HTML and CSS, plus a little JavaScript), wagtail-localize for Norwegian/English, and PostgreSQL. Full list: [docs/architecture/tech_stack.md](docs/architecture/tech_stack.md).
+Django + Wagtail (Python, HTML and CSS, plus a little JavaScript), DeepL for Norwegian → English, and PostgreSQL. Full list: [docs/architecture/tech_stack.md](docs/architecture/tech_stack.md).
 
 ## Quick start
 The recommended setup is Docker. One step installs everything: Python, the packages, a PostgreSQL database and test data. Can't use Docker? See [setup without Docker](docs/contributing/setup_without_docker.md).

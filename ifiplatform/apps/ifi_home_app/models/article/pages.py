@@ -10,7 +10,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin.panels import FieldPanel
 from wagtail.fields import RichTextField, StreamField
-from wagtail.models import Locale, Page
+from wagtail.models import Page
 from wagtail.url_routing import RouteResult
 
 from .blocks import _body_content_blocks, _iter_toc_entries
@@ -30,7 +30,6 @@ from ..page_mixins import (
 from .tools import ToolPage
 from .unions import StudentUnionCategoryPage
 from ...translation.english_overlay import EnglishPreviewMixin
-from ...translation.sync import SOURCE_LANGUAGE_CODE
 
 
 def _split_categories_by_season(categories):
@@ -191,29 +190,11 @@ class ArticlePage(
             0
         ]
 
-    # aliases the shared constant so existing SOURCE_LANGUAGE_CODE
-    # references keep working unchanged.
-    SOURCE_LANGUAGE_CODE = SOURCE_LANGUAGE_CODE
-
-    @property
-    def publish_target(self):
-        """The nb-locale copy -- publish/unpublish always acts on this one
-        regardless of viewed locale. See docs/claude_context/article_pages.md."""
-        target = self.style_target
-        if target.locale.language_code == self.SOURCE_LANGUAGE_CODE:
-            return target
-        nb_locale = Locale.objects.filter(
-            language_code=self.SOURCE_LANGUAGE_CODE
-        ).first()
-        if nb_locale is None:
-            return target
-        return target.get_translation_or_none(nb_locale) or target
-
     def can_publish_in_editor_mode(self, user):
-        return editor_mode_allowed(self.publish_target, user, "publish")
+        return editor_mode_allowed(self, user, "publish")
 
     def can_unpublish_in_editor_mode(self, user):
-        return editor_mode_allowed(self.publish_target, user, "unpublish")
+        return editor_mode_allowed(self, user, "unpublish")
 
     @property
     def toc_entries(self):
