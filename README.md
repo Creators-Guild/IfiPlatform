@@ -21,7 +21,11 @@ The recommended setup is Docker. One step installs everything: Python, the packa
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows and macOS). On Linux, install Docker Engine with the Compose plugin.
 - [Visual Studio Code](https://code.visualstudio.com/) with the **Dev Containers** extension (by Microsoft).
 
-Start Docker Desktop and leave it running.
+Start Docker Desktop and leave it running. On Linux there's no Docker Desktop app — start the daemon instead:
+```bash
+sudo systemctl start docker
+sudo systemctl enable --now docker
+```
 
 ### 2. Open the project in the container
 1. **Fork** the repo on GitHub (the "Fork" button at the top right), then clone your fork and connect it to the main repo:
