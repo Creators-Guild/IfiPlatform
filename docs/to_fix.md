@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-10-13
+Last updated: 2026-10-14
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -106,6 +106,52 @@ folder.
     the home page shortcuts
 
   Where: `panels` on `MenuGroupLink` and `MenuGroup` in `models/menus.py`.
+
+## For future features
+
+Problems that don't hurt today, but will once the student resource library
+(documents, flashcards, images) and the wiki arrive. Plan for them before
+those features launch.
+
+- [ ] **Uploads will fill the server's disk.** The server has one 20 GB disk
+  for Ubuntu, Docker images, the database and every uploaded file. A
+  resource library can fill that within a few semesters. Fix: keep the
+  database and `media` on a separate NREC volume mounted at a fixed folder
+  (for example `/srv/ifiplatform-data`). An NREC volume can be made bigger
+  later without rebuilding the server. If even that isn't enough, store
+  uploads in object storage (NREC has S3-style storage) with the
+  `django-storages` package.
+- [ ] **Private documents can be downloaded without logging in.** Wagtail
+  checks a document's privacy settings only when it's downloaded through
+  Wagtail (`/documents/<id>/<name>`). The files themselves sit in
+  `media/documents/`, and the web server hands out everything under
+  `/media/` directly, so anyone with that direct link skips the check. This
+  is already true today with Nginx, but it only matters once something is
+  uploaded as login-only. Fix: make the web server refuse `/media/documents/`
+  (one line in the Nginx or Caddy config), as Wagtail's docs recommend.
+- [ ] **Upload size limits must be chosen on purpose.** Lecture slides and
+  scanned notes can be large, and there are several limits in different
+  places: the web server (Nginx today allows only 1 MB, see Server below),
+  and Wagtail's image limit (`WAGTAILIMAGES_MAX_UPLOAD_SIZE`, 10 MB by
+  default, not set in `ifiplatform/ifiplatform_project/settings.py`).
+  Wagtail has no limit of its own for documents. Fix: decide the largest
+  file we accept, set every limit to match, and write down where they are.
+- [ ] **Media backups will become huge.** `deploy/backup/backup_db.sh` makes
+  a full `.tar.gz` of all of `media` every day, plus one before every
+  deploy, and keeps 14 days of them. That's 14 or more complete copies of
+  every uploaded file on the backup volume. Fix: copy media with `rsync`,
+  which only copies new and changed files, and keep the 14-day history for
+  the database dumps.
+- [ ] **Wiki history will fill the database.** Wagtail saves a full copy of
+  a page every time someone saves it, and keeps them forever. A busy wiki
+  makes many copies. Fix: decide how long history is kept, and run
+  Wagtail's `purge_revisions --days=<N>` as a scheduled job.
+- [ ] **Content must never be committed into a `static/` folder.** Uploaded
+  material (PDFs, images, flashcard pictures) belongs in Wagtail, where it
+  ends up in `media`. `static/` is only for the CSS, JS and icons that
+  developers write. Files committed there are copied into every build and
+  every deploy. Fix: write this rule in the contributing docs when the
+  library is built.
 
 ## Safety and cleanup
 
