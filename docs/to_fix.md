@@ -44,86 +44,66 @@ folder.
   articles that already use it (they do today, since an empty field means
   "use the default").
 
-- [ ] **Move student unions out of the info articles, like events.**
-  Unions are more than information articles: they have their own events,
-  calendar, board members and Peoply link. Today `StudentUnionCategoryPage`
-  sits under an `ArticleIndexPage` or `CategoryPage` (for example under
-  "Sosialt"). The goal is a tree like this:
+- [ ] **Redesign the page tree: one page type per job.** Today
+  `ArticleIndexPage` is the site root ("hub"), the info index and the news
+  index, told apart by its `section` field, and student unions sit inside
+  the info articles although they have their own events, calendar, board
+  and Peoply link. The goal:
   ```
-  ArticleIndexPage (hub)
-  ├── ArticleIndexPage (info_articles)   articles *about* unions stay here
-  ├── ArticleIndexPage (news)
-  ├── EventIndexPage
-  └── Union index page                   one per language, all unions below it
+  SiteRootPage           the site root; structural only, never shown
+  ├── InfoIndexPage      once
+  │   └── CategoryPage → ArticlePage, ToolPage
+  ├── NewsIndexPage      once
+  │   └── CategoryPage → ArticlePage
+  ├── EventIndexPage     once (as today)
+  │   └── EventPage
+  └── UnionIndexPage     once; replaces StudentUnionCategoryPage
       └── UnionPage
   ```
   What it involves:
-  - **One union index page**, like `EventIndexPage`: it may only sit under
-    the hub, and only once (`max_count_per_parent = 1`). The simplest way
-    is to turn the existing `StudentUnionCategoryPage` into it, since it
-    already lists all unions. Renaming the model to `UnionIndexPage` is
-    optional and needs a migration.
-  - Remove it from the `subpage_types` of `CategoryPage` and the
-    info-articles index (`models/article/pages.py`,
-    `models/article/unions.py`).
-  - Move the existing union category page (English follows, since it's
-    the same page).
-  - **Every union URL changes.** Wagtail's redirects app is installed and
-    should create redirects from the old URLs automatically when the page
-    is moved in the admin (also for the English addresses). Check that they appear under Settings →
-    Redirects, so links from outside, such as Peoply, keep working.
-  - Replace the purple union category card on category pages with a link
-    or an info article that points to the unions page.
-  - Update the menus, `seed_dev_data`, the breadcrumbs, and the page tree
-    in `docs/architecture/overview.md` and `unions_and_tools.md`.
+  - **New page types**: `SiteRootPage` (only under Wagtail's root, once,
+    children only the four indexes) and `InfoIndexPage`,
+    `NewsIndexPage`, `UnionIndexPage` (only under `SiteRootPage`,
+    `max_count_per_parent = 1`). Each declares `translated_fields`; update
+    `translated_fields.json` with `update_translation_snapshot`.
+  - **Wagtail can't change a page's type**, and recreating the index
+    pages would give them new ids. Stored English (`SegmentTranslation`,
+    keyed by content type + id), `EnglishSlug`, `Site.root_page`, menu
+    links and page choosers all point at those ids. Prefer a data
+    migration that swaps the type in place: add the new type's row with
+    the same `page_ptr_id`, drop the old type's row, update
+    `content_type` on the page and on its `SegmentTranslation` rows. Ids
+    and URLs then stay the same. Forward-only; rehearse on a copy of the
+    production database and take a backup first.
+  - **Unions move** under `SiteRootPage`, so every union URL changes.
+    Wagtail's redirects app creates redirects for the old URLs in both
+    languages; check Settings → Redirects (Peoply links to union pages).
+    Remove the union index from the `subpage_types` of `CategoryPage` and
+    the info index, and replace the purple union category card on
+    category pages with a link to the unions page.
+  - **Remove `section`** and everything that reads it:
+    `get_section_index()` (the home page finds the news index),
+    `category_section` (article cards), `ArticlePage.can_create_at()`
+    (blocks articles under the hub), and the breadcrumbs (skip the root by
+    type instead).
+  - Update `seed_dev_data`, the menus, the home templates (they crash if
+    an index is missing, see the project rules), the dashboard guide
+    (`templates/wagtailadmin/home/guide.html` describes the tree), and
+    `overview.md`, `articles.md`, `unions_and_tools.md`, `menus.md`.
+  - Open question: should tools get their own `ToolIndexPage` too? Today
+    they sit under categories ("Verktøy").
+  - Do it in two steps (root + unions first, then info/news), each with
+    its own rehearsal on a copy of the production database.
 
-- [ ] **Give news and info articles their own index page types.** Today
-  the hub, the info-articles index and the news index are all the same
-  model, `ArticleIndexPage`, told apart by its `section` field. The goal is
-  one page type per job, so the rules are in the page types instead of a
-  field:
-  ```
-  hub                                    the site root, one per language
-  ├── InfoIndexPage                      one per language
-  │   └── CategoryPage → ArticlePage
-  ├── NewsIndexPage                      one per language
-  │   └── CategoryPage → ArticlePage
-  ├── EventIndexPage
-  └── UnionIndexPage                     see the item above
-  ```
-  What it involves:
-  - New models `InfoIndexPage` and `NewsIndexPage`, each allowed only
-    under the hub and only once (`max_count_per_parent = 1`). Decide what
-    the hub becomes: keep `ArticleIndexPage` for it, or a small `HubPage`.
-  - **Wagtail can't change the type of an existing page**, so the live
-    index pages need a data migration: create the new pages (in both
-    languages), move their children over, then delete the old ones. This
-    is the riskiest part. Test it on a copy of the production database
-    first, and take a backup before deploying it.
-  - Replace everything that reads `section`:
-    - `get_section_index()`, which the home page uses to find the news
-      index
-    - `category_section`, used by article cards
-    - `ArticlePage.can_create_at()`, which blocks articles under the hub
-    - the breadcrumbs, which skip the hub
-
-    Then remove the field.
-  - Check `seed_dev_data`, the menus, and the home templates (they crash
-    if an index is missing, see the project rules).
-  - Update `overview.md`, `articles.md` and `menus.md`.
-  - Worth doing together with the unions move above, since both change
-    the page tree and need page moves in production.
-
-- [ ] **The links in a menu group look odd in the Wagtail admin.** Add a
-  screenshot to the issue showing what looks wrong. What the code does
-  today: each link in the "Links" list shows five full-width fields in
-  this order: label, page, URL, description, prefix. There is no custom
-  admin CSS. Possible improvements:
+- [ ] **Tidy the link fields in the menu group editor.** (The broken
+  "Links" panel was fixed by renaming `prefix` to `label_prefix`.) Each
+  link shows five full-width fields: label, page, URL, description,
+  label prefix. Possible improvements:
   - put page and URL side by side (`FieldRowPanel`), since only one of
     them may be filled
-  - move `prefix` before `label`, the order they appear on the site
-  - add help texts saying `prefix` and `description` only show on the
-    home page shortcuts
+  - move `label_prefix` before `label`, the order they appear on the site
+  - add help texts saying `label_prefix` and `description` only show on
+    the home page shortcuts
 
   Where: `panels` on `MenuGroupLink` and `MenuGroup` in `models/menus.py`.
 
@@ -195,4 +175,13 @@ From [operations/server_setup.md](operations/server_setup.md#notes-and-known-iss
 - [ ] **Uploads over 1 MB probably fail** with "413", because Nginx has no
   `client_max_body_size`. Test with a large image in the Wagtail admin.
 - [ ] **Gunicorn's timeout is 30 minutes** (`--timeout 1800`). The usual
-  value is 30–120 seconds.
+  value is 30–120 seconds. It was raised for machine-translating a whole
+  subtree inside the web request; that now runs from the
+  `ifiplatform-translate` timer, so the long timeout can probably go.
+  Check that nothing else needs it (the "Sync Peoply now" button runs in
+  the request too, see Bugs).
+- [ ] **Local dev and production share one DeepL account.**
+  `sync_deepl_glossary` replaces the glossary by name, so running it
+  locally gives prod's `DEEPL_GLOSSARY_ID` a deleted glossary, and DeepL
+  then fails with 404 until prod's `.env` is updated. Fix: a separate
+  DeepL key for development (or none: without a key nothing is sent).

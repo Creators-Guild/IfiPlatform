@@ -4,11 +4,11 @@ Last updated: 2026-10-13
 Covers: ifiplatform/apps/ifi_home_app/translation/page_segments.py, ifiplatform/apps/ifi_home_app/translation/stored_translations.py, ifiplatform/apps/ifi_home_app/translation/english_overlay.py, ifiplatform/apps/ifi_home_app/translation/english_urls.py, ifiplatform/apps/ifi_home_app/translation/auto_translate.py, ifiplatform/apps/ifi_home_app/translation/deepl.py, ifiplatform/apps/ifi_home_app/translation/english_editor.py, ifiplatform/apps/ifi_home_app/models/translation.py, ifiplatform/apps/ifi_home_app/management/commands/update_translation_snapshot.py, ifiplatform/apps/ifi_home_app/management/commands/translate_english.py
 
 Context for future Claude sessions. Not a human-facing doc. The plan and
-its decisions: `docs/claude_references/translation_redesign.md`.
+its decisions: `docs/claude_plans/translation_redesign.md`.
 
 ## Status
 
-Done and in production (plan: `docs/claude_references/translation_redesign.md`):
+Done and in production (plan: `docs/claude_plans/translation_redesign.md`):
 `WAGTAIL_I18N_ENABLED = False`, one Norwegian tree, English shown under
 /en/ by `EnglishDisplayMiddleware`. Only `page_segments.py` imports
 wagtail-localize (test_translated_fields_guard). `translation_key` stays on the style

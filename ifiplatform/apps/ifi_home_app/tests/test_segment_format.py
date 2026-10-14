@@ -8,7 +8,7 @@ English row would stop matching, and DeepL would redo everything, losing
 people's fixes. Don't update golden_segments.json to make it pass: make
 the extraction produce these pieces again. The only legitimate update is a
 new case for a new kind of content. Any replacement for wagtail-localize
-must pass these unchanged (docs/claude_references/translation_redesign.md).
+must pass these unchanged (docs/claude_context/translation_overlay.md).
 """
 
 import json
