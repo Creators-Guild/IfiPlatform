@@ -314,9 +314,11 @@ development, stays as it is.
 4. Create a normal user called `app` and run as that user. Running as the all-powerful
    `root` user is a security risk.
 5. Run `collectstatic`, so the CSS/JS ends up in `/app/staticfiles/` *inside the image*.
-   `settings.py` refuses to start without a secret key, so this one command gets a
-   placeholder: `DJANGO_SECRET_KEY=build-only python manage.py collectstatic --noinput`.
-   The placeholder only exists for that command. The real key is never in the image.
+   `settings.py` refuses to load without a secret key, and with `DEBUG` off it builds
+   the cache path from `DB_NAME`, so this one command gets placeholders for both:
+   `DJANGO_SECRET_KEY=build-only DB_NAME=build-only python manage.py collectstatic --noinput`.
+   `collectstatic` never connects to the database. The placeholders only exist for that
+   command. The real key is never in the image.
 6. Create empty `media/` and `django_cache/` folders owned by `app`, so Django is allowed
    to write into them.
 7. Say what to run when a container starts (`CMD`): Gunicorn with the same settings as
@@ -393,6 +395,8 @@ and takes the site down. The limit keeps the newest ~30 MB per container.
   The known 1 MB upload problem in `server_setup.md` comes from Nginx's default, so it
   goes away when Nginx does.
 - "Compress responses" (gzip), so pages load faster.
+- "Only HTTP/1 and HTTP/2." HTTP/3 needs UDP port 443, which the security group doesn't
+  open. Without this line, browsers would try HTTP/3 first and wait for it to fail.
 - "Add the `X-Robots-Tag` header from the `ROBOTS_TAG` setting." The mock site sets it to
   `noindex, nofollow` (hide from Google). The real site leaves it at the default, `all`
   (normal).
@@ -451,7 +455,7 @@ The script starts with a short comment explaining this, like today's.
 | 2 | 6 | *(only if `SEED_COMMAND` is set)* `... python manage.py $SEED_COMMAND` | Fills in fake content. The seed script must skip anything that already exists, so it's safe on every deploy |
 | 2 | 7 | `docker compose up -d` | Starts or replaces all containers with the new versions. `-d` means "run in the background" |
 | 2 | 8 | `docker compose exec web python manage.py clear_cache` | Clears Django's cache, same as today's deploy. `exec` runs a command inside an already running container |
-| 2 | 9 | `docker image prune -f` | Deletes old unused images so the disk doesn't fill up |
+| 2 | 9 | `docker image prune -f` + `docker builder prune -f --filter until=168h` | Deletes old unused images, and build cache unused for a week, so the disk doesn't fill up |
 
 Two things from today's deploy are left for phase 2 (the real site): the backup before
 migrating, and the 10-minute "the site is about to restart" banner for visitors.

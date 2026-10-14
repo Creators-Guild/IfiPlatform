@@ -1,6 +1,6 @@
 # Server setup
 
-Last updated: 2026-09-29
+Last updated: 2026-10-14
 
 How to build the production server from zero, for example if the VM is
 lost or has to be replaced. Follow the steps in order. For how the
@@ -357,8 +357,8 @@ of the rebuild in this doc.
   the deploy SSH key gives full root access, so keep the GitHub secrets
   and the list of repo admins small, and replace the key when a maintainer
   leaves.
-- **Docker** could replace most of these steps with a single
-  `docker compose up`. It would also mean rewriting the deploy, the
-  backups and the HTTPS setup, so it is a project of its own. It's worth
-  considering after the thesis data collection period, starting from this
-  doc and `deploy/server_config/`.
+- **Docker** replaces most of these steps on the servers that use it. The
+  setup is ready and runs the Halloween mock site, see
+  [docker_server.md](docker_server.md). The real site keeps this setup
+  until it moves over, which also means rewriting the backups and the
+  scheduled jobs for Docker.

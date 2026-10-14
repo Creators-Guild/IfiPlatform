@@ -92,6 +92,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Serves /static/ on the Docker servers (deploy/docker/). Unused where
+    # Nginx serves /static/ itself.
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     # after LocaleMiddleware: needs the language picked from the address

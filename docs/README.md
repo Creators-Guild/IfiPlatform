@@ -1,6 +1,6 @@
 # docs/
 
-Last updated: 2026-10-13
+Last updated: 2026-10-14
 
 Project documentation beyond the main [README.md](../README.md). Each
 folder holds one kind of document. When you add a new doc, put it in the
@@ -24,7 +24,8 @@ into one folder per app, and features that span several apps go in
 - [frontend.md](architecture/frontend.md): how HTML templates and CSS are
   organized, loaded and written
 - [docker_setup.md](architecture/docker_setup.md): how the local Docker
-  setup is built and why
+  setup is built and why (the server setup is in
+  [operations/docker_server.md](operations/docker_server.md))
 - [eraser_links.md](architecture/eraser_links.md): feature concept map
 - `shared/`: cross-app features and `core_app`
   - [translations.md](architecture/shared/translations.md): Norwegian
@@ -55,6 +56,8 @@ into one folder per app, and features that span several apps go in
   backed up, how to check it, and how to restore
 - [server_setup.md](operations/server_setup.md): how to rebuild the
   production server from zero
+- [docker_server.md](operations/docker_server.md): setting up and running
+  a server with Docker (the mock site now, the real site later)
 - [access_and_handover.md](operations/access_and_handover.md): accounts
   and keys, and checklists for adding, removing and handing over people
 
