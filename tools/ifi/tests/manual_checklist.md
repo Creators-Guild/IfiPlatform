@@ -42,6 +42,7 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | On your branch, add a field to a model and `ifi migrate`, save. Add another field in the same app on main (another clone), with its migration | |
 | ☐ | `ifi check`, then `ifi update` | check: "both added a database change (a migration) in: …". update: the same, with `ifi migrate` under "Your turn" |
 | ☐ | `ifi migrate`, answer y to Django | "Two database changes … were made at the same time", Django lists both, a `…_merge_….py` file appears; then `ifi test` passes |
+| ☐ | `ifi start docs fix typo`, change a file, `ifi save`, `ifi pull-request` | No issue question; it says to delete the `Closes #` line |
 | ☐ | Press **Update branch** on the pull request on GitHub, then make a change and `ifi save` + `ifi pull-request` | "Your branch on GitHub has commits that aren't on your computer", with the `git pull --rebase` line. Run it, then pull-request works |
 | ☐ | Merge the pull request (as yourself), then `ifi check` and `ifi cleanup` (still on the branch) | check: "Your pull request … is merged". cleanup: switches you to main, deletes the branch here and on the fork |
 | ☐ | `command -v gh` in the container terminal | Nothing: the GitHub CLI isn't in the container |

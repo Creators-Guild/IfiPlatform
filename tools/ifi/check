@@ -203,6 +203,7 @@ elif [[ "$branch" == main ]]; then
     warn "You're on main. Start an issue with: ifi fix-issue <nr>"
     next+=("Want to start an issue?" "ifi fix-issue <nr>")
 else
+    # "none": a branch without an issue (ifi start).
     nr="$(git config "branch.$branch.ifi-issue" || true)"
     if [[ -z "$nr" ]]; then
         warn "On branch $branch, not linked to an issue yet. ifi pull-request asks for the number."
@@ -228,7 +229,7 @@ while IFS=$'\t' read -r ref when b; do
             "See them: git stash show -p $ref"
         continue
     fi
-    if [[ -n "$stash_nr" ]]; then
+    if [[ "$stash_nr" =~ ^[0-9]+$ ]]; then
         get="ifi fix-issue $stash_nr"
     else
         get="git switch $b, then git stash pop $ref"
@@ -347,7 +348,9 @@ echo
 if [[ -z "$branch" ]]; then
     printf '%sCurrent branch:%s none (detached HEAD)\n' "$C_BOLD" "$C_OFF"
 else
-    printf '%sCurrent branch:%s %s%s\n' "$C_BOLD" "$C_OFF" "$branch" "${nr:+  (issue #$nr)}"
+    about="${nr:+  (issue #$nr)}"
+    [[ "$nr" != none ]] || about="  (no issue)"
+    printf '%sCurrent branch:%s %s%s\n' "$C_BOLD" "$C_OFF" "$branch" "$about"
 fi
 
 if [[ $problems -gt 0 ]]; then

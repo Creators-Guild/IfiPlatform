@@ -37,8 +37,9 @@ Do this for every change. There are two ways to do the Git parts. Pick the one y
    - `git switch -c <type>/<few-words> upstream/main` makes a new branch, starting from that latest `main`, and switches to it. `-c` means "create".
 
    `<type>` is the issue's Type: `bug`, `feature` or `task`. For example `bug/login-redirect` or `feature/mobile-nav`.
+   A small change with no issue, like a typo or a CI tweak, can also use `docs` or `ci`, for example `docs/fix-readme-typo`. Most changes should have an issue, though.
 
-   **Using the `ifi` commands?** `ifi fix-issue <issue number>` does this step for you and names the branch from the issue. In step 6, `ifi save "message"` adds and commits everything, and in step 7 `ifi pull-request` pushes and prints the pull request link. Your branch fell behind `main`? `ifi update`. Something odd? `ifi check`.
+   **Using the `ifi` commands?** `ifi fix-issue <issue number>` does this step for you and names the branch from the issue. In step 6, `ifi save "message"` adds and commits everything, and in step 7 `ifi pull-request` pushes and prints the pull request link. Your branch fell behind `main`? `ifi update`. Something odd? `ifi check`. No issue for a small change? `ifi start docs fix readme typo`.
 
 3. **Make your change.**
    Not sure which file to open? See [Where do I change…?](docs/contributing/how_this_project_works.md#where-do-i-change). The site at http://localhost:8000 reloads when you save.

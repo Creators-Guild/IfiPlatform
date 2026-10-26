@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# ifi start <type> <few words>: a branch without an issue, for small things
+# like a typo or a CI tweak. Named <type>/<few-words> like ifi fix-issue's
+# branches, from the newest main. branch.<name>.ifi-issue is "none", so
+# ifi pull-request doesn't ask for an issue number.
+#
+# Most changes should have an issue (CONTRIBUTING.md step 1), so this isn't
+# on the beginners' path: docs/to_fix.md has what to decide about that.
+set -euo pipefail
+source "$(dirname "$(readlink -f "$0")")/common.sh"
+
+types="bug feature task docs ci"
+kind="$(lower "${1:-}")"
+shift || true
+[[ " $types " == *" $kind "* && -n "$kind" ]] || die "Which type? One of: $types" \
+    "For example: ifi start docs fix typo in readme" \
+    "Is there an issue for it? Then use: ifi fix-issue <nr>"
+slug="$(slugify "$*")"
+[[ -n "$slug" ]] || die "A few words about it, for the branch name. For example: ifi start $kind fix typo in readme"
+
+name="$kind/$slug"
+git show-ref --verify --quiet "refs/heads/$name" && die "You already have a branch called $name. Go to it:" \
+    "  git switch $name"
+
+dirty=""
+leave_unsaved_changes && dirty=yes
+
+find_base
+fetch_base
+switch_or_explain "Make the branch $name from the newest main (not linked to main, so pushes go to your fork)" \
+    -c "$name" --no-track "$base/main"
+printf '        %s(switch -c makes the branch and moves you onto it: you are on %s now)%s\n' "$C_DIM" "$name" "$C_OFF"
+git config "branch.$name.ifi-issue" none
+
+[[ -z "$dirty" ]] || echo "        The changes you had on main came along to it."
+git_recap
+your_turn "make your change."
+choices \
+    "Want to keep what you have so far?" "ifi save \"Short description of what you changed\"" \
+    "Works, and you're done?" "ifi save, then ifi pull-request (it won't ask for an issue)"

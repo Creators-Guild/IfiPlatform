@@ -23,10 +23,12 @@ if [[ "$(git rev-list --count "$base/main..HEAD")" -eq 0 ]]; then
         "  ifi save \"Short description of what you changed\""
 fi
 
+# "none": a pull request without an issue (ifi start, or Enter here).
 nr="$(git config "branch.$branch.ifi-issue" || true)"
-while [[ ! "$nr" =~ ^[0-9]+$ ]]; do
-    read -r -p "Which issue number does this fix? " nr || die ""
+while [[ ! "$nr" =~ ^([0-9]+|none)$ ]]; do
+    read -r -p "Which issue number does this fix? (Enter if none) " nr || die ""
     nr="${nr#\#}"
+    [[ -n "$nr" ]] || nr=none
 done
 git config "branch.$branch.ifi-issue" "$nr"
 
@@ -35,7 +37,9 @@ if [[ -n "$(stash_for "$branch")" ]]; then
     echo "You have changes put aside for $branch. They aren't in your pull request."
     answer=""
     read -r -p "Send without them? (y/n) " answer || true
-    [[ "$answer" =~ ^[YyJj] ]] || die "Nothing was sent. Get them back first: ifi fix-issue $nr" \
+    get="ifi fix-issue $nr"
+    [[ "$nr" != none ]] || get="git stash pop $(stash_for "$branch")"
+    [[ "$answer" =~ ^[YyJj] ]] || die "Nothing was sent. Get them back first: $get" \
         "Then ifi save, and ifi pull-request again."
 fi
 
@@ -60,13 +64,19 @@ print(
 PY
 )"
 
+if [[ "$nr" == none ]]; then
+    fill=("" "Fill in the template. There's no issue, so delete the \"Closes #\" line," \
+        "" "and say under \"Why\" what the change is for.")
+else
+    fill=("" "Fill in the template, and write #$nr on its \"Closes #\" line:" \
+        "" "it closes the issue when your pull request is merged.")
+fi
 git_recap
 your_turn
 choices \
     "No pull request yet?" "open this link (Ctrl+click, or Cmd+click on a Mac):" \
     "" "$url" \
-    "" "Fill in the template, and write #$nr on its \"Closes #\" line:" \
-    "" "it closes the issue when your pull request is merged." \
+    "${fill[@]}" \
     "Already made it?" "nothing to do, it's updated now" \
     "More changes later?" "ifi save, then ifi pull-request again" \
     "Merged on GitHub?" "ifi cleanup   (deletes the branch, and takes you back to main)"

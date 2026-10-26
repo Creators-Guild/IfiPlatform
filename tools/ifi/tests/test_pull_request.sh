@@ -26,7 +26,7 @@ t_pull_request_asks_for_the_issue_when_the_branch_has_none() {
     clone_as contributor
     git switch --quiet -c feature/my-own
     commit README.md "Better readme"
-    IN=$'\n#9\n' run_ifi pull-request
+    IN=$'#9\n' run_ifi pull-request
     succeeds
     has "write #9 on its \"Closes #\" line"
     same "$(git config branch.feature/my-own.ifi-issue)" 9 "linked issue"
@@ -104,4 +104,18 @@ t_pull_request_sends_without_changes_put_aside_when_asked() {
     IN=$'y\n' run_ifi pull-request
     succeeds
     same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$(git rev-parse HEAD)" "the branch on your fork"
+}
+
+t_pull_request_without_an_issue_when_you_press_enter() {
+    clone_as contributor
+    git switch --quiet -c task/small-fix
+    commit README.md "# Better"
+    IN=$'\n' run_ifi pull-request
+    succeeds
+    same "$(git config branch.task/small-fix.ifi-issue)" none "linked issue"
+    has "There's no issue, so delete the \"Closes #\" line"
+    commit README.md "# Even better"
+    run_ifi pull-request
+    succeeds
+    hasnt "Which issue number"
 }

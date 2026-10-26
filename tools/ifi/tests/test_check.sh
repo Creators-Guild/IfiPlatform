@@ -301,3 +301,11 @@ t_check_warns_when_both_added_a_migration() {
     has "both added a database change (a migration) in: ifiplatform/apps/x_app/migrations"
     has "After ifi update, run ifi migrate"
 }
+
+t_check_on_a_branch_without_an_issue() {
+    clone_as contributor
+    run_ifi start docs Fix typo
+    run_ifi check
+    has "Current branch: docs/fix-typo  (no issue)"
+    hasnt "not linked to an issue yet"
+}

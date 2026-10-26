@@ -537,6 +537,29 @@ put_aside() {
         git stash push --quiet --include-untracked -m "ifi: $branch"
 }
 
+# Before going to another branch. Uncommitted work on main is usually a
+# change made before branching, so it comes along: true. On another branch
+# it belongs to that branch, so it's put aside for it if you say so (false:
+# nothing comes along), and otherwise ifi stops.
+leave_unsaved_changes() {
+    local current answer=""
+    current="$(git branch --show-current)"
+    [[ -n "$(git status --porcelain)" ]] || return 1
+    [[ -n "$current" && "$current" != main ]] || return 0
+    if [[ -t 0 ]]; then
+        echo "You have changes on $current that aren't committed yet:"
+        git status --short | sed 's/^/  /'
+        echo "ifi can put them aside for $current, and give them back when you go back to it."
+        echo "They're kept only on this computer, not on GitHub."
+        read -r -p "Put them aside? (y/n) " answer || true
+    fi
+    [[ "$answer" =~ ^[YyJj] ]] || die "You have changes on $current that aren't committed yet." \
+        "Commit them first, then run this again:" \
+        "  ifi save \"Short description of what you changed\""
+    put_aside
+    return 1
+}
+
 # Takes back what was put aside for the current branch, if anything. Only
 # into a clean working tree, so nothing of yours gets mixed up.
 take_back() {
@@ -589,6 +612,21 @@ migration_clash() {
 added_migration_dirs() {
     git diff --name-only --diff-filter=A "$1" "$2" -- '*/migrations/[0-9]*.py' 2>/dev/null |
         sed 's#/[^/]*$##' | sort -u
+}
+
+# A branch name from a title (ifi fix-issue) or a few words (ifi start):
+# "Gjør kortene oransje!" -> "gjor-kortene-oransje": the first 4 words,
+# ASCII only, at most 40 characters.
+slugify() {
+    "$PY" - "$1" <<'PY'
+import re, sys, unicodedata
+
+text = sys.argv[1].lower()
+for a, b in (("æ", "ae"), ("ø", "o"), ("å", "a")):
+    text = text.replace(a, b)
+text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+print("-".join(re.findall(r"[a-z0-9]+", text)[:4])[:40].strip("-"))
+PY
 }
 
 # Fetches the main repo's newest code into $base/main. $1 can say why, when

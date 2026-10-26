@@ -21,7 +21,7 @@ computers, or with teammates.
 | A1 | Find your branch again on any computer | 🟢 Built (not committed) |
 | A2 | Warn about and fix clashing database changes (migrations) | 🟢 Built (not committed) |
 | A3 | Put unsaved work aside when switching, with reminders | 🟢 Built (not committed) |
-| A4 | Pull requests without an issue | ✅ Agreed, consequences noted for later |
+| A4 | Pull requests without an issue | 🟢 Built (not committed); consequences in docs/to_fix.md |
 | B1–B5 | Smaller improvements | ✅ Agreed (B3: review afterwards, see docs/to_fix.md) |
 | C1 | Pull requests into `beta` | ❌ No: `beta` is old and unused, everything goes to `main` |
 | C2 | Merge button | ✅ Only "Merge commit" is used, so nothing to build |
