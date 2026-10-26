@@ -259,3 +259,35 @@ t_check_with_gh_selecting_someone_else_than_origin_asks_for() {
     run_ifi check
     has "origin asks for octocat, but your computer's gh has hanna selected"
 }
+
+# Changes put aside for the issue-5 branch, and now on main.
+changes_put_aside() {
+    clone_as contributor
+    start_issue
+    echo "changed" >>README.md
+    git stash push --quiet --include-untracked -m "ifi: bug/orange-cards"
+    git switch --quiet main
+}
+
+t_check_reminds_of_changes_put_aside() {
+    changes_put_aside
+    run_ifi check
+    has "Changes put aside for bug/orange-cards"
+    has "They're only on this computer."
+    has "Get them back: ifi fix-issue 5"
+}
+
+t_check_quiet_reminds_of_changes_put_aside() {
+    changes_put_aside
+    run_ifi check --quiet
+    has "Changes put aside for bug/orange-cards"
+    has "Get them back: ifi fix-issue 5"
+}
+
+t_check_changes_put_aside_for_a_deleted_branch() {
+    changes_put_aside
+    git branch --quiet -D bug/orange-cards
+    run_ifi check
+    has "but that branch is deleted"
+    has "See them: git stash show -p stash@{0}"
+}

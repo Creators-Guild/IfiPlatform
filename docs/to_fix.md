@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-10-14
+Last updated: 2026-10-26
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -211,6 +211,31 @@ those features launch.
   `models/article/blocks.py`).
 - [ ] Some admin and model docstrings say "three" Peoply mismatch proxies;
   there are four.
+
+## ifi commands
+
+Decisions to come back to once the planned ifi changes are built.
+
+- [ ] **Pull requests without an issue: check the consequences.** The plan
+  lets `ifi pull-request` go on without an issue number (press Enter), and
+  adds `ifi start` for branches without an issue. Then:
+  - the pull request closes no issue, so nothing on GitHub links the work
+    to a task
+  - no issue means no Trello card (cards are made from issues by
+    `.github/workflows/trello_sync.yml`), so the work doesn't show on the
+    board
+  - students may skip step 1 in CONTRIBUTING.md (pick an issue and say
+    you're taking it), so two people can end up doing the same work
+
+  Ways to soften it: only allow "no issue" for some branch types (task,
+  docs, ci), ask "Most changes should have an issue. Sure? (y/n)", or leave
+  `ifi start` out of the beginners' help page.
+- [ ] **Review how `ifi undo-file` hides files you added.** When you undo a
+  file you added, ifi puts it in `.git/info/exclude`, so Git ignores it on
+  that computer from then on, and a later `ifi save` leaves it out. The
+  plan makes ifi say so, mark the line, and list those files in
+  `ifi check`. Check that this is clear enough for beginners, or whether
+  hiding the file should stop, or only happen when asked.
 
 ## Server
 

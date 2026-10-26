@@ -1,5 +1,6 @@
 ifi check                  check your setup and see what to do next
 ifi fix-issue <nr>         make a branch for issue <nr>, or go back to it
+                           (asks to put unsaved changes aside, and gives them back)
 ifi save "message"         commit all your changes (git add + commit, whole repo)
 ifi update                 bring your branch up to date with main in the main repo
 ifi update --abort         undo an update that hit a conflict

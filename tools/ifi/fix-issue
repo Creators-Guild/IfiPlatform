@@ -3,6 +3,9 @@
 # like CONTRIBUTING.md asks, starting from the newest main. The issue number
 # is kept in the branch's Git config (branch.<name>.ifi-issue), so
 # pull-request knows it, and a second fix-issue <nr> switches back to it.
+# That config is only in this clone. On another computer the issue gives the
+# same branch name, so a branch with that name on your fork (or here, not
+# linked to an issue) is offered to go on with, after asking.
 set -euo pipefail
 source "$(dirname "$(readlink -f "$0")")/common.sh"
 
@@ -12,37 +15,50 @@ nr="${nr#\#}"
 
 current="$(git branch --show-current)"
 dirty="$(git status --porcelain)"
-
-# Uncommitted work on main is usually a change made before branching, so it
-# comes along. On another issue's branch it belongs to that issue.
-if [[ -n "$dirty" && -n "$current" && "$current" != main ]]; then
-    die "You have changes on $current that aren't committed yet." \
-        "Commit them first, then run this again:" \
-        "  ifi save \"Short description of what you changed\""
-fi
-
 existing="$(git config --get-regexp '^branch\..*\.ifi-issue$' 2>/dev/null |
     awk -v n="$nr" '$2 == n { print $1 }' | sed -E 's/^branch\.//; s/\.ifi-issue$//' | head -n 1 || true)"
-if [[ -n "$existing" ]] && git show-ref --verify --quiet "refs/heads/$existing"; then
-    if [[ "$existing" == "$current" ]]; then
-        echo "You're already on $existing, the branch for issue #$nr."
-    else
-        echo "Issue #$nr already has a branch: $existing. No need for a new one."
-        switch_or_explain "Switch to your branch for issue #$nr" "$existing"
+git show-ref --verify --quiet "refs/heads/$existing" || existing=""
+
+# Uncommitted work on main is usually a change made before branching, so it
+# comes along. On another issue's branch it belongs to that issue, so it's
+# put aside for that branch (put_aside in common.sh), if you say so.
+if [[ -n "$dirty" && -n "$current" && "$current" != main && "$existing" != "$current" ]]; then
+    answer=""
+    if [[ -t 0 ]]; then
+        echo "You have changes on $current that aren't committed yet:"
+        git status --short | sed 's/^/  /'
+        echo "ifi can put them aside for $current, and give them back when you go back to it."
+        echo "They're kept only on this computer, not on GitHub."
+        read -r -p "Put them aside? (y/n) " answer || true
     fi
-    find_base
-    # Only to say whether main moved on, so a failed fetch (no internet)
-    # isn't worth an error.
-    behind=0
-    why="Download the newest code from the main repo, to see if its main moved on"
-    GIT_DONE+=("git fetch $base")
-    step_start "$why"
-    if GIT_TERMINAL_PROMPT=0 git fetch --quiet "$base" 2>/dev/null; then
-        step_done ok "$why" git fetch "$base"
+    [[ "$answer" =~ ^[YyJj] ]] || die "You have changes on $current that aren't committed yet." \
+        "Commit them first, then run this again:" \
+        "  ifi save \"Short description of what you changed\""
+    put_aside
+    dirty=""
+fi
+
+# On the issue's branch already: says whether main moved on, and what's
+# next, then exits. $1 is "fetched" when $base is fetched already.
+carry_on() {
+    take_back
+    [[ -n "${base:-}" ]] || find_base
+    local behind=0 why
+    if [[ "${1:-}" == fetched ]]; then
         behind="$(git rev-list --count "HEAD..$base/main")"
     else
-        step_done fail "$why" git fetch "$base"
-        echo "      Couldn't reach GitHub. Not a problem, it just can't tell if main moved on."
+        # Only to say whether main moved on, so a failed fetch (no internet)
+        # isn't worth an error.
+        why="Download the newest code from the main repo, to see if its main moved on"
+        GIT_DONE+=("git fetch $base")
+        step_start "$why"
+        if GIT_TERMINAL_PROMPT=0 git fetch --quiet "$base" 2>/dev/null; then
+            step_done ok "$why" git fetch "$base"
+            behind="$(git rev-list --count "HEAD..$base/main")"
+        else
+            step_done fail "$why" git fetch "$base"
+            echo "      Couldn't reach GitHub. Not a problem, it just can't tell if main moved on."
+        fi
     fi
     if [[ "$behind" -gt 0 ]]; then
         echo
@@ -61,6 +77,16 @@ if [[ -n "$existing" ]] && git show-ref --verify --quiet "refs/heads/$existing";
             "Works, and you're done?" "ifi save, then ifi pull-request (sends it to GitHub)"
     fi
     exit 0
+}
+
+if [[ -n "$existing" ]]; then
+    if [[ "$existing" == "$current" ]]; then
+        echo "You're already on $existing, the branch for issue #$nr."
+    else
+        echo "Issue #$nr already has a branch: $existing. No need for a new one."
+        switch_or_explain "Switch to your branch for issue #$nr" "$existing"
+    fi
+    carry_on
 fi
 
 # "Gjør kortene oransje!" -> "gjor-kortene-oransje": the first 4 words,
@@ -122,12 +148,71 @@ while [[ -z "$slug" ]]; do
 done
 
 name="$kind/$slug"
-if git show-ref --verify --quiet "refs/heads/$name"; then
-    name="$name-$nr"
-fi
 
 find_base
 fetch_base
+# Collaborators' origin is the main repo, which fetch_base just fetched.
+if [[ "$base" != origin ]]; then
+    why="Download your branches from your fork, to look for one for issue #$nr"
+    GIT_DONE+=("git fetch origin")
+    step_start "$why"
+    if GIT_TERMINAL_PROMPT=0 git fetch --quiet origin 2>/dev/null; then
+        step_done ok "$why" git fetch origin
+    else
+        step_done fail "$why" git fetch origin
+        echo "      Couldn't reach your fork, so a branch you made on another computer can't be found."
+    fi
+fi
+
+# A branch with the name this issue gives: on GitHub, or here but not linked
+# to an issue (made with plain Git). One linked to another issue isn't it.
+found="" where=""
+for b in "$name-$nr" "$name"; do
+    if git show-ref --verify --quiet "refs/heads/$b"; then
+        [[ -n "$(git config "branch.$b.ifi-issue" || true)" ]] || found="$b" where=here
+    elif git show-ref --verify --quiet "refs/remotes/origin/$b"; then
+        found="$b" where=github
+    fi
+    [[ -z "$found" ]] || break
+done
+if [[ -n "$found" ]]; then
+    ref="$found"
+    echo
+    if [[ "$where" == github ]]; then
+        ref="origin/$found"
+        echo "There's already a branch called $found on GitHub."
+    else
+        echo "There's already a branch called $found here, not linked to an issue."
+    fi
+    echo "  Its last commit: $(git log -1 --format='"%s", by %an, %ar' "$ref")"
+    answer=""
+    read -r -p "Is it your work for issue #$nr? Then you go on with it. (y/n) " answer || true
+    if [[ "$answer" =~ ^[YyJj] ]]; then
+        if [[ "$where" == github ]]; then
+            switch_or_explain "Make $found here from your branch on GitHub, and switch to it" \
+                -c "$found" --track "origin/$found"
+        else
+            switch_or_explain "Switch to $found" "$found"
+        fi
+        git config "branch.$found.ifi-issue" "$nr"
+        carry_on fetched
+    fi
+fi
+
+# Taken here or on GitHub: add the issue number, then -2, -3, ...
+taken() {
+    git show-ref --verify --quiet "refs/heads/$1" || git show-ref --verify --quiet "refs/remotes/origin/$1"
+}
+if taken "$name"; then
+    stem="$name-$nr"
+    name="$stem"
+    n=2
+    while taken "$name"; do
+        name="$stem-$n"
+        n=$((n + 1))
+    done
+fi
+
 switch_or_explain "Make the branch $name from the newest main (not linked to main, so pushes go to your fork)" \
     -c "$name" --no-track "$base/main"
 printf '        %s(switch -c makes the branch and moves you onto it: you are on %s now)%s\n' "$C_DIM" "$name" "$C_OFF"

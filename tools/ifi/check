@@ -218,6 +218,25 @@ else
     next+=("Changes to keep?" "ifi save \"Short description of what you changed\"")
 fi
 
+# 8b. Changes ifi put aside for a branch (put_aside in common.sh). Shown at
+# start-up too: they're easy to forget, and only on this computer.
+while IFS=$'\t' read -r ref when b; do
+    [[ -n "$ref" ]] || continue
+    stash_nr="$(git config "branch.$b.ifi-issue" || true)"
+    if ! git show-ref --verify --quiet "refs/heads/$b"; then
+        quiet=false warn "Changes put aside for $b $when, but that branch is deleted. They're only on this computer." \
+            "See them: git stash show -p $ref"
+        continue
+    fi
+    if [[ -n "$stash_nr" ]]; then
+        get="ifi fix-issue $stash_nr"
+    else
+        get="git switch $b, then git stash pop $ref"
+    fi
+    quiet=false warn "Changes put aside for $b $when. They're only on this computer." "Get them back: $get"
+    [[ "$b" != "$branch" ]] || next+=("Changes put aside?" "$get")
+done < <(ifi_stashes)
+
 # 9. Behind the newest main? 9b. Commits not on GitHub yet?
 if [[ -n "$base" && -n "$branch" && "$branch" != main ]] && ! $offline; then
     if GIT_TERMINAL_PROMPT=0 with_timeout $wait_fetch git fetch --quiet "$base" 2>/dev/null; then

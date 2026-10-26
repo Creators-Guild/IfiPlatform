@@ -77,6 +77,10 @@ if [[ "$base" != origin ]]; then
         echo "${#on_fork[@]} of them are also on your fork on GitHub, and get deleted there too."
     fi
 fi
+for b in "${merged[@]}"; do
+    aside="$(stash_for "$b")"
+    [[ -z "$aside" ]] || echo "$b has changes put aside. They're kept after it's deleted: git stash show -p $aside"
+done
 unsaved_note
 read -r -p "Delete them? (y/n) " answer || answer=""
 [[ "$answer" =~ ^[YyJj] ]] || die "Nothing was deleted."

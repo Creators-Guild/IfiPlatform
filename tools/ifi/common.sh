@@ -512,6 +512,47 @@ switch_or_explain() {
     step_done ok "$why" git switch "$@"
 }
 
+# Unsaved changes ifi puts aside for a branch (a git stash with the message
+# "ifi: <branch>") until you go back to it. Stashes are only on this
+# computer, never on GitHub, so ifi check reminds you of them.
+
+# Every stash ifi put aside: "stash@{n}<tab>how long ago<tab>branch" lines.
+# Git names it "On <where you were>: ifi: <branch>"; branch names can't
+# contain ":", so the first ": ifi: " is the one.
+ifi_stashes() {
+    git stash list --format='%gd%x09%cr%x09%gs' 2>/dev/null |
+        awk -F'\t' '{ i = index($3, ": ifi: "); if (i) print $1 "\t" $2 "\t" substr($3, i + 7) }'
+}
+
+# The stash put aside for branch $1, as stash@{n}; empty if there's none.
+stash_for() {
+    ifi_stashes | awk -F'\t' -v b="$1" '$3 == b { print $1; exit }'
+}
+
+# Puts the unsaved changes, new files too, aside for the current branch.
+put_aside() {
+    local branch
+    branch="$(git branch --show-current)"
+    run "Put your unsaved changes aside for $branch" \
+        git stash push --quiet --include-untracked -m "ifi: $branch"
+}
+
+# Takes back what was put aside for the current branch, if anything. Only
+# into a clean working tree, so nothing of yours gets mixed up.
+take_back() {
+    local branch ref
+    branch="$(git branch --show-current)"
+    ref="$(stash_for "$branch")"
+    [[ -n "$ref" ]] || return 0
+    if [[ -n "$(git status --porcelain)" ]]; then
+        echo "      You have changes put aside for $branch too, but there are other unsaved changes here."
+        echo "      Save these first (ifi save), then take the others back: git stash pop $ref"
+        return 0
+    fi
+    run "Take back the changes you put aside for $branch" git stash pop --quiet "$ref" ||
+        echo "      Some of them clash with the branch as it is now. They're still kept (git stash list). Ask a helper."
+}
+
 # Sets $base: the remote that holds the main repo. Collaborators cloned it
 # directly (origin). Contributors cloned their fork, so it's upstream, which
 # is added here if they skipped that step in get_the_code.md.

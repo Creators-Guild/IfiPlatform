@@ -31,6 +31,10 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | Open the pull request | The template in the description; CI runs |
 | ☐ | Change another file by mistake, save, pull-request | The file shows in the pull request's Files changed |
 | ☐ | `ifi undo-file <that file>` | The file goes back, and is gone from Files changed |
+| ☐ | Clone the fork again into another folder (outside the container is fine), `ifi fix-issue <test issue>`, answer y | "There's already a branch called … on GitHub", its last commit, then you're on it with your changes |
+| ☐ | Change a file, then `ifi fix-issue <another issue>`, answer y | "Put your unsaved changes aside for …" and "only on this computer" |
+| ☐ | Open a new VS Code terminal | No new check, but the startup result; `ifi check` shows "Changes put aside for …" with `ifi fix-issue <nr>` |
+| ☐ | `ifi fix-issue <test issue>` | Back on the first branch, "Took back the changes you put aside", the change is there |
 | ☐ | Make a commit on main that changes the same line (as yourself, in another clone or on GitHub) | |
 | ☐ | `ifi check` | "has 1 new commit(s)" and "You'll likely get a conflict in: ..." |
 | ☐ | `ifi update`, answer y to help | The conflict explanation; VS Code shows Accept buttons on the file |

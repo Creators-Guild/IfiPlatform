@@ -80,3 +80,28 @@ t_pull_request_never_overwrites_someone_elses_push() {
     has "Your branch on GitHub has commits that aren't on your computer"
     same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$theirs" "the branch on your fork"
 }
+
+# On the issue-5 branch with a commit, and other changes put aside for it.
+commit_and_changes_put_aside() {
+    clone_as contributor
+    start_issue
+    commit README.md "Better readme"
+    echo "more" >>docs/notes.md
+    git stash push --quiet -m "ifi: bug/orange-cards"
+}
+
+t_pull_request_stops_for_changes_put_aside() {
+    commit_and_changes_put_aside
+    run_ifi pull-request
+    fails
+    has "You have changes put aside for bug/orange-cards. They aren't in your pull request."
+    has "Get them back first: ifi fix-issue 5"
+    [[ -z "$(git ls-remote origin refs/heads/bug/orange-cards)" ]] || fail "nothing should be sent"
+}
+
+t_pull_request_sends_without_changes_put_aside_when_asked() {
+    commit_and_changes_put_aside
+    IN=$'y\n' run_ifi pull-request
+    succeeds
+    same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$(git rev-parse HEAD)" "the branch on your fork"
+}

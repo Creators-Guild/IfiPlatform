@@ -1,5 +1,7 @@
 # ifi fix-issue <nr>
 
+CARDS=ifiplatform/static/css/cards.css
+
 t_fix_issue_names_the_branch_after_the_issue() {
     clone_as contributor
     issue 5 Bug "Gjør kortene oransje på forsiden!"
@@ -118,6 +120,53 @@ t_fix_issue_adds_the_number_when_the_name_is_taken() {
     same "$(git branch --show-current)" "bug/orange-cards-6" "branch"
 }
 
+# A second clone of your fork, as on another computer: cd's into it.
+other_computer() {
+    git clone --quiet "https://github.com/$STUDENT/$NAME.git" "$SANDBOX/laptop"
+    cd "$SANDBOX/laptop" || exit 1
+    git remote add upstream "https://github.com/$MAIN.git"
+}
+
+t_fix_issue_goes_on_with_the_branch_from_another_computer() {
+    clone_as contributor
+    start_issue
+    commit "$CARDS" ".event-card { background: orange; }" "Orange cards"
+    run_ifi pull-request
+    other_computer
+    IN=$'y\n' run_ifi fix-issue 5
+    succeeds
+    has "There's already a branch called bug/orange-cards on GitHub."
+    has '"Orange cards", by Student Testesen'
+    same "$(git branch --show-current)" "bug/orange-cards" "branch"
+    same "$(cat "$CARDS")" ".event-card { background: orange; }" "your work"
+    same "$(git config branch.bug/orange-cards.ifi-issue)" 5 "linked issue"
+}
+
+t_fix_issue_makes_a_new_branch_when_the_one_on_github_isnt_yours() {
+    clone_as contributor
+    start_issue
+    commit "$CARDS" ".event-card { background: orange; }"
+    run_ifi pull-request
+    other_computer
+    IN=$'n\n' run_ifi fix-issue 5
+    succeeds
+    same "$(git branch --show-current)" "bug/orange-cards-5" "branch"
+    same "$(git rev-parse HEAD)" "$(git rev-parse upstream/main)" "starts from"
+}
+
+t_fix_issue_offers_a_branch_made_with_plain_git() {
+    clone_as contributor
+    issue 5 Bug "Orange cards"
+    git switch --quiet -c bug/orange-cards
+    commit "$CARDS" ".event-card { background: orange; }"
+    git switch --quiet main
+    IN=$'y\n' run_ifi fix-issue 5
+    succeeds
+    has "There's already a branch called bug/orange-cards here, not linked to an issue."
+    same "$(git branch --show-current)" "bug/orange-cards" "branch"
+    same "$(git config branch.bug/orange-cards.ifi-issue)" 5 "linked issue"
+}
+
 t_fix_issue_for_a_collaborator_starts_from_origin() {
     clone_as collaborator
     issue 5 Bug "Orange cards"
@@ -127,4 +176,48 @@ t_fix_issue_for_a_collaborator_starts_from_origin() {
     same "$(git rev-parse HEAD)" "$(git rev-parse origin/main)" "starts from"
     git remote get-url upstream >/dev/null 2>&1 && fail "a collaborator doesn't need upstream"
     return 0
+}
+
+# Unsaved changes on the issue-5 branch, a new file among them, with issue 6
+# waiting.
+changes_on_issue_5() {
+    clone_as contributor
+    start_issue
+    issue 6 Bug "Blue cards"
+    echo "changed" >>README.md
+    echo "idea" >notes.txt
+}
+
+t_fix_issue_puts_changes_aside_and_gives_them_back() {
+    changes_on_issue_5
+    IN=$'y\n' run_ifi_tty fix-issue 6
+    succeeds
+    has "Put your unsaved changes aside for bug/orange-cards"
+    has "only on this computer"
+    same "$(git branch --show-current)" "bug/blue-cards" "branch"
+    same "$(git status --porcelain)" "" "unsaved changes on the new branch"
+    run_ifi fix-issue 5
+    succeeds
+    has "Took back the changes you put aside for bug/orange-cards"
+    same "$(git branch --show-current)" "bug/orange-cards" "branch"
+    same "$(tail -n 1 README.md)" "changed" "README.md"
+    same "$(cat notes.txt)" "idea" "the new file"
+    same "$(git stash list)" "" "stashes left"
+}
+
+t_fix_issue_keeps_changes_when_you_say_no() {
+    changes_on_issue_5
+    IN=$'n\n' run_ifi_tty fix-issue 6
+    fails
+    has "You have changes on bug/orange-cards that aren't committed yet."
+    same "$(git branch --show-current)" "bug/orange-cards" "branch"
+    same "$(git stash list)" "" "stashes"
+}
+
+t_fix_issue_for_the_branch_you_are_on_keeps_your_changes() {
+    changes_on_issue_5
+    run_ifi fix-issue 5
+    succeeds
+    has "You're already on bug/orange-cards"
+    same "$(tail -n 1 README.md)" "changed" "README.md"
 }

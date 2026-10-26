@@ -18,15 +18,19 @@ computers, or with teammates.
 
 | Item | What | Status |
 | --- | --- | --- |
-| A1 | Find your branch again on any computer | ✅ Agreed |
+| A1 | Find your branch again on any computer | 🟢 Built (not committed) |
 | A2 | Warn about and fix clashing database changes (migrations) | ✅ Agreed |
-| A3 | Put unsaved work aside when switching, with reminders | ✅ Agreed, plus your reminder idea |
+| A3 | Put unsaved work aside when switching, with reminders | 🟢 Built (not committed) |
 | A4 | Pull requests without an issue | ✅ Agreed, consequences noted for later |
-| B1–B5 | Smaller improvements | ❓ Not decided yet |
-| C1–C4 | Questions only you can answer | ❓ Open |
+| B1–B5 | Smaller improvements | ✅ Agreed (B3: review afterwards, see docs/to_fix.md) |
+| C1 | Pull requests into `beta` | ❌ No: `beta` is old and unused, everything goes to `main` |
+| C2 | Merge button | ✅ Only "Merge commit" is used, so nothing to build |
+| C3 | `ifi review <pr>` | ✅ Agreed: collaborators only (see C3 below) |
+| C4 | Branch types | ✅ Also allow `docs/` and `ci/` (for `ifi start`) |
 
-Order of work: A1 → A3 → A2 → A4 → (B items you pick).
-A1 and A3 both change `fix-issue`, so they go together.
+Order of work: A1 → A3 → A2 → A4 → B1–B5 → C3.
+A1 and A3 both change `fix-issue`, so they go together. C3 reuses A3's
+put-aside code, so it comes after A3.
 
 ---
 
@@ -157,6 +161,7 @@ A1 and A3 both change `fix-issue`, so they go together.
     No issue means no card, so the work doesn't show on the board.
   - Students might skip step 1 of CONTRIBUTING.md ("Pick an issue, comment
     that you're taking it"), so two people could do the same work.
+  - These are also listed in docs/to_fix.md (ifi commands), for later.
   - Ways to soften it later: only allow "no issue" for some types (task,
     docs, ci); add "Most changes should have an issue. Sure? (y/n)"; or leave
     `ifi start` out of the beginners' help page.
@@ -167,7 +172,7 @@ A1 and A3 both change `fix-issue`, so they go together.
   in the description why there's no issue, instead of the `Closes #` line.
 - New tools/ifi/start: reuse fix-issue's branch-making part (`slugify`,
   `find_base`, `fetch_base`, `switch_or_explain -c ... --no-track`), moved
-  into a shared function. The allowed types depend on C4.
+  into a shared function. Allowed types: bug, feature, task, docs, ci (C4).
 - Add `start` everywhere commands are listed: tools/ifi/ifi (dispatcher),
   shell-setup.sh (Tab completion), pages/ifi.txt. The test
   `t_commands_lists_agree` checks they match.
@@ -177,32 +182,61 @@ A1 and A3 both change `fix-issue`, so they go together.
 
 ---
 
-## Group B: not decided yet
+## Group B: agreed
 
 | # | Today | Change |
 | --- | --- | --- |
 | B1 | Translation files (`.po`) conflict often, and they're big to fix by hand | If only translation files conflict, ifi combines both versions (`msgcat --use-first`; where the same text has two translations, yours wins), then rebuilds the `.mo` files with `compilemessages`. gettext is in the container (Dockerfile.dev). Where it's missing, the normal conflict help is shown. |
 | B2 | `ifi save` adds every file, even new ones you didn't mean to | When there are new files, list them and ask "Add these too? (y/n)". Maybe also `ifi save "msg" --only <files>`. Not `ifi save "msg" file1`, because today `ifi save Fixed the cards` without quotes works, and that would break. |
-| B3 | Undoing a file you added makes Git ignore it for good, with no warning | Say it clearly, mark the line in `.git/info/exclude` with a comment, and have `ifi check` list those files and how to un-hide them. |
+| B3 | Undoing a file you added makes Git ignore it for good, with no warning | Say it clearly, mark the line in `.git/info/exclude` with a comment, and have `ifi check` list those files and how to un-hide them. Review it after building (docs/to_fix.md). |
 | B4 | One message for two cases when GitHub has commits you don't | Separate "someone else pushed to your branch" from "you rewrote your history yourself". Tell them apart with `git cherry` (same changes = you rewrote them). |
 | B5 | `ifi cleanup` doesn't delete collaborators' merged branches on GitHub | Also delete them on origin when origin is the main repo. It's safe: only branches already merged into main. |
 
-## Group C: questions for you
+## Group C: answers
 
-- **C1. Pull requests into `beta`?**
-  - No: nothing changes.
-  - Yes: `ifi fix-issue 42 --base beta`. ifi remembers it for that branch,
-    and `update` and `pull-request` use beta too.
-- **C2. Which merge button do you use on GitHub?**
-  - Only "Merge commit": nothing to do.
-  - "Squash" or "Rebase" too: ifi can't tell the branch was merged, so
-    `ifi cleanup` never deletes it. Fix: ask GitHub whether the pull request
-    was merged.
-- **C3. `ifi review <pr>`, to download and run someone's pull request?**
-  - It runs someone else's code on your computer.
-  - Choose: everyone (with a warning), collaborators only, or not at all.
-- **C4. Branch types:** keep `bug/ feature/ task/`, or also allow `docs/`
-  and `ci/`? This matters for `ifi start` (A4).
+- **C1. Pull requests into `beta`: no.** `beta` hasn't changed since
+  2026-08-15 and has nothing that isn't in main. ifi keeps using `main`.
+- **C2. Merge button: only "Merge commit".** ifi already sees those branches
+  as merged. If squash or rebase merging is ever turned on, `ifi cleanup`
+  stops seeing merged branches; then it needs to ask GitHub instead.
+- **C3. `ifi review <pr>`: collaborators only.**
+  - **What it does:** `ifi review 57` downloads pull request #57 into a
+    branch `review/57` and switches to it, so your local site runs their
+    code and you can click around and run the tests.
+    `ifi review --done` takes you back to your own branch.
+  - **Why only collaborators:** their code runs on your computer. It can
+    change your project files and your local database, and while you run
+    their tests or migrations it can ask VS Code for your GitHub login.
+    Collaborators are trusted, and reviewing is part of their job.
+  - **Safety step:** before downloading, ifi shows who wrote the pull
+    request and its title, and asks "Run code from <name>? (y/n)".
+
+  **For the builder:**
+  - New tools/ifi/review. Collaborator = may push to the main repo: a
+    dry-run push to `$base`, like `try_login` (tools/ifi/account) and
+    `ifi check` step 6. Denied → "Only collaborators can use ifi review.
+    Read the pull request on GitHub: <link>".
+  - Author and title from `GET /repos/$MAIN_REPO/pulls/<nr>` (the `$PY` +
+    urllib + `IFI_GITHUB_API` pattern from fix-issue). Offline → the last
+    commit's author from Git.
+  - `git fetch $base +pull/<nr>/head:review/<nr>`, then switch. Running it
+    again updates the branch (switch away first if you're on it).
+  - Unsaved work on the branch you leave: put aside with A3's code;
+    remember the branch in `ifi.review-return`.
+  - `ifi review --done`: switch back, take back put-aside work, delete
+    `review/<nr>`. If the pull request added migrations, say: "Their
+    database changes are still in your local database. If the site acts
+    strange: ifi reset-database".
+  - On `review/*`, `ifi save` and `ifi pull-request` refuse: "This is
+    someone else's pull request. Leave comments on GitHub instead."
+  - Register `review` in tools/ifi/ifi, shell-setup.sh (with `--done`) and
+    pages/ifi.txt. Document it in docs/contributing/collaborators.md.
+  - Tests: new test_review.sh; the fake GitHub in tests/lib.sh needs a
+    `pulls/<nr>` answer and a `refs/pull/<nr>/head` ref.
+- **C4. Branch types: `bug/ feature/ task/ docs/ ci/`.** `ifi fix-issue`
+  still takes the type from the issue (bug, feature or task). `ifi start`
+  (A4) also accepts docs and ci. Update CONTRIBUTING.md's branch-name line
+  when building.
 
 ---
 
