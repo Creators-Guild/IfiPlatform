@@ -3,7 +3,9 @@ ifi fix-issue <nr>         make a branch for issue <nr>, or go back to it
                            (asks to put unsaved changes aside, and gives them back)
 ifi start <type> <words>   a branch without an issue, for small things (type: bug,
                            feature, task, docs or ci). Most changes need an issue.
-ifi save "message"         commit all your changes (git add + commit, whole repo)
+ifi save "message"         commit all your changes (git add + commit, whole repo;
+                           asks before adding new, untracked files)
+ifi save "msg" --only <f>  commit only these files
 ifi update                 bring your branch up to date with main in the main repo
                            (joins clashing translation files by itself)
 ifi update --abort         undo an update that hit a conflict

@@ -29,6 +29,7 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | Change the file, `ifi save "Orange cards"` | The file under "Committing these files" |
 | ☐ | `ifi pull-request`, Ctrl+click the link | GitHub's "Open a pull request" page, with `Closes #<nr>` filled in |
 | ☐ | Open the pull request | The template in the description; CI runs |
+| ☐ | Make a new file `notes.txt` and change a file, `ifi save "Notes"`, answer n | "New files Git doesn't know yet (untracked)" lists `notes.txt`; only the changed file is committed |
 | ☐ | Change another file by mistake, save, pull-request | The file shows in the pull request's Files changed |
 | ☐ | `ifi undo-file <that file>` | The file goes back, and is gone from Files changed |
 | ☐ | Clone the fork again into another folder (outside the container is fine), `ifi fix-issue <test issue>`, answer y | "There's already a branch called … on GitHub", its last commit, then you're on it with your changes |

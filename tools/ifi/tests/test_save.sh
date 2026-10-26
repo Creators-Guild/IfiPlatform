@@ -6,8 +6,9 @@ t_save_commits_changes_in_every_folder() {
     echo "More notes" >>docs/notes.md
     mkdir -p tools && echo "echo hi" >tools/new.sh
     cd ifiplatform
-    run_ifi save "Add notes and a tool"
+    IN=$'y\n' run_ifi save "Add notes and a tool"
     succeeds
+    has "New files Git doesn't know yet (untracked):"
     has "changed  docs/notes.md"
     has "new      tools/new.sh"
     same "$(git status --porcelain)" "" "unsaved changes"
@@ -50,4 +51,42 @@ t_save_with_nothing_to_save() {
     run_ifi save "Nothing"
     fails
     has "Nothing to commit"
+}
+
+t_save_leaves_new_files_out_when_you_say_no() {
+    clone_as contributor
+    start_issue
+    echo "More" >>README.md
+    echo "scratch" >notes.txt
+    IN=$'n\n' run_ifi save "Update the readme"
+    succeeds
+    has "  notes.txt"
+    same "$(git status --porcelain)" "?? notes.txt" "left out"
+    echo "Even more" >>README.md
+    IN=$'n\n' run_ifi save "More readme"
+    has "  notes.txt"
+}
+
+t_save_with_only_new_files_left_out() {
+    clone_as contributor
+    start_issue
+    echo "scratch" >notes.txt
+    IN=$'n\n' run_ifi save "Notes"
+    fails
+    has "Nothing to commit: you left out the new files"
+}
+
+t_save_only_some_files() {
+    clone_as contributor
+    start_issue
+    echo "More" >>README.md
+    echo "More notes" >>docs/notes.md
+    echo "scratch" >docs/new.md
+    cd docs
+    run_ifi save Some notes --only notes.md new.md
+    succeeds
+    hasnt "Add these too?"
+    same "$(git log -1 --format=%s)" "Some notes" "commit message"
+    same "$(git show --name-only --format= HEAD | sort | tr '\n' ' ')" "docs/new.md docs/notes.md " "files in the commit"
+    same "$(git status --porcelain)" " M README.md" "unsaved changes"
 }

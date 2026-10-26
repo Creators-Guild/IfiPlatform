@@ -22,8 +22,9 @@ computers, or with teammates.
 | A2 | Warn about and fix clashing database changes (migrations) | ✅ Done (5bab3f9) |
 | A3 | Put unsaved work aside when switching, with reminders | ✅ Done (3294d7b); wording → "stash", see "Decisions 2026-10-26" |
 | A4 | Pull requests without an issue | ✅ Done (38118b6); consequences in docs/to_fix.md |
-| B1 | Join clashing translation files | 🟢 Built (not committed) |
-| B2–B5 | Smaller improvements | ✅ Agreed, details in "Decisions 2026-10-26" |
+| B1 | Join clashing translation files | ✅ Done (8271ce1) |
+| B2 | `ifi save` asks about new files, and `--only` | 🟢 Built (not committed) |
+| B3–B5 | Smaller improvements | ✅ Agreed, details in "Decisions 2026-10-26" |
 | C1 | Pull requests into `beta` | ❌ No: `beta` is old and unused, everything goes to `main` |
 | C2 | Merge button | ✅ Only "Merge commit" is used, so nothing to build |
 | C3 | `ifi review <pr>` | ✅ Agreed: collaborators only (see C3 below) |

@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# ifi save "message": commits every change in the whole repo, not
-# just the folder you're in: `git add .` in ifiplatform/ misses changes in
-# docs/ or tools/. Shows the files first, and asks for your name and email
-# the first time.
+# ifi save "message": commits every change in the whole repo, not just the
+# folder you're in. New (untracked) files only after asking.
+# ifi save "message" --only <files>: commits only those files.
 set -euo pipefail
 source "$(dirname "$(readlink -f "$0")")/common.sh"
 
@@ -11,18 +10,48 @@ branch="$(git branch --show-current)"
 [[ "$branch" != main ]] || die "You're on main. Make a branch for your issue first, your" \
     "changes come along to it: ifi fix-issue <nr>"
 
-cd "$(git rev-parse --show-toplevel)"
 [[ -n "$(git status --porcelain)" ]] || die "Nothing to commit: you have no changes since your last commit."
 
-message="$*"
+message=""
+only=()
+while [[ $# -gt 0 && "$1" != --only ]]; do
+    message+="${message:+ }$1"
+    shift
+done
+if [[ "${1:-}" == --only ]]; then
+    shift
+    only=("$@")
+    [[ ${#only[@]} -gt 0 ]] || die "Which files? For example: ifi save \"Orange cards\" --only ifiplatform/static/css/cards.css"
+fi
 while [[ -z "${message// /}" ]]; do
     read -r -p "Short description of what you changed: " message || die ""
 done
 
 ensure_identity
-run "Mark every change in the repo to be committed" git add -A
-git diff --cached --name-status | sed -E 's/^A\t/        new      /; s/^M\t/        changed  /; s/^D\t/        deleted  /; s/^R[0-9]*\t/        renamed  /; s/^[A-Z][0-9]*\t/        changed  /'
-run "Make the commit (on your computer only)" git commit -m "$message"
+list_staged() {
+    git diff --cached --name-status "$@" | sed -E 's/^A\t/        new      /; s/^M\t/        changed  /; s/^D\t/        deleted  /; s/^R[0-9]*\t/        renamed  /; s/^[A-Z][0-9]*\t/        changed  /'
+}
+if [[ ${#only[@]} -gt 0 ]]; then
+    run "Mark these files to be committed" git add -- "${only[@]}"
+    list_staged -- "${only[@]}"
+    run "Make the commit, with only these files (on your computer only)" git commit -m "$message" --only -- "${only[@]}"
+else
+    new="$(git status --porcelain | sed -n 's/^?? //p')"
+    answer=""
+    if [[ -n "$new" ]]; then
+        echo "New files Git doesn't know yet (untracked):"
+        sed 's/^/  /' <<<"$new"
+        read -r -p "Add these too? (y/n) " answer || true
+    fi
+    if [[ -z "$new" || "$answer" =~ ^[YyJj] ]]; then
+        run "Mark every change in the repo to be committed" git add -A
+    else
+        run "Mark the changes to files Git knows to be committed, not the new ones" git add -u
+        git diff --cached --quiet && die "Nothing to commit: you left out the new files, and nothing else changed."
+    fi
+    list_staged
+    run "Make the commit (on your computer only)" git commit -m "$message"
+fi
 
 git_recap
 your_turn
