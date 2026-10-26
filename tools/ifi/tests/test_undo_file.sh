@@ -98,3 +98,13 @@ t_undo_file_after_main_changed_the_file() {
     same "$(cat README.md)" "# The project" "README.md"
     same "$(git diff --name-only upstream/main...HEAD)" "" "files in the pull request"
 }
+
+t_undo_file_with_a_path_from_a_subfolder() {
+    clone_as contributor
+    start_issue
+    commit "$CARDS" ".event-card { background: orange; }"
+    cd ifiplatform
+    run_ifi undo-file static/css/cards.css
+    succeeds
+    same "$(cat static/css/cards.css)" ".event-card { background: #222; }" "cards.css"
+}

@@ -26,8 +26,8 @@ fi
 # On the issue's branch already: says whether main moved on, and what's
 # next, then exits. $1 is "fetched" when $base is fetched already.
 carry_on() {
-    [ -n "${base:-}" ]] || find_base
-    local behind=0 why
+    [[ -n "${base:-}" ]] || find_base
+    local behind=0
     if [[ "${1:-}" == fetched ]]; then
         behind="$(git rev-list --count "HEAD..$base/main")"
     else

@@ -160,6 +160,12 @@ commit() {
 run_ifi() {
     OUT="$(printf '%s' "${IN-}" | "$TOOLS/ifi" "$@" 2>&1)"
     STATUS=$?
+    no_bash_errors
+}
+
+# A bash error ("tools/ifi/x: line 12: ...") is a bug, even if ifi goes on.
+no_bash_errors() {
+    ! grep -qE '/tools/ifi/[a-z-]+: line [0-9]+: ' <<<"$OUT" || fail "bash printed an error"
 }
 
 # Like run_ifi, but in a pretend terminal, for the questions ifi only asks
@@ -171,6 +177,7 @@ run_ifi_tty() {
     { sleep 1; printf '%s' "${IN-}"; sleep 2; } | script -qec "$cmd" /dev/null >"$log" 2>&1
     STATUS=$?
     OUT="$(tr -d '\r' <"$log")"
+    no_bash_errors
 }
 
 # The checks. Each stops the test with what went wrong and ifi's output.

@@ -96,7 +96,6 @@ verb_form() {
         Point) past=Pointed ing=Pointing ;;
         Put) past=Put ing=Putting ;;
         Rebuild) past=Rebuilt ing=Rebuilding ;;
-        Rename) past=Renamed ing=Renaming ;;
         Replace) past=Replaced ing=Replacing ;;
         Run) past=Ran ing=Running ;;
         Send) past=Sent ing=Sending ;;

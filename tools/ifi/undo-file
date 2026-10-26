@@ -22,7 +22,6 @@ if [[ -n "$(changed_files)" ]]; then
         "  ifi save \"Short description of what you changed\""
 fi
 
-cd "$(git rev-parse --show-toplevel)"
 find_base
 fetch_base
 
@@ -32,7 +31,7 @@ message="Undo changes to $*"
 kept=()
 
 for file in "${files[@]}"; do
-    if git cat-file -e "$start:$file" 2>/dev/null; then
+    if git cat-file -e "$start:./$file" 2>/dev/null; then
         run "Put $file back to how it was when your branch started" git checkout "$base/main...HEAD" -- "$file"
     elif git ls-files --error-unmatch -- "$file" >/dev/null 2>&1; then
         run "Take $file out of Git. It stays on your computer" git rm --quiet --cached -- "$file"
