@@ -5,6 +5,7 @@ ifi start <type> <words>   a branch without an issue, for small things (type: bu
                            feature, task, docs or ci). Most changes need an issue.
 ifi save "message"         commit all your changes (git add + commit, whole repo)
 ifi update                 bring your branch up to date with main in the main repo
+                           (joins clashing translation files by itself)
 ifi update --abort         undo an update that hit a conflict
 ifi pull-request           push your branch and get the pull request link
 ifi undo-file <file>       take a file out of your pull request

@@ -34,6 +34,13 @@ what_now_after_update() {
     branch="$(git branch --show-current)"
     dirs="$(git config "branch.$branch.ifi-migration-clash" || true)"
     git config --unset "branch.$branch.ifi-migration-clash" || true
+    if [[ ${#JOINED[@]} -gt 0 ]]; then
+        echo
+        echo "ifi joined these translation files for you (where you and main both"
+        echo "translated the same text, yours was kept):"
+        printf '  %s\n' "${JOINED[@]}"
+        echo "See what your branch changes in them: git diff $base/main -- <file>"
+    fi
     if [[ -n "$dirs" ]]; then
         echo
         echo "You and main both added a database change (a migration) in:"
@@ -132,6 +139,51 @@ conflict_help() {
     exit 1
 }
 
+JOINED=()
+
+# Joins the clashing translation files, if no other file clashes.
+# Your version is stage 2 in a merge, but stage 3 in a rebase.
+join_translations() {
+    local files dir lang po yours=2 main=3
+    files="$(git diff --name-only --diff-filter=U)"
+    [[ -n "$files" ]] && ! grep -qv '/LC_MESSAGES/django\.[mp]o$' <<<"$files" || return 1
+    command -v msgcat >/dev/null && (find_django_python) >/dev/null 2>&1 || return 1
+    find_django_python
+    [[ "$1" == rebase ]] && yours=3 main=2
+
+    echo
+    echo "Only translation files clash, so ifi joins them for you."
+    for dir in $(sed 's#/[^/]*$##' <<<"$files" | sort -u); do
+        po="$dir/django.po"
+        lang="$(basename "$(dirname "$dir")")"
+        if grep -qxF "$po" <<<"$files"; then
+            git show ":$yours:$po" >"$po.yours" && git show ":$main:$po" >"$po.main" || return 1
+            run "Join your $lang translations with main's. Where both translated the same text, yours is kept" \
+                msgcat --use-first -o "$po" "$po.yours" "$po.main" || return 1
+            rm "$po.yours" "$po.main"
+            JOINED+=("$po")
+        fi
+        # compilemessages compiles every locale folder below it, a venv's too.
+        (cd ifiplatform && run "Rebuild the $lang .mo file from the .po" \
+            "$DJANGO_PY" manage.py compilemessages -l "$lang") || return 1
+        run "Mark the $lang translations as solved" git add -- "$dir" || return 1
+    done
+}
+
+# After a conflict: joins translation files and goes on, else the conflict screen.
+resolve_or_stop() {
+    local mode="$1" again="${2:-}"
+    while join_translations "$mode"; do
+        if [[ "$mode" == merge ]]; then
+            run "Finish the merge" git commit --no-edit
+            return 0
+        fi
+        run "Go on with the update" env GIT_EDITOR=true git rebase --continue && return 0
+        again=again
+    done
+    conflict_help "$mode" $again
+}
+
 if in_rebase || in_merge; then
     mode=rebase
     in_merge && mode=merge
@@ -160,7 +212,7 @@ if in_rebase || in_merge; then
     if [[ "$mode" == merge ]]; then
         run "Finish the merge" git commit --no-edit
     elif ! run "Go on with the update" env GIT_EDITOR=true git rebase --continue; then
-        conflict_help rebase again
+        resolve_or_stop rebase again
     fi
 else
     [[ "${1:-}" != --abort ]] || die "No update is running, so there's nothing to abort."
@@ -219,12 +271,12 @@ else
 
     if [[ "$mode" == merge ]]; then
         if ! run "Bring the main repo's new commits into your branch, in one go" git merge --no-edit "$base/main"; then
-            conflict_help merge
+            resolve_or_stop merge
         fi
     else
         git config "branch.$branch.ifi-before-update" "$(git rev-parse HEAD)"
         if ! run "Put your commits on top of the newest main from the main repo" git rebase "$base/main"; then
-            conflict_help rebase
+            resolve_or_stop rebase
         fi
     fi
 fi

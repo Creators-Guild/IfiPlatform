@@ -18,15 +18,21 @@ computers, or with teammates.
 
 | Item | What | Status |
 | --- | --- | --- |
-| A1 | Find your branch again on any computer | 🟢 Built (not committed) |
-| A2 | Warn about and fix clashing database changes (migrations) | 🟢 Built (not committed) |
-| A3 | Put unsaved work aside when switching, with reminders | 🟢 Built (not committed) |
-| A4 | Pull requests without an issue | 🟢 Built (not committed); consequences in docs/to_fix.md |
-| B1–B5 | Smaller improvements | ✅ Agreed (B3: review afterwards, see docs/to_fix.md) |
+| A1 | Find your branch again on any computer | ✅ Done (3294d7b) |
+| A2 | Warn about and fix clashing database changes (migrations) | ✅ Done (5bab3f9) |
+| A3 | Put unsaved work aside when switching, with reminders | ✅ Done (3294d7b); wording → "stash", see "Decisions 2026-10-26" |
+| A4 | Pull requests without an issue | ✅ Done (38118b6); consequences in docs/to_fix.md |
+| B1 | Join clashing translation files | 🟢 Built (not committed) |
+| B2–B5 | Smaller improvements | ✅ Agreed, details in "Decisions 2026-10-26" |
 | C1 | Pull requests into `beta` | ❌ No: `beta` is old and unused, everything goes to `main` |
 | C2 | Merge button | ✅ Only "Merge commit" is used, so nothing to build |
 | C3 | `ifi review <pr>` | ✅ Agreed: collaborators only (see C3 below) |
-| C4 | Branch types | ✅ Also allow `docs/` and `ci/` (for `ifi start`) |
+| C4 | Branch types | ✅ Done with `ifi start` (A4), CONTRIBUTING.md updated |
+
+The user commits each item themselves: build one, stop, wait for "go on".
+Tests ran on a Windows host need tests/lib.sh's `safe.directory` line
+(the sandbox drops the container's system config, and /workspace belongs
+to root there).
 
 Order of work: A1 → A3 → A2 → A4 → B1–B5 → C3.
 A1 and A3 both change `fix-issue`, so they go together. C3 reuses A3's
@@ -191,6 +197,44 @@ put-aside code, so it comes after A3.
 | B3 | Undoing a file you added makes Git ignore it for good, with no warning | Say it clearly, mark the line in `.git/info/exclude` with a comment, and have `ifi check` list those files and how to un-hide them. Review it after building (docs/to_fix.md). |
 | B4 | One message for two cases when GitHub has commits you don't | Separate "someone else pushed to your branch" from "you rewrote your history yourself". Tell them apart with `git cherry` (same changes = you rewrote them). |
 | B5 | `ifi cleanup` doesn't delete collaborators' merged branches on GitHub | Also delete them on origin when origin is the main repo. It's safe: only branches already merged into main. |
+
+## Decisions 2026-10-26
+
+Asked and answered before building B1–C3:
+
+- **B1:** when only translation files clash, ifi joins them and goes on
+  with the update by itself (also at each commit of a rebase), then lists
+  the joined files. Translation files plus other files: the usual conflict
+  help, as planned. `.mo` files are rebuilt with
+  `compilemessages -l <lang>`, only for the languages that clashed.
+- **B2:** `ifi save` asks only about *untracked* files ("Add these too?").
+  Changes to files Git knows are always included. y: added, and never asked
+  again (Git tracks them now). n: left out of the commit, kept on disk, and
+  asked again next time, like `git status` keeps listing them.
+  Build `ifi save "msg" --only <files>` now (like `git commit --only`).
+- **B3:** `ifi undo-file` stops hiding files. It takes an added file out of
+  Git and ends with the tip `ifi hide <file>`. New commands:
+  - `ifi hide <file>`: adds `/<file>` to `.git/info/exclude` (this computer
+    only; `.gitignore` is for everyone and is edited like any other file).
+    Refuses files Git tracks: "Take it out first: ifi undo-file <file>".
+  - `ifi unhide <file>`: removes that line.
+  - `ifi check` lists hidden files, with "Show them to Git again:
+    ifi unhide <file>".
+  This replaces the "mark the line with a comment" idea, and answers the
+  undo-file item in docs/to_fix.md.
+- **B4:** "you rewrote your own commits" (git cherry: all of GitHub's extra
+  commits have the same changes as yours) → ask "Replace your branch on
+  GitHub with this version? (y/n)", pushed with a lease. Someone else's
+  commits → today's message.
+- **B5:** on origin, delete only the branches cleanup also deletes on your
+  computer. Not every merged branch on GitHub (that would hit `beta`,
+  `skeleton`, ...). GitHub does *not* auto-delete merged branches in this
+  repo, so fix cleanup's comment that says it does.
+- **C3:** unsaved changes when starting `ifi review`, also on main: ask to
+  stash them, given back at `ifi review --done`.
+- **Wording:** say "stash" wherever ifi puts changes aside (fix-issue,
+  check, pull-request, cleanup, review), to teach Git's words. E.g. "Stash
+  your changes (put them aside)? (y/n)".
 
 ## Group C: answers
 

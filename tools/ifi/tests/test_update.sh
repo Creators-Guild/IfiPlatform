@@ -178,3 +178,124 @@ t_update_quiet_about_migrations_in_different_apps() {
     succeeds
     hasnt "database change"
 }
+
+PO=ifiplatform/locale/nb/LC_MESSAGES/django.po
+MO=ifiplatform/locale/nb/LC_MESSAGES/django.mo
+
+# Writes $PO with these "text=translation" pairs, and its $MO.
+po_file() {
+    mkdir -p "$(dirname "$PO")"
+    {
+        printf '#\nmsgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n'
+        local pair
+        for pair in "$@"; do printf '\nmsgid "%s"\nmsgstr "%s"\n' "${pair%%=*}" "${pair#*=}"; done
+    } >"$PO"
+    msgfmt -o "$MO" "$PO"
+}
+
+# The teammate's translations, merged into main: teammate_po "text=translation" ...
+teammate_po() {
+    (
+        cd "$SANDBOX/teammate" || exit 1
+        git pull --quiet --rebase origin main
+        po_file "$@"
+        git add -A
+        git commit --quiet -m "Teammate's translations"
+        git push --quiet origin main
+    )
+}
+
+# A fake manage.py (no Django here) whose compilemessages runs msgfmt.
+translations_setup() {
+    command -v msgcat >/dev/null && command -v msgfmt >/dev/null || skip "needs gettext (msgcat, msgfmt)"
+    (
+        cd "$SANDBOX/teammate" || exit 1
+        cat >ifiplatform/manage.py <<'PY'
+import glob, subprocess, sys
+
+lang = sys.argv[sys.argv.index("-l") + 1]
+for po in glob.glob(f"locale/{lang}/LC_MESSAGES/*.po"):
+    subprocess.run(["msgfmt", "-o", po[:-3] + ".mo", po], check=True)
+PY
+        git add -A
+        git commit --quiet -m "manage.py"
+        git push --quiet origin main
+    )
+    teammate_po "Hello=Hei" "Cards=Kort"
+    clone_as contributor
+    mkdir -p venv/bin
+    printf '#!/bin/sh\nexec python3 "$@"\n' >venv/bin/python
+    chmod +x venv/bin/python
+    echo /venv >>.git/info/exclude
+    start_issue
+}
+
+has_both_translations() {
+    grep -qF 'msgstr "Registrer deg"' "$PO" || fail "your new text is missing in $PO"
+    grep -qF 'msgstr "Logg ut"' "$PO" || fail "main's new text is missing in $PO"
+    grep -qF 'msgstr "Kortene"' "$PO" || fail "your translation of Cards should win"
+    grep -qF 'msgstr "Kort"' "$PO" && fail "main's translation of Cards should be gone"
+    msgunfmt "$MO" | grep -qF "Logg ut" || fail "$MO wasn't rebuilt"
+    same "$(git status --porcelain)" "" "unsaved changes"
+}
+
+t_update_joins_clashing_translations() {
+    translations_setup
+    po_file "Hello=Hei" "Sign up=Registrer deg" "Cards=Kortene"
+    git add -A
+    git commit --quiet -m "Sign up"
+    teammate_po "Hello=Hei" "Log out=Logg ut" "Cards=Kort"
+    run_ifi update
+    succeeds
+    has "Only translation files clash, so ifi joins them for you."
+    has "✓ Joined your nb translations with main's"
+    has "✓ Rebuilt the nb .mo file"
+    has "ifi joined these translation files for you"
+    hasnt "Conflict!"
+    has_both_translations
+}
+
+# Two commits of yours that change translations, and a teammate's.
+two_translation_commits() {
+    translations_setup
+    po_file "Hello=Hei" "Sign up=Registrer deg" "Cards=Kort"
+    git add -A
+    git commit --quiet -m "Sign up"
+    po_file "Hello=Hei" "Sign up=Registrer deg" "Cards=Kortene"
+    git add -A
+    git commit --quiet -m "Better Cards"
+    teammate_po "Hello=Hei" "Log out=Logg ut" "Cards=Kort"
+}
+
+t_update_joins_translations_at_each_commit_of_a_rebase() {
+    two_translation_commits
+    IN=$'2\n' run_ifi_tty update
+    has "Updated:"
+    [[ "$(grep -c "Joined your nb translations" <<<"$OUT")" -eq 2 ]] || fail "should join once per commit"
+    same "$(git rev-list --count upstream/main..HEAD)" 2 "your commits"
+    has_both_translations
+}
+
+t_update_joins_translations_in_a_merge() {
+    two_translation_commits
+    IN=$'1\n' run_ifi_tty update
+    has "How do you want to do that?"
+    has "Joined your nb translations"
+    has "Updated:"
+    same "$(git rev-list --merges --count upstream/main..HEAD)" 1 "merge commits"
+    has_both_translations
+}
+
+t_update_translations_and_other_files_get_the_usual_help() {
+    translations_setup
+    po_file "Hello=Hei" "Sign up=Registrer deg" "Cards=Kortene"
+    commit "$CARDS" ".event-card { background: orange; }" "Sign up, orange cards"
+    teammate_po "Hello=Hei" "Log out=Logg ut" "Cards=Kort"
+    teammate "$CARDS" ".event-card { background: blue; }"
+    run_ifi update
+    fails
+    has "Conflict!"
+    has "  $PO"
+    has "  $CARDS"
+    hasnt "ifi joins them"
+}

@@ -85,12 +85,14 @@ verb_form() {
         Fill) past=Filled ing=Filling ;;
         Finish) past=Finished ing=Finishing ;;
         Go) past=Went ing=Going ;;
+        Join) past=Joined ing=Joining ;;
         Keep) past=Kept ing=Keeping ;;
         Make) past=Made ing=Making ;;
         Mark) past=Marked ing=Marking ;;
         Move) past=Moved ing=Moving ;;
         Point) past=Pointed ing=Pointing ;;
         Put) past=Put ing=Putting ;;
+        Rebuild) past=Rebuilt ing=Rebuilding ;;
         Rename) past=Renamed ing=Renaming ;;
         Replace) past=Replaced ing=Replacing ;;
         Run) past=Ran ing=Running ;;
