@@ -26,13 +26,17 @@ computers, or with teammates.
 | B2 | `ifi save` asks about new files, and `--only` | ✅ Done (fb56457) |
 | B3 | `ifi hide`/`unhide`; undo-file stops hiding | ✅ Done |
 | B4 | Rewrote your own commits vs someone else's push | ✅ Done (d0c67ed) |
-| B5 | cleanup deletes your merged branches on origin | 🟢 Built (not committed) |
+| B5 | cleanup deletes your merged branches on origin | ✅ Done (49bdb16) |
+| – | Subcommands run with `bash`, so a missing x bit doesn't matter | 🟢 Built (not committed) |
 | C1 | Pull requests into `beta` | ❌ No: `beta` is old and unused, everything goes to `main` |
 | C2 | Merge button | ✅ Only "Merge commit" is used, so nothing to build |
 | C3 | `ifi review <pr>` | ✅ Agreed: collaborators only (see C3 below) |
 | C4 | Branch types | ✅ Done with `ifi start` (A4), CONTRIBUTING.md updated |
 
 The user commits each item themselves: build one, stop, wait for "go on".
+Commits from Windows drop the x bit of new scripts, so tools/ifi/ifi runs
+every subcommand with `bash` (decided 2026-10-26). Only the entry points
+(ifi, tools/ifi/ifi, tests/run, tests/playground) need the bit.
 Tests ran on a Windows host need tests/lib.sh's `safe.directory` line
 (the sandbox drops the container's system config, and /workspace belongs
 to root there).

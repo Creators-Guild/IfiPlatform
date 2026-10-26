@@ -19,12 +19,11 @@ t_commands_every_script_parses() {
 }
 
 t_commands_are_executable_in_git() {
-    # Without the x bit in Git, a fresh clone (Windows, Mac) can't run them.
+    # The files people run directly. The subcommands are run with bash.
     local mode path
     while read -r mode _ _ path; do
-        head -n 1 "$REPO/$path" | grep -q '^#!' || continue
         same "$mode" 100755 "the Git mode of $path"
-    done < <(cd "$REPO" && git ls-files -s -- tools/ifi ifi)
+    done < <(cd "$REPO" && git ls-files -s -- ifi tools/ifi/ifi tools/ifi/tests/run tools/ifi/tests/playground)
 }
 
 t_commands_lists_agree() {
@@ -325,4 +324,16 @@ t_commands_pull_request_with_gh_selecting_someone_else() {
     run_ifi pull-request
     fails
     has "that's hanna. Nothing changed."
+}
+
+t_commands_run_without_the_x_bit() {
+    # A script committed from Windows has no x bit in Git.
+    cp -r "$TOOLS" "$SANDBOX/tools"
+    find "$SANDBOX/tools" -maxdepth 1 -type f -exec chmod -x {} +
+    chmod +x "$SANDBOX/tools/ifi"
+    clone_as contributor
+    echo "scratch" >notes.txt
+    OUT="$("$SANDBOX/tools/ifi" hide notes.txt 2>&1)"
+    [[ $? -eq 0 ]] || fail "ifi hide should work without the x bit"
+    has "✓ Added /notes.txt to .git/info/exclude"
 }

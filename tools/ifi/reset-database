@@ -31,5 +31,5 @@ fi
 run "Make all the tables again" "$DJANGO_PY" manage.py migrate
 in_container && run "Make the cache table again" "$DJANGO_PY" manage.py createcachetable
 run "Fill in the starter content" "$DJANGO_PY" manage.py seed_dev_data
-"$here/restart-server"
+bash "$here/restart-server"
 echo "Reset done. Log in with admin / admin (made by seed_dev_data)."
