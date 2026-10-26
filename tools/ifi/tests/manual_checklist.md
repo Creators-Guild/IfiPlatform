@@ -68,6 +68,7 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | `git remote set-url origin git@github.com:<you>/<repo>.git` | ⚠️ SSH address, with the set-url line to switch back, and no second ❌ "Can't use SSH here" |
 | ☐ | `git remote remove upstream` | ❌ No 'upstream' remote, with the add line |
 | ☐ | Clone the main repo (not the fork) as the second account, `ifi fix-issue`, save, `ifi pull-request` | Only the ❌ "You cloned the main repo, but <account> can't push to it", with fork steps; no ✅ "origin is the main repo … collaborator" and no "upstream isn't needed" |
+| ☐ | As a collaborator: a branch in the main repo, merged on GitHub, then `ifi cleanup` | "They're on the main repo on GitHub too"; the branch is gone on GitHub; other people's merged branches stay |
 | ☐ | Clone the main repo as a collaborator, `ifi check` | ✅ "origin is the main repo … as a collaborator" and ✅ "upstream isn't needed", no ❌ |
 
 ## 2. Linux, without Docker

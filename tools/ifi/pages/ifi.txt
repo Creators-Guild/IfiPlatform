@@ -17,6 +17,7 @@ ifi account                which GitHub account you push as (and commit as)
 ifi account switch <name>  push as another account, and make commits match it
 ifi account switch         back to your computer's usual account
 ifi cleanup                delete your branches that are already merged
+                           (here, and on your fork or the main repo on GitHub)
 ifi test                   the quick tests (run before a pull request)
 ifi test --long            all tests, with the slow site crawler (or -l)
 ifi migrate                makemigrations + migrate, after changing a model

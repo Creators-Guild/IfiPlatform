@@ -1,6 +1,6 @@
 # For collaborators
 
-Last updated: 2026-10-20
+Last updated: 2026-10-26
 
 You're a **collaborator** if you have write access to the main repo. Then
 you don't need a fork: you clone the main repo and push your branches
@@ -46,6 +46,7 @@ In GitHub Desktop, base new branches on **origin/main**.
   request, so a Committer can review it.
 - **Branches are shared.** Everyone with write access sees your branches.
   Use the `<type>/<few-words>` names, and delete your branch after it's
-  merged (GitHub offers a button on the pull request).
+  merged: GitHub offers a button on the pull request, or `ifi cleanup`
+  deletes your merged branches here and in the main repo.
 - **Getting write access:** ask a Committer. See
   [Who can contribute](../../CONTRIBUTING.md#who-can-contribute).

@@ -15,7 +15,7 @@ t_cleanup_deletes_merged_branches_here_and_on_your_fork() {
     IN=$'y\n' run_ifi cleanup
     succeeds
     has "These branches are merged into main"
-    has "Your fork on GitHub has them too"
+    has "They're on your fork on GitHub too"
     git show-ref --verify --quiet refs/heads/bug/orange-cards && fail "should be deleted on your computer"
     [[ -z "$(git ls-remote origin refs/heads/bug/orange-cards)" ]] || fail "should be deleted on your fork"
 }
@@ -125,4 +125,43 @@ t_cleanup_names_changes_put_aside() {
     succeeds
     has "bug/orange-cards has changes put aside. They're kept after it's deleted: git stash show -p stash@{0}"
     same "$(git stash list | wc -l | tr -d ' ')" 1 "stashes"
+}
+
+# Merges <branch> in the main repo into main, like GitHub's merge button.
+merge_in_main_repo() {
+    (
+        cd "$SANDBOX/teammate" || exit 1
+        git pull --quiet --rebase origin main
+        git fetch --quiet origin "$1"
+        git merge --quiet --no-ff -m "Merge $1" FETCH_HEAD
+        git push --quiet origin main
+    )
+}
+
+t_cleanup_deletes_only_your_merged_branches_in_the_main_repo() {
+    clone_as collaborator
+    (cd "$SANDBOX/teammate" && git switch --quiet -c task/theirs && echo "theirs" >theirs.md &&
+        git add -A && git commit --quiet -m "Theirs" && git push --quiet origin HEAD && git switch --quiet main)
+    merge_in_main_repo task/theirs
+    start_issue
+    commit README.md "Better readme"
+    git push --quiet -u origin HEAD
+    merge_in_main_repo bug/orange-cards
+    git switch --quiet main
+    IN=$'y\n' run_ifi cleanup
+    succeeds
+    has "They're on the main repo on GitHub too"
+    [[ -z "$(git ls-remote origin refs/heads/bug/orange-cards)" ]] || fail "should be deleted in the main repo"
+    [[ -n "$(git ls-remote origin refs/heads/task/theirs)" ]] || fail "a teammate's branch you don't have should stay"
+}
+
+t_cleanup_skips_branches_already_deleted_on_github() {
+    merged_issue_branch
+    git push --quiet origin --delete bug/orange-cards
+    git update-ref refs/remotes/origin/bug/orange-cards HEAD
+    IN=$'y\n' run_ifi cleanup
+    succeeds
+    hasnt "on your fork on GitHub"
+    git show-ref --verify --quiet refs/heads/bug/orange-cards && fail "should be deleted on your computer"
+    return 0
 }

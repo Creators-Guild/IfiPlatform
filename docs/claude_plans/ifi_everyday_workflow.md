@@ -25,8 +25,8 @@ computers, or with teammates.
 | B1 | Join clashing translation files | ✅ Done (8271ce1) |
 | B2 | `ifi save` asks about new files, and `--only` | ✅ Done (fb56457) |
 | B3 | `ifi hide`/`unhide`; undo-file stops hiding | ✅ Done |
-| B4 | Rewrote your own commits vs someone else's push | 🟢 Built (not committed) |
-| B5 | cleanup deletes your merged branches on origin | ✅ Agreed, details in "Decisions 2026-10-26" |
+| B4 | Rewrote your own commits vs someone else's push | ✅ Done (d0c67ed) |
+| B5 | cleanup deletes your merged branches on origin | 🟢 Built (not committed) |
 | C1 | Pull requests into `beta` | ❌ No: `beta` is old and unused, everything goes to `main` |
 | C2 | Merge button | ✅ Only "Merge commit" is used, so nothing to build |
 | C3 | `ifi review <pr>` | ✅ Agreed: collaborators only (see C3 below) |

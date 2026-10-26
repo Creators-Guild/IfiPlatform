@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # ifi cleanup: deletes your branches that are already merged into main, on
-# your computer and on your fork. GitHub deletes merged branches in the main
-# repo by itself, but never on your computer or in a fork. Only merged
-# branches: those whose every commit is in the newest main (merged_into_main
-# in common.sh). Asks before deleting anything.
+# your computer and on GitHub (your fork, or the main repo for collaborators).
+# Only merged branches: those whose every commit is in the newest main
+# (merged_into_main in common.sh). Asks before deleting anything.
 #
 # Right after a merge you're usually still on that branch, and Git can't
 # delete the branch you're on. So it's included, and ifi switches you to
@@ -66,16 +65,18 @@ if [[ ${#backups[@]} -gt 0 ]]; then
     echo "And these backups from ifi undo-file, for branches that are merged:"
     printf '  %s   (has the file changes you took out of that pull request)\n' "${backups[@]}"
 fi
-on_fork=()
-if [[ "$base" != origin ]]; then
-    for b in "${merged[@]}"; do
-        git show-ref --verify --quiet "refs/remotes/origin/$b" && on_fork+=("$b")
-    done
-    if [[ ${#on_fork[@]} -eq ${#merged[@]} ]]; then
-        echo "Your fork on GitHub has them too, so they get deleted there as well."
-    elif [[ ${#on_fork[@]} -gt 0 ]]; then
-        echo "${#on_fork[@]} of them are also on your fork on GitHub, and get deleted there too."
-    fi
+github="your fork on GitHub"
+[[ "$base" != origin ]] || github="the main repo on GitHub"
+on_github=()
+heads="$(GIT_TERMINAL_PROMPT=0 git ls-remote --heads origin 2>/dev/null | sed 's#.*refs/heads/##' || true)"
+for b in "${merged[@]}"; do
+    grep -qxF -- "$b" <<<"$heads" && on_github+=("$b")
+done
+if [[ ${#on_github[@]} -eq ${#merged[@]} ]]; then
+    echo "They're on $github too, so they get deleted there as well."
+elif [[ ${#on_github[@]} -gt 0 ]]; then
+    echo "${#on_github[@]} of them are also on $github, and get deleted there too:"
+    printf '  %s\n' "${on_github[@]}"
 fi
 for b in "${merged[@]}"; do
     aside="$(stash_for "$b")"
@@ -99,8 +100,8 @@ fi
 for b in "${merged[@]}"; do
     run "Delete $b on your computer" git branch -D "$b"
 done
-if [[ ${#on_fork[@]} -gt 0 ]]; then
-    git_or_explain origin "Delete them on your fork on GitHub too" push --quiet origin --delete "${on_fork[@]}"
+if [[ ${#on_github[@]} -gt 0 ]]; then
+    git_or_explain origin "Delete them on $github too" push --quiet origin --delete "${on_github[@]}"
 fi
 git_recap
 your_turn
