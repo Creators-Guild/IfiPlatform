@@ -221,3 +221,14 @@ t_fix_issue_for_the_branch_you_are_on_keeps_your_changes() {
     has "You're already on bug/orange-cards"
     same "$(tail -n 1 README.md)" "changed" "README.md"
 }
+
+t_fix_issue_keeps_your_changes_when_it_stops() {
+    clone_as contributor
+    start_issue
+    echo "mine" >>docs/notes.md
+    issue 8 "" "Not an issue" "" pr
+    IN=$'y\n' run_ifi_tty fix-issue 8
+    has "is a pull request, not an issue"
+    same "$(git stash list)" "" "stashes"
+    same "$(git status --porcelain)" " M docs/notes.md" "your change"
+}

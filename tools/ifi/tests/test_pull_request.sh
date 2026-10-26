@@ -148,3 +148,14 @@ t_pull_request_without_an_issue_when_you_press_enter() {
     succeeds
     hasnt "Which issue number"
 }
+
+t_pull_request_with_a_new_file_left_out() {
+    clone_as contributor
+    start_issue
+    commit README.md "Better readme"
+    echo "scratch" >notes.txt
+    run_ifi pull-request
+    succeeds
+    has "Not in your pull request, since Git doesn't know them"
+    has "  notes.txt"
+}

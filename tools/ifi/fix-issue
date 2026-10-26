@@ -13,15 +13,12 @@ nr="${1:-}"
 nr="${nr#\#}"
 [[ "$nr" =~ ^[0-9]+$ ]] || die "Which issue? For example: ifi fix-issue 42"
 
+stop_during_update
 current="$(git branch --show-current)"
 dirty="$(git status --porcelain)"
 existing="$(git config --get-regexp '^branch\..*\.ifi-issue$' 2>/dev/null |
     awk -v n="$nr" '$2 == n { print $1 }' | sed -E 's/^branch\.//; s/\.ifi-issue$//' | head -n 1 || true)"
 git show-ref --verify --quiet "refs/heads/$existing" || existing=""
-
-if [[ "$existing" != "$current" ]] && ! leave_unsaved_changes; then
-    dirty=""
-fi
 
 # On the issue's branch already: says whether main moved on, and what's
 # next, then exits. $1 is "fetched" when $base is fetched already.
@@ -69,6 +66,7 @@ if [[ -n "$existing" ]]; then
         echo "You're already on $existing, the branch for issue #$nr."
     else
         echo "Issue #$nr already has a branch: $existing. No need for a new one."
+        leave_unsaved_changes || true
         switch_or_explain "Switch to your branch for issue #$nr" "$existing"
     fi
     carry_on
@@ -134,6 +132,9 @@ if [[ "$base" != origin ]]; then
         echo "      Couldn't reach your fork, so a branch you made on another computer can't be found."
     fi
 fi
+
+# Only now, so nothing is stashed when a step above fails.
+leave_unsaved_changes || dirty=""
 
 # A branch with the name this issue gives: on GitHub, or here but not linked
 # to an issue (made with plain Git). One linked to another issue isn't it.

@@ -22,12 +22,6 @@ source "$(dirname "$(readlink -f "$0")")/common.sh"
 
 cd "$(git rev-parse --show-toplevel)"
 
-in_rebase() {
-    [[ -d "$(git rev-parse --git-path rebase-merge)" || -d "$(git rev-parse --git-path rebase-apply)" ]]
-}
-in_merge() {
-    git rev-parse --verify --quiet MERGE_HEAD >/dev/null
-}
 
 what_now_after_update() {
     local branch dirs
@@ -219,8 +213,8 @@ else
     branch="$(git branch --show-current)"
     [[ -n "$branch" ]] || die "You're not on a branch. Go to your issue's branch first: ifi fix-issue <nr>"
     [[ "$branch" != main ]] || die "You're on main. ifi fix-issue <nr> already starts from the newest main in the main repo."
-    if [[ -n "$(git status --porcelain)" ]]; then
-        git status --short
+    if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
+        git status --short --untracked-files=no
         die "" "Commit your changes first, then update:" \
             "  ifi save \"Short description of what you changed\""
     fi

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # ifi undo-file <file> [<file> ...]: takes files out of your pull request.
 #
-# A file that is in the main repo goes back to how it is there; a file you
-# added leaves Git but stays on your computer (ifi hide makes Git ignore it).
+# A file goes back to how it was where your branch started from main (not
+# the newest main, whose own changes would then show up in your pull
+# request); a file you added leaves Git but stays on your computer.
 # Before it commits, it saves the branch as it was in a backup branch
 # (one per branch), so nothing is lost. Then it commits and pushes, so the pull request updates by itself.
 set -euo pipefail
@@ -10,6 +11,7 @@ source "$(dirname "$(readlink -f "$0")")/common.sh"
 
 [[ $# -gt 0 ]] || die "Which file? For example: ifi undo-file ifiplatform/locale/nb/LC_MESSAGES/django.po"
 
+stop_during_update
 branch="$(git branch --show-current)"
 [[ -n "$branch" ]] || die "You're not on a branch. Go to your issue's branch first: ifi fix-issue <nr>"
 [[ "$branch" != main ]] || die "You're on main. Go to your issue's branch first: ifi fix-issue <nr>"
@@ -24,13 +26,14 @@ cd "$(git rev-parse --show-toplevel)"
 find_base
 fetch_base
 
+start="$(git merge-base HEAD "$base/main")"
 files=("$@")
 message="Undo changes to $*"
 kept=()
 
 for file in "${files[@]}"; do
-    if git cat-file -e "$base/main:$file" 2>/dev/null; then
-        run "Put $file back to how it is in the main repo's main ($base/main)" git checkout "$base/main" -- "$file"
+    if git cat-file -e "$start:$file" 2>/dev/null; then
+        run "Put $file back to how it was when your branch started" git checkout "$base/main...HEAD" -- "$file"
     elif git ls-files --error-unmatch -- "$file" >/dev/null 2>&1; then
         run "Take $file out of Git. It stays on your computer" git rm --quiet --cached -- "$file"
         kept+=("$file")
@@ -41,7 +44,7 @@ done
 
 if git diff --cached --quiet; then
     echo
-    echo "Nothing to undo: ${files[*]} is already the same as in the main repo."
+    echo "Nothing to undo: ${files[*]} is already the same as when your branch started."
     exit 0
 fi
 

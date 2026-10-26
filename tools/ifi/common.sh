@@ -18,6 +18,9 @@ else
     PY=python
 fi
 
+# File names with æøå as they are, not "\303\246" (for every git call ifi makes).
+export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.quotePath GIT_CONFIG_VALUE_0=false
+
 # True inside the Docker dev container.
 in_container() {
     [[ -f /.dockerenv || "${USE_POSTGRES:-}" == True ]]
@@ -604,6 +607,20 @@ take_back() {
     fi
     run "Take back your stashed changes for $branch" git stash pop --quiet "$ref" ||
         echo "      Some of them clash with the branch as it is now. They're still kept (git stash list). Ask a helper."
+}
+
+# ifi update stopped at a conflict, as a rebase or a merge.
+in_rebase() {
+    [[ -d "$(git rev-parse --git-path rebase-merge)" || -d "$(git rev-parse --git-path rebase-apply)" ]]
+}
+in_merge() {
+    git rev-parse --verify --quiet MERGE_HEAD >/dev/null
+}
+stop_during_update() {
+    if in_rebase || in_merge; then
+        die "ifi update stopped at a conflict, and is waiting for you to fix it." \
+            "Fix the files it listed, then: ifi update   (or go back: ifi update --abort)"
+    fi
 }
 
 # Sets $base: the remote that holds the main repo. Collaborators cloned it

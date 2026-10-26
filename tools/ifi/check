@@ -197,7 +197,11 @@ fi
 # itself gets its own line at the bottom, above "Your turn:".
 branch="$(git branch --show-current)"
 nr=""
-if [[ -z "$branch" ]]; then
+if in_rebase || in_merge; then
+    quiet=false warn "ifi update stopped at a conflict, and is waiting for you to fix it." \
+        "Fix the files it listed, then: ifi update   (or go back: ifi update --abort)"
+    next+=("Conflict fixed?" "ifi update")
+elif [[ -z "$branch" ]]; then
     warn "You're not on a branch (detached HEAD)." "Go to your issue's branch: ifi fix-issue <nr>"
 elif [[ "$branch" == main ]]; then
     warn "You're on main. Start an issue with: ifi fix-issue <nr>"

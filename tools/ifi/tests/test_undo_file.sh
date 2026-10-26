@@ -45,7 +45,7 @@ t_undo_file_when_the_file_is_unchanged() {
     commit README.md "Oops"
     run_ifi undo-file docs/notes.md
     succeeds
-    has "Nothing to undo: docs/notes.md is already the same as in the main repo."
+    has "Nothing to undo: docs/notes.md is already the same as when your branch started."
 }
 
 t_undo_file_refuses_unsaved_changes() {
@@ -87,3 +87,14 @@ t_undo_file_makes_a_second_backup_after_a_rebase() {
         fail "the first backup has commits the rebased branch lost, so it needs a -backup-2"
 }
 
+
+t_undo_file_after_main_changed_the_file() {
+    clone_as contributor
+    start_issue
+    commit README.md "Oops"
+    teammate README.md "# The project, newer"
+    run_ifi undo-file README.md
+    succeeds
+    same "$(cat README.md)" "# The project" "README.md"
+    same "$(git diff --name-only upstream/main...HEAD)" "" "files in the pull request"
+}

@@ -90,3 +90,13 @@ t_save_only_some_files() {
     same "$(git show --name-only --format= HEAD | sort | tr '\n' ' ')" "docs/new.md docs/notes.md " "files in the commit"
     same "$(git status --porcelain)" " M README.md" "unsaved changes"
 }
+
+t_save_shows_file_names_with_aeoa() {
+    clone_as contributor
+    start_issue
+    echo "Blå" >docs/blåbær.md
+    IN=$'y\n' run_ifi save "Bær"
+    succeeds
+    has "  docs/blåbær.md"
+    has "new      docs/blåbær.md"
+}

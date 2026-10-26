@@ -299,3 +299,36 @@ t_update_translations_and_other_files_get_the_usual_help() {
     has "  $CARDS"
     hasnt "ifi joins them"
 }
+
+t_update_with_a_new_file_left_out() {
+    clone_as contributor
+    start_issue
+    commit "$CARDS" ".event-card { background: orange; }"
+    echo "scratch" >notes.txt
+    teammate docs/other.md "Other"
+    run_ifi update
+    succeeds
+    same "$(git status --porcelain)" "?? notes.txt" "git status"
+}
+
+t_update_other_commands_wait_for_the_conflict() {
+    conflict_on_cards
+    run_ifi update
+    run_ifi save "Fixed"
+    fails
+    has "ifi update stopped at a conflict"
+    run_ifi pull-request
+    has "ifi update stopped at a conflict"
+    run_ifi check
+    has "ifi update stopped at a conflict"
+}
+
+t_update_save_doesnt_commit_markers_in_a_merge() {
+    two_commits_and_a_conflict
+    IN=$'1\nn\n' run_ifi_tty update
+    before="$(git rev-parse HEAD)"
+    run_ifi save "Fixed"
+    fails
+    has "ifi update stopped at a conflict"
+    same "$(git rev-parse HEAD)" "$before" "the branch"
+}
