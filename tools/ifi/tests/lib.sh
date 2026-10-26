@@ -61,6 +61,8 @@ new_sandbox() {
     # The account ifi account switch tests log in as.
     git config --global --add "url.file://$SANDBOX/remotes/.insteadOf" "https://octocat@github.com/"
     git config --global advice.detachedHead false
+    # GIT_CONFIG_NOSYSTEM drops the container's safe.directory, needed on Windows hosts.
+    git config --global --add safe.directory "$(cd "$TOOLS/../.." && pwd)"
     rm -rf "${API_DIR:?}/repos" "${API_DIR:?}/users"
 
     git init --quiet --bare "$SANDBOX/remotes/$MAIN.git"
