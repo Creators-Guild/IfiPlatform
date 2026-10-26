@@ -263,6 +263,9 @@ if [[ -n "$base" && -n "$branch" && "$branch" != main ]] && ! $offline; then
             next+=("Want main's new commits?" "ifi update")
             [[ -n "$clash" ]] && quiet=false warn "You'll likely get a conflict in: $clash" \
                 "Those files changed both on your branch and in $base/main."
+            migrations="$(migration_clash "$fork_point" HEAD "$base/main" | tr '\n' ' ')"
+            [[ -n "$migrations" ]] && warn "You and $base/main both added a database change (a migration) in: $migrations" \
+                "After ifi update, run ifi migrate: it makes the migration that joins them."
         fi
     else
         warn "Couldn't fetch main from the main repo ($base), so 'behind' wasn't checked."

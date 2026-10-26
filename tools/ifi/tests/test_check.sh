@@ -291,3 +291,13 @@ t_check_changes_put_aside_for_a_deleted_branch() {
     has "but that branch is deleted"
     has "See them: git stash show -p stash@{0}"
 }
+
+t_check_warns_when_both_added_a_migration() {
+    clone_as contributor
+    start_issue
+    commit ifiplatform/apps/x_app/migrations/0002_mine.py "# mine"
+    teammate ifiplatform/apps/x_app/migrations/0002_theirs.py "# theirs"
+    run_ifi check
+    has "both added a database change (a migration) in: ifiplatform/apps/x_app/migrations"
+    has "After ifi update, run ifi migrate"
+}

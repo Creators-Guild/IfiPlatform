@@ -19,7 +19,7 @@ computers, or with teammates.
 | Item | What | Status |
 | --- | --- | --- |
 | A1 | Find your branch again on any computer | 🟢 Built (not committed) |
-| A2 | Warn about and fix clashing database changes (migrations) | ✅ Agreed |
+| A2 | Warn about and fix clashing database changes (migrations) | 🟢 Built (not committed) |
 | A3 | Put unsaved work aside when switching, with reminders | 🟢 Built (not committed) |
 | A4 | Pull requests without an issue | ✅ Agreed, consequences noted for later |
 | B1–B5 | Smaller improvements | ✅ Agreed (B3: review afterwards, see docs/to_fix.md) |

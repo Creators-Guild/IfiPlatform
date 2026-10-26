@@ -13,6 +13,10 @@
 # (branch.<name>.ifi-before-update), so the next push (push_branch in
 # common.sh: ifi pull-request, ifi undo-file) knows the branch on GitHub may
 # be replaced by the updated one, and nothing else.
+#
+# Also remembers the migrations folders where both you and main added a
+# migration (branch.<name>.ifi-migration-clash), since a conflict can pause
+# the update, and says to run ifi migrate when it's done.
 set -euo pipefail
 source "$(dirname "$(readlink -f "$0")")/common.sh"
 
@@ -26,6 +30,22 @@ in_merge() {
 }
 
 what_now_after_update() {
+    local branch dirs
+    branch="$(git branch --show-current)"
+    dirs="$(git config "branch.$branch.ifi-migration-clash" || true)"
+    git config --unset "branch.$branch.ifi-migration-clash" || true
+    if [[ -n "$dirs" ]]; then
+        echo
+        echo "You and main both added a database change (a migration) in:"
+        printf '  %s\n' $dirs
+        echo "Django needs one more migration that joins them, or the site won't start."
+        your_turn
+        choices \
+            "First" "ifi migrate   (makes that migration; Django asks before it writes it)" \
+            "Then" "ifi save \"Join the migrations\", check the site, and run ifi test" \
+            "Done?" "ifi pull-request"
+        return
+    fi
     your_turn "check that the site still works, and run ifi test. Then:"
     choices \
         "Done, or already have a pull request?" "ifi pull-request" \
@@ -117,6 +137,7 @@ if in_rebase || in_merge; then
     in_merge && mode=merge
     if [[ "${1:-}" == --abort ]]; then
         run "Stop the update and put your branch back the way it was" git "$mode" --abort
+        git config --unset "branch.$(git branch --show-current).ifi-migration-clash" || true
         echo
         echo "Back to how your branch was before the update."
         git_recap
@@ -160,6 +181,11 @@ else
         echo "Already up to date with main in the main repo ($base/main)."
         git_recap
         exit 0
+    fi
+
+    dirs="$(migration_clash "$(git merge-base HEAD "$base/main")" HEAD "$base/main" | tr '\n' ' ')"
+    if [[ -n "$dirs" ]]; then
+        git config "branch.$branch.ifi-migration-clash" "$dirs"
     fi
 
     mode=rebase

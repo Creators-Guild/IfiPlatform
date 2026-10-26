@@ -13,6 +13,7 @@ ifi cleanup                delete your branches that are already merged
 ifi test                   the quick tests (run before a pull request)
 ifi test --long            all tests, with the slow site crawler (or -l)
 ifi migrate                makemigrations + migrate, after changing a model
+                           (first joins clashing migrations, after asking)
 ifi restart-server         restart the website
 ifi reset-database         DELETE the local database and start fresh
 ifi rebuild-docker         how to rebuild the container

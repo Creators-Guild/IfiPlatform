@@ -153,3 +153,28 @@ t_update_shows_the_conflict_how_to() {
     has "Take one file at a time."
     has "\"Current\" is main's version"
 }
+
+MIGRATIONS=ifiplatform/apps/x_app/migrations
+
+t_update_says_when_both_added_a_migration() {
+    clone_as contributor
+    start_issue
+    commit "$MIGRATIONS/0002_mine.py" "# mine"
+    teammate "$MIGRATIONS/0002_theirs.py" "# theirs"
+    run_ifi update
+    succeeds
+    has "You and main both added a database change (a migration) in:"
+    has "  $MIGRATIONS"
+    has "ifi migrate"
+    same "$(git config branch.bug/orange-cards.ifi-migration-clash || true)" "" "remembered clash after the update"
+}
+
+t_update_quiet_about_migrations_in_different_apps() {
+    clone_as contributor
+    start_issue
+    commit "$MIGRATIONS/0002_mine.py" "# mine"
+    teammate ifiplatform/apps/y_app/migrations/0002_theirs.py "# theirs"
+    run_ifi update
+    succeeds
+    hasnt "database change"
+}

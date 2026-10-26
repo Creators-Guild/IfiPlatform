@@ -579,6 +579,18 @@ merged_into_main() {
         ! git rev-list --first-parent "$base/main" | grep -qxF "$(git rev-parse "$1")"
 }
 
+# The migrations folders where both $2 and $3 added a migration since $1,
+# the commit they split from, one per line. Git sees no conflict there (the
+# file names differ), but Django refuses to run until a merge migration
+# joins them, which ifi migrate makes.
+migration_clash() {
+    comm -12 <(added_migration_dirs "$1" "$2") <(added_migration_dirs "$1" "$3")
+}
+added_migration_dirs() {
+    git diff --name-only --diff-filter=A "$1" "$2" -- '*/migrations/[0-9]*.py' 2>/dev/null |
+        sed 's#/[^/]*$##' | sort -u
+}
+
 # Fetches the main repo's newest code into $base/main. $1 can say why, when
 # it's for something more specific.
 fetch_base() {
