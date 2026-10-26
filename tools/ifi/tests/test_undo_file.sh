@@ -1,4 +1,4 @@
-# ifi undo-file <file>, ifi undo-file --extra
+# ifi undo-file <file>
 
 CARDS=ifiplatform/static/css/cards.css
 
@@ -87,43 +87,3 @@ t_undo_file_makes_a_second_backup_after_a_rebase() {
         fail "the first backup has commits the rebased branch lost, so it needs a -backup-2"
 }
 
-t_undo_file_extra_takes_out_files_the_issue_doesnt_list() {
-    clone_as contributor
-    issue 5 Bug "Orange cards" $'Make them orange.\n\n### Files to change\n- `'"$CARDS"$'`\n\n### Hints\n- `docs/notes.md` has notes'
-    "$TOOLS/ifi" fix-issue 5 </dev/null >/dev/null 2>&1
-    commit "$CARDS" ".event-card { background: orange; }"
-    commit README.md "Oops"
-    commit docs/notes.md "Oops too"
-    IN=$'y\n' run_ifi undo-file --extra
-    succeeds
-    has "Issue #5 doesn't list these files that your pull request changes:"
-    same "$(git diff --name-only upstream/main...HEAD)" "$CARDS" "files in the pull request"
-}
-
-t_undo_file_extra_when_nothing_is_extra() {
-    clone_as contributor
-    issue 5 Bug "Orange cards" $'### Files to change\n- `'"$CARDS"'`'
-    "$TOOLS/ifi" fix-issue 5 </dev/null >/dev/null 2>&1
-    commit "$CARDS" ".event-card { background: orange; }"
-    run_ifi undo-file --extra
-    succeeds
-    has "Nothing to undo: your pull request only changes files that issue #5 lists."
-}
-
-t_undo_file_extra_without_a_list() {
-    clone_as contributor
-    start_issue
-    commit README.md "Oops"
-    run_ifi undo-file --extra
-    fails
-    has "Issue #5 has no \"Files to change\" list"
-}
-
-t_undo_file_extra_without_github() {
-    clone_as contributor
-    start_issue
-    commit README.md "Oops"
-    IFI_GITHUB_API=http://127.0.0.1:1 run_ifi undo-file --extra
-    fails
-    has "Couldn't read issue #5 on GitHub"
-}

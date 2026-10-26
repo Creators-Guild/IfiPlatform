@@ -9,9 +9,9 @@ Do it before ifi moves to a new repo, and after big changes.
 **Before you start**
 - A second GitHub account that is *not* a collaborator, so you see what a
   new student sees. Use a private browser window for it.
-- A test issue in the repo, with a Type and a `### Files to change` list
-  (one file), for example "Make the event cards orange" listing
-  `ifiplatform/static/css/cards.css`. Use the second account's view of it.
+- A test issue in the repo, with a Type, for example "Make the event cards
+  orange" (change `ifiplatform/static/css/cards.css`). Use the second
+  account's view of it.
 - Warm-up (optional): `tools/ifi/tests/playground` runs the same steps on a
   fake GitHub first.
 
@@ -29,8 +29,8 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | Change the file, `ifi save "Orange cards"` | The file under "Committing these files" |
 | ☐ | `ifi pull-request`, Ctrl+click the link | GitHub's "Open a pull request" page, with `Closes #<nr>` filled in |
 | ☐ | Open the pull request | The template in the description; CI runs |
-| ☐ | Change a file the issue doesn't list, save, pull-request | The file shows in the pull request's Files changed |
-| ☐ | `ifi undo-file --extra`, answer y | The extra file goes back, and is gone from Files changed |
+| ☐ | Change another file by mistake, save, pull-request | The file shows in the pull request's Files changed |
+| ☐ | `ifi undo-file <that file>` | The file goes back, and is gone from Files changed |
 | ☐ | Make a commit on main that changes the same line (as yourself, in another clone or on GitHub) | |
 | ☐ | `ifi check` | "has 1 new commit(s)" and "You'll likely get a conflict in: ..." |
 | ☐ | `ifi update`, answer y to help | The conflict explanation; VS Code shows Accept buttons on the file |

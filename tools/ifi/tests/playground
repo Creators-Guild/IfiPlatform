@@ -21,7 +21,7 @@ new_sandbox "$dir" >/dev/null 2>&1 || {
 unset GIT_CONFIG_NOSYSTEM GIT_TERMINAL_PROMPT NO_COLOR
 
 cards=ifiplatform/static/css/cards.css
-issue 5 Bug "Make the event cards orange" $'The event cards should be orange.\n\n### Files to change\n- `'"$cards"$'`\n'
+issue 5 Bug "Make the event cards orange" "The event cards should be orange."
 issue 6 Feature "Add a page with notes" "Write some notes in docs/."
 issue 7 "" "Tidy up the readme" "An issue without a Type, so ifi fix-issue asks."
 issue 8 Bug "A pull request, not an issue" "" pr
@@ -93,7 +93,7 @@ contributor with a fork, cloned into "work". Nothing here reaches real
 GitHub, and it's all deleted when you type exit.
 
 Issues on the fake GitHub:
-  #5  Bug      Make the event cards orange   (has a "Files to change" list)
+  #5  Bug      Make the event cards orange
   #6  Feature  Add a page with notes
   #7  (none)   Tidy up the readme            (no Type, so ifi asks)
   #8           a pull request, not an issue
@@ -105,7 +105,7 @@ Things to try:
   teammate                        someone changes the same file on main
   ifi check, then ifi update      see the conflict, and fix it
   ifi pull-request                send it to your fork (the link is to real GitHub, don't open it)
-  ifi undo-file --extra           after changing a file issue 5 doesn't list
+  ifi undo-file <file>            take a file you changed by mistake out again
   teammate merge, then ifi cleanup
   teammate help                   all the teammate commands
 

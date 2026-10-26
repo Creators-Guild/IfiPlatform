@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 # ifi undo-file <file> [<file> ...]: takes files out of your pull request.
-# ifi undo-file --extra: takes out every file the issue doesn't list under
-# "### Files to change"
-# (.github/workflows/files_check.yml).
 #
 # A file that is in the main repo goes back to how it is there; a file you
 # added leaves Git but stays on your computer, and Git ignores it there from
@@ -12,8 +9,7 @@
 set -euo pipefail
 source "$(dirname "$(readlink -f "$0")")/common.sh"
 
-[[ $# -gt 0 ]] || die "Which file? For example: ifi undo-file ifiplatform/locale/nb/LC_MESSAGES/django.po" \
-    "Or take out every file the issue doesn't list: ifi undo-file --extra"
+[[ $# -gt 0 ]] || die "Which file? For example: ifi undo-file ifiplatform/locale/nb/LC_MESSAGES/django.po"
 
 branch="$(git branch --show-current)"
 [[ -n "$branch" ]] || die "You're not on a branch. Go to your issue's branch first: ifi fix-issue <nr>"
@@ -29,65 +25,8 @@ cd "$(git rev-parse --show-toplevel)"
 find_base
 fetch_base
 
-if [[ "$1" == --extra ]]; then
-    nr="$(git config "branch.$branch.ifi-issue" || true)"
-    while [[ ! "$nr" =~ ^[0-9]+$ ]]; do
-        read -r -p "Which issue is this branch for? " nr || die ""
-        nr="${nr#\#}"
-    done
-
-    # The paths in backticks under "### Files to change", up to the next
-    # heading: the same rule as files_check.yml. Exit 2 = no such list,
-    # anything else = GitHub couldn't be reached. IFI_GITHUB_API lets tests
-    # use a fake server.
-    status=0
-    allowed="$("$PY" - "$nr" "${IFI_GITHUB_API:-https://api.github.com}" "$MAIN_REPO" <<'PY' 2>/dev/null
-import json, re, sys, urllib.request
-
-nr, api, repo = sys.argv[1:4]
-req = urllib.request.Request(
-    f"{api}/repos/{repo}/issues/{nr}",
-    headers={"Accept": "application/vnd.github+json", "User-Agent": "ifi-undo-file"},
-)
-with urllib.request.urlopen(req, timeout=5) as resp:
-    body = json.load(resp).get("body") or ""
-parts = re.split(r"^### Files to change.*$", body, maxsplit=1, flags=re.M)
-if len(parts) < 2:
-    sys.exit(2)
-section = re.split(r"^#{1,6} ", parts[1], flags=re.M)[0]
-for path in re.findall(r"`([^`\s]+/[^`\s]+)`", section):
-    print(path)
-PY
-)" || status=$?
-    case "$status" in
-        0) ;;
-        2) die "Issue #$nr has no \"Files to change\" list, so there's nothing to compare with." \
-            "Name the files instead: ifi undo-file <file> ..." ;;
-        *) die "Couldn't read issue #$nr on GitHub (no internet, or GitHub's limit of" \
-            "60 lookups an hour for everyone on the same Wi-Fi). Try again in a while," \
-            "or name the files instead: ifi undo-file <file> ..." ;;
-    esac
-
-    # Every file the pull request changes, compared with where the branch
-    # started, as GitHub shows it. Both sides of a rename count.
-    files=()
-    while IFS= read -r file; do
-        grep -qxF -- "$file" <<<"$allowed" || files+=("$file")
-    done < <(git diff --name-only --no-renames "$base/main...HEAD")
-
-    if [[ ${#files[@]} -eq 0 ]]; then
-        echo "Nothing to undo: your pull request only changes files that issue #$nr lists."
-        exit 0
-    fi
-    echo "Issue #$nr doesn't list these files that your pull request changes:"
-    printf '  %s\n' "${files[@]}"
-    read -r -p "Take all ${#files[@]} out of your pull request? (y/n) " answer || answer=""
-    [[ "$answer" =~ ^[YyJj] ]] || die "Nothing was changed."
-    message="Undo changes to files not in issue #$nr"
-else
-    files=("$@")
-    message="Undo changes to $*"
-fi
+files=("$@")
+message="Undo changes to $*"
 
 for file in "${files[@]}"; do
     if git cat-file -e "$base/main:$file" 2>/dev/null; then

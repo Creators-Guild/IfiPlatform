@@ -5,7 +5,6 @@ ifi update                 bring your branch up to date with main in the main re
 ifi update --abort         undo an update that hit a conflict
 ifi pull-request           push your branch and get the pull request link
 ifi undo-file <file>       take a file out of your pull request
-ifi undo-file --extra      take out every file the issue doesn't list
 ifi account                which GitHub account you push as (and commit as)
 ifi account switch <name>  push as another account, and make commits match it
 ifi account switch         back to your computer's usual account
