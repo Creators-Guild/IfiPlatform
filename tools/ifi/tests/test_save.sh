@@ -76,21 +76,6 @@ t_save_with_only_new_files_left_out() {
     has "Nothing to commit: you left out the new files"
 }
 
-t_save_only_some_files() {
-    clone_as contributor
-    start_issue
-    echo "More" >>README.md
-    echo "More notes" >>docs/notes.md
-    echo "scratch" >docs/new.md
-    cd docs
-    run_ifi save Some notes --only notes.md new.md
-    succeeds
-    hasnt "Add these too?"
-    same "$(git log -1 --format=%s)" "Some notes" "commit message"
-    same "$(git show --name-only --format= HEAD | sort | tr '\n' ' ')" "docs/new.md docs/notes.md " "files in the commit"
-    same "$(git status --porcelain)" " M README.md" "unsaved changes"
-}
-
 t_save_shows_file_names_with_aeoa() {
     clone_as contributor
     start_issue
@@ -101,11 +86,13 @@ t_save_shows_file_names_with_aeoa() {
     has "new      docs/blåbær.md"
 }
 
-t_save_only_a_file_without_changes() {
+t_save_refuses_conflict_markers() {
     clone_as contributor
     start_issue
-    echo "More" >>README.md
-    run_ifi save "Notes" --only docs/notes.md
+    printf '<<<<<<< HEAD\nmine\n=======\ntheirs\n>>>>>>> stash\n' >docs/notes.md
+    run_ifi save "Notes"
     fails
-    has "Nothing to commit: docs/notes.md has no changes since your last commit."
+    has "These files still have conflict markers"
+    has "  docs/notes.md"
+    same "$(git log -1 --format=%s)" "First commit" "the last commit"
 }

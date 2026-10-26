@@ -96,12 +96,10 @@ verb_form() {
         Point) past=Pointed ing=Pointing ;;
         Put) past=Put ing=Putting ;;
         Rebuild) past=Rebuilt ing=Rebuilding ;;
-        Remove) past=Removed ing=Removing ;;
         Rename) past=Renamed ing=Renaming ;;
         Replace) past=Replaced ing=Replacing ;;
         Run) past=Ran ing=Running ;;
         Send) past=Sent ing=Sending ;;
-        Stash) past=Stashed ing=Stashing ;;
         Stop) past=Stopped ing=Stopping ;;
         Switch) past=Switched ing=Switching ;;
         Take) past=Took ing=Taking ;;
@@ -445,7 +443,7 @@ explain_git_error() {
         branch="$(git branch --show-current)"
         echo "Your branch on GitHub has commits that aren't on your computer:" >&2
         GIT_TERMINAL_PROMPT=0 git fetch --quiet "$remote" "$branch" 2>/dev/null &&
-            git log --format='  "%s", by %an, %ar' HEAD..FETCH_HEAD >&2
+            git log --first-parent --format='  "%s", by %an, %ar' HEAD..FETCH_HEAD >&2
         die "From a teammate, from you on another computer, or GitHub's Update branch button?" \
             "Get them first, then try again:" \
             "  git pull --rebase origin $branch" \
@@ -477,44 +475,24 @@ git_or_explain() {
     step_done ok "$why" git "$@"
 }
 
-# Pushes the current branch to origin; $1 is what it does. GitHub refuses a
-# normal push when its branch has commits that aren't here. Then it replaces
-# the branch on GitHub, with a lease on that exact commit so nobody else's
-# work is ever overwritten, when those commits are only:
-# - the ones from before `ifi update` put yours on top of the newest main, or
-# - old versions of yours, with the same changes (you rewrote them), after asking.
+# Pushes the current branch to origin; $1 is what it does. After `ifi
+# update` the branch has new commits in place of the old ones, so GitHub
+# refuses a normal push. Then it replaces the branch on GitHub, but only if
+# it still has nothing but what was there before the update (a lease on that
+# exact commit), so nobody else's work is ever overwritten.
 push_branch() {
-    local why="$1" branch before remote_tip replace="" answer=""
+    local why="$1" branch before remote_tip=""
     branch="$(git branch --show-current)"
     before="$(git config "branch.$branch.ifi-before-update" || true)"
-    remote_tip="$(GIT_TERMINAL_PROMPT=0 git ls-remote origin "refs/heads/$branch" 2>/dev/null | cut -f1 || true)"
-    if [[ -n "$remote_tip" ]] && ! git merge-base --is-ancestor "$remote_tip" HEAD 2>/dev/null; then
-        if [[ -n "$before" ]] && git merge-base --is-ancestor "$remote_tip" "$before" 2>/dev/null; then
-            replace="Replace your branch on GitHub with the updated one"
-        elif rewritten_here "$branch"; then
-            echo "Your branch on GitHub has older versions of your commits: the same changes,"
-            echo "but you changed the commits since (for example with git commit --amend)."
-            read -r -p "Replace your branch on GitHub with this version? (y/n) " answer || true
-            [[ "$answer" =~ ^[YyJj] ]] || die "Nothing was sent."
-            replace="Replace your branch on GitHub with this version"
-        fi
-    fi
-    if [[ -n "$replace" ]]; then
-        git_or_explain origin "$replace. Git refuses if someone else pushed to it in the meantime, so nothing gets lost" \
+    [[ -n "$before" ]] && remote_tip="$(GIT_TERMINAL_PROMPT=0 git ls-remote origin "refs/heads/$branch" 2>/dev/null | cut -f1 || true)"
+    if [[ -n "$remote_tip" ]] && ! git merge-base --is-ancestor "$remote_tip" HEAD 2>/dev/null &&
+        git merge-base --is-ancestor "$remote_tip" "$before" 2>/dev/null; then
+        git_or_explain origin "Replace your branch on GitHub with the updated one. Git refuses if someone else pushed to it in the meantime, so nothing gets lost" \
             push --quiet -u --force-with-lease="refs/heads/$branch:$remote_tip" origin HEAD
     else
         git_or_explain origin "$why" push --quiet -u origin HEAD
     fi
     git config --unset "branch.$branch.ifi-before-update" || true
-}
-
-# True when every commit on GitHub's branch $1 that isn't here has the same
-# changes as one of yours (git cherry marks those "-").
-rewritten_here() {
-    local extra
-    run "Download your branch from GitHub, to compare it with yours" git fetch --quiet origin "$1" || return 1
-    extra="$(git cherry HEAD FETCH_HEAD)"
-    [[ -n "$extra" ]] && ! grep -q '^+' <<<"$extra"
 }
 
 # git switch, with a plain explanation when unsaved changes are in the way.
@@ -555,68 +533,24 @@ new_files() {
     git status --porcelain | sed -n 's/^?? //p'
 }
 
-# Unsaved changes ifi stashes for a branch (a git stash with the message
-# "ifi: <branch>") until you go back to it. Stashes are only on this
-# computer, never on GitHub, so ifi check reminds you of them.
-
-# Every stash ifi made: "stash@{n}<tab>how long ago<tab>branch" lines.
-# Git names it "On <where you were>: ifi: <branch>"; branch names can't
-# contain ":", so the first ": ifi: " is the one.
-ifi_stashes() {
-    git stash list --format='%gd%x09%cr%x09%gs' 2>/dev/null |
-        awk -F'\t' '{ i = index($3, ": ifi: "); if (i) print $1 "\t" $2 "\t" substr($3, i + 7) }'
+# Files whose changes since your last commit add (or remove) conflict
+# markers, staged or not.
+files_with_markers() {
+    git diff --name-only -G '^(<<<<<<<|>>>>>>>)( |$)' HEAD 2>/dev/null
 }
 
-# The stash for branch $1, as stash@{n}; empty if there's none.
-stash_for() {
-    ifi_stashes | awk -F'\t' -v b="$1" '$3 == b { print $1; exit }'
-}
-
-# Stashes the unsaved changes for the current branch.
-stash_changes() {
-    local branch
-    branch="$(git branch --show-current)"
-    run "Stash your unsaved changes for $branch" \
-        git stash push --quiet -m "ifi: $branch"
-}
-
-# Before going to another branch. Uncommitted work on main is usually a
-# change made before branching, so it comes along: true. On another branch
-# it belongs to that branch, so it's stashed for it if you say so (false:
-# nothing comes along), and otherwise ifi stops.
+# Before going to another branch. Unsaved changes on main are usually made
+# before branching, so they come along: true. On another branch they belong
+# to it, so ifi stops. False when there are none.
 leave_unsaved_changes() {
-    local current answer=""
+    local current
     current="$(git branch --show-current)"
     [[ -n "$(changed_files)" ]] || return 1
     [[ -n "$current" && "$current" != main ]] || return 0
-    if [[ -t 0 ]]; then
-        echo "You have changes on $current that aren't committed yet:"
-        git status --short --untracked-files=no | sed 's/^/  /'
-        echo "ifi can stash them (put them aside) for $current, and give them back when you go back to it."
-        echo "They're kept only on this computer, not on GitHub."
-        read -r -p "Stash them? (y/n) " answer || true
-    fi
-    [[ "$answer" =~ ^[YyJj] ]] || die "You have changes on $current that aren't committed yet." \
+    git status --short --untracked-files=no
+    die "" "You have changes on $current that aren't committed yet." \
         "Commit them first, then run this again:" \
         "  ifi save \"Short description of what you changed\""
-    stash_changes
-    return 1
-}
-
-# Takes back what was stashed for the current branch, if anything. Only
-# into a clean working tree, so nothing of yours gets mixed up.
-take_back() {
-    local branch ref
-    branch="$(git branch --show-current)"
-    ref="$(stash_for "$branch")"
-    [[ -n "$ref" ]] || return 0
-    if [[ -n "$(changed_files)" ]]; then
-        echo "      You have stashed changes for $branch too, but there are other unsaved changes here."
-        echo "      Save these first (ifi save), then take the others back: git stash pop $ref"
-        return 0
-    fi
-    run "Take back your stashed changes for $branch" git stash pop --quiet "$ref" ||
-        echo "      Some of them clash with the branch as it is now. They're still kept (git stash list). Ask a helper."
 }
 
 # ifi update stopped at a conflict, as a rebase or a merge.
@@ -671,7 +605,7 @@ added_migration_dirs() {
         sed 's#/[^/]*$##' | sort -u
 }
 
-# A branch name from a title (ifi fix-issue) or a few words (ifi start):
+# A branch name from an issue's title (ifi fix-issue):
 # "Gjør kortene oransje!" -> "gjor-kortene-oransje": the first 4 words,
 # ASCII only, at most 40 characters.
 slugify() {

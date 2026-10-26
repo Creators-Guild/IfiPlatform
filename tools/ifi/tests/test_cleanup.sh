@@ -115,18 +115,6 @@ t_cleanup_doesnt_call_a_new_branch_merged() {
     hasnt "which is merged"
 }
 
-t_cleanup_names_stashed_changes() {
-    merged_issue_branch
-    git switch --quiet bug/orange-cards
-    echo "more" >>docs/notes.md
-    git stash push --quiet -m "ifi: bug/orange-cards"
-    git switch --quiet main
-    IN=$'y\n' run_ifi cleanup
-    succeeds
-    has "bug/orange-cards has stashed changes. They're kept after it's deleted: git stash show -p stash@{0}"
-    same "$(git stash list | wc -l | tr -d ' ')" 1 "stashes"
-}
-
 # Merges <branch> in the main repo into main, like GitHub's merge button.
 merge_in_main_repo() {
     (

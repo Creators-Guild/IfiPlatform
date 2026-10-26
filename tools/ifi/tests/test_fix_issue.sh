@@ -188,30 +188,13 @@ changes_on_issue_5() {
     echo "idea" >notes.txt
 }
 
-t_fix_issue_stashes_changes_and_gives_them_back() {
+t_fix_issue_stops_for_unsaved_changes() {
     changes_on_issue_5
-    IN=$'y\n' run_ifi_tty fix-issue 6
-    succeeds
-    has "Stashed your unsaved changes for bug/orange-cards"
-    has "only on this computer"
-    same "$(git branch --show-current)" "bug/blue-cards" "branch"
-    same "$(git status --porcelain)" "?? notes.txt" "the new file comes along, like in Git"
-    run_ifi fix-issue 5
-    succeeds
-    has "Took back your stashed changes for bug/orange-cards"
-    same "$(git branch --show-current)" "bug/orange-cards" "branch"
-    same "$(tail -n 1 README.md)" "changed" "README.md"
-    same "$(cat notes.txt)" "idea" "the new file"
-    same "$(git stash list)" "" "stashes left"
-}
-
-t_fix_issue_keeps_changes_when_you_say_no() {
-    changes_on_issue_5
-    IN=$'n\n' run_ifi_tty fix-issue 6
+    run_ifi fix-issue 6
     fails
     has "You have changes on bug/orange-cards that aren't committed yet."
     same "$(git branch --show-current)" "bug/orange-cards" "branch"
-    same "$(git stash list)" "" "stashes"
+    same "$(tail -n 1 README.md)" "changed" "README.md"
 }
 
 t_fix_issue_for_the_branch_you_are_on_keeps_your_changes() {
@@ -220,28 +203,4 @@ t_fix_issue_for_the_branch_you_are_on_keeps_your_changes() {
     succeeds
     has "You're already on bug/orange-cards"
     same "$(tail -n 1 README.md)" "changed" "README.md"
-}
-
-t_fix_issue_keeps_your_changes_when_it_stops() {
-    clone_as contributor
-    start_issue
-    echo "mine" >>docs/notes.md
-    issue 8 "" "Not an issue" "" pr
-    IN=$'y\n' run_ifi_tty fix-issue 8
-    has "is a pull request, not an issue"
-    same "$(git stash list)" "" "stashes"
-    same "$(git status --porcelain)" " M docs/notes.md" "your change"
-}
-
-t_fix_issue_gives_back_stashed_changes_with_a_new_file_around() {
-    clone_as contributor
-    start_issue
-    echo "mine" >>docs/notes.md
-    git stash push --quiet -m "ifi: bug/orange-cards"
-    git switch --quiet main
-    echo "scratch" >notes.txt
-    run_ifi fix-issue 5
-    succeeds
-    has "Took back your stashed changes for bug/orange-cards"
-    grep -q mine docs/notes.md || fail "your stashed change should be back"
 }

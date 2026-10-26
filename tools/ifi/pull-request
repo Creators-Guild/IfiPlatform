@@ -24,7 +24,7 @@ if [[ "$(git rev-list --count "$base/main..HEAD")" -eq 0 ]]; then
         "  ifi save \"Short description of what you changed\""
 fi
 
-# "none": a pull request without an issue (ifi start, or Enter here).
+# "none": a pull request without an issue (Enter here).
 nr="$(git config "branch.$branch.ifi-issue" || true)"
 while [[ ! "$nr" =~ ^([0-9]+|none)$ ]]; do
     read -r -p "Which issue number does this fix? (Enter if none) " nr || die ""
@@ -32,17 +32,6 @@ while [[ ! "$nr" =~ ^([0-9]+|none)$ ]]; do
     [[ -n "$nr" ]] || nr=none
 done
 git config "branch.$branch.ifi-issue" "$nr"
-
-# Changes stashed for this branch (stash_changes in common.sh) would be left out.
-if [[ -n "$(stash_for "$branch")" ]]; then
-    echo "You have stashed changes for $branch. They aren't in your pull request."
-    answer=""
-    read -r -p "Send without them? (y/n) " answer || true
-    get="ifi fix-issue $nr"
-    [[ "$nr" != none ]] || get="git stash pop $(stash_for "$branch")"
-    [[ "$answer" =~ ^[YyJj] ]] || die "Nothing was sent. Get them back first: $get" \
-        "Then ifi save, and ifi pull-request again."
-fi
 
 push_branch "Send your branch to your fork on GitHub (-u: remember where, so a plain git push works next time)"
 

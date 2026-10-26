@@ -79,10 +79,6 @@ elif [[ ${#on_github[@]} -gt 0 ]]; then
     echo "${#on_github[@]} of them are also on $github, and get deleted there too:"
     printf '  %s\n' "${on_github[@]}"
 fi
-for b in "${merged[@]}"; do
-    stash="$(stash_for "$b")"
-    [[ -z "$stash" ]] || echo "$b has stashed changes. They're kept after it's deleted: git stash show -p $stash"
-done
 unsaved_note
 read -r -p "Delete them? (y/n) " answer || answer=""
 [[ "$answer" =~ ^[YyJj] ]] || die "Nothing was deleted."

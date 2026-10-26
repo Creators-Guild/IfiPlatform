@@ -79,60 +79,7 @@ t_pull_request_never_overwrites_someone_elses_push() {
     fails
     has "Your branch on GitHub has commits that aren't on your computer"
     has '  "Their commit", by Student Testesen'
-    hasnt "Replace your branch on GitHub with this version?"
     same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$theirs" "the branch on your fork"
-}
-
-# Pushed, then the commit message changed with --amend: same changes, new commit.
-amended_after_push() {
-    clone_as contributor
-    start_issue
-    commit README.md "Better readme" "Readme"
-    run_ifi pull-request
-    git commit --quiet --amend -m "Better readme"
-}
-
-t_pull_request_replaces_commits_you_rewrote_when_asked() {
-    amended_after_push
-    IN=$'y\n' run_ifi pull-request
-    succeeds
-    has "Your branch on GitHub has older versions of your commits"
-    has "✓ Replaced your branch on GitHub with this version."
-    same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$(git rev-parse HEAD)" "the branch on your fork"
-}
-
-t_pull_request_keeps_commits_you_rewrote_when_you_say_no() {
-    amended_after_push
-    before="$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)"
-    IN=$'n\n' run_ifi pull-request
-    fails
-    has "Nothing was sent."
-    same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$before" "the branch on your fork"
-}
-
-# On the issue-5 branch with a commit, and other changes stashed for it.
-commit_and_stashed_changes() {
-    clone_as contributor
-    start_issue
-    commit README.md "Better readme"
-    echo "more" >>docs/notes.md
-    git stash push --quiet -m "ifi: bug/orange-cards"
-}
-
-t_pull_request_stops_for_stashed_changes() {
-    commit_and_stashed_changes
-    run_ifi pull-request
-    fails
-    has "You have stashed changes for bug/orange-cards. They aren't in your pull request."
-    has "Get them back first: ifi fix-issue 5"
-    [[ -z "$(git ls-remote origin refs/heads/bug/orange-cards)" ]] || fail "nothing should be sent"
-}
-
-t_pull_request_sends_without_stashed_changes_when_asked() {
-    commit_and_stashed_changes
-    IN=$'y\n' run_ifi pull-request
-    succeeds
-    same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$(git rev-parse HEAD)" "the branch on your fork"
 }
 
 t_pull_request_without_an_issue_when_you_press_enter() {
@@ -158,4 +105,21 @@ t_pull_request_with_a_new_file_left_out() {
     succeeds
     has "Not in your pull request, since Git doesn't know them"
     has "  notes.txt"
+}
+
+t_pull_request_lists_only_your_branchs_own_commits() {
+    clone_as contributor
+    start_issue
+    commit README.md "Better readme"
+    run_ifi pull-request
+    teammate docs/t1.md "t1" "Teammate commit"
+    # GitHub's Update branch button: merges main into your branch there.
+    (cd "$SANDBOX/teammate" && git fetch -q "https://github.com/$STUDENT/$NAME.git" bug/orange-cards &&
+        git switch -q -c ub FETCH_HEAD && git merge -q --no-edit -m "Merge main into bug/orange-cards" main &&
+        git push -q "https://github.com/$STUDENT/$NAME.git" HEAD:bug/orange-cards && git switch -q main)
+    commit docs/notes.md "More"
+    run_ifi pull-request
+    fails
+    has '"Merge main into bug/orange-cards", by Teammate'
+    hasnt '"Teammate commit"'
 }

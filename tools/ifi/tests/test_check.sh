@@ -261,38 +261,6 @@ t_check_with_gh_selecting_someone_else_than_origin_asks_for() {
     has "origin asks for octocat, but your computer's gh has hanna selected"
 }
 
-# Changes stashed for the issue-5 branch, and now on main.
-stashed_changes() {
-    clone_as contributor
-    start_issue
-    echo "changed" >>README.md
-    git stash push --quiet -m "ifi: bug/orange-cards"
-    git switch --quiet main
-}
-
-t_check_reminds_of_stashed_changes() {
-    stashed_changes
-    run_ifi check
-    has "Stashed changes for bug/orange-cards"
-    has "They're only on this computer."
-    has "Get them back: ifi fix-issue 5"
-}
-
-t_check_quiet_reminds_of_stashed_changes() {
-    stashed_changes
-    run_ifi check --quiet
-    has "Stashed changes for bug/orange-cards"
-    has "Get them back: ifi fix-issue 5"
-}
-
-t_check_stashed_changes_for_a_deleted_branch() {
-    stashed_changes
-    git branch --quiet -D bug/orange-cards
-    run_ifi check
-    has "but that branch is deleted"
-    has "See them: git stash show -p stash@{0}"
-}
-
 t_check_warns_when_both_added_a_migration() {
     clone_as contributor
     start_issue
@@ -305,9 +273,10 @@ t_check_warns_when_both_added_a_migration() {
 
 t_check_on_a_branch_without_an_issue() {
     clone_as contributor
-    run_ifi start docs Fix typo
+    start_issue
+    git config branch.bug/orange-cards.ifi-issue none
     run_ifi check
-    has "Current branch: docs/fix-typo  (no issue)"
+    has "Current branch: bug/orange-cards  (no issue)"
     hasnt "not linked to an issue yet"
 }
 

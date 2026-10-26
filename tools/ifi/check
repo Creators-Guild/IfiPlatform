@@ -207,7 +207,7 @@ elif [[ "$branch" == main ]]; then
     warn "You're on main. Start an issue with: ifi fix-issue <nr>"
     next+=("Want to start an issue?" "ifi fix-issue <nr>")
 else
-    # "none": a branch without an issue (ifi start).
+    # "none": a pull request without an issue (Enter in ifi pull-request).
     nr="$(git config "branch.$branch.ifi-issue" || true)"
     if [[ -z "$nr" ]]; then
         warn "On branch $branch, not linked to an issue yet. ifi pull-request asks for the number."
@@ -218,37 +218,13 @@ fi
 unsaved="$(changed_files | wc -l | tr -d ' ')"
 new="$(new_files | tr '\n' ' ')"
 [[ -z "$new" ]] || warn "New files Git doesn't know: $new" \
-    "ifi save asks about them (or ifi hide, if Git should ignore them)"
+    "ifi save asks about them"
 if [[ "$unsaved" -eq 0 ]]; then
     ok "No unsaved changes."
 else
     warn "$unsaved file(s) changed but not saved yet:" "ifi save \"Short description of what you changed\""
     next+=("Changes to keep?" "ifi save \"Short description of what you changed\"")
 fi
-
-# 8b. Changes ifi stashed for a branch (stash_changes in common.sh). Shown at
-# start-up too: they're easy to forget, and only on this computer.
-while IFS=$'\t' read -r ref when b; do
-    [[ -n "$ref" ]] || continue
-    stash_nr="$(git config "branch.$b.ifi-issue" || true)"
-    if ! git show-ref --verify --quiet "refs/heads/$b"; then
-        quiet=false warn "Stashed changes for $b $when, but that branch is deleted. They're only on this computer." \
-            "See them: git stash show -p $ref"
-        continue
-    fi
-    if [[ "$stash_nr" =~ ^[0-9]+$ ]]; then
-        get="ifi fix-issue $stash_nr"
-    else
-        get="git switch $b, then git stash pop $ref"
-    fi
-    quiet=false warn "Stashed changes for $b $when. They're only on this computer." "Get them back: $get"
-    [[ "$b" != "$branch" ]] || next+=("Stashed changes?" "$get")
-done < <(ifi_stashes)
-
-# 8c. Files hidden with ifi hide.
-hidden="$(sed -n 's#^/##p' "$(git rev-parse --git-path info/exclude)" 2>/dev/null | tr '\n' ' ')"
-[[ -z "$hidden" ]] || warn "Git ignores these on this computer only (ifi hide): $hidden" \
-    "Show them to Git again: ifi unhide <file>"
 
 # 9. Behind the newest main? 9b. Commits not on GitHub yet?
 if [[ -n "$base" && -n "$branch" && "$branch" != main ]] && ! $offline; then

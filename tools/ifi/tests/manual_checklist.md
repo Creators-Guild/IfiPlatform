@@ -1,6 +1,6 @@
 # ifi: checks by hand
 
-Last updated: 2026-10-26
+Last updated: 2026-10-27
 
 `tools/ifi/tests/run` checks ifi against a fake GitHub. This list is for what
 it can't fake: real GitHub logins, VS Code's pop-ups, Docker, and Windows.
@@ -33,9 +33,7 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | Change another file by mistake, save, pull-request | The file shows in the pull request's Files changed |
 | ☐ | `ifi undo-file <that file>` | The file goes back, and is gone from Files changed |
 | ☐ | Clone the fork again into another folder (outside the container is fine), `ifi fix-issue <test issue>`, answer y | "There's already a branch called … on GitHub", its last commit, then you're on it with your changes |
-| ☐ | Change a file, then `ifi fix-issue <another issue>`, answer y | "Stash them?", then "Stashed your unsaved changes for …" and "only on this computer" |
-| ☐ | Open a new VS Code terminal | No new check, but the startup result; `ifi check` shows "Stashed changes for …" with `ifi fix-issue <nr>` |
-| ☐ | `ifi fix-issue <test issue>` | Back on the first branch, "Took back your stashed changes", the change is there |
+| ☐ | Change a file, then `ifi fix-issue <another issue>` | "You have changes on … that aren't committed yet. Commit them first" |
 | ☐ | Make a commit on main that changes the same line (as yourself, in another clone or on GitHub) | |
 | ☐ | `ifi check` | "has 1 new commit(s)" and "You'll likely get a conflict in: ..." |
 | ☐ | `ifi update`, answer y to help | The conflict explanation; VS Code shows Accept buttons on the file |
@@ -45,9 +43,8 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | `ifi migrate`, answer y to Django | "Two database changes … were made at the same time", Django lists both, a `…_merge_….py` file appears; then `ifi test` passes |
 | ☐ | On your branch, change a Norwegian text in `django.po`, run `compilemessages`, save. On main (another clone), add another translation to the same file, with its `.mo` | |
 | ☐ | `ifi update` | "Only translation files clash, so ifi joins them for you", ✓ Rebuilt the .mo files, the file listed at the end; the site shows both translations |
-| ☐ | `ifi start docs fix typo`, change a file, `ifi save`, `ifi pull-request` | No issue question; it says to delete the `Closes #` line |
+| ☐ | On a branch made with plain Git: `ifi save`, `ifi pull-request`, press Enter at the issue question | It says to delete the `Closes #` line |
 | ☐ | Press **Update branch** on the pull request on GitHub, then make a change and `ifi save` + `ifi pull-request` | "Your branch on GitHub has commits that aren't on your computer", the Update branch commit with its author, and the `git pull --rebase` line. Run it, then pull-request works |
-| ☐ | `git commit --amend -m "New message"`, then `ifi pull-request`, answer y | "older versions of your commits", then "✓ Replaced your branch on GitHub with this version" |
 | ☐ | Merge the pull request (as yourself), then `ifi check` and `ifi cleanup` (still on the branch) | check: "Your pull request … is merged". cleanup: switches you to main, deletes the branch here and on the fork |
 | ☐ | `command -v gh` in the container terminal | Nothing: the GitHub CLI isn't in the container |
 | ☐ | Computer that logs in with gh, the other account *not* selected in gh: `ifi account switch <other>` | The gh message with `gh auth switch --user <other>`; no password prompt; `git remote -v` unchanged |

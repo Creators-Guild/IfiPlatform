@@ -8,11 +8,7 @@ ifi update                 bring your branch up to date with the newest main
 
 When you need it:
 ifi update --abort         undo an update that hit a conflict
-ifi start <type> <words>   a branch without an issue, for small things
-ifi save "msg" --only <f>  commit only these files
 ifi undo-file <file>       take a file out of your pull request
-ifi hide <file>            Git ignores the file, on this computer only
-ifi unhide <file>          Git sees it again
 ifi cleanup                delete your branches that are merged (here and on GitHub)
 ifi migrate                makemigrations + migrate, after changing a model
 ifi test --long            all tests, with the slow site crawler (or -l)

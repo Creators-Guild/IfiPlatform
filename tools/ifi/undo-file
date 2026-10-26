@@ -81,6 +81,5 @@ EOF
 if [[ ${#kept[@]} -gt 0 ]]; then
     echo
     echo "Still on your computer, untracked: ${kept[*]}"
-    echo "ifi save asks before adding it again. Want Git to ignore it on this computer?"
-    echo "  ifi hide ${kept[*]}"
+    echo "ifi save asks before adding it again."
 fi

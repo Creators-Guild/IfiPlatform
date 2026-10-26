@@ -346,3 +346,23 @@ t_update_stopped_by_a_new_file_in_the_way() {
     has "docs/new.md"
     same "$(git config branch.bug/orange-cards.ifi-before-update || true)" "" "remembered update"
 }
+
+t_update_refuses_staged_conflict_markers() {
+    conflict_on_cards
+    run_ifi update
+    git add "$CARDS"
+    run_ifi update
+    fails
+    has "These files still have conflict markers"
+    has "  $CARDS"
+}
+
+t_update_says_not_to_use_vs_codes_sync_button() {
+    clone_as contributor
+    start_issue
+    commit "$CARDS" ".event-card { background: orange; }"
+    teammate docs/other.md "Other"
+    run_ifi update
+    succeeds
+    has "not VS Code's Sync button"
+}

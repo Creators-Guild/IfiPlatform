@@ -27,7 +27,7 @@ t_undo_file_takes_a_new_file_out_but_keeps_it() {
     git ls-files --error-unmatch docs/extra.md >/dev/null 2>&1 && fail "docs/extra.md should be out of Git"
     [[ -f docs/extra.md ]] || fail "docs/extra.md should still be on your computer"
     same "$(git status --porcelain)" "?? docs/extra.md" "git status (untracked, not hidden)"
-    has "ifi hide docs/extra.md"
+    has "ifi save asks before adding it again."
 }
 
 t_undo_file_with_a_file_git_doesnt_know() {

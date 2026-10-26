@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-10-26
+Last updated: 2026-10-27
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -217,8 +217,8 @@ those features launch.
 Decisions to come back to once the planned ifi changes are built.
 
 - [ ] **Pull requests without an issue: check the consequences.** The plan
-  lets `ifi pull-request` go on without an issue number (press Enter), and
-  adds `ifi start` for branches without an issue. Then:
+  lets `ifi pull-request` go on without an issue number (press Enter).
+  Then:
   - the pull request closes no issue, so nothing on GitHub links the work
     to a task
   - no issue means no Trello card (cards are made from issues by
@@ -228,8 +228,7 @@ Decisions to come back to once the planned ifi changes are built.
     you're taking it), so two people can end up doing the same work
 
   Ways to soften it: only allow "no issue" for some branch types (task,
-  docs, ci), ask "Most changes should have an issue. Sure? (y/n)", or leave
-  `ifi start` out of the beginners' help page.
+  docs, ci), or ask "Most changes should have an issue. Sure? (y/n)".
 
 ## Server
 

@@ -332,8 +332,7 @@ t_commands_run_without_the_x_bit() {
     find "$SANDBOX/tools" -maxdepth 1 -type f -exec chmod -x {} +
     chmod +x "$SANDBOX/tools/ifi"
     clone_as contributor
-    echo "scratch" >notes.txt
-    OUT="$("$SANDBOX/tools/ifi" hide notes.txt 2>&1)"
-    [[ $? -eq 0 ]] || fail "ifi hide should work without the x bit"
-    has "✓ Added /notes.txt to .git/info/exclude"
+    OUT="$("$SANDBOX/tools/ifi" help ifi 2>&1)"
+    [[ $? -eq 0 ]] || fail "ifi help should work without the x bit"
+    has "Every day:"
 }

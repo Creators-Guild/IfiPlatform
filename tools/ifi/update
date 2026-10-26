@@ -49,7 +49,8 @@ what_now_after_update() {
     fi
     your_turn "check that the site still works, and run ifi test. Then:"
     choices \
-        "Done, or already have a pull request?" "ifi pull-request" \
+        "Done, or already have a pull request?" "ifi pull-request   (not VS Code's Sync button: it would" \
+        "" "                   bring the old version of your commits back)" \
         "Still working?" "carry on with your change"
 }
 
@@ -198,10 +199,8 @@ if in_rebase || in_merge; then
         git_recap
         exit 0
     fi
-    # Still conflict markers in a file? Then it isn't fixed yet.
-    marked="$(git diff --name-only --diff-filter=U | while IFS= read -r f; do
-        if grep -qE '^(<<<<<<<|>>>>>>>)( |$)' -- "$f" 2>/dev/null; then echo "$f"; fi
-    done)"
+    # Still conflict markers in a file, staged or not? Then it isn't fixed yet.
+    marked="$(files_with_markers)"
     if [[ -n "$marked" ]]; then
         echo "These files still have conflict markers (<<<<<<< or >>>>>>>):"
         sed 's/^/  /' <<<"$marked"
