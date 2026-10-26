@@ -219,13 +219,13 @@ else
     next+=("Changes to keep?" "ifi save \"Short description of what you changed\"")
 fi
 
-# 8b. Changes ifi put aside for a branch (put_aside in common.sh). Shown at
+# 8b. Changes ifi stashed for a branch (stash_changes in common.sh). Shown at
 # start-up too: they're easy to forget, and only on this computer.
 while IFS=$'\t' read -r ref when b; do
     [[ -n "$ref" ]] || continue
     stash_nr="$(git config "branch.$b.ifi-issue" || true)"
     if ! git show-ref --verify --quiet "refs/heads/$b"; then
-        quiet=false warn "Changes put aside for $b $when, but that branch is deleted. They're only on this computer." \
+        quiet=false warn "Stashed changes for $b $when, but that branch is deleted. They're only on this computer." \
             "See them: git stash show -p $ref"
         continue
     fi
@@ -234,8 +234,8 @@ while IFS=$'\t' read -r ref when b; do
     else
         get="git switch $b, then git stash pop $ref"
     fi
-    quiet=false warn "Changes put aside for $b $when. They're only on this computer." "Get them back: $get"
-    [[ "$b" != "$branch" ]] || next+=("Changes put aside?" "$get")
+    quiet=false warn "Stashed changes for $b $when. They're only on this computer." "Get them back: $get"
+    [[ "$b" != "$branch" ]] || next+=("Stashed changes?" "$get")
 done < <(ifi_stashes)
 
 # 8c. Files hidden with ifi hide.

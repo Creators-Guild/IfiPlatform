@@ -260,8 +260,8 @@ t_check_with_gh_selecting_someone_else_than_origin_asks_for() {
     has "origin asks for octocat, but your computer's gh has hanna selected"
 }
 
-# Changes put aside for the issue-5 branch, and now on main.
-changes_put_aside() {
+# Changes stashed for the issue-5 branch, and now on main.
+stashed_changes() {
     clone_as contributor
     start_issue
     echo "changed" >>README.md
@@ -269,23 +269,23 @@ changes_put_aside() {
     git switch --quiet main
 }
 
-t_check_reminds_of_changes_put_aside() {
-    changes_put_aside
+t_check_reminds_of_stashed_changes() {
+    stashed_changes
     run_ifi check
-    has "Changes put aside for bug/orange-cards"
+    has "Stashed changes for bug/orange-cards"
     has "They're only on this computer."
     has "Get them back: ifi fix-issue 5"
 }
 
-t_check_quiet_reminds_of_changes_put_aside() {
-    changes_put_aside
+t_check_quiet_reminds_of_stashed_changes() {
+    stashed_changes
     run_ifi check --quiet
-    has "Changes put aside for bug/orange-cards"
+    has "Stashed changes for bug/orange-cards"
     has "Get them back: ifi fix-issue 5"
 }
 
-t_check_changes_put_aside_for_a_deleted_branch() {
-    changes_put_aside
+t_check_stashed_changes_for_a_deleted_branch() {
+    stashed_changes
     git branch --quiet -D bug/orange-cards
     run_ifi check
     has "but that branch is deleted"

@@ -115,7 +115,7 @@ t_cleanup_doesnt_call_a_new_branch_merged() {
     hasnt "which is merged"
 }
 
-t_cleanup_names_changes_put_aside() {
+t_cleanup_names_stashed_changes() {
     merged_issue_branch
     git switch --quiet bug/orange-cards
     echo "more" >>docs/notes.md
@@ -123,7 +123,7 @@ t_cleanup_names_changes_put_aside() {
     git switch --quiet main
     IN=$'y\n' run_ifi cleanup
     succeeds
-    has "bug/orange-cards has changes put aside. They're kept after it's deleted: git stash show -p stash@{0}"
+    has "bug/orange-cards has stashed changes. They're kept after it's deleted: git stash show -p stash@{0}"
     same "$(git stash list | wc -l | tr -d ' ')" 1 "stashes"
 }
 

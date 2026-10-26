@@ -188,17 +188,17 @@ changes_on_issue_5() {
     echo "idea" >notes.txt
 }
 
-t_fix_issue_puts_changes_aside_and_gives_them_back() {
+t_fix_issue_stashes_changes_and_gives_them_back() {
     changes_on_issue_5
     IN=$'y\n' run_ifi_tty fix-issue 6
     succeeds
-    has "Put your unsaved changes aside for bug/orange-cards"
+    has "Stashed your unsaved changes for bug/orange-cards"
     has "only on this computer"
     same "$(git branch --show-current)" "bug/blue-cards" "branch"
     same "$(git status --porcelain)" "" "unsaved changes on the new branch"
     run_ifi fix-issue 5
     succeeds
-    has "Took back the changes you put aside for bug/orange-cards"
+    has "Took back your stashed changes for bug/orange-cards"
     same "$(git branch --show-current)" "bug/orange-cards" "branch"
     same "$(tail -n 1 README.md)" "changed" "README.md"
     same "$(cat notes.txt)" "idea" "the new file"

@@ -110,8 +110,8 @@ t_pull_request_keeps_commits_you_rewrote_when_you_say_no() {
     same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$before" "the branch on your fork"
 }
 
-# On the issue-5 branch with a commit, and other changes put aside for it.
-commit_and_changes_put_aside() {
+# On the issue-5 branch with a commit, and other changes stashed for it.
+commit_and_stashed_changes() {
     clone_as contributor
     start_issue
     commit README.md "Better readme"
@@ -119,17 +119,17 @@ commit_and_changes_put_aside() {
     git stash push --quiet -m "ifi: bug/orange-cards"
 }
 
-t_pull_request_stops_for_changes_put_aside() {
-    commit_and_changes_put_aside
+t_pull_request_stops_for_stashed_changes() {
+    commit_and_stashed_changes
     run_ifi pull-request
     fails
-    has "You have changes put aside for bug/orange-cards. They aren't in your pull request."
+    has "You have stashed changes for bug/orange-cards. They aren't in your pull request."
     has "Get them back first: ifi fix-issue 5"
     [[ -z "$(git ls-remote origin refs/heads/bug/orange-cards)" ]] || fail "nothing should be sent"
 }
 
-t_pull_request_sends_without_changes_put_aside_when_asked() {
-    commit_and_changes_put_aside
+t_pull_request_sends_without_stashed_changes_when_asked() {
+    commit_and_stashed_changes
     IN=$'y\n' run_ifi pull-request
     succeeds
     same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$(git rev-parse HEAD)" "the branch on your fork"

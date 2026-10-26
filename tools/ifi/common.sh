@@ -98,6 +98,7 @@ verb_form() {
         Replace) past=Replaced ing=Replacing ;;
         Run) past=Ran ing=Running ;;
         Send) past=Sent ing=Sending ;;
+        Stash) past=Stashed ing=Stashing ;;
         Stop) past=Stopped ing=Stopping ;;
         Switch) past=Switched ing=Switching ;;
         Take) past=Took ing=Taking ;;
@@ -530,9 +531,9 @@ switch_or_explain() {
             if [[ "$(git branch --show-current)" != main ]]; then
                 echo "Either save them on this branch first:" >&2
                 echo "  ifi save \"Short description of what you changed\"" >&2
-                echo "or put them aside, switch, and take them back:" >&2
+                echo "or stash them (put them aside), switch, and take them back:" >&2
             else
-                echo "Put them aside, switch, and take them back:" >&2
+                echo "Stash them (put them aside), switch, and take them back:" >&2
             fi
             die "  git stash        then run the same ifi command again, then:  git stash pop"
         fi
@@ -541,11 +542,11 @@ switch_or_explain() {
     step_done ok "$why" git switch "$@"
 }
 
-# Unsaved changes ifi puts aside for a branch (a git stash with the message
+# Unsaved changes ifi stashes for a branch (a git stash with the message
 # "ifi: <branch>") until you go back to it. Stashes are only on this
 # computer, never on GitHub, so ifi check reminds you of them.
 
-# Every stash ifi put aside: "stash@{n}<tab>how long ago<tab>branch" lines.
+# Every stash ifi made: "stash@{n}<tab>how long ago<tab>branch" lines.
 # Git names it "On <where you were>: ifi: <branch>"; branch names can't
 # contain ":", so the first ": ifi: " is the one.
 ifi_stashes() {
@@ -553,22 +554,22 @@ ifi_stashes() {
         awk -F'\t' '{ i = index($3, ": ifi: "); if (i) print $1 "\t" $2 "\t" substr($3, i + 7) }'
 }
 
-# The stash put aside for branch $1, as stash@{n}; empty if there's none.
+# The stash for branch $1, as stash@{n}; empty if there's none.
 stash_for() {
     ifi_stashes | awk -F'\t' -v b="$1" '$3 == b { print $1; exit }'
 }
 
-# Puts the unsaved changes, new files too, aside for the current branch.
-put_aside() {
+# Stashes the unsaved changes, new files too, for the current branch.
+stash_changes() {
     local branch
     branch="$(git branch --show-current)"
-    run "Put your unsaved changes aside for $branch" \
+    run "Stash your unsaved changes for $branch" \
         git stash push --quiet --include-untracked -m "ifi: $branch"
 }
 
 # Before going to another branch. Uncommitted work on main is usually a
 # change made before branching, so it comes along: true. On another branch
-# it belongs to that branch, so it's put aside for it if you say so (false:
+# it belongs to that branch, so it's stashed for it if you say so (false:
 # nothing comes along), and otherwise ifi stops.
 leave_unsaved_changes() {
     local current answer=""
@@ -578,18 +579,18 @@ leave_unsaved_changes() {
     if [[ -t 0 ]]; then
         echo "You have changes on $current that aren't committed yet:"
         git status --short | sed 's/^/  /'
-        echo "ifi can put them aside for $current, and give them back when you go back to it."
+        echo "ifi can stash them (put them aside) for $current, and give them back when you go back to it."
         echo "They're kept only on this computer, not on GitHub."
-        read -r -p "Put them aside? (y/n) " answer || true
+        read -r -p "Stash them? (y/n) " answer || true
     fi
     [[ "$answer" =~ ^[YyJj] ]] || die "You have changes on $current that aren't committed yet." \
         "Commit them first, then run this again:" \
         "  ifi save \"Short description of what you changed\""
-    put_aside
+    stash_changes
     return 1
 }
 
-# Takes back what was put aside for the current branch, if anything. Only
+# Takes back what was stashed for the current branch, if anything. Only
 # into a clean working tree, so nothing of yours gets mixed up.
 take_back() {
     local branch ref
@@ -597,11 +598,11 @@ take_back() {
     ref="$(stash_for "$branch")"
     [[ -n "$ref" ]] || return 0
     if [[ -n "$(git status --porcelain)" ]]; then
-        echo "      You have changes put aside for $branch too, but there are other unsaved changes here."
+        echo "      You have stashed changes for $branch too, but there are other unsaved changes here."
         echo "      Save these first (ifi save), then take the others back: git stash pop $ref"
         return 0
     fi
-    run "Take back the changes you put aside for $branch" git stash pop --quiet "$ref" ||
+    run "Take back your stashed changes for $branch" git stash pop --quiet "$ref" ||
         echo "      Some of them clash with the branch as it is now. They're still kept (git stash list). Ask a helper."
 }
 

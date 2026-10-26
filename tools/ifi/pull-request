@@ -32,9 +32,9 @@ while [[ ! "$nr" =~ ^([0-9]+|none)$ ]]; do
 done
 git config "branch.$branch.ifi-issue" "$nr"
 
-# Changes put aside for this branch (put_aside in common.sh) would be left out.
+# Changes stashed for this branch (stash_changes in common.sh) would be left out.
 if [[ -n "$(stash_for "$branch")" ]]; then
-    echo "You have changes put aside for $branch. They aren't in your pull request."
+    echo "You have stashed changes for $branch. They aren't in your pull request."
     answer=""
     read -r -p "Send without them? (y/n) " answer || true
     get="ifi fix-issue $nr"

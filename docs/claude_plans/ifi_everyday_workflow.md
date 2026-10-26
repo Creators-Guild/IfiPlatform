@@ -27,7 +27,8 @@ computers, or with teammates.
 | B3 | `ifi hide`/`unhide`; undo-file stops hiding | ✅ Done |
 | B4 | Rewrote your own commits vs someone else's push | ✅ Done (d0c67ed) |
 | B5 | cleanup deletes your merged branches on origin | ✅ Done (49bdb16) |
-| – | Subcommands run with `bash`, so a missing x bit doesn't matter | 🟢 Built (not committed) |
+| – | Subcommands run with `bash`, so a missing x bit doesn't matter | ✅ Done (2cc478c, f8ae112) |
+| – | "stash" instead of "put aside" everywhere | 🟢 Built (not committed) |
 | C1 | Pull requests into `beta` | ❌ No: `beta` is old and unused, everything goes to `main` |
 | C2 | Merge button | ✅ Only "Merge commit" is used, so nothing to build |
 | C3 | `ifi review <pr>` | ✅ Agreed: collaborators only (see C3 below) |
