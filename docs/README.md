@@ -1,6 +1,6 @@
 # docs/
 
-Last updated: 2026-10-14
+Last updated: 2026-10-20
 
 Project documentation beyond the main [README.md](../README.md). Each
 folder holds one kind of document. When you add a new doc, put it in the
@@ -68,8 +68,19 @@ Guides for contributors beyond the basics in
 writing content, writing docs, testing), see [Planned docs](#planned-docs)
 below.
 
-- [docker.md](contributing/docker.md): using the Docker setup day to day:
-  your own extensions, stopping and resetting, and fixing problems
+- [how_this_project_works.md](contributing/how_this_project_works.md):
+  for beginners: Django in plain words, the folders, and where to change
+  what
+- [get_the_code.md](contributing/get_the_code.md): the first step:
+  contributors fork, collaborators clone the main repo
+- [setup_with_docker.md](contributing/setup_with_docker.md): first-time
+  setup with Docker (recommended)
+- [docker_guide.md](contributing/docker_guide.md): everything after the
+  first start: how Docker works here, restart or rebuild, everyday tasks,
+  and fixing problems
+- [collaborators.md](contributing/collaborators.md): for people with
+  write access: cloning the main repo and using `origin` instead of
+  `upstream`
 - [setup_without_docker.md](contributing/setup_without_docker.md): the
   Python + SQLite setup, for when Docker won't work
 - [everyday_commands.md](contributing/everyday_commands.md): migrations,

@@ -14,65 +14,54 @@ Note: the site is bilingual (Norwegian Bokmål + English). Pages are written in 
 ## Tech stack
 Django + Wagtail (Python, HTML and CSS, plus a little JavaScript), DeepL for Norwegian → English, and PostgreSQL. Full list: [docs/architecture/tech_stack.md](docs/architecture/tech_stack.md).
 
-## Quick start
-The recommended setup is Docker. One step installs everything: Python, the packages, a PostgreSQL database and test data. Can't use Docker? See [setup without Docker](docs/contributing/setup_without_docker.md).
+## Get started
+Two steps, and both end with the site running at http://localhost:8000.
 
-### 1. Install the tools
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows and macOS). On Linux, install Docker Engine with the Compose plugin.
-- [Visual Studio Code](https://code.visualstudio.com/) with the **Dev Containers** extension (by Microsoft).
+**Recommended to set up with Docker Desktop and Visual Studio Code.** Download Docker, VSC and add the extension **Dev Containers**. More info in the setup with docker below.
 
-Start Docker Desktop and leave it running. On Linux there's no Docker Desktop app — start the daemon instead:
-```bash
-sudo systemctl start docker
-sudo systemctl enable --now docker
-```
+**1. Get the code:** [Get the code](docs/contributing/get_the_code.md). Most people are **contributors** and fork the repo. Collaborators with write access clone it directly.
 
-### 2. Open the project in the container
-1. **Fork** the repo on GitHub (the "Fork" button at the top right), then clone your fork and connect it to the main repo:
-   ```bash
-   git clone https://github.com/<your-username>/IfiPlatform.git
-   cd IfiPlatform
-   git remote add upstream https://github.com/Creators-Guild/IfiPlatform.git
-   ```
-   `origin` is now your own fork, which is where you push. `upstream` is the main repo, where you get everyone else's changes. Collaborators with write access clone this repo directly instead, skip the last line, and use `origin` wherever the docs say `upstream`.
-
-   **On Windows**, clone inside WSL, not to a drive like `C:\`: open the Ubuntu terminal, clone there, and run `code .` in the repo folder. Docker is much faster that way.
-
-   Then open the repo's root folder in VS Code.
-2. VS Code shows a popup: **"Reopen in Container"**. Click it. (No popup? Open the Command Palette and run `Dev Containers: Reopen in Container`.)
-3. Wait. The first time takes a few minutes, because Docker downloads Python and PostgreSQL and installs the packages. Later starts take seconds.
-
-While it starts, the container sets up the database, fills it with test data (`seed_dev_data`) and starts the website.
-
-### 3. Open the site
-Go to http://localhost:8000.
-
-To edit pages, log in at http://localhost:8000/wagtail-admin with username `admin` and password `admin`. This is a test admin user that the test data (`seed_dev_data`) creates in your local database only. It doesn't exist on the real site, so you can't use it there, and it's never created when `DEBUG` is off.
-
-### 4. Start working
-The VS Code terminal now runs **inside** the container, and you're already in the `ifiplatform/` folder. You don't need a venv or a `.env` file. The site reloads when you save a file, so you don't need to run `runserver`.
+**2. Run the site.** Pick one:
+- 🐳 **[Setup with Docker](docs/contributing/setup_with_docker.md) (recommended).** One click installs everything: Python, the packages, a database and test content.
+- 🐍 **[Setup without Docker](docs/contributing/setup_without_docker.md).** Plain Python and SQLite, for laptops where Docker is too heavy or won't install.
 
 ## Next steps
-- **Make your first change:** follow [Your First Contribution, Step by Step](CONTRIBUTING.md#your-first-contribution-step-by-step) in CONTRIBUTING.md.
-- **Using Docker day to day** (your own extensions, stopping and resetting, when something goes wrong): [docs/contributing/docker.md](docs/contributing/docker.md)
-- **Commands you'll use often:** [docs/contributing/everyday_commands.md](docs/contributing/everyday_commands.md)
+1. **Set up** with the two steps above.
+2. **Make your first change.** With Docker, run these in the VS Code terminal:
+   ```bash
+   ifi fix-issue 42        # a branch for issue #42, made from the newest code
+   # ...make your change, check it at http://localhost:8000...
+   ifi test                # the quick tests
+   ifi save "Short description of what you changed"   # git add + commit, for the whole repo
+   ifi pull-request        # pushes, and gives you the pull request link
+   ifi update              # later: bring your branch up to date with the newest main
+   ```
+   `ifi` commands are this project's own shortcuts, not part of Git. Each one prints the commands it runs. Rather do it all with Git, or not using Docker? Follow [Make a change, step by step](CONTRIBUTING.md#2-make-a-change-step-by-step) in CONTRIBUTING.md.
+
+If you want more background first, these short pages can help:
+- [How this project works](docs/contributing/how_this_project_works.md): Django in plain words, the folders, and **where to change what**
+- [Everyday commands](docs/contributing/everyday_commands.md): tests, migrations and translations
+- [Tutorials](TUTORIALS.md): beginner guides to Git, Docker, Django, HTML and CSS
 
 ## Everyday commands
-Run these in the container's terminal.
+With Docker, run these in the VS Code terminal (it's inside the container). Without Docker, run them in the `ifiplatform/` folder with your venv active.
 
 | What | Command |
 | --- | --- |
-| Run the quick tests | `python manage.py test --exclude-tag=slow` |
-| After changing a model | `python manage.py makemigrations` then `python manage.py migrate` |
+| Run the quick tests | `python manage.py test --exclude-tag=slow`, or `ifi test` |
+| After changing a model | `python manage.py makemigrations` then `python manage.py migrate`, or `ifi migrate` |
 | Edit pages and articles | http://localhost:8000/wagtail-admin (`admin` / `admin`) |
 | Users and raw database tables | http://localhost:8000/admin |
 
-More, including translations: [docs/contributing/everyday_commands.md](docs/contributing/everyday_commands.md).
+Forgot a command? Type `ifi help`. Without Docker, run `./ifi install` once first (see [setup without Docker](docs/contributing/setup_without_docker.md#optional-the-ifi-commands)). Something not working? `ifi check` checks your setup and says what to fix. Every `ifi` command lists what it did for you under "Done for you:", a ✓ line for each step with the Git command under it. Then "In plain Git, this was:", so you can type them yourself next time, and "Your turn:" with what you can do next.
+
+More, including translations: [docs/contributing/everyday_commands.md](docs/contributing/everyday_commands.md). Docker day to day (restart or rebuild, fixing problems): [docs/contributing/docker_guide.md](docs/contributing/docker_guide.md).
 
 ## Docs
 All docs, sorted by topic: [docs/README.md](docs/README.md).
 
-- **Start here:** [overview.md](docs/architecture/overview.md), the map of the whole system: apps, the page tree and how a request becomes a page
+- **Start here:** [How this project works](docs/contributing/how_this_project_works.md), the beginner's map: where things are and what the words mean
+- **The full map, when you want more:** [overview.md](docs/architecture/overview.md), with diagrams of every app, the page tree and how a request becomes a page
 - **Working on the code:**
   - [frontend.md](docs/architecture/frontend.md): how templates and CSS are organized and written
   - Features: [articles](docs/architecture/ifi_home_app/articles.md), [events](docs/architecture/ifi_home_app/events.md), [unions and tools](docs/architecture/ifi_home_app/unions_and_tools.md), [menus](docs/architecture/ifi_home_app/menus.md)

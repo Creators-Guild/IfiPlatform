@@ -1,6 +1,6 @@
 # Everyday commands
 
-Last updated: 2026-10-11
+Last updated: 2026-10-20
 
 These work the same in both setups. With Docker, run them in the container's terminal.
 
@@ -12,24 +12,26 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 ## To create superuser/admin user
-`seed_dev_data` (runs on every Docker start, or step 6 of the [setup without Docker](setup_without_docker.md)) already creates an `admin` / `admin` superuser for
+`seed_dev_data` (runs on every Docker start, or step 7 of the [setup without Docker](setup_without_docker.md)) already creates an `admin` / `admin` superuser for
 local development, so you usually don't need this. To make your own:
 ```bash
 python manage.py createsuperuser
 ```
 Fill out the terminal's questions
 ## Running tests
-```bash
-python manage.py test
-```
-Runs the tests for every app in the project, including new ones. To test just one app, name it, e.g. `python manage.py test ifi_home_app`.
-
-CI runs this same command on every PR (`.github/workflows/ci.yml`) across Python 3.12–3.14, so it's worth running locally before opening a PR. CI uses PostgreSQL, like production and the Docker setup. With Option B your tests run on SQLite instead, so now and then a test can pass for you and fail in CI.
-
-To skip the slow whole-site crawler test (`core_app.tests.SiteCrawlTests`, tagged `slow` — it seeds a full page tree and makes real HTTP requests to every page on the site) for a quicker loop while iterating:
+The quick tests, the ones to run before you open a pull request:
 ```bash
 python manage.py test --exclude-tag=slow
 ```
+This skips the slow whole-site crawler test (`core_app.tests.SiteCrawlTests`, tagged `slow`: it seeds a full page tree and makes real HTTP requests to every page on the site).
+
+All tests, including the slow one:
+```bash
+python manage.py test
+```
+To test just one app, name it, e.g. `python manage.py test ifi_home_app`.
+
+CI runs every test, the slow one too, on every PR (`.github/workflows/ci.yml`) across Python 3.12–3.14, so run `python manage.py test` yourself before you open a PR if you changed something big. CI uses PostgreSQL, like production and the Docker setup. Without Docker your tests run on SQLite instead, so now and then a test can pass for you and fail in CI.
 ## Translations
 If you change translatable text (`{% trans %}` / `_(...)`):
 Update the `.po` files with the new/changed strings:

@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+# ifi fix-issue <nr>: makes a branch for an issue, named <type>/<few-words>
+# like CONTRIBUTING.md asks, starting from the newest main. The issue number
+# is kept in the branch's Git config (branch.<name>.ifi-issue), so
+# pull-request knows it, and a second fix-issue <nr> switches back to it.
+set -euo pipefail
+source "$(dirname "$(readlink -f "$0")")/common.sh"
+
+nr="${1:-}"
+nr="${nr#\#}"
+[[ "$nr" =~ ^[0-9]+$ ]] || die "Which issue? For example: ifi fix-issue 42"
+
+current="$(git branch --show-current)"
+dirty="$(git status --porcelain)"
+
+# Uncommitted work on main is usually a change made before branching, so it
+# comes along. On another issue's branch it belongs to that issue.
+if [[ -n "$dirty" && -n "$current" && "$current" != main ]]; then
+    die "You have changes on $current that aren't committed yet." \
+        "Commit them first, then run this again:" \
+        "  ifi save \"Short description of what you changed\""
+fi
+
+existing="$(git config --get-regexp '^branch\..*\.ifi-issue$' 2>/dev/null |
+    awk -v n="$nr" '$2 == n { print $1 }' | sed -E 's/^branch\.//; s/\.ifi-issue$//' | head -n 1 || true)"
+if [[ -n "$existing" ]] && git show-ref --verify --quiet "refs/heads/$existing"; then
+    if [[ "$existing" == "$current" ]]; then
+        echo "You're already on $existing, the branch for issue #$nr."
+    else
+        echo "Issue #$nr already has a branch: $existing. No need for a new one."
+        switch_or_explain "Switch to your branch for issue #$nr" "$existing"
+    fi
+    find_base
+    # Only to say whether main moved on, so a failed fetch (no internet)
+    # isn't worth an error.
+    behind=0
+    why="Download the newest code from the main repo, to see if its main moved on"
+    GIT_DONE+=("git fetch $base")
+    step_start "$why"
+    if GIT_TERMINAL_PROMPT=0 git fetch --quiet "$base" 2>/dev/null; then
+        step_done ok "$why" git fetch "$base"
+        behind="$(git rev-list --count "HEAD..$base/main")"
+    else
+        step_done fail "$why" git fetch "$base"
+        echo "      Couldn't reach GitHub. Not a problem, it just can't tell if main moved on."
+    fi
+    if [[ "$behind" -gt 0 ]]; then
+        echo
+        echo "main in the main repo ($base/main) has $behind new commit(s) since you started this branch."
+    fi
+    git_recap
+    if [[ "$behind" -gt 0 ]]; then
+        your_turn
+        choices \
+            "Want main's new commits in your branch?" "ifi update" \
+            "Otherwise" "carry on with your change"
+    else
+        your_turn "carry on with your change."
+        choices \
+            "Want to keep what you have so far?" "ifi save \"Short description of what you changed\"" \
+            "Works, and you're done?" "ifi save, then ifi pull-request (sends it to GitHub)"
+    fi
+    exit 0
+fi
+
+# "Gjør kortene oransje!" -> "gjor-kortene-oransje": the first 4 words,
+# ASCII only, at most 40 characters.
+slugify() {
+    "$PY" - "$1" <<'PY'
+import re, sys, unicodedata
+
+text = sys.argv[1].lower()
+for a, b in (("æ", "ae"), ("ø", "o"), ("å", "a")):
+    text = text.replace(a, b)
+text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+print("-".join(re.findall(r"[a-z0-9]+", text)[:4])[:40].strip("-"))
+PY
+}
+
+# Prints "<type>\t<title>" for the issue, with an empty type when the issue
+# has none. Exit 3 = the number is a pull request. Prints nothing when
+# GitHub can't be reached (no network, or the 60-calls-an-hour limit for a
+# room sharing one IP). IFI_GITHUB_API lets the tests (tests/) use a fake
+# server.
+lookup_status=0
+lookup="$("$PY" - "$nr" "${IFI_GITHUB_API:-https://api.github.com}" "$MAIN_REPO" <<'PY' 2>/dev/null
+import json, sys, urllib.request
+
+nr, api, repo = sys.argv[1:4]
+req = urllib.request.Request(
+    f"{api}/repos/{repo}/issues/{nr}",
+    headers={"Accept": "application/vnd.github+json", "User-Agent": "ifi-fix-issue"},
+)
+with urllib.request.urlopen(req, timeout=5) as resp:
+    issue = json.load(resp)
+if "pull_request" in issue:
+    sys.exit(3)
+kind = ((issue.get("type") or {}).get("name") or "").lower()
+if kind not in ("bug", "feature", "task"):
+    kind = ""
+print(f"{kind}\t{' '.join(issue.get('title', '').split())}")
+PY
+)" || lookup_status=$?
+[[ $lookup_status -ne 3 ]] || die "#$nr is a pull request, not an issue. Use the number of the issue it's for:" \
+    "you find it in the Issues tab on GitHub, after the # in the title."
+kind=""
+slug=""
+if [[ "$lookup" == *$'\t'* ]]; then
+    kind="${lookup%%$'\t'*}"
+    slug="$(slugify "${lookup#*$'\t'}")"
+    echo "Issue #$nr: ${lookup#*$'\t'}"
+else
+    echo "Couldn't look up issue #$nr on GitHub, so tell me about it instead."
+fi
+while [[ ! "$kind" =~ ^(bug|feature|task)$ ]]; do
+    read -r -p "What is the issue's Type? (bug/feature/task) " kind || die ""
+    kind="$(lower "$kind")"
+done
+while [[ -z "$slug" ]]; do
+    read -r -p "A few words about it, like 'orange event cards': " words || die ""
+    slug="$(slugify "$words")"
+done
+
+name="$kind/$slug"
+if git show-ref --verify --quiet "refs/heads/$name"; then
+    name="$name-$nr"
+fi
+
+find_base
+fetch_base
+switch_or_explain "Make the branch $name from the newest main (not linked to main, so pushes go to your fork)" \
+    -c "$name" --no-track "$base/main"
+printf '        %s(switch -c makes the branch and moves you onto it: you are on %s now)%s\n' "$C_DIM" "$name" "$C_OFF"
+git config "branch.$name.ifi-issue" "$nr"
+
+[[ -n "$dirty" ]] && echo "        The changes you had on main came along to it."
+git_recap
+your_turn "make your change."
+choices \
+    "Want to keep what you have so far?" "ifi save \"Short description of what you changed\"" \
+    "Works, and you're done?" "ifi save, then ifi pull-request (sends it to GitHub)"

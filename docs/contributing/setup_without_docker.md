@@ -1,24 +1,35 @@
 # Setup without Docker (Python + SQLite)
 
-Last updated: 2026-10-11
+Last updated: 2026-10-26
 
 Only use this if Docker is too heavy for your laptop or won't install. The
-recommended setup is Docker, see the quick start in the main
-[README.md](../../README.md#quick-start).
+recommended setup is [Setup with Docker](setup_with_docker.md).
+
+Here you install Python packages yourself and use SQLite, a database that
+is just one file on your computer. The site looks the same as in Docker.
+
+**Before you start:** [get the code](get_the_code.md). You need the
+`IfiPlatform` folder on your computer.
 
 ## Requirements
 - Python 3.12 or newer (tested on 3.12, 3.13 and 3.14)
+- [Visual Studio Code](https://code.visualstudio.com/) (recommended)
 - SQLite, which comes with Python
 
-> **A note on file paths below:** "repo root" means the top-level folder you get from cloning (likely named `IfiPlatform`). 
+**About folders:** cloning gives you a folder called `IfiPlatform`
+(the "repo root"). Inside it is a folder called `ifiplatform`, where
+`manage.py` and the Django code live. Each step says which folder to run it in.
 
->Steps also reference the `ifiplatform/` subdirectory inside it (likely named `ifiplatform`, lowercase (*not to be confused with `ifiplatform/ifiplatform_project/`, which is just the Django settings package*) — that's where manage.py, `.env` and all the Django apps actually live. Steps say which one they're relative to.
+## 1. Open the project in VS Code
+Open the `IfiPlatform` folder in VS Code. If VS Code offers to
+"Reopen in Container", say no: that's the Docker setup.
 
-## 0. Fork and clone
-Follow item 1 under "2. Open the project in the container" in the README's [Quick start](../../README.md#quick-start): fork the repo, clone your fork and add the `upstream` remote. Skip the rest of the Quick start, which is for Docker.
+## 2. Make a virtual environment
+A virtual environment (venv) is a private box for this project's Python
+packages, so they don't mix with anything else on your computer. Run this in
+the repo root:
 
-## 1. Set up Virtual Environment
-### Windows (PowerShell)
+**Windows (PowerShell)**
 ```bash
 py -m venv venv
 venv\Scripts\Activate.ps1
@@ -27,64 +38,120 @@ If PowerShell says running scripts is disabled, run this once and try again:
 ```bash
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
-### macOS / Linux
+
+**macOS / Linux**
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
-### Or through Visual Studio Code
-Run this command from the Command Palette:
-```bash
-Python: Create Environment
-```
-## 2. Install dependencies
-Run from the repo root:
+
+**Or in VS Code:** Command Palette (Ctrl+Shift+P) → `Python: Create Environment`.
+
+When it's active, your terminal prompt starts with `(venv)`. Activate it
+again every time you open a new terminal.
+
+## 3. Install the packages
+In the repo root:
 ```bash
 pip install -r requirements.txt
 ```
-In VS Code, click **Install** when it offers the project's recommended extensions (Python, Black, Pylint and Django templates). Then pick your venv with Command Palette → `Python: Select Interpreter`, so the editor uses the same Black and pylint versions as everyone else. Black formats Python files when you save, just like in Docker.
+In VS Code, click **Install** when it offers the project's recommended
+extensions (Python, Black, Pylint, Django templates and Mermaid diagrams). Then pick your venv
+with Command Palette → `Python: Select Interpreter`, so the editor uses the
+same Black and pylint versions as everyone else. Black formats Python files
+when you save, just like in Docker.
 
-## 3. Move into the ifiplatform/ folder
-manage.py, `.env` and all the Django apps live in `ifiplatform/`. Every command from here on assumes you're inside it:
+## 4. Move into the ifiplatform folder
 ```bash
 cd ifiplatform
 ```
+Every command from here on is run in this folder.
 
-## 4. Create .env for Secrets
-Copy `.env.example` to `.env`:
+## 5. Create the .env file
+The `.env` file holds settings for your own computer. Copy the example:
 ```bash
 cp .env.example .env
 ```
-That's enough for local development: the placeholder secret key works on your own computer, and you can ignore the rest of the file. (Any server needs a real random key. This prints one:)
+(In PowerShell `cp` works too. In the old Windows `cmd`, use `copy`.)
+
+If you skip this step, Django stops with `DJANGO_SECRET_KEY is not set`.
+
+**The secret key.** Django uses `DJANGO_SECRET_KEY` to sign logins and
+other data, so on a real server it must be a long random value that
+nobody else knows. On your own computer the placeholder from the example
+works fine. To use a proper key anyway, generate one:
 ```bash
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
-If you skip this step, Django stops with an error saying `DJANGO_SECRET_KEY is not set`.
+Copy what it prints into `.env`, after `DJANGO_SECRET_KEY=` (no spaces or
+quotes). Run the command with your venv active, since it needs Django. If
+you change the key later, you're logged out of your local site, but nothing
+else breaks.
 
-## 5. Run Migrations
+The rest of the example values work as they are.
+
+## 6. Create the database
 ```bash
 python manage.py migrate
 ```
+This creates `db.sqlite3` and all the tables in it.
 
-## 6. Fill database with dummy data(recommended)
+## 7. Fill it with test content
 ```bash
 python manage.py seed_dev_data
 ```
-Fills your local database with a dummy article tree (index pages, categories, a test article, a test student union and a test tool) so you're not starting from a blank site. Safe to re-run — it skips anything that already exists instead of duplicating it.
+This adds the same test pages as the Docker setup: categories, articles,
+news, events, student unions, tools and menus, plus an `admin` login. It
+skips what already exists, so it's safe to run again. See
+[management_commands.md](../operations/management_commands.md#seed_dev_data).
 
-## 7. Run website on localhost
+## 8. Start the site
 ```bash
 python manage.py runserver
 ```
-Once running, open your browser and go to:
-```
-http://localhost:8000
-```
+Open http://localhost:8000. The server reloads when you save a file. Stop it
+with Ctrl+C.
 
-### Access from your phone (same Wi-Fi)
-Useful for testing responsive/mobile layout on a real device. This only works with this setup: the Docker setup only accepts connections from your own computer.
+## 9. Log in
+The test content comes with a superuser: log in as `admin` with the
+password `admin`. It works both in Wagtail, where you edit pages
+(http://localhost:8000/wagtail-admin), and in the Django admin
+(http://localhost:8000/admin). The login only exists in your local
+database.
 
-1. Start the server bound to all network interfaces, not just localhost:
+## Check that it works
+- [ ] http://localhost:8000 shows the site.
+- [ ] You can log in as `admin` / `admin` at http://localhost:8000/wagtail-admin.
+- [ ] The quick tests pass:
+  ```bash
+  python manage.py test --exclude-tag=slow
+  ```
+
+Your tests run on SQLite, while CI uses PostgreSQL. Now and then a test can
+pass for you and fail in CI. That's not your fault: say so in your pull request.
+
+## Optional: the `ifi` commands
+The project's own shortcuts (`ifi check`, `ifi save`, `ifi pull-request`,
+`ifi test`, ...) work without Docker too. They're bash scripts, so on
+Windows use the **Git Bash** terminal (it comes with Git for Windows; in VS
+Code pick it with the **+** arrow in the terminal panel). In the repo root:
+```bash
+./ifi install
+```
+Open a new terminal, and `ifi help` lists them. They find your venv by
+themselves. In PowerShell, run them from the repo root as `.\ifi check`
+instead (that still needs Git Bash installed).
+
+## Next
+- New to Django? Read [How this project works](how_this_project_works.md).
+- Make your first change: [Make a change, step by step](../../CONTRIBUTING.md#2-make-a-change-step-by-step).
+- Commands you'll use often: [everyday_commands.md](everyday_commands.md).
+
+## Extra: open the site on your phone (same Wi-Fi)
+Useful for testing the mobile layout on a real device. This only works with
+this setup: the Docker setup only accepts connections from your own computer.
+
+1. Start the server so it listens on your network, not just your computer:
    ```bash
    python manage.py runserver 0.0.0.0:8000
    ```
@@ -96,11 +163,10 @@ Useful for testing responsive/mobile layout on a real device. This only works wi
    ```
    DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost,192.168.1.23
    ```
-   Without this, Django rejects the request with a 400 `DisallowedHost` error — `ALLOWED_HOSTS` is read straight from this env var (`settings.py`), it isn't relaxed just because `DEBUG=True`.
-4. On your phone, connected to the **same Wi-Fi network**, open:
-   ```
-   http://192.168.1.23:8000
-   ```
-   (use your own IP from step 2, not this example one)
+   Without this, Django rejects the request with a 400 `DisallowedHost` error.
+4. On your phone, connected to the **same Wi-Fi network**, open
+   `http://192.168.1.23:8000` (with your own IP from step 2).
 
-If it still doesn't load, your computer's firewall may be blocking incoming connections on port 8000 — Windows will usually prompt to allow this the first time; allow it for at least "Private networks."
+If it still doesn't load, your computer's firewall may be blocking port
+8000. Windows usually asks the first time: allow it for at least "Private
+networks".
