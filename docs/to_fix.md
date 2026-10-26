@@ -230,12 +230,6 @@ Decisions to come back to once the planned ifi changes are built.
   Ways to soften it: only allow "no issue" for some branch types (task,
   docs, ci), ask "Most changes should have an issue. Sure? (y/n)", or leave
   `ifi start` out of the beginners' help page.
-- [ ] **Review how `ifi undo-file` hides files you added.** When you undo a
-  file you added, ifi puts it in `.git/info/exclude`, so Git ignores it on
-  that computer from then on, and a later `ifi save` leaves it out. The
-  plan makes ifi say so, mark the line, and list those files in
-  `ifi check`. Check that this is clear enough for beginners, or whether
-  hiding the file should stop, or only happen when asked.
 
 ## Server
 

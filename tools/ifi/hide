@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# ifi hide <file>: Git ignores the file, on this computer only
+# (.git/info/exclude). ifi unhide <file> undoes it.
+set -euo pipefail
+source "$(dirname "$(readlink -f "$0")")/common.sh"
+
+[[ $# -gt 0 ]] || die "Which file? For example: ifi hide notes.txt"
+exclude="$(git rev-parse --git-path info/exclude)"
+mkdir -p "$(dirname "$exclude")"
+touch "$exclude"
+
+for file in "$@"; do
+    git ls-files --error-unmatch -- "$file" >/dev/null 2>&1 &&
+        die "Git tracks $file, so hiding it does nothing. Take it out of Git first:" \
+            "  ifi undo-file $file"
+    line="/$(git rev-parse --show-prefix)${file#./}"
+    if grep -qxF -- "$line" "$exclude"; then
+        echo "$file is hidden already."
+        continue
+    fi
+    printf '%s\n' "$line" >>"$exclude"
+    steps_heading
+    step_done ok "Add $line to .git/info/exclude, so Git ignores it on this computer"
+done
+
+your_turn
+choices \
+    "Should everyone's Git ignore it?" "add it to .gitignore instead, and ifi save that" \
+    "Want Git to see it again?" "ifi unhide $*"

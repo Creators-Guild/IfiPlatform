@@ -238,6 +238,11 @@ while IFS=$'\t' read -r ref when b; do
     [[ "$b" != "$branch" ]] || next+=("Changes put aside?" "$get")
 done < <(ifi_stashes)
 
+# 8c. Files hidden with ifi hide.
+hidden="$(sed -n 's#^/##p' "$(git rev-parse --git-path info/exclude)" 2>/dev/null | tr '\n' ' ')"
+[[ -z "$hidden" ]] || warn "Git ignores these on this computer only (ifi hide): $hidden" \
+    "Show them to Git again: ifi unhide <file>"
+
 # 9. Behind the newest main? 9b. Commits not on GitHub yet?
 if [[ -n "$base" && -n "$branch" && "$branch" != main ]] && ! $offline; then
     if GIT_TERMINAL_PROMPT=0 with_timeout $wait_fetch git fetch --quiet "$base" 2>/dev/null; then

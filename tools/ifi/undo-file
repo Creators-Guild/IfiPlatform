@@ -2,8 +2,7 @@
 # ifi undo-file <file> [<file> ...]: takes files out of your pull request.
 #
 # A file that is in the main repo goes back to how it is there; a file you
-# added leaves Git but stays on your computer, and Git ignores it there from
-# now on (.git/info/exclude), so a later `git add .` doesn't bring it back.
+# added leaves Git but stays on your computer (ifi hide makes Git ignore it).
 # Before it commits, it saves the branch as it was in a backup branch
 # (one per branch), so nothing is lost. Then it commits and pushes, so the pull request updates by itself.
 set -euo pipefail
@@ -27,14 +26,14 @@ fetch_base
 
 files=("$@")
 message="Undo changes to $*"
+kept=()
 
 for file in "${files[@]}"; do
     if git cat-file -e "$base/main:$file" 2>/dev/null; then
         run "Put $file back to how it is in the main repo's main ($base/main)" git checkout "$base/main" -- "$file"
     elif git ls-files --error-unmatch -- "$file" >/dev/null 2>&1; then
-        run "Take $file out of Git. It stays on your computer, and Git ignores it from now on" \
-            git rm --quiet --cached -- "$file"
-        printf '/%s\n' "$file" >>"$(git rev-parse --git-path info/exclude)"
+        run "Take $file out of Git. It stays on your computer" git rm --quiet --cached -- "$file"
+        kept+=("$file")
     else
         die "Git doesn't know $file. Copy the name exactly as git status shows it."
     fi
@@ -76,3 +75,9 @@ Your version is saved on the branch $backup.
 Had a good idea in one of those files? Make it its own pull request later:
   git switch $backup
 EOF
+if [[ ${#kept[@]} -gt 0 ]]; then
+    echo
+    echo "Still on your computer, untracked: ${kept[*]}"
+    echo "ifi save asks before adding it again. Want Git to ignore it on this computer?"
+    echo "  ifi hide ${kept[*]}"
+fi
