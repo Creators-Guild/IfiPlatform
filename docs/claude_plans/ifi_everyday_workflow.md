@@ -24,14 +24,14 @@ computers, or with teammates.
 | A4 | Pull requests without an issue | ✅ Done (38118b6); consequences in docs/to_fix.md |
 | B1 | Join clashing translation files | ✅ Done (8271ce1) |
 | B2 | `ifi save` asks about new files, and `--only` | ✅ Done (fb56457) |
-| B3 | `ifi hide`/`unhide`; undo-file stops hiding | ✅ Done |
+| B3 | `ifi hide`/`unhide`; undo-file stops hiding | ✅ Done (5636ec3) |
 | B4 | Rewrote your own commits vs someone else's push | ✅ Done (d0c67ed) |
 | B5 | cleanup deletes your merged branches on origin | ✅ Done (49bdb16) |
 | – | Subcommands run with `bash`, so a missing x bit doesn't matter | ✅ Done (2cc478c, f8ae112) |
-| – | "stash" instead of "put aside" everywhere | 🟢 Built (not committed) |
+| – | "stash" instead of "put aside" everywhere | ✅ Done (de23b96) |
 | C1 | Pull requests into `beta` | ❌ No: `beta` is old and unused, everything goes to `main` |
 | C2 | Merge button | ✅ Only "Merge commit" is used, so nothing to build |
-| C3 | `ifi review <pr>` | ✅ Agreed: collaborators only (see C3 below) |
+| C3 | `ifi review <pr>` | ❌ Dropped (2026-10-26): ifi is for beginners; collaborators know Git |
 | C4 | Branch types | ✅ Done with `ifi start` (A4), CONTRIBUTING.md updated |
 
 The user commits each item themselves: build one, stop, wait for "go on".
@@ -42,7 +42,7 @@ Tests ran on a Windows host need tests/lib.sh's `safe.directory` line
 (the sandbox drops the container's system config, and /workspace belongs
 to root there).
 
-Order of work: A1 → A3 → A2 → A4 → B1–B5 → C3.
+Order of work: A1 → A3 → A2 → A4 → B1–B5 → C3. All done or decided.
 A1 and A3 both change `fix-issue`, so they go together. C3 reuses A3's
 put-aside code, so it comes after A3.
 
@@ -240,10 +240,11 @@ Asked and answered before building B1–C3:
   computer. Not every merged branch on GitHub (that would hit `beta`,
   `skeleton`, ...). GitHub does *not* auto-delete merged branches in this
   repo, so fix cleanup's comment that says it does.
-- **C3:** unsaved changes when starting `ifi review`, also on main: ask to
-  stash them, given back at `ifi review --done`.
+- **C3:** dropped after building it. ifi commands are for beginners, and
+  collaborators are expected to know Git, so `ifi review` adds nothing.
+  Don't add collaborator-only ifi commands.
 - **Wording:** say "stash" wherever ifi puts changes aside (fix-issue,
-  check, pull-request, cleanup, review), to teach Git's words. E.g. "Stash
+  check, pull-request, cleanup), to teach Git's words. E.g. "Stash
   your changes (put them aside)? (y/n)".
 
 ## Group C: answers
@@ -253,40 +254,8 @@ Asked and answered before building B1–C3:
 - **C2. Merge button: only "Merge commit".** ifi already sees those branches
   as merged. If squash or rebase merging is ever turned on, `ifi cleanup`
   stops seeing merged branches; then it needs to ask GitHub instead.
-- **C3. `ifi review <pr>`: collaborators only.**
-  - **What it does:** `ifi review 57` downloads pull request #57 into a
-    branch `review/57` and switches to it, so your local site runs their
-    code and you can click around and run the tests.
-    `ifi review --done` takes you back to your own branch.
-  - **Why only collaborators:** their code runs on your computer. It can
-    change your project files and your local database, and while you run
-    their tests or migrations it can ask VS Code for your GitHub login.
-    Collaborators are trusted, and reviewing is part of their job.
-  - **Safety step:** before downloading, ifi shows who wrote the pull
-    request and its title, and asks "Run code from <name>? (y/n)".
-
-  **For the builder:**
-  - New tools/ifi/review. Collaborator = may push to the main repo: a
-    dry-run push to `$base`, like `try_login` (tools/ifi/account) and
-    `ifi check` step 6. Denied → "Only collaborators can use ifi review.
-    Read the pull request on GitHub: <link>".
-  - Author and title from `GET /repos/$MAIN_REPO/pulls/<nr>` (the `$PY` +
-    urllib + `IFI_GITHUB_API` pattern from fix-issue). Offline → the last
-    commit's author from Git.
-  - `git fetch $base +pull/<nr>/head:review/<nr>`, then switch. Running it
-    again updates the branch (switch away first if you're on it).
-  - Unsaved work on the branch you leave: put aside with A3's code;
-    remember the branch in `ifi.review-return`.
-  - `ifi review --done`: switch back, take back put-aside work, delete
-    `review/<nr>`. If the pull request added migrations, say: "Their
-    database changes are still in your local database. If the site acts
-    strange: ifi reset-database".
-  - On `review/*`, `ifi save` and `ifi pull-request` refuse: "This is
-    someone else's pull request. Leave comments on GitHub instead."
-  - Register `review` in tools/ifi/ifi, shell-setup.sh (with `--done`) and
-    pages/ifi.txt. Document it in docs/contributing/collaborators.md.
-  - Tests: new test_review.sh; the fake GitHub in tests/lib.sh needs a
-    `pulls/<nr>` answer and a `refs/pull/<nr>/head` ref.
+- **C3. `ifi review <pr>`: dropped.** It was built (collaborators only),
+  then dropped: ifi is for beginners, and collaborators know Git.
 - **C4. Branch types: `bug/ feature/ task/ docs/ ci/`.** `ifi fix-issue`
   still takes the type from the issue (bug, feature or task). `ifi start`
   (A4) also accepts docs and ci. Update CONTRIBUTING.md's branch-name line
