@@ -195,7 +195,7 @@ t_fix_issue_stashes_changes_and_gives_them_back() {
     has "Stashed your unsaved changes for bug/orange-cards"
     has "only on this computer"
     same "$(git branch --show-current)" "bug/blue-cards" "branch"
-    same "$(git status --porcelain)" "" "unsaved changes on the new branch"
+    same "$(git status --porcelain)" "?? notes.txt" "the new file comes along, like in Git"
     run_ifi fix-issue 5
     succeeds
     has "Took back your stashed changes for bug/orange-cards"
@@ -231,4 +231,17 @@ t_fix_issue_keeps_your_changes_when_it_stops() {
     has "is a pull request, not an issue"
     same "$(git stash list)" "" "stashes"
     same "$(git status --porcelain)" " M docs/notes.md" "your change"
+}
+
+t_fix_issue_gives_back_stashed_changes_with_a_new_file_around() {
+    clone_as contributor
+    start_issue
+    echo "mine" >>docs/notes.md
+    git stash push --quiet -m "ifi: bug/orange-cards"
+    git switch --quiet main
+    echo "scratch" >notes.txt
+    run_ifi fix-issue 5
+    succeeds
+    has "Took back your stashed changes for bug/orange-cards"
+    grep -q mine docs/notes.md || fail "your stashed change should be back"
 }

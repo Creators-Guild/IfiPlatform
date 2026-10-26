@@ -332,3 +332,17 @@ t_update_save_doesnt_commit_markers_in_a_merge() {
     has "ifi update stopped at a conflict"
     same "$(git rev-parse HEAD)" "$before" "the branch"
 }
+
+t_update_stopped_by_a_new_file_in_the_way() {
+    clone_as contributor
+    start_issue
+    commit README.md "Readme"
+    echo "mine" >docs/new.md
+    teammate docs/new.md "theirs"
+    run_ifi update
+    fails
+    hasnt "Conflict!"
+    has "Git stopped the update before it changed anything."
+    has "docs/new.md"
+    same "$(git config branch.bug/orange-cards.ifi-before-update || true)" "" "remembered update"
+}

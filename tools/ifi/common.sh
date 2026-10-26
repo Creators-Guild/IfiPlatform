@@ -545,6 +545,16 @@ switch_or_explain() {
     step_done ok "$why" git switch "$@"
 }
 
+# Unsaved changes are changes to files Git knows. New files Git doesn't know
+# don't count, like in Git: they stay where they are, come along when you
+# switch branches, and ifi save asks about them.
+changed_files() {
+    git status --porcelain --untracked-files=no
+}
+new_files() {
+    git status --porcelain | sed -n 's/^?? //p'
+}
+
 # Unsaved changes ifi stashes for a branch (a git stash with the message
 # "ifi: <branch>") until you go back to it. Stashes are only on this
 # computer, never on GitHub, so ifi check reminds you of them.
@@ -562,12 +572,12 @@ stash_for() {
     ifi_stashes | awk -F'\t' -v b="$1" '$3 == b { print $1; exit }'
 }
 
-# Stashes the unsaved changes, new files too, for the current branch.
+# Stashes the unsaved changes for the current branch.
 stash_changes() {
     local branch
     branch="$(git branch --show-current)"
     run "Stash your unsaved changes for $branch" \
-        git stash push --quiet --include-untracked -m "ifi: $branch"
+        git stash push --quiet -m "ifi: $branch"
 }
 
 # Before going to another branch. Uncommitted work on main is usually a
@@ -577,11 +587,11 @@ stash_changes() {
 leave_unsaved_changes() {
     local current answer=""
     current="$(git branch --show-current)"
-    [[ -n "$(git status --porcelain)" ]] || return 1
+    [[ -n "$(changed_files)" ]] || return 1
     [[ -n "$current" && "$current" != main ]] || return 0
     if [[ -t 0 ]]; then
         echo "You have changes on $current that aren't committed yet:"
-        git status --short | sed 's/^/  /'
+        git status --short --untracked-files=no | sed 's/^/  /'
         echo "ifi can stash them (put them aside) for $current, and give them back when you go back to it."
         echo "They're kept only on this computer, not on GitHub."
         read -r -p "Stash them? (y/n) " answer || true
@@ -600,7 +610,7 @@ take_back() {
     branch="$(git branch --show-current)"
     ref="$(stash_for "$branch")"
     [[ -n "$ref" ]] || return 0
-    if [[ -n "$(git status --porcelain)" ]]; then
+    if [[ -n "$(changed_files)" ]]; then
         echo "      You have stashed changes for $branch too, but there are other unsaved changes here."
         echo "      Save these first (ifi save), then take the others back: git stash pop $ref"
         return 0

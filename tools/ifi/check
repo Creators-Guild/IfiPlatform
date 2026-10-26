@@ -214,8 +214,11 @@ else
     fi
 fi
 
-# 8. Unsaved changes.
-unsaved="$(git status --porcelain | wc -l | tr -d ' ')"
+# 8. Unsaved changes, and new files Git doesn't know.
+unsaved="$(changed_files | wc -l | tr -d ' ')"
+new="$(new_files | tr '\n' ' ')"
+[[ -z "$new" ]] || warn "New files Git doesn't know: $new" \
+    "ifi save asks about them (or ifi hide, if Git should ignore them)"
 if [[ "$unsaved" -eq 0 ]]; then
     ok "No unsaved changes."
 else

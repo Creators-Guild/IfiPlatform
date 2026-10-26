@@ -100,3 +100,12 @@ t_save_shows_file_names_with_aeoa() {
     has "  docs/blåbær.md"
     has "new      docs/blåbær.md"
 }
+
+t_save_only_a_file_without_changes() {
+    clone_as contributor
+    start_issue
+    echo "More" >>README.md
+    run_ifi save "Notes" --only docs/notes.md
+    fails
+    has "Nothing to commit: docs/notes.md has no changes since your last commit."
+}

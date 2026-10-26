@@ -15,7 +15,7 @@ nr="${nr#\#}"
 
 stop_during_update
 current="$(git branch --show-current)"
-dirty="$(git status --porcelain)"
+dirty="$(changed_files)"
 existing="$(git config --get-regexp '^branch\..*\.ifi-issue$' 2>/dev/null |
     awk -v n="$nr" '$2 == n { print $1 }' | sed -E 's/^branch\.//; s/\.ifi-issue$//' | head -n 1 || true)"
 git show-ref --verify --quiet "refs/heads/$existing" || existing=""

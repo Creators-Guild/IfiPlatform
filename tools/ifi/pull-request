@@ -11,7 +11,7 @@ branch="$(git branch --show-current)"
 [[ -n "$branch" ]] || die "You're not on a branch. Start one with: ifi fix-issue <nr>"
 [[ "$branch" != main ]] || die "You're on main. Make a branch for your issue first: ifi fix-issue <nr>"
 
-if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
+if [[ -n "$(changed_files)" ]]; then
     git status --short --untracked-files=no
     die "" "These changes aren't committed yet. Commit them first:" \
         "  ifi save \"Short description of what you changed\""
@@ -72,7 +72,7 @@ else
     fill=("" "Fill in the template, and write #$nr on its \"Closes #\" line:" \
         "" "it closes the issue when your pull request is merged.")
 fi
-new="$(git status --porcelain | sed -n 's/^?? //p')"
+new="$(new_files)"
 if [[ -n "$new" ]]; then
     echo
     echo "Not in your pull request, since Git doesn't know them (ifi save asks about them):"

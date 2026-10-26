@@ -16,7 +16,7 @@ branch="$(git branch --show-current)"
 [[ -n "$branch" ]] || die "You're not on a branch. Go to your issue's branch first: ifi fix-issue <nr>"
 [[ "$branch" != main ]] || die "You're on main. Go to your issue's branch first: ifi fix-issue <nr>"
 
-if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
+if [[ -n "$(changed_files)" ]]; then
     git status --short --untracked-files=no
     die "" "These changes aren't committed yet. Commit them first:" \
         "  ifi save \"Short description of what you changed\""

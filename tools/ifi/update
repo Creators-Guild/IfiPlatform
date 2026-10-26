@@ -113,6 +113,15 @@ conflict_help() {
     files="$(git diff --name-only --diff-filter=U)"
     count="$(grep -c . <<<"$files" || true)"
     git_recap
+    if [[ -z "$files" ]]; then
+        if in_rebase || in_merge; then
+            die "" "Git stopped the update, but not for a conflict. Its message above says why." \
+                "Ask a helper, or go back to how your branch was: ifi update --abort"
+        fi
+        git config --unset "branch.$(git branch --show-current).ifi-before-update" || true
+        git config --unset "branch.$(git branch --show-current).ifi-migration-clash" || true
+        die "" "Git stopped the update before it changed anything. Its message above says why."
+    fi
     echo
     if [[ "${2:-}" == again ]]; then
         echo "Another conflict, in your next commit (\"$(git log -1 --format=%s REBASE_HEAD 2>/dev/null)\")."
@@ -213,7 +222,7 @@ else
     branch="$(git branch --show-current)"
     [[ -n "$branch" ]] || die "You're not on a branch. Go to your issue's branch first: ifi fix-issue <nr>"
     [[ "$branch" != main ]] || die "You're on main. ifi fix-issue <nr> already starts from the newest main in the main repo."
-    if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
+    if [[ -n "$(changed_files)" ]]; then
         git status --short --untracked-files=no
         die "" "Commit your changes first, then update:" \
             "  ifi save \"Short description of what you changed\""

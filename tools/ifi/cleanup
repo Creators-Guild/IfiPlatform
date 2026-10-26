@@ -17,7 +17,7 @@ fetch_base
 
 current="$(git branch --show-current)"
 leave_current=false
-if [[ -n "$current" && "$current" != main ]] && merged_into_main HEAD && [[ -n "$(git status --porcelain)" ]]; then
+if [[ -n "$current" && "$current" != main ]] && merged_into_main HEAD && [[ -n "$(changed_files)" ]]; then
     leave_current=true
 fi
 merged=()

@@ -73,7 +73,8 @@ t_check_counts_unsaved_files() {
     echo "x" >>README.md
     echo "y" >new.txt
     run_ifi check
-    has "⚠️  2 file(s) changed but not saved yet"
+    has "⚠️  1 file(s) changed but not saved yet"
+    has "⚠️  New files Git doesn't know: new.txt"
 }
 
 t_check_says_main_moved_on_and_where_it_will_conflict() {
@@ -265,7 +266,7 @@ stashed_changes() {
     clone_as contributor
     start_issue
     echo "changed" >>README.md
-    git stash push --quiet --include-untracked -m "ifi: bug/orange-cards"
+    git stash push --quiet -m "ifi: bug/orange-cards"
     git switch --quiet main
 }
 
@@ -308,4 +309,13 @@ t_check_on_a_branch_without_an_issue() {
     run_ifi check
     has "Current branch: docs/fix-typo  (no issue)"
     hasnt "not linked to an issue yet"
+}
+
+t_check_lists_new_files_on_their_own() {
+    clone_as contributor
+    start_issue
+    echo "scratch" >notes.txt
+    run_ifi check
+    has "New files Git doesn't know: notes.txt"
+    has "No unsaved changes."
 }

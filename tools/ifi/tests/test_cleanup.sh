@@ -165,3 +165,13 @@ t_cleanup_skips_branches_already_deleted_on_github() {
     git show-ref --verify --quiet refs/heads/bug/orange-cards && fail "should be deleted on your computer"
     return 0
 }
+
+t_cleanup_with_a_new_file_lying_around() {
+    merged_issue_branch
+    git switch --quiet bug/orange-cards
+    echo "scratch" >notes.txt
+    IN=$'y\n' run_ifi cleanup
+    succeeds
+    git show-ref --verify --quiet refs/heads/bug/orange-cards && fail "the merged branch should be deleted"
+    [[ -f notes.txt ]] || fail "notes.txt should come along to main"
+}

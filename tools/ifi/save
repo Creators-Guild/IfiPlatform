@@ -34,10 +34,11 @@ list_staged() {
 }
 if [[ ${#only[@]} -gt 0 ]]; then
     run "Mark these files to be committed" git add -- "${only[@]}"
+    git diff --cached --quiet -- "${only[@]}" && die "Nothing to commit: ${only[*]} has no changes since your last commit."
     list_staged -- "${only[@]}"
     run "Make the commit, with only these files (on your computer only)" git commit -m "$message" --only -- "${only[@]}"
 else
-    new="$(git status --porcelain | sed -n 's/^?? //p')"
+    new="$(new_files)"
     answer=""
     if [[ -n "$new" ]]; then
         echo "New files Git doesn't know yet (untracked):"
