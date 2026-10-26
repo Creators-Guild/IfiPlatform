@@ -1,29 +1,28 @@
+Every day:
 ifi check                  check your setup and see what to do next
 ifi fix-issue <nr>         make a branch for issue <nr>, or go back to it
-                           (asks to stash unsaved changes, and gives them back)
-ifi start <type> <words>   a branch without an issue, for small things (type: bug,
-                           feature, task, docs or ci). Most changes need an issue.
-ifi save "message"         commit all your changes (git add + commit, whole repo;
-                           asks before adding new, untracked files)
-ifi save "msg" --only <f>  commit only these files
-ifi update                 bring your branch up to date with main in the main repo
-                           (joins clashing translation files by itself)
-ifi update --abort         undo an update that hit a conflict
+ifi save "message"         commit your changes (asks before adding new files)
+ifi test                   the quick tests (run before a pull request)
 ifi pull-request           push your branch and get the pull request link
+ifi update                 bring your branch up to date with the newest main
+
+When you need it:
+ifi update --abort         undo an update that hit a conflict
+ifi start <type> <words>   a branch without an issue, for small things
+ifi save "msg" --only <f>  commit only these files
 ifi undo-file <file>       take a file out of your pull request
 ifi hide <file>            Git ignores the file, on this computer only
 ifi unhide <file>          Git sees it again
-ifi account                which GitHub account you push as (and commit as)
-ifi account switch <name>  push as another account, and make commits match it
-ifi account switch         back to your computer's usual account
-ifi cleanup                delete your branches that are already merged
-                           (here, and on your fork or the main repo on GitHub)
-ifi test                   the quick tests (run before a pull request)
-ifi test --long            all tests, with the slow site crawler (or -l)
+ifi cleanup                delete your branches that are merged (here and on GitHub)
 ifi migrate                makemigrations + migrate, after changing a model
-                           (first joins clashing migrations, after asking)
+ifi test --long            all tests, with the slow site crawler (or -l)
+
+The site and your setup:
 ifi restart-server         restart the website
 ifi reset-database         DELETE the local database and start fresh
 ifi rebuild-docker         how to rebuild the container
 ifi install                make ifi a command in your own terminal (no Docker)
+ifi account                which GitHub account you push as (and commit as)
+ifi account switch <name>  push as another account (no name: back to your usual one)
+
 ifi help [topic]           these pages: git, docker, django, ifi

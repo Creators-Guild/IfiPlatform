@@ -31,14 +31,10 @@ carry_on() {
     else
         # Only to say whether main moved on, so a failed fetch (no internet)
         # isn't worth an error.
-        why="Download the newest code from the main repo, to see if its main moved on"
-        GIT_DONE+=("git fetch $base")
-        step_start "$why"
-        if GIT_TERMINAL_PROMPT=0 git fetch --quiet "$base" 2>/dev/null; then
-            step_done ok "$why" git fetch "$base"
+        if run "Download the newest code from the main repo, to see if its main moved on" \
+            env GIT_TERMINAL_PROMPT=0 git fetch --quiet "$base"; then
             behind="$(git rev-list --count "HEAD..$base/main")"
         else
-            step_done fail "$why" git fetch "$base"
             echo "      Couldn't reach GitHub. Not a problem, it just can't tell if main moved on."
         fi
     fi
@@ -122,15 +118,9 @@ find_base
 fetch_base
 # Collaborators' origin is the main repo, which fetch_base just fetched.
 if [[ "$base" != origin ]]; then
-    why="Download your branches from your fork, to look for one for issue #$nr"
-    GIT_DONE+=("git fetch origin")
-    step_start "$why"
-    if GIT_TERMINAL_PROMPT=0 git fetch --quiet origin 2>/dev/null; then
-        step_done ok "$why" git fetch origin
-    else
-        step_done fail "$why" git fetch origin
+    run "Download your branches from your fork, to look for one for issue #$nr" \
+        env GIT_TERMINAL_PROMPT=0 git fetch --quiet origin ||
         echo "      Couldn't reach your fork, so a branch you made on another computer can't be found."
-    fi
 fi
 
 # Only now, so nothing is stashed when a step above fails.
