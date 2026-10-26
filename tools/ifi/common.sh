@@ -437,10 +437,16 @@ explain_git_error() {
     fi
 
     if [[ "$kind" == behind ]]; then
-        die "Your branch on GitHub has commits that aren't on your computer" \
-            "(for example from GitHub's Update branch button). Get them first, then try again:" \
-            "  git pull --rebase origin $(git branch --show-current)" \
-            "Conflict? Fix the files the same way as for ifi update, then: git add -A && git rebase --continue"
+        local branch
+        branch="$(git branch --show-current)"
+        echo "Your branch on GitHub has commits that aren't on your computer:" >&2
+        GIT_TERMINAL_PROMPT=0 git fetch --quiet "$remote" "$branch" 2>/dev/null &&
+            git log --format='  "%s", by %an, %ar' HEAD..FETCH_HEAD >&2
+        die "From a teammate, from you on another computer, or GitHub's Update branch button?" \
+            "Get them first, then try again:" \
+            "  git pull --rebase origin $branch" \
+            "Conflict? Fix the files the same way as for ifi update, then: git add -A && git rebase --continue" \
+            "Old versions of commits you changed since? Ask a helper before you replace them."
     fi
 
     die "Git couldn't reach GitHub. The message above says why. Ask a helper if it's unclear."
@@ -467,24 +473,44 @@ git_or_explain() {
     step_done ok "$why" git "$@"
 }
 
-# Pushes the current branch to origin; $1 is what it does. After `ifi
-# update` the branch has new commits in place of the old ones, so GitHub
-# refuses a normal push. Then it replaces the branch on GitHub, but only if
-# it still has nothing but what was there before the update (a lease on that
-# exact commit), so nobody else's work is ever overwritten.
+# Pushes the current branch to origin; $1 is what it does. GitHub refuses a
+# normal push when its branch has commits that aren't here. Then it replaces
+# the branch on GitHub, with a lease on that exact commit so nobody else's
+# work is ever overwritten, when those commits are only:
+# - the ones from before `ifi update` put yours on top of the newest main, or
+# - old versions of yours, with the same changes (you rewrote them), after asking.
 push_branch() {
-    local why="$1" branch before remote_tip=""
+    local why="$1" branch before remote_tip replace="" answer=""
     branch="$(git branch --show-current)"
     before="$(git config "branch.$branch.ifi-before-update" || true)"
-    [[ -n "$before" ]] && remote_tip="$(GIT_TERMINAL_PROMPT=0 git ls-remote origin "refs/heads/$branch" 2>/dev/null | cut -f1 || true)"
-    if [[ -n "$remote_tip" ]] && ! git merge-base --is-ancestor "$remote_tip" HEAD 2>/dev/null &&
-        git merge-base --is-ancestor "$remote_tip" "$before" 2>/dev/null; then
-        git_or_explain origin "Replace your branch on GitHub with the updated one. Git refuses if someone else pushed to it in the meantime, so nothing gets lost" \
+    remote_tip="$(GIT_TERMINAL_PROMPT=0 git ls-remote origin "refs/heads/$branch" 2>/dev/null | cut -f1 || true)"
+    if [[ -n "$remote_tip" ]] && ! git merge-base --is-ancestor "$remote_tip" HEAD 2>/dev/null; then
+        if [[ -n "$before" ]] && git merge-base --is-ancestor "$remote_tip" "$before" 2>/dev/null; then
+            replace="Replace your branch on GitHub with the updated one"
+        elif rewritten_here "$branch"; then
+            echo "Your branch on GitHub has older versions of your commits: the same changes,"
+            echo "but you changed the commits since (for example with git commit --amend)."
+            read -r -p "Replace your branch on GitHub with this version? (y/n) " answer || true
+            [[ "$answer" =~ ^[YyJj] ]] || die "Nothing was sent."
+            replace="Replace your branch on GitHub with this version"
+        fi
+    fi
+    if [[ -n "$replace" ]]; then
+        git_or_explain origin "$replace. Git refuses if someone else pushed to it in the meantime, so nothing gets lost" \
             push --quiet -u --force-with-lease="refs/heads/$branch:$remote_tip" origin HEAD
     else
         git_or_explain origin "$why" push --quiet -u origin HEAD
     fi
     git config --unset "branch.$branch.ifi-before-update" || true
+}
+
+# True when every commit on GitHub's branch $1 that isn't here has the same
+# changes as one of yours (git cherry marks those "-").
+rewritten_here() {
+    local extra
+    run "Download your branch from GitHub, to compare it with yours" git fetch --quiet origin "$1" || return 1
+    extra="$(git cherry HEAD FETCH_HEAD)"
+    [[ -n "$extra" ]] && ! grep -q '^+' <<<"$extra"
 }
 
 # git switch, with a plain explanation when unsaved changes are in the way.

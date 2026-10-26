@@ -46,7 +46,8 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | On your branch, change a Norwegian text in `django.po`, run `compilemessages`, save. On main (another clone), add another translation to the same file, with its `.mo` | |
 | ☐ | `ifi update` | "Only translation files clash, so ifi joins them for you", ✓ Rebuilt the .mo files, the file listed at the end; the site shows both translations |
 | ☐ | `ifi start docs fix typo`, change a file, `ifi save`, `ifi pull-request` | No issue question; it says to delete the `Closes #` line |
-| ☐ | Press **Update branch** on the pull request on GitHub, then make a change and `ifi save` + `ifi pull-request` | "Your branch on GitHub has commits that aren't on your computer", with the `git pull --rebase` line. Run it, then pull-request works |
+| ☐ | Press **Update branch** on the pull request on GitHub, then make a change and `ifi save` + `ifi pull-request` | "Your branch on GitHub has commits that aren't on your computer", the Update branch commit with its author, and the `git pull --rebase` line. Run it, then pull-request works |
+| ☐ | `git commit --amend -m "New message"`, then `ifi pull-request`, answer y | "older versions of your commits", then "✓ Replaced your branch on GitHub with this version" |
 | ☐ | Merge the pull request (as yourself), then `ifi check` and `ifi cleanup` (still on the branch) | check: "Your pull request … is merged". cleanup: switches you to main, deletes the branch here and on the fork |
 | ☐ | `command -v gh` in the container terminal | Nothing: the GitHub CLI isn't in the container |
 | ☐ | Computer that logs in with gh, the other account *not* selected in gh: `ifi account switch <other>` | The gh message with `gh auth switch --user <other>`; no password prompt; `git remote -v` unchanged |

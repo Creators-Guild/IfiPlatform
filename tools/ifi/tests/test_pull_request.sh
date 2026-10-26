@@ -78,7 +78,36 @@ t_pull_request_never_overwrites_someone_elses_push() {
     run_ifi pull-request
     fails
     has "Your branch on GitHub has commits that aren't on your computer"
+    has '  "Their commit", by Student Testesen'
+    hasnt "Replace your branch on GitHub with this version?"
     same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$theirs" "the branch on your fork"
+}
+
+# Pushed, then the commit message changed with --amend: same changes, new commit.
+amended_after_push() {
+    clone_as contributor
+    start_issue
+    commit README.md "Better readme" "Readme"
+    run_ifi pull-request
+    git commit --quiet --amend -m "Better readme"
+}
+
+t_pull_request_replaces_commits_you_rewrote_when_asked() {
+    amended_after_push
+    IN=$'y\n' run_ifi pull-request
+    succeeds
+    has "Your branch on GitHub has older versions of your commits"
+    has "✓ Replaced your branch on GitHub with this version."
+    same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$(git rev-parse HEAD)" "the branch on your fork"
+}
+
+t_pull_request_keeps_commits_you_rewrote_when_you_say_no() {
+    amended_after_push
+    before="$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)"
+    IN=$'n\n' run_ifi pull-request
+    fails
+    has "Nothing was sent."
+    same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$before" "the branch on your fork"
 }
 
 # On the issue-5 branch with a commit, and other changes put aside for it.

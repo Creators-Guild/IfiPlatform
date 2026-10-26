@@ -24,8 +24,9 @@ computers, or with teammates.
 | A4 | Pull requests without an issue | ✅ Done (38118b6); consequences in docs/to_fix.md |
 | B1 | Join clashing translation files | ✅ Done (8271ce1) |
 | B2 | `ifi save` asks about new files, and `--only` | ✅ Done (fb56457) |
-| B3 | `ifi hide`/`unhide`; undo-file stops hiding | 🟢 Built (not committed) |
-| B4–B5 | Smaller improvements | ✅ Agreed, details in "Decisions 2026-10-26" |
+| B3 | `ifi hide`/`unhide`; undo-file stops hiding | ✅ Done |
+| B4 | Rewrote your own commits vs someone else's push | 🟢 Built (not committed) |
+| B5 | cleanup deletes your merged branches on origin | ✅ Agreed, details in "Decisions 2026-10-26" |
 | C1 | Pull requests into `beta` | ❌ No: `beta` is old and unused, everything goes to `main` |
 | C2 | Merge button | ✅ Only "Merge commit" is used, so nothing to build |
 | C3 | `ifi review <pr>` | ✅ Agreed: collaborators only (see C3 below) |
@@ -227,7 +228,9 @@ Asked and answered before building B1–C3:
 - **B4:** "you rewrote your own commits" (git cherry: all of GitHub's extra
   commits have the same changes as yours) → ask "Replace your branch on
   GitHub with this version? (y/n)", pushed with a lease. Someone else's
-  commits → today's message.
+  commits → today's message, plus a list of GitHub's extra commits
+  ("subject", by author, when). An --amend that changed content counts as
+  "someone else's" (cherry sees different changes), which is the safe side.
 - **B5:** on origin, delete only the branches cleanup also deletes on your
   computer. Not every merged branch on GitHub (that would hit `beta`,
   `skeleton`, ...). GitHub does *not* auto-delete merged branches in this
