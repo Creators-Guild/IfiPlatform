@@ -4,11 +4,17 @@
 set -euo pipefail
 source "$(dirname "$(readlink -f "$0")")/common.sh"
 
+# --long anywhere, like Git takes options anywhere.
 args=(--exclude-tag=slow)
-if [[ "${1:-}" == --long || "${1:-}" == -l ]]; then
-    args=()
-    shift
-fi
+labels=()
+for a in "$@"; do
+    if [[ "$a" == --long || "$a" == -l ]]; then
+        args=()
+    else
+        labels+=("$a")
+    fi
+done
+set -- ${labels[@]+"${labels[@]}"}
 
 find_django_python
 cd "$(git rev-parse --show-toplevel)/ifiplatform"

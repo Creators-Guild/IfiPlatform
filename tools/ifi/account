@@ -44,6 +44,7 @@ https_origin_repo() {
 # Prints "<name>\t<noreply email>" from the public GitHub profile of $1.
 # IFI_GITHUB_API lets the tests (tests/) use a fake server.
 profile_of() {
+    need_python
     local found status=0
     found="$("$PY" - "$1" "${IFI_GITHUB_API:-https://api.github.com}" <<'PY' 2>/dev/null
 import json, sys, urllib.error, urllib.request
@@ -102,7 +103,7 @@ switch_to() {
     echo "If a login window opens, log in as $name there."
     err="$(try_login "$repo" "$name")" || status=$?
     if [[ $status -ne 0 ]]; then
-        if [[ $status -eq 124 ]] || grep -qiE "could not resolve host|failed to connect|timed out" <<<"$err"; then
+        if [[ $status -eq 124 || "$(git_error_kind "$err")" == offline ]]; then
             die "Couldn't reach GitHub, or no login came within 2 minutes. Nothing changed." \
                 "Try again: ifi account switch $name"
         fi

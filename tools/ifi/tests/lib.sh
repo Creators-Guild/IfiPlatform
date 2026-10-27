@@ -141,6 +141,21 @@ with open(path, "w", encoding="utf-8") as f:
 PY
 }
 
+# A PATH with every command except Python, like Git Bash on Windows:
+# PATH="$(no_python_path)" run_ifi ...
+no_python_path() {
+    local dir="$SANDBOX/no-python" d t
+    if [[ ! -d "$dir" ]]; then
+        mkdir -p "$dir"
+        for d in /usr/local/bin /usr/bin /bin; do
+            for t in "$d"/*; do
+                [[ "${t##*/}" == python* || -e "$dir/${t##*/}" ]] || ln -s "$t" "$dir/${t##*/}"
+            done
+        done
+    fi
+    echo "$dir"
+}
+
 # On the branch for issue 5 ("Orange cards"), as ifi fix-issue makes it.
 start_issue() {
     issue 5 Bug "Orange cards"

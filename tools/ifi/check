@@ -149,7 +149,7 @@ elif [[ -n "$origin_url" ]]; then
             ok "origin is the main repo ($MAIN_REPO): you push straight to it, as a collaborator."
             ok "upstream isn't needed: origin already is the main repo."
         fi
-    elif [[ $status -eq 124 ]] || grep -qiE "could not resolve host|failed to connect|timed out" <<<"$err"; then
+    elif [[ $status -eq 124 || "$(git_error_kind "$err")" == offline ]]; then
         # Not broken, just not checked, so no ❌. The fetch below would fail too.
         offline=true
         quiet=false warn "Couldn't reach GitHub, so your login wasn't checked. No internet?" \
@@ -301,15 +301,15 @@ if [[ -n "$base" && -n "$branch" && "$branch" != main ]]; then
     fi
 fi
 
-# 10. Is the site running?
-# Any HTTP answer, even an error page, means the server is running.
-if "$PY" - 2>/dev/null <<'PY'; then
-import urllib.error, urllib.request
-try:
-    urllib.request.urlopen("http://localhost:8000/", timeout=3)
-except urllib.error.HTTPError:
-    pass
-PY
+# 10. Is the site running? Any HTTP answer, even an error page, means the
+# server is running. Plain bash (/dev/tcp), so no Python or curl is needed.
+site_answers() (
+    exec 3<>/dev/tcp/localhost/8000 || exit 1
+    printf 'HEAD / HTTP/1.0\r\n\r\n' >&3
+    read -r -t 3 line <&3
+    [[ "$line" == HTTP/* ]]
+)
+if site_answers 2>/dev/null; then
     ok "The site answers at http://localhost:8000"
 elif $in_container; then
     bad "Nothing answers at http://localhost:8000." "ifi restart-server"

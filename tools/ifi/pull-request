@@ -42,17 +42,10 @@ else
     head="${head%%/*}:$branch"
 fi
 
-url="$("$PY" - "$MAIN_REPO" "$head" <<'PY'
-import sys
-from urllib.parse import quote
-
-repo, head = sys.argv[1:3]
-print(
-    f"https://github.com/{repo}/compare/main...{quote(head, safe='/:')}"
-    "?expand=1"
-)
-PY
-)"
+# % and # would break the link (Git allows them in branch names).
+head="${head//%/%25}"
+head="${head//#/%23}"
+url="https://github.com/$MAIN_REPO/compare/main...$head?expand=1"
 
 if [[ "$nr" == none ]]; then
     fill=("" "Fill in the template. There's no issue, so delete the \"Closes #\" line," \

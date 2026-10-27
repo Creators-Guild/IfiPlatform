@@ -336,3 +336,10 @@ t_commands_run_without_the_x_bit() {
     [[ $? -eq 0 ]] || fail "ifi help should work without the x bit"
     has "Every day:"
 }
+
+t_commands_account_switch_without_python_says_so() {
+    clone_as contributor
+    PATH="$(no_python_path)" run_ifi account switch octocat
+    fails
+    has "ifi needs Python for this, and there's none here."
+}

@@ -204,3 +204,11 @@ t_fix_issue_for_the_branch_you_are_on_keeps_your_changes() {
     has "You're already on bug/orange-cards"
     same "$(tail -n 1 README.md)" "changed" "README.md"
 }
+
+t_fix_issue_without_python() {
+    clone_as contributor
+    IN=$'bug\nGjør kortene oransje\n' PATH="$(no_python_path)" run_ifi fix-issue 9
+    succeeds
+    has "Couldn't look up issue #9 on GitHub"
+    same "$(git branch --show-current)" "bug/gjor-kortene-oransje" "branch"
+}

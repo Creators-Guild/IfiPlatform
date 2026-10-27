@@ -288,3 +288,10 @@ t_check_lists_new_files_on_their_own() {
     has "New files Git doesn't know: notes.txt"
     has "No unsaved changes."
 }
+
+t_check_without_python() {
+    clone_as contributor
+    start_issue
+    PATH="$(no_python_path)" run_ifi check
+    has "Current branch: bug/orange-cards"
+}

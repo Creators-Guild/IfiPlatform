@@ -10,13 +10,19 @@ lower() {
     printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
 }
 
-# A Python for the small helper snippets: python3, or python where that's
-# all there is (Windows' python3 is often a stub that only opens the Store).
+# A Python for asking GitHub's API: python3, or python where that's all
+# there is (Windows' python3 is often a stub that only opens the Store).
+# Empty when there's none, as in Git Bash: the rest of ifi doesn't need it.
+PY=""
 if python3 -c '' >/dev/null 2>&1; then
     PY=python3
-else
+elif python -c '' >/dev/null 2>&1; then
     PY=python
 fi
+need_python() {
+    [[ -n "$PY" ]] || die "ifi needs Python for this, and there's none here." \
+        "Use ifi in VS Code's container terminal, or install Python (python.org)."
+}
 
 # File names with æøå as they are, not "\303\246" (for every git call ifi makes).
 export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.quotePath GIT_CONFIG_VALUE_0=false
@@ -271,10 +277,13 @@ ensure_identity() {
     run "Tell Git your email, for every commit on this computer" git config --global user.email "$email"
 }
 
-# What kind of failure Git's message ($1) is: ssh, login, denied, notfound,
-# behind or other. Shared by explain_git_error and `ifi check`.
+# What kind of failure Git's message ($1) is: offline, ssh, login, denied,
+# notfound, behind or other. Shared by explain_git_error, `ifi check` and
+# `ifi account`.
 git_error_kind() {
-    if grep -qiE "cannot run ssh|ssh: not found|Permission denied \(publickey\)|Host key verification failed" <<<"$1"; then
+    if grep -qiE "could not resolve host|failed to connect|timed out" <<<"$1"; then
+        echo offline
+    elif grep -qiE "cannot run ssh|ssh: not found|Permission denied \(publickey\)|Host key verification failed" <<<"$1"; then
         echo ssh
     elif grep -qiE "could not read Username|Authentication failed|terminal prompts disabled|Invalid username or (password|token)" <<<"$1"; then
         echo login
@@ -391,6 +400,10 @@ explain_git_error() {
     kind="$(git_error_kind "$err")"
     echo >&2
 
+    if [[ "$kind" == offline ]]; then
+        die "Git couldn't reach GitHub. No internet? Try again when you're online."
+    fi
+
     if [[ "$kind" == ssh ]]; then
         echo "'$remote' uses an SSH address ($url), and SSH doesn't work here." >&2
         echo "HTTPS works without any setup, because VS Code shares your GitHub login." >&2
@@ -450,7 +463,7 @@ explain_git_error() {
             "Old versions of commits you changed since? Ask a helper before you replace them."
     fi
 
-    die "Git couldn't reach GitHub. The message above says why. Ask a helper if it's unclear."
+    die "GitHub said no, or couldn't be reached. Git's message above says why. Ask a helper if it's unclear."
 }
 
 # Runs a git command that talks to GitHub (fetch, push). Shows it like run,
@@ -608,15 +621,10 @@ added_migration_dirs() {
 # "Gjør kortene oransje!" -> "gjor-kortene-oransje": the first 4 words,
 # ASCII only, at most 40 characters.
 slugify() {
-    "$PY" - "$1" <<'PY'
-import re, sys, unicodedata
-
-text = sys.argv[1].lower()
-for a, b in (("æ", "ae"), ("ø", "o"), ("å", "a")):
-    text = text.replace(a, b)
-text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
-print("-".join(re.findall(r"[a-z0-9]+", text)[:4])[:40].strip("-"))
-PY
+    printf '%s\n' "$1" |
+        sed 's/Æ/ae/g; s/æ/ae/g; s/Ø/o/g; s/ø/o/g; s/Å/a/g; s/å/a/g; s/É/e/g; s/é/e/g' |
+        tr '[:upper:]' '[:lower:]' | LC_ALL=C tr -cs 'a-z0-9' ' ' | sed 's/^ //' |
+        cut -d ' ' -f 1-4 | tr ' ' '-' | cut -c 1-40 | sed 's/-*$//'
 }
 
 # Fetches the main repo's newest code into $base/main. $1 can say why, when

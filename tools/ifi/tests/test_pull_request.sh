@@ -123,3 +123,12 @@ t_pull_request_lists_only_your_branchs_own_commits() {
     has '"Merge main into bug/orange-cards", by Teammate'
     hasnt '"Teammate commit"'
 }
+
+t_pull_request_without_python() {
+    clone_as contributor
+    start_issue
+    commit README.md "Better readme"
+    PATH="$(no_python_path)" run_ifi pull-request
+    succeeds
+    has "https://github.com/$MAIN/compare/main...$STUDENT:bug/orange-cards?expand=1"
+}

@@ -93,6 +93,7 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | PowerShell in the repo folder: `.\ifi check` | Same as Git Bash |
 | ☐ | Command Prompt: `ifi check` | Same as Git Bash |
 | ☐ | Git Bash: `./ifi install`, new Git Bash window | `ifi` works without `./` |
+| ☐ | Git Bash without Python installed: `./ifi fix-issue <nr>`, `./ifi save`, `./ifi pull-request`, `./ifi check` | All work; fix-issue asks for the type and a few words; pull-request shows the link |
 | ☐ | `ifi fix-issue` with a title with æøå | The branch name has ae/o/a, no odd characters |
 
 ## Write down
