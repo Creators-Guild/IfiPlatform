@@ -3,13 +3,14 @@
 <div class="bot-bar">
     <div id="left-info">
         <p id="want-to-contribute">{% trans "Want to contribute?" %}</p>
-        <a href="">{% trans "Contribution Guide" %}</a>
-        <p>{% trans "GitHub" %} {% trans " opening soon..." %}</p>
+        <a href="https://github.com/Creators-Guild/IfiPlatform/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener" data-umami-event="footer-contribution-guide">{% trans "Contribution Guide" %}</a>
+        <a href="https://github.com/Creators-Guild/IfiPlatform" target="_blank" rel="noopener" data-umami-event="footer-github">{% trans "GitHub" %}</a>
     </div>
     <img id="made-by" src="{% static "images/studentunions/IfiCreatorsGuildLogo.png" %}" alt="{% trans "Ifi-Creators' Guild" %}">
     <div id="right-info">
         <a href="{% url 'privacy_policy' %}">{% trans "Privacy Policy" %}</a>
-        <a href="">{% trans "Report a bug" %}</a>
-        <a href="">{% trans "Request a feature" %}</a>
+        {# prefills "Related" with the path; skipped on account pages, whose paths can hold one-time codes #}
+        <a href="https://github.com/Creators-Guild/IfiPlatform/issues/new?template=bug_report.yml{% if '/account/' not in request.path %}&related=Found%20on%20page%3A%20{{ request.path|urlencode:'' }}{% endif %}" target="_blank" rel="noopener" data-umami-event="footer-report-bug">{% trans "Report a bug" %}</a>
+        <a href="https://github.com/Creators-Guild/IfiPlatform/issues/new?template=feature_request.yml" target="_blank" rel="noopener" data-umami-event="footer-request-feature">{% trans "Request a feature" %}</a>
     </div>
 </div>

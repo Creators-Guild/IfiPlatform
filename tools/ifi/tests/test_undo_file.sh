@@ -16,6 +16,7 @@ t_undo_file_puts_a_file_back_as_in_main() {
     same "$(git rev-parse bug/orange-cards-backup)" "$before" "the backup"
     same "$(git ls-remote origin refs/heads/bug/orange-cards | cut -f1)" "$(git rev-parse HEAD)" "pushed"
     same "$(git diff --name-only upstream/main...HEAD)" "$CARDS" "files in the pull request"
+    same "$(git log -1 --format='%(trailers:key=Made-with,valueonly)')" "ifi" "marked as made with ifi"
 }
 
 t_undo_file_takes_a_new_file_out_but_keeps_it() {

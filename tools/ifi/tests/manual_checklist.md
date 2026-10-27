@@ -27,6 +27,7 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | `ifi check` | No ❌. If "Not logged in": run `git push`, click **Allow**, log in, run it again |
 | ☐ | `ifi fix-issue <test issue>` | The issue's title; a branch named `<type>/<few-words>` |
 | ☐ | Change the file, `ifi save "Orange cards"` | "✓ Marked every change in the repo to be committed", with the file under it |
+| ☐ | After the pull request is merged: the commit on GitHub | The message ends with a `Made-with: ifi` line |
 | ☐ | `ifi pull-request`, Ctrl+click the link | GitHub's "Open a pull request" page, with `Closes #<nr>` filled in |
 | ☐ | Open the pull request | The template in the description; CI runs |
 | ☐ | Make a new file `notes.txt` and change a file, `ifi save "Notes"`, answer n | "New files Git doesn't know yet (untracked)" lists `notes.txt`; only the changed file is committed |
