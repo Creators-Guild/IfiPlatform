@@ -4,6 +4,8 @@ Thanks for wanting to contribute! IfiPlatform is built by IFI-Creators' Guild, a
 
 Never contributed to an open source project before? This guide walks you through it.
 
+**New here?** Start with the [README](README.md): what IfiPlatform is, how to get it running, and where all the docs are.
+
 **On this page:** [Set up](#1-set-up-once) · [Make a change](#2-make-a-change-step-by-step) · [Good pull requests](#good-pull-requests) · [Code style](#code-style) · [Reporting an issue](#reporting-an-issue) · [Who can contribute](#who-can-contribute) · [Questions](#questions)
 
 ## 1. Set up (once)
@@ -39,7 +41,7 @@ Do this for every change. There are two ways to do the Git parts. Pick the one y
    `<type>` is the issue's Type: `bug`, `feature` or `task`. For example `bug/login-redirect` or `feature/mobile-nav`.
    A small change with no issue, like a typo or a CI tweak, can also use `docs` or `ci`, for example `docs/fix-readme-typo`. Most changes should have an issue, though.
 
-   **Using the `ifi` commands?** `ifi fix-issue <issue number>` does this step for you and names the branch from the issue. In step 6, `ifi save "message"` adds and commits your changes (it asks before adding new files), and in step 7 `ifi pull-request` pushes and prints the pull request link. Your branch fell behind `main`? `ifi update`. Something odd? `ifi check`.
+   **Using the `ifi` commands?** `ifi fix-issue <issue number>` does this step for you and names the branch from the issue. In step 6, `ifi save "message"` adds and commits your changes (it asks before adding new files, and ends the commit message with a `Made-with: ifi` line so we can count how many people use ifi), and in step 7 `ifi pull-request` pushes and prints the pull request link. Your branch fell behind `main`? `ifi update`. Something odd? `ifi check`.
 
 3. **Make your change.**
    Not sure which file to open? See [Where do I change…?](docs/contributing/how_this_project_works.md#where-do-i-change). The site at http://localhost:8000 reloads when you save.
