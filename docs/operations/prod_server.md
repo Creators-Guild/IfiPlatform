@@ -1,6 +1,6 @@
 # Production server
 
-Last updated: 2026-10-13
+Last updated: 2026-10-27
 
 How the live IfiPlatform site is hosted, deployed and secured. For the
 software itself, see [architecture/tech_stack.md](../architecture/tech_stack.md).
@@ -165,8 +165,9 @@ SKIP_COUNTDOWN=true bash deploy/deploy.sh   # without the 10-minute warning
 - **Hosts:** `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` come from `.env`,
   not from code.
 - **Secrets:** only in `.env`, which is gitignored and never committed. The
-  GitHub Actions deploy uses repository secrets for the server address,
-  user and SSH key.
+  GitHub Actions deploy gets the server address, user and SSH key from
+  the `production` environment, which only `main` can use (see
+  [access_and_handover.md](access_and_handover.md#protecting-main-and-the-deploy-key)).
 - **sudo:** the `ubuntu` user, which the deploy also logs in as, has
   passwordless sudo for **everything** (Ubuntu's cloud-init default, in
   `/etc/sudoers.d/90-cloud-init-users`). Anyone with the deploy SSH key
