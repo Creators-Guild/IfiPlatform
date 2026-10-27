@@ -15,6 +15,20 @@ t_save_commits_changes_in_every_folder() {
     same "$(git log -1 --format=%s)" "Add notes and a tool" "commit message"
 }
 
+t_save_marks_the_commit_as_made_with_ifi() {
+    clone_as contributor
+    start_issue
+    echo "More" >>README.md
+    run_ifi save "Update the readme"
+    succeeds
+    same "$(git log -1 --format=%B)" $'Update the readme\n\nMade-with: ifi' "commit message"
+    same "$(git log --grep="Made-with: ifi" --format=%s)" "Update the readme" "found by git log --grep"
+    has '$ git commit -m "Update the readme" -m "Made-with: ifi"'
+    [[ "$OUT" == *$'In plain Git, this was:\n  git add -A\n  git commit -m "Update the readme"\n'* ]] ||
+        fail "the recap should show the plain git commit -m"
+    has '(ifi also added the line "Made-with: ifi" to the commit message:'
+}
+
 t_save_asks_for_a_message() {
     clone_as contributor
     start_issue

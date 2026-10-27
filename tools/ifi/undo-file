@@ -65,7 +65,7 @@ else
     run "Keep a copy of your branch as it is now, just in case" git branch "$backup"
 fi
 
-run "Commit that" git commit -m "$message"
+commit_marked "Commit that" "$message"
 push_branch "Send it to GitHub, so your pull request updates by itself"
 echo
 echo "Your pull request no longer changes:"

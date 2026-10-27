@@ -216,12 +216,27 @@ run() {
     return $status
 }
 
+# commit_marked "what it does" "message": git commit, with a "Made-with: ifi"
+# line at the end of the message, so the project can count how many people
+# use ifi (git log --grep="Made-with: ifi"). The recap shows the plain
+# git commit -m you'd type yourself, and says that ifi added the line.
+MARKED=false
+commit_marked() {
+    run "$1" git commit -m "$2" -m "Made-with: ifi" || return
+    GIT_DONE[${#GIT_DONE[@]} - 1]="$(shown git commit -m "$2")"
+    MARKED=true
+}
+
 # "In plain Git, this was:" with every git command this run used.
 git_recap() {
     [[ ${#GIT_DONE[@]} -gt 0 ]] || return 0
     echo
     echo "In plain Git, this was:"
     printf '  %s\n' "${GIT_DONE[@]}" | sed 's/ --quiet//g'
+    if $MARKED; then
+        echo "  (ifi also added the line \"Made-with: ifi\" to the commit message:"
+        echo "  it lets the project count how many people use ifi.)"
+    fi
 }
 
 # "Your turn:" and what's up to you now, before the choices.
