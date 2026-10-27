@@ -26,25 +26,28 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | Ports panel | One port: 8000, labelled **Website**, green dot, shows runserver |
 | ☐ | `ifi check` | No ❌. If "Not logged in": run `git push`, click **Allow**, log in, run it again |
 | ☐ | `ifi fix-issue <test issue>` | The issue's title; a branch named `<type>/<few-words>` |
-| ☐ | Change the file, `ifi save "Orange cards"` | The file under "Committing these files" |
+| ☐ | Change the file, `ifi save "Orange cards"` | "✓ Marked every change in the repo to be committed", with the file under it |
 | ☐ | `ifi pull-request`, Ctrl+click the link | GitHub's "Open a pull request" page, with `Closes #<nr>` filled in |
 | ☐ | Open the pull request | The template in the description; CI runs |
 | ☐ | Make a new file `notes.txt` and change a file, `ifi save "Notes"`, answer n | "New files Git doesn't know yet (untracked)" lists `notes.txt`; only the changed file is committed |
 | ☐ | Change another file by mistake, save, pull-request | The file shows in the pull request's Files changed |
 | ☐ | `ifi undo-file <that file>` | The file goes back, and is gone from Files changed |
+| ☐ | In `ifiplatform/`: change and save a file there, then `ifi undo-file` with its path as `git status` shows it in that folder | It works (paths are relative to where you are, like in Git) |
 | ☐ | Clone the fork again into another folder (outside the container is fine), `ifi fix-issue <test issue>`, answer y | "There's already a branch called … on GitHub", its last commit, then you're on it with your changes |
 | ☐ | Change a file, then `ifi fix-issue <another issue>` | "You have changes on … that aren't committed yet. Commit them first" |
 | ☐ | Make a commit on main that changes the same line (as yourself, in another clone or on GitHub) | |
 | ☐ | `ifi check` | "has 1 new commit(s)" and "You'll likely get a conflict in: ..." |
 | ☐ | `ifi update`, answer y to help | The conflict explanation; VS Code shows Accept buttons on the file |
-| ☐ | Fix the file, `ifi update`, then `ifi pull-request` | "✓ Replaced your branch on GitHub with the updated one", and the pull request shows the new commits |
+| ☐ | While it waits for you: `ifi save "x"` | "ifi update stopped at a conflict…"; nothing is committed |
+| ☐ | Fix the file in VS Code's merge editor but leave one `<<<<<<<`, press **Complete Merge**, then `ifi update` | "These files still have conflict markers" (even though the file is staged) |
+| ☐ | Fix the file, `ifi update`, then `ifi pull-request` | update's "Your turn" warns about VS Code's Sync button. pull-request: "✓ Replaced your branch on GitHub with the updated one", and the pull request shows the new commits |
 | ☐ | On your branch, add a field to a model and `ifi migrate`, save. Add another field in the same app on main (another clone), with its migration | |
 | ☐ | `ifi check`, then `ifi update` | check: "both added a database change (a migration) in: …". update: the same, with `ifi migrate` under "Your turn" |
 | ☐ | `ifi migrate`, answer y to Django | "Two database changes … were made at the same time", Django lists both, a `…_merge_….py` file appears; then `ifi test` passes |
 | ☐ | On your branch, change a Norwegian text in `django.po`, run `compilemessages`, save. On main (another clone), add another translation to the same file, with its `.mo` | |
 | ☐ | `ifi update` | "Only translation files clash, so ifi joins them for you", ✓ Rebuilt the .mo files, the file listed at the end; the site shows both translations |
 | ☐ | On a branch made with plain Git: `ifi save`, `ifi pull-request`, press Enter at the issue question | It says to delete the `Closes #` line |
-| ☐ | Press **Update branch** on the pull request on GitHub, then make a change and `ifi save` + `ifi pull-request` | "Your branch on GitHub has commits that aren't on your computer", the Update branch commit with its author, and the `git pull --rebase` line. Run it, then pull-request works |
+| ☐ | Press **Update branch** on the pull request on GitHub, then make a change and `ifi save` + `ifi pull-request` | "Your branch on GitHub has commits that aren't on your computer", only the Update branch commit with its author (not main's commits), and the `git pull --rebase` line. Run it, then pull-request works |
 | ☐ | Merge the pull request (as yourself), then `ifi check` and `ifi cleanup` (still on the branch) | check: "Your pull request … is merged". cleanup: switches you to main, deletes the branch here and on the fork |
 | ☐ | `command -v gh` in the container terminal | Nothing: the GitHub CLI isn't in the container |
 | ☐ | Computer that logs in with gh, the other account *not* selected in gh: `ifi account switch <other>` | The gh message with `gh auth switch --user <other>`; no password prompt; `git remote -v` unchanged |
