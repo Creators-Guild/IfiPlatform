@@ -1,6 +1,6 @@
 # Server setup
 
-Last updated: 2026-10-14
+Last updated: 2026-10-27
 
 How to build the production server from zero, for example if the VM is
 lost or has to be replaced. Follow the steps in order. For how the
@@ -305,7 +305,7 @@ sudo sshd -T | grep -E 'passwordauthentication|permitrootlogin'
 # should show: passwordauthentication no, permitrootlogin without-password
 ```
 
-**GitHub:** in the repo's Settings → Secrets and variables → Actions,
+**GitHub:** in the repo's Settings → Environments → `production`,
 update `SERVER_IP` to the new address. If the deploy key changed, update
 `SSH_PRIVATE_KEY` and add its public key to `~/.ssh/authorized_keys` on
 the server. `SERVER_USER` stays `ubuntu`.

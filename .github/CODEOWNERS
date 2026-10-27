@@ -1,0 +1,6 @@
+# Changes to these paths need approval from the people listed, on top of the
+# normal review. They control the deploy and the server.
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+/.github/   @hkkniemi
+/deploy/    @hkkniemi

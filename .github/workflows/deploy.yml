@@ -50,6 +50,7 @@ jobs:
     # always() so this still runs when `ci` was skipped via skip_ci.
     if: always() && needs.changed.outputs.changed == 'true' && (inputs.skip_ci || needs.ci.result == 'success')
     runs-on: ubuntu-latest
+    environment: production  # holds the deploy secrets; only main may use it
     concurrency: deploy  # never two deploys at the same time
     steps:
       - uses: appleboy/ssh-action@v1.2.5
