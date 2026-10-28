@@ -35,7 +35,7 @@ Everything below is there to keep these promises.
 
 | Place | What's in it | Who can reach it |
 | --- | --- | --- |
-| Site database | Accounts, the GitHub ID of everyone who connects GitHub, and a short queue of events from people who consented (deleted once the research job has read them) | The site, root |
+| Site database | Accounts, the GitHub ID of everyone who connects GitHub, and a short queue of events from people who consented (deleted once the research job has read them, and left out of the site database's backup) | The site, root |
 | Link database | Pseudonym ↔ user ↔ GitHub ID, and the exact time of each event, encrypted | The research job, the project lead by hand when needed, root |
 | Research database | Pseudonyms, and events with year, month, time of day, type and size | Written only by the research job. Read by the project lead (read-only), root |
 | Keys (encryption and lookup) | A file only the research job's Linux user can read | The research job, root |
@@ -148,6 +148,10 @@ for analysis, since the link database is opened by hand only when needed
    project would lose them too.
    Write down *where* the keys are (never the keys themselves), so they
    can be found when a backup is needed.
+   Decided 2026-10-28: the site database's backup leaves out the rows of
+   the research queue. They hold a user ID and the exact time of an
+   event, which belong only in the link database. A row lives a few
+   minutes, so a restore loses at most a few minutes of events.
 5. **Copies for analysis.** Where to analyse is decided later. UiO's
    storage guide approves NREC for green and yellow data; this data is
    most likely yellow. Looking at the data through an SSH tunnel

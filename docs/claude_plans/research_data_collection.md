@@ -7,7 +7,8 @@ users into contributors. The data collection is approved by Sikt. This plan
 covers the code only (no interviews). Delete this plan when the build is
 done.
 
-**Status: planning only.** Don't start building until Hanna says so.
+**Status:** Phase 1 is built (not merged yet). Phase 2 has started.
+Build each phase only when Hanna says so.
 
 Security and data handling (who can reach what, risks, open questions):
 `docs/research/data_handling.md`. Its open questions are Hanna's to decide.
@@ -73,6 +74,8 @@ participant 7f3a…   #3   contribution: article   way in: site editor   2026-11
 - The exact times disappear with the link database in June 2027.
 
 Sizes stay exact for now (640 words, 137 lines), and roles aren't merged.
+Decided 2026-10-28: words for articles, issues and comments; lines
+added + removed for pull requests.
 Hanna changes this if needed.
 
 **Paths** (decided 2026-10-28): every row gets month, time block, weekday
@@ -155,9 +158,23 @@ then, so between December and May this person had two roles.
 - Data can only be used for what the consent text says. If follow-up
   research is likely, say so in the consent text now (as far as Sikt
   allows).
-- Moderation: check on prod whether pages go through Wagtail's default
-  "Moderators approval" workflow:
-  `python manage.py shell -c "from wagtail.models import WorkflowPage; print(list(WorkflowPage.objects.values_list('page__title','workflow__name','workflow__active')))"`
+- Moderation: check on prod whether pages go through moderation. The
+  workflow alone doesn't decide it: the site's editor mode publishes
+  directly for anyone with publish rights, so only groups *without*
+  them go through "Moderators approval". Counts only, no names:
+
+  ```bash
+  python manage.py shell -c "
+  from collections import Counter
+  from wagtail.models import GroupPagePermission, WorkflowPage, WorkflowState
+  print('Workflows:', list(WorkflowPage.objects.values_list('page__title', 'workflow__name', 'workflow__active')))
+  print('Groups that can publish:', sorted(set(GroupPagePermission.objects.filter(permission__codename='publish_page').values_list('group__name', flat=True))))
+  print('Moderation so far:', dict(Counter(WorkflowState.objects.values_list('status', flat=True))))
+  "
+  ```
+
+  On a fresh dev database: the workflow is on for the whole tree, only
+  Moderators can publish, and nothing has been moderated yet.
 
 ## Questions
 
@@ -217,7 +234,7 @@ Hanna decides these. Don't build the parts that are still open.
    - Already in the plan: only the job writes research data (Hanna's user
      is read-only), and the feature timeline dates every onboarding
      change.
-   - Suggested, not decided: write down the analysis questions (dated)
+   - Decided 2026-10-28: write down the analysis questions (dated)
      before collection starts, and a reflexivity section in the thesis.
 10. **Recruitment.** Decided:
     - a one-time question after signup, or at the next login for existing
@@ -375,9 +392,39 @@ Start exploring as soon as this works.
 - Write the consent text (Norwegian, the source of truth, and English)
   and the privacy policy update.
 - Run the moderation check on prod (see Decided).
-- Small decisions: sizes per type (words for articles, issues and
-  comments; lines for pull requests?), the two suggestions in Questions
-  9, and leaving the queue table's rows out of the main database's backup.
+- Small decisions, all decided 2026-10-28: sizes per type (see Focus),
+  both suggestions in Questions 9, and leaving the queue table's rows out
+  of the main database's backup.
+- Write down the analysis questions, dated, before the first participant.
+
+**Sikt check: what to look for.** Found by comparing the plan with the
+summary of the application (in `docs/research/data_handling.md`), not
+the exact wording, so each one is "check", not "wrong":
+
+1. **Where consent is stored.** The application: in IfiPlatform's
+   database, tied to the pseudonym. The plan: in the link database; the
+   site database only has "takes part: yes/no", with no pseudonym.
+2. **Level** (bachelor, master, PhD). The application lists study
+   year/cohort, but not level.
+3. **Earlier project experience.** The application lists it for
+   reviewers. The plan asks every participant.
+4. **History before consent** (the optional second tick). Does the
+   letter allow using what someone did before they consented?
+5. **Keeping data after the account is deleted** ("keep" in the delete
+   form). Can't be withdrawn after that, because nothing points to the
+   person.
+6. **Backups:** withdrawn data stays in backups for up to 14 days.
+7. **Exact times in the link database.** The application describes it
+   as holding the link between pseudonym and GitHub account.
+8. **A copy of the link database's key on OneDrive** (Microsoft 365 for
+   UiO). The application says everything is on NREC, including the link.
+9. **Follow-up research:** if it's likely, the consent text should say
+   so now.
+10. **The UiO email check:** the address is used once for a link and not
+    kept.
+
+Whatever the letter doesn't cover goes in a change notice, or out of
+the plan.
 
 ### Phase 3: research setup, with made-up data only
 
