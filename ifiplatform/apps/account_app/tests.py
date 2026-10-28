@@ -191,6 +191,7 @@ class EditorNoticeTests(TestCase):
         self.client.login(username="eve", password="pw")
         response = self.client.get(reverse("account_settings"))
         self.assertTrue(response.context["show_editor_notice"])
+        self.assertContains(response, f'href="{reverse("content_terms")}"')
 
     def test_agree_hides_notice(self):
         user = User.objects.create_user(username="frank", password="pw")
@@ -218,6 +219,21 @@ class EditorNoticeTests(TestCase):
         self.client.login(username="henry", password="pw")
         response = self.client.get(reverse("account_settings"))
         self.assertFalse(response.context["show_editor_notice"])
+
+
+class LegalPagesTests(TestCase):
+    def test_content_terms_have_their_own_page(self):
+        with translation.override("en"):
+            response = self.client.get(reverse("content_terms"))
+        self.assertContains(response, "become the property of IfiPlatform")
+
+    def test_privacy_policy_links_to_content_terms(self):
+        with translation.override("en"):
+            response = self.client.get(reverse("privacy_policy"))
+            content_terms_url = reverse("content_terms")
+        self.assertNotContains(response, "become the property of IfiPlatform")
+        self.assertContains(response, f'href="{content_terms_url}"')
+        self.assertNotContains(response, "TODO")
 
 
 class WagtailBuiltinGroupsTests(TestCase):

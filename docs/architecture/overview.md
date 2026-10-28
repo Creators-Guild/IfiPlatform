@@ -164,7 +164,7 @@ flowchart LR
     subgraph addr["Addresses under /account/"]
         a1["signin, login, logout,<br/>verify/..."]
         a2["account_settings, export_data,<br/>delete_account, ..."]
-        a3["privacy_policy"]
+        a3["privacy_policy,<br/>content_terms"]
     end
     subgraph code["Code in views/"]
         v1["login_views.py"]

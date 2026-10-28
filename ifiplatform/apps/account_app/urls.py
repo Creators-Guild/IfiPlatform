@@ -7,6 +7,7 @@ from .views import legal_views
 
 urlpatterns = [
     path("privacy_policy", legal_views.privacy_policy_view, name="privacy_policy"),
+    path("content_terms", legal_views.content_terms_view, name="content_terms"),
     path("signin", login_views.signin_view, name="signin"),
     path("signin_success", login_views.signin_success_view, name="signin_success"),
     path(

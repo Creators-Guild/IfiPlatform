@@ -19,19 +19,24 @@
             <p>{% blocktrans %}This data is used to create and secure your account, verify your email address, let you write and be credited for articles/news and own study decks, and reach you if we need to (e.g. a security notice). The legal basis is contract necessity: we need it to provide the account-based features you sign up for.{% endblocktrans %}</p>
 
             <h2>{% trans "Cookies and third parties" %}</h2>
-            <p>{% blocktrans %}IfiPlatform does not use any analytics, advertising, or tracking scripts, and does not share your data with any third party. The only cookies in use are Django's own session and CSRF cookies, required for login and form security.{% endblocktrans %}</p>
+            <p>{% blocktrans %}IfiPlatform does not use advertising or tracking cookies, and does not share your data with any third party. The only cookies in use are Django's own session and CSRF cookies, required for login and form security.{% endblocktrans %}</p>
+
+            <h2>{% trans "Visitor statistics" %}</h2>
+            <p>{% blocktrans %}To see which pages are used, we count visits and clicks on some links with Umami, which runs on IfiPlatform's own server. Umami uses no cookies, doesn't store your IP address, and isn't linked to your account. It records the page, the site you came from, and your browser, operating system, device type, language and country.{% endblocktrans %}</p>
+
+            <h2>{% trans "Numbers for research" %}</h2>
+            <p>{% blocktrans %}We count, per month, things like how many accounts are created, how many pages are published, and how many issues and pull requests are made in the project's public GitHub repository. These numbers are used in a master's thesis about how people start contributing to the platform. They are totals for the whole site only: they never say who did what, and numbers from 1 to 4 are shown as "fewer than 5".{% endblocktrans %}</p>
 
             <h2>{% trans "How long we keep it" %}</h2>
             <p>{% blocktrans %}Your account data is kept until you delete your account (see "Your rights" below). If you sign up but never confirm your email address, that unverified account -- and the name/email on it -- is automatically deleted after {{ retention_days }} days.{% endblocktrans %}</p>
-
-            <h2 id="editor-terms">{% trans "Content ownership for articles and news" %}</h2>
-            <p>{% blocktrans %}Info articles and news you write on IfiPlatform become the property of IfiPlatform and the student union(s) it represents -- they aren't deleted if you later delete your account, since they're institutional content, not personal data about you. What does stay your choice is how they're credited: under your real name, your nickname, or anonymously as "Unknown". You'll be asked to explicitly agree to this the first time you're given permission to write pages; if you disagree, that permission is removed again.{% endblocktrans %}</p>
+            {% url 'content_terms' as content_terms_url %}
+            <p>{% blocktrans %}Articles and news you write stay published after you delete your account, as described in the <a href="{{ content_terms_url }}">content ownership terms</a>.{% endblocktrans %}</p>
 
             <h2>{% trans "Your rights" %}</h2>
             <p>{% blocktrans %}You can view and correct your name/email/nickname at any time from Account Settings. You can download a copy of the personal data we hold on you ("Download my data"). You can delete your account entirely ("Delete my account") -- at that point you also choose whether to delete your study decks/flashcards outright or keep them, and how any articles you wrote should be credited going forward.{% endblocktrans %}</p>
 
             <h2>{% trans "Contact" %}</h2>
-            <p>{% blocktrans %}To exercise any of these rights, or with questions about this policy, contact: {% endblocktrans %}[TODO: fill in contact email]</p>
+            <p>{% blocktrans %}To exercise any of these rights, or with questions about this policy, contact: {% endblocktrans %}<a href="mailto:hkniemi@uio.no">hkniemi@uio.no</a></p>
         </div>
     </div>
 {% endblock %}

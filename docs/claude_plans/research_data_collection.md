@@ -158,23 +158,6 @@ then, so between December and May this person had two roles.
 - Data can only be used for what the consent text says. If follow-up
   research is likely, say so in the consent text now (as far as Sikt
   allows).
-- Moderation: check on prod whether pages go through moderation. The
-  workflow alone doesn't decide it: the site's editor mode publishes
-  directly for anyone with publish rights, so only groups *without*
-  them go through "Moderators approval". Counts only, no names:
-
-  ```bash
-  python manage.py shell -c "
-  from collections import Counter
-  from wagtail.models import GroupPagePermission, WorkflowPage, WorkflowState
-  print('Workflows:', list(WorkflowPage.objects.values_list('page__title', 'workflow__name', 'workflow__active')))
-  print('Groups that can publish:', sorted(set(GroupPagePermission.objects.filter(permission__codename='publish_page').values_list('group__name', flat=True))))
-  print('Moderation so far:', dict(Counter(WorkflowState.objects.values_list('status', flat=True))))
-  "
-  ```
-
-  On a fresh dev database: the workflow is on for the whole tree, only
-  Moderators can publish, and nothing has been moderated yet.
 
 ## Questions
 
@@ -193,7 +176,7 @@ Hanna decides these. Don't build the parts that are still open.
    | An edit to someone else's page above a low threshold | A review (also stored as "who helps whom") |
    | | A pull request closed without merging |
    | | A small edit to someone else's page |
-   | | A draft: finished by someone else, abandoned, or rejected |
+   | | A draft: finished by someone else, or abandoned |
 
    Decided: each edit to someone else's page stores the number of words
    added or changed. For now, an edit counts as a contribution from 40
@@ -213,11 +196,12 @@ Hanna decides these. Don't build the parts that are still open.
    later, so the consent form has a second, optional tick: "You may also
    use what I did on the platform before I consented." Not ticked in
    advance, and only used if Hanna decides to go back.
-6. **Drafts.** Decided: a mini-contribution, in three cases:
+6. **Drafts.** Decided: a mini-contribution, in two cases:
    - finished by someone else: recorded when the page is published; the
      publisher gets a contribution
    - abandoned: after 30 days without being published (a late check)
-   - rejected by a moderator, if pages go through moderation
+   Drafts rejected by a moderator are left out (decided 2026-10-28), so
+   no moderation check is needed.
 7. **Reviewers who aren't participants.** Decided: stored as "reviewed by
    a non-participant".
 8. **Event dates.** Decided: not now, on the future agenda.
@@ -343,8 +327,8 @@ The most useful number is probably how far people get, for example
   GitHub, Report a bug, Request a feature, with Umami click events. The bug
   link prefills the form's "Related" field with the page path (skipped on
   `/account/` pages, whose paths can hold one-time codes). An issue whose
-  text contains that line came from the site. The four link texts still
-  need Norwegian translations (`makemessages`).
+  text contains that line came from the site. Norwegian link texts added
+  2026-10-28.
 - **`CONTRIBUTING.md`** links to the README near the top, since the footer
   sends people there first.
 - **`Made-with: ifi`** commit line (above).
@@ -386,12 +370,17 @@ Start exploring as soon as this works.
 
 ### Phase 2: before any participant (mostly outside the code)
 
+Decided 2026-10-28: the Sikt check and the consent text wait until later,
+but must be done before Phase 5 (the first participant). The privacy
+policy already mentions Umami and the totals (2026-10-28). The research
+notice gets its own page, like the content ownership terms
+(`/account/content_terms`), not a section in the privacy policy.
+
 - Check the Sikt application and information letter against the plan:
   the optional tick for history before consent, and the consent text as
   a whole. Change notice if needed.
 - Write the consent text (Norwegian, the source of truth, and English)
   and the privacy policy update.
-- Run the moderation check on prod (see Decided).
 - Small decisions, all decided 2026-10-28: sizes per type (see Focus),
   both suggestions in Questions 9, and leaving the queue table's rows out
   of the main database's backup.
