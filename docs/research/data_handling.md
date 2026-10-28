@@ -100,6 +100,10 @@ for analysis, since the link database is opened by hand only when needed
   link database by hand when needed, the research database read-only).
 - Numbers about everyone are totals only, per month or term, and 1–4 is
   shown as "fewer than 5".
+- Umami's visitor statistics are not personal data: no cookies, no
+  stored IP addresses, nothing linked to an account. They're used for the
+  research as numbers about the whole site, and the privacy policy says
+  so (decided 2026-10-28).
 - Only what the analysis needs is kept. June 2027 deletes only the link
   database; the research database stays. When the research data is
   deleted later, only the results and the proof of them remain.
