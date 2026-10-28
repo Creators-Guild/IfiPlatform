@@ -1,6 +1,6 @@
 # Architecture overview
 
-Last updated: 2026-10-26
+Last updated: 2026-10-28
 
 A map of how IfiPlatform fits together: which app does what, how pages are
 organized, and what happens between a browser request and the HTML that
@@ -44,6 +44,7 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
 | `account_app` | plain Django | `/account/` | `Profile` | in use |
 | `study_app` | plain Django | `/study/` | `Deck`, `Card` | under development |
 | `yourpage_app` | plain Django | `/yourpage/` | none yet | under development |
+| `research_app` | plain Django | none | none yet | in use (one command) |
 
 - **`core_app`** holds things every app needs: the "deploy coming" banner,
   the sitemap, static file storage, the "under development" placeholder
@@ -56,6 +57,13 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
   accept before using the Wagtail admin.
 - **`study_app`** and **`yourpage_app`** show a placeholder page for now.
   This is switched by `APPS_UNDER_DEVELOPMENT` in `settings.py`.
+- **`research_app`** holds the code for the master's thesis research. For
+  now that's one command, `research_totals`, which prints whole-site
+  monthly totals (see
+  [management_commands.md](../operations/management_commands.md#research_totals)).
+  Changes to it need the code owner's approval (`.github/CODEOWNERS`).
+  How the research data is handled:
+  [research/data_handling.md](../research/data_handling.md).
 
 ### How the apps fit together
 

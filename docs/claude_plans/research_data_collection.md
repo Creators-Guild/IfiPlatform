@@ -339,6 +339,10 @@ Each phase is finished, checked and merged before the next one starts.
 
 ### Phase 1: totals (no consent, no new database)
 
+**Built 2026-10-28, not merged yet.** Docs: `docs/operations/
+management_commands.md#research_totals`; design notes:
+`docs/claude_context/research_totals.md`.
+
 A new `research_app`, where all research code will live, with one
 command, `research_totals`. It prints monthly totals as CSV, from the site
 database, the GitHub API (public repo, so the "before" months come for

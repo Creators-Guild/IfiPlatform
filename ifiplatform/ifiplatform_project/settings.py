@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "study_app.apps.StudyAppConfig",
     "account_app.apps.AccountAppConfig",
     "yourpage_app.apps.YourPageAppConfig",
+    "research_app.apps.ResearchAppConfig",
     "django.contrib.postgres",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",

@@ -1,6 +1,6 @@
 # Custom manage.py commands
 
-Last updated: 2026-10-13
+Last updated: 2026-10-28
 
 This project's own `manage.py` commands, beyond Django's built-in ones
 (`migrate`, `createsuperuser`, `test`, `makemessages`/`compilemessages`,
@@ -361,6 +361,52 @@ is meant to be invoked periodically from *outside* Django entirely (host
 cron, or your platform's own scheduled-job feature). Nothing runs it for
 you automatically. Safe to re-run. `--dry-run` lists matching accounts
 without deleting them.
+
+## research_app
+
+### research_totals
+
+```bash
+py manage.py research_totals [--since YYYY-MM] [--until YYYY-MM] [--no-github] [--repo owner/name]
+py manage.py research_totals > totals.csv      # save it
+```
+
+Prints monthly totals for the master's thesis research as CSV, one row
+per month. It reads the site database, and GitHub's public API for issues,
+pull requests and commits. It's whole-site numbers only, with no consent
+needed, so it follows three rules (see
+[research/data_handling.md](../research/data_handling.md)):
+
+- only counts, never who: nothing in the output names anyone
+- 1 to 4 are shown as `<5`, so small groups can't be told apart
+- months, in Oslo time; by default from the first month with data to the
+  last complete month, so a printed month never changes later
+
+Bots on GitHub, and publishing done by code (the Peoply sync), don't
+count.
+
+| Column | Counts |
+| --- | --- |
+| `new_accounts` | Verified accounts created that month |
+| `people_saved_draft` | People who saved a page version |
+| `people_published` | People who published a page |
+| `first_time_publishers` | People who published for the first time |
+| `pages_first_published` | Pages published for the first time by a person |
+| `drafts_never_published` | Pages first saved that month and still not published 30 days later (low for the last month) |
+| `issues_opened` | Issues opened on GitHub |
+| `bug_reports`, `feature_requests`, `docs_issues`, `task_issues` | Issues by template label |
+| `issues_from_site` | Issues opened through the footer's "Report a bug" link |
+| `good_first_issues_closed` | `good first issue` issues closed as completed |
+| `prs_opened`, `prs_merged` | Pull requests opened, and merged |
+| `people_opened_pr` | People who opened a pull request |
+| `first_time_pr_authors_merged` | People whose first pull request was merged |
+| `ifi_commits` | Commits with the `Made-with: ifi` line |
+| `people_using_ifi` | People who made those commits |
+
+`--no-github` leaves out the GitHub columns, for example without
+internet. The repo is public, so no login is needed. If GitHub's limit of
+60 requests an hour is reached, set `GITHUB_TOKEN` to any GitHub token
+(no permissions needed) for 5000 an hour.
 
 ## core_app
 
