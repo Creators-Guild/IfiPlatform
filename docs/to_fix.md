@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-10-27
+Last updated: 2026-10-28
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -155,6 +155,13 @@ those features launch.
 
 ## Safety and cleanup
 
+- [ ] **More thorough logs across the site.** There is little record of
+  who did what. Wagtail logs page actions and the Django admin logs its
+  own changes, but nothing logs logins, failed logins, group and
+  permission changes, account deletions or data exports. Idea: an audit
+  log for these. Logs are personal data too (usernames, IP addresses), so
+  decide how long they're kept, and never log research data (see
+  [research/data_handling.md](research/data_handling.md)).
 - [ ] **Some style save endpoints accept any number.** `save_quick_style`
   (`content_side_padding`), `save_header_style` (font sizes, padding) and
   `save_toc_icon_style` have no range check, unlike `save_block_style` and
@@ -231,6 +238,33 @@ Decisions to come back to once the planned ifi changes are built.
   docs, ci), or ask "Most changes should have an issue. Sure? (y/n)".
 
 ## Server
+
+- [ ] **Move the real site to the Docker setup.** The Halloween mock site
+  already runs on it ([operations/docker_server.md](operations/docker_server.md)).
+  `ifiplattform.no` still runs the old setup in
+  [operations/prod_server.md](operations/prod_server.md). The research
+  databases will need an init script in `compose.prod.yml`.
+- [ ] **Limited server access for the devops person.** Today the only
+  login is `ubuntu`, which has full root, so it can read `.env` and every
+  database, including the research data. The devops person only needs to
+  restart services, read logs and check the server. Idea: their own Linux
+  user and SSH key, with:
+  - a short sudo list (restart services, `systemctl status`). Never
+    commands that can open an editor, a pager or a shell, such as
+    `sudo journalctl`, `sudo nano`, `sudo systemctl edit`,
+    `sudo -u postgres psql` or `sudo apt`.
+  - logs through the `systemd-journal` and `adm` groups instead of sudo
+  - no access to `/home/ubuntu` (code and `.env`), `/mnt/backups` or the
+    database
+  - not a member of the NREC project, since the console, snapshots and
+    volumes get around Linux users
+
+  Also: with Docker, anyone in the `docker` group is root. A restart then
+  needs an exact sudo rule for the one `docker compose` command. (The
+  deploy key and code getting into `main` are already handled, see
+  [operations/access_and_handover.md](operations/access_and_handover.md#protecting-main-and-the-deploy-key).)
+
+  Do this together with the Docker move, since the details differ.
 
 From [operations/server_setup.md](operations/server_setup.md#notes-and-known-issues):
 
