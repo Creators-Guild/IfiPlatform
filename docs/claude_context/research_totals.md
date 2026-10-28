@@ -51,13 +51,24 @@ research are in `docs/research/data_handling.md`.
 
 ## fake_data.py and seed_research_data
 
-- **`EXPECTED` is written by hand, on purpose.** It's what the site
-  totals should be for the steps in `fake_data.create()`, worked out from
-  the steps, not from the counting code. `FakeDataTests` compares it with
-  `site_totals()`, so a counting bug or a step changed without updating
-  `EXPECTED` fails, naming the month and column. Don't compute it from
-  `totals.py`. Only person 13's two drafts (29 and 31 days before `now`)
-  are added in `expected()`, since their month depends on today's date.
+- **`EXPECTED_SITE` and `EXPECTED_GITHUB` are written by hand, on
+  purpose.** They're what the totals should be for the steps in
+  `fake_data.create()` and `fake_data.github()`, worked out from the
+  steps, not from the counting code. `FakeDataTests` compares them with
+  `site_totals()` and `github_totals()`, so a counting bug or a step
+  changed without updating the table fails, naming the month and column.
+  Don't compute them from `totals.py`. Only person 13's two drafts (29
+  and 31 days before `now`) are added in `expected_site()`, since their
+  month depends on today's date.
+- **`fake_data.github()` is plain data in the API's shape**, no database.
+  Every fake pull request is also put in the issues list with a
+  `pull_request` key, like GitHub's issues endpoint does.
+  `seed_research_data --github-file` saves it as JSON
+  (`{"issues", "pulls", "commits"}`), and `research_totals
+  --github-file` reads that instead of calling `github_api`. There's
+  deliberately no option to save the real API answer: it holds logins,
+  IDs and commit emails, which goes against the totals' counts-only
+  rule. Ask Hanna before adding one.
 - **Fake pages are never live.** `_FakeSite.publish` writes the
   `wagtail.publish` log row and `first_published_at` itself instead of
   calling Wagtail's `publish()`, which fires `page_published` and marks

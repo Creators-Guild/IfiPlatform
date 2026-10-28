@@ -8,6 +8,7 @@ Save it to a file:
 Design notes: docs/claude_context/research_totals.md"""
 
 import csv
+import json
 import re
 
 import requests
@@ -43,10 +44,16 @@ class Command(BaseCommand):
             "--until",
             help="Last month, YYYY-MM. Default: the last complete month.",
         )
-        parser.add_argument(
+        github_source = parser.add_mutually_exclusive_group()
+        github_source.add_argument(
             "--no-github",
             action="store_true",
             help="Only the site database; leave out the GitHub columns.",
+        )
+        github_source.add_argument(
+            "--github-file",
+            help="Read GitHub's data from this JSON file instead of from GitHub "
+            "(for example the made-up data from seed_research_data).",
         )
         parser.add_argument(
             "--repo",
@@ -66,7 +73,16 @@ class Command(BaseCommand):
         now = timezone.now()
         site = site_totals(now)
         github = {}
-        if not options["no_github"]:
+        if options["github_file"]:
+            try:
+                with open(options["github_file"], encoding="utf-8") as file:
+                    data = json.load(file)
+                github = github_totals(data["issues"], data["pulls"], data["commits"])
+            except (OSError, ValueError, KeyError) as error:
+                raise CommandError(
+                    f"Can't read {options['github_file']}: {error}"
+                ) from error
+        elif not options["no_github"]:
             repo = options["repo"]
             try:
                 github = github_totals(

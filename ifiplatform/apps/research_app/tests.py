@@ -12,6 +12,7 @@ from wagtail.models import Page, PageLogEntry, Revision
 
 from research_app import fake_data
 from research_app.totals import (
+    GITHUB_COLUMNS,
     SITE_COLUMNS,
     github_totals,
     last_complete_month,
@@ -209,19 +210,29 @@ class SiteTotalsTests(TestCase):
 
 
 class FakeDataTests(TestCase):
-    def test_totals_are_what_the_fake_data_expects(self):
-        # The second date is just after midnight on 1 March in Oslo, still
-        # February in UTC, with a short month before it.
-        for now in (_at("2026-11-15 12:00"), _at("2027-02-28 23:30")):
+    # The second date is just after midnight on 1 March in Oslo, still
+    # February in UTC, with a short month before it.
+    NOWS = (_at("2026-11-15 12:00"), _at("2027-02-28 23:30"))
+
+    def _assert_totals(self, totals, expected, columns, now):
+        for month in sorted(expected.keys() | totals.keys()):
+            with self.subTest(now=now, month=month):
+                found = totals.get(month, {})
+                self.assertEqual(
+                    {column: found.get(column, 0) for column in columns},
+                    expected.get(month),
+                )
+
+    def test_site_totals_are_what_the_fake_data_expects(self):
+        for now in self.NOWS:
             expected = fake_data.create(now)
-            totals = site_totals(now)
-            for month in sorted(expected.keys() | totals.keys()):
-                with self.subTest(now=now, month=month):
-                    found = totals.get(month, {})
-                    self.assertEqual(
-                        {column: found.get(column, 0) for column in SITE_COLUMNS},
-                        expected.get(month),
-                    )
+            self._assert_totals(site_totals(now), expected, SITE_COLUMNS, now)
+
+    def test_github_totals_are_what_the_fake_data_expects(self):
+        for now in self.NOWS:
+            totals = github_totals(**fake_data.github(now))
+            expected = fake_data.expected_github(now)
+            self._assert_totals(totals, expected, GITHUB_COLUMNS, now)
 
     def test_remove_leaves_nothing(self):
         now = _at("2026-11-15 12:00")
@@ -237,18 +248,35 @@ class CommandTests(TestCase):
     @override_settings(DEBUG=True)
     def test_seed_and_totals_give_the_same_csv(self):
         with TemporaryDirectory() as folder:
-            expected = Path(folder) / "expected.csv"
-            totals = Path(folder) / "totals.csv"
-            call_command("seed_research_data", "--output", expected, stdout=StringIO())
-            call_command(
-                "research_totals",
-                "--no-github",
-                "--output",
-                totals,
-                stdout=StringIO(),
-                stderr=StringIO(),
-            )
-            self.assertEqual(totals.read_text(), expected.read_text())
+            fake_github = str(Path(folder) / "fake_github.json")
+            for github in (["--no-github"], ["--github-file", fake_github]):
+                with self.subTest(github=github[0]):
+                    expected = Path(folder) / "expected.csv"
+                    totals = Path(folder) / "totals.csv"
+                    seed_github = github if github[0] == "--github-file" else []
+                    call_command(
+                        "seed_research_data",
+                        "--output",
+                        expected,
+                        *seed_github,
+                        stdout=StringIO(),
+                    )
+                    call_command(
+                        "research_totals",
+                        *github,
+                        "--output",
+                        totals,
+                        stdout=StringIO(),
+                        stderr=StringIO(),
+                    )
+                    self.assertEqual(totals.read_text(), expected.read_text())
+                    self.assertEqual(
+                        "issues_opened" in totals.read_text(), bool(seed_github)
+                    )
+
+    def test_bad_github_file(self):
+        with self.assertRaises(CommandError):
+            call_command("research_totals", "--github-file", "no-such-file.json")
 
     def test_seed_needs_debug(self):
         with self.assertRaises(CommandError):

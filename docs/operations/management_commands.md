@@ -367,7 +367,7 @@ without deleting them.
 ### research_totals
 
 ```bash
-py manage.py research_totals [--since YYYY-MM] [--until YYYY-MM] [--no-github] [--repo owner/name] [--output FILE]
+py manage.py research_totals [--since YYYY-MM] [--until YYYY-MM] [--no-github | --github-file FILE] [--repo owner/name] [--output FILE]
 py manage.py research_totals --output totals.csv     # save it as a file
 ```
 
@@ -408,13 +408,15 @@ count.
 `--no-github` leaves out the GitHub columns, for example without
 internet. The repo is public, so no login is needed. If GitHub's limit of
 60 requests an hour is reached, set `GITHUB_TOKEN` to any GitHub token
-(no permissions needed) for 5000 an hour.
+(no permissions needed) for 5000 an hour. `--github-file` reads the
+GitHub data from a file instead, such as the made-up data from
+`seed_research_data`.
 
 ### seed_research_data
 
 ```bash
-py manage.py seed_research_data --output expected.csv
-py manage.py research_totals --no-github --output totals.csv
+py manage.py seed_research_data --github-file fake_github.json --output expected.csv
+py manage.py research_totals --github-file fake_github.json --output totals.csv
 py manage.py seed_research_data --remove
 ```
 
@@ -424,8 +426,14 @@ This command adds made-up people who join, save drafts and publish over
 the last four months, including the cases that count in a special way,
 such as publishing by the Peoply sync, an unverified account, and drafts
 just under and over 30 days old. It then prints, or saves with
-`--output`, what `research_totals --no-github` should print for it. The
-two files should be the same.
+`--output`, what `research_totals` should print for it. The two files
+should be the same.
+
+`--github-file` also saves made-up issues, pull requests and commits
+for `research_totals --github-file` to read, with cases such as bots,
+an issue from the site's "Report a bug" link, and a commit from an
+email GitHub doesn't know. Without it, compare with
+`research_totals --no-github`.
 
 The fake pages are under "Fake research data" in the Wagtail admin. They
 are never live, so they don't show on the site. Running the command again

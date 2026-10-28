@@ -342,8 +342,9 @@ Each phase is finished, checked and merged before the next one starts.
 **Built 2026-10-28, not merged yet.** Docs: `docs/operations/
 management_commands.md#research_totals`; design notes:
 `docs/claude_context/research_totals.md`. To try it locally:
-`seed_research_data` adds made-up history and saves the totals it should
-give; `research_totals --output` saves the real ones to compare.
+`seed_research_data` adds made-up history (and with `--github-file`,
+made-up GitHub data) and saves the totals it should give;
+`research_totals --output` saves the real ones to compare.
 
 A new `research_app`, where all research code will live, with one
 command, `research_totals`. It prints monthly totals as CSV, from the site

@@ -1,15 +1,17 @@
 """Fills the local database with made-up people, drafts and published
 pages over the last four months, so research_totals can be tried by hand,
-and prints what research_totals should give for them. Only runs with
+and prints what research_totals should give for them. With --github-file,
+also saves made-up GitHub data for research_totals to read. Only runs with
 DEBUG on. Re-running replaces the earlier fake data.
 
-    python manage.py seed_research_data --output expected.csv
-    python manage.py research_totals --no-github --output totals.csv
+    python manage.py seed_research_data --github-file fake_github.json --output expected.csv
+    python manage.py research_totals --github-file fake_github.json --output totals.csv
     python manage.py seed_research_data --remove
 
 Design notes: docs/claude_context/research_totals.md"""
 
 import csv
+import json
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -33,6 +35,12 @@ class Command(BaseCommand):
             help="Save the expected totals to this CSV file instead of printing them.",
         )
         parser.add_argument(
+            "--github-file",
+            help="Also save made-up GitHub data to this JSON file, for "
+            "research_totals --github-file. The expected totals then have the "
+            "GitHub columns too.",
+        )
+        parser.add_argument(
             "--remove",
             action="store_true",
             help="Only delete the fake research data.",
@@ -54,14 +62,33 @@ class Command(BaseCommand):
         other_months = site_totals(now)
         expected = fake_data.create(now)
 
+        github_file = options["github_file"]
+        expected_github = {}
+        if github_file:
+            with open(github_file, "w", encoding="utf-8") as file:
+                json.dump(fake_data.github(now), file, indent=2)
+            expected_github = fake_data.expected_github(now)
+            self.stdout.write(f"Saved made-up GitHub data to {github_file}.")
+        compare = "research_totals " + (
+            f"--github-file {github_file}" if github_file else "--no-github"
+        )
+
         last_month = last_complete_month(now)
-        table = rows(expected, {}, min(expected), last_month, include_github=False)
+        table = rows(
+            expected,
+            expected_github,
+            min(expected),
+            last_month,
+            include_github=bool(github_file),
+        )
         if options["output"]:
             with open(options["output"], "w", newline="", encoding="utf-8") as file:
                 csv.writer(file, lineterminator="\n").writerows(table)
-            self.stdout.write(f"Saved the expected totals to {options['output']}.")
+            self.stdout.write(
+                f"Saved what {compare} should give to {options['output']}."
+            )
         else:
-            self.stdout.write("research_totals --no-github should print:")
+            self.stdout.write(f"{compare} should print:")
             csv.writer(self.stdout, lineterminator="\n").writerows(table)
 
         self.stdout.write(
