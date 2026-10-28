@@ -78,7 +78,7 @@ class Tally:
 
 
 def month_of(moment):
-    """"YYYY-MM" of an aware datetime, in Oslo time."""
+    """ "YYYY-MM" of an aware datetime, in Oslo time."""
     return moment.astimezone(SITE_TIMEZONE).strftime("%Y-%m")
 
 
@@ -223,9 +223,9 @@ def _count_commits(tally, commits):
         made = _when(commit["commit"]["author"]["date"])
         tally.add(made, "ifi_commits")
         # Commits by an email GitHub doesn't know have no "author" account.
-        person = (commit.get("author") or {}).get("id") or commit["commit"][
-            "author"
-        ]["email"]
+        person = (commit.get("author") or {}).get("id") or commit["commit"]["author"][
+            "email"
+        ]
         tally.add_person(made, "people_using_ifi", person)
 
 

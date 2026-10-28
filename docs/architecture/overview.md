@@ -58,9 +58,10 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
 - **`study_app`** and **`yourpage_app`** show a placeholder page for now.
   This is switched by `APPS_UNDER_DEVELOPMENT` in `settings.py`.
 - **`research_app`** holds the code for the master's thesis research. For
-  now that's one command, `research_totals`, which prints whole-site
+  now that's two commands: `research_totals`, which prints whole-site
   monthly totals (see
-  [management_commands.md](../operations/management_commands.md#research_totals)).
+  [management_commands.md](../operations/management_commands.md#research_totals)),
+  and `seed_research_data`, which adds made-up data for trying it locally.
   Changes to it need the code owner's approval (`.github/CODEOWNERS`).
   How the research data is handled:
   [research/data_handling.md](../research/data_handling.md).

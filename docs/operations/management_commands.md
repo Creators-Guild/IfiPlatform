@@ -367,8 +367,8 @@ without deleting them.
 ### research_totals
 
 ```bash
-py manage.py research_totals [--since YYYY-MM] [--until YYYY-MM] [--no-github] [--repo owner/name]
-py manage.py research_totals > totals.csv      # save it
+py manage.py research_totals [--since YYYY-MM] [--until YYYY-MM] [--no-github] [--repo owner/name] [--output FILE]
+py manage.py research_totals --output totals.csv     # save it as a file
 ```
 
 Prints monthly totals for the master's thesis research as CSV, one row
@@ -380,7 +380,9 @@ needed, so it follows three rules (see
 - only counts, never who: nothing in the output names anyone
 - 1 to 4 are shown as `<5`, so small groups can't be told apart
 - months, in Oslo time; by default from the first month with data to the
-  last complete month, so a printed month never changes later
+  last complete month, so a printed month never changes later. When the
+  current month is left out, the command says so; add `--until` with the
+  current month to see it.
 
 Bots on GitHub, and publishing done by code (the Peoply sync), don't
 count.
@@ -407,6 +409,30 @@ count.
 internet. The repo is public, so no login is needed. If GitHub's limit of
 60 requests an hour is reached, set `GITHUB_TOKEN` to any GitHub token
 (no permissions needed) for 5000 an hour.
+
+### seed_research_data
+
+```bash
+py manage.py seed_research_data --output expected.csv
+py manage.py research_totals --no-github --output totals.csv
+py manage.py seed_research_data --remove
+```
+
+For trying `research_totals` on your own computer. A local database has
+no history to count: everything in it was made the day you set it up.
+This command adds made-up people who join, save drafts and publish over
+the last four months, including the cases that count in a special way,
+such as publishing by the Peoply sync, an unverified account, and drafts
+just under and over 30 days old. It then prints, or saves with
+`--output`, what `research_totals --no-github` should print for it. The
+two files should be the same.
+
+The fake pages are under "Fake research data" in the Wagtail admin. They
+are never live, so they don't show on the site. Running the command again
+replaces the fake data, and `--remove` deletes it. If your database has
+other data in the same months, the command warns you that those months
+won't match. It only runs when `DEBUG` is on, so it can never add fake
+data to the real site.
 
 ## core_app
 

@@ -1,14 +1,18 @@
 # pylint: disable=C0114,C0115,C0116
 from datetime import datetime, timezone as dt_timezone
 from io import StringIO
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core.management import CommandError, call_command
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from wagtail.models import Page, PageLogEntry, Revision
 
+from research_app import fake_data
 from research_app.totals import (
+    SITE_COLUMNS,
     github_totals,
     last_complete_month,
     month_of,
@@ -204,7 +208,58 @@ class SiteTotalsTests(TestCase):
         self.assertEqual(totals["2026-11"]["people_saved_draft"], 1)
 
 
+class FakeDataTests(TestCase):
+    def test_totals_are_what_the_fake_data_expects(self):
+        # The second date is just after midnight on 1 March in Oslo, still
+        # February in UTC, with a short month before it.
+        for now in (_at("2026-11-15 12:00"), _at("2027-02-28 23:30")):
+            expected = fake_data.create(now)
+            totals = site_totals(now)
+            for month in sorted(expected.keys() | totals.keys()):
+                with self.subTest(now=now, month=month):
+                    found = totals.get(month, {})
+                    self.assertEqual(
+                        {column: found.get(column, 0) for column in SITE_COLUMNS},
+                        expected.get(month),
+                    )
+
+    def test_remove_leaves_nothing(self):
+        now = _at("2026-11-15 12:00")
+        fake_data.create(now)
+        fake_data.remove()
+        self.assertEqual(site_totals(now), {})
+        self.assertFalse(
+            User.objects.filter(username__startswith=fake_data.USERNAME_PREFIX).exists()
+        )
+
+
 class CommandTests(TestCase):
+    @override_settings(DEBUG=True)
+    def test_seed_and_totals_give_the_same_csv(self):
+        with TemporaryDirectory() as folder:
+            expected = Path(folder) / "expected.csv"
+            totals = Path(folder) / "totals.csv"
+            call_command("seed_research_data", "--output", expected, stdout=StringIO())
+            call_command(
+                "research_totals",
+                "--no-github",
+                "--output",
+                totals,
+                stdout=StringIO(),
+                stderr=StringIO(),
+            )
+            self.assertEqual(totals.read_text(), expected.read_text())
+
+    def test_seed_needs_debug(self):
+        with self.assertRaises(CommandError):
+            call_command("seed_research_data", stdout=StringIO())
+
+    def test_says_when_this_month_is_left_out(self):
+        User.objects.create_user(username="ada", password="pw")
+        err = StringIO()
+        call_command("research_totals", "--no-github", stdout=StringIO(), stderr=err)
+        self.assertIn("--until", err.getvalue())
+
     def test_csv_without_github(self):
         User.objects.create_user(username="ada", password="pw")
         out = StringIO()
@@ -220,17 +275,26 @@ class CommandTests(TestCase):
         lines = out.getvalue().splitlines()
         self.assertEqual(lines[0].split(",")[0], "month")
         self.assertNotIn("issues_opened", lines[0])
-        self.assertEqual([line.split(",")[0] for line in lines[1:]], ["2026-01", "2026-02"])
+        self.assertEqual(
+            [line.split(",")[0] for line in lines[1:]], ["2026-01", "2026-02"]
+        )
         self.assertNotIn("ada", out.getvalue())
 
     def test_github_is_used_unless_turned_off(self):
         out = StringIO()
-        with mock.patch("research_app.management.commands.research_totals.github_api") as api:
+        with mock.patch(
+            "research_app.management.commands.research_totals.github_api"
+        ) as api:
             api.get_issues.return_value = []
             api.get_pulls.return_value = []
             api.get_commits.return_value = []
             call_command(
-                "research_totals", "--since", "2026-01", "--until", "2026-01", stdout=out
+                "research_totals",
+                "--since",
+                "2026-01",
+                "--until",
+                "2026-01",
+                stdout=out,
             )
         self.assertIn("issues_opened", out.getvalue().splitlines()[0])
 
@@ -241,5 +305,10 @@ class CommandTests(TestCase):
     def test_since_after_until(self):
         with self.assertRaises(CommandError):
             call_command(
-                "research_totals", "--no-github", "--since", "2026-05", "--until", "2026-04"
+                "research_totals",
+                "--no-github",
+                "--since",
+                "2026-05",
+                "--until",
+                "2026-04",
             )

@@ -2,8 +2,8 @@
 database, GitHub and the commit history. Counts only: 1 to 4 are shown as
 "<5", and nothing names anyone.
 
-Redirect the output to save it:
-    python manage.py research_totals > totals.csv
+Save it to a file:
+    python manage.py research_totals --output totals.csv
 
 Design notes: docs/claude_context/research_totals.md"""
 
@@ -15,7 +15,13 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from research_app import github_api
-from research_app.totals import github_totals, last_complete_month, rows, site_totals
+from research_app.totals import (
+    github_totals,
+    last_complete_month,
+    month_of,
+    rows,
+    site_totals,
+)
 
 MONTH_FORMAT = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
 
@@ -47,6 +53,10 @@ class Command(BaseCommand):
             default="Creators-Guild/IfiPlatform",
             help="GitHub repo as owner/name. Default: %(default)s.",
         )
+        parser.add_argument(
+            "--output",
+            help="Save the CSV to this file instead of printing it.",
+        )
 
     def handle(self, *args, **options):
         for option in ("since", "until"):
@@ -75,13 +85,26 @@ class Command(BaseCommand):
         if first_month > last_month:
             raise CommandError("--since is after --until.")
 
-        writer = csv.writer(self.stdout, lineterminator="\n")
-        writer.writerows(
-            rows(
-                site,
-                github,
-                first_month,
-                last_month,
-                include_github=not options["no_github"],
-            )
+        table = rows(
+            site,
+            github,
+            first_month,
+            last_month,
+            include_github=not options["no_github"],
         )
+        if options["output"]:
+            with open(options["output"], "w", newline="", encoding="utf-8") as file:
+                csv.writer(file, lineterminator="\n").writerows(table)
+            self.stdout.write(f"Saved {len(table) - 1} months to {options['output']}.")
+        else:
+            csv.writer(self.stdout, lineterminator="\n").writerows(table)
+
+        this_month = month_of(now)
+        if not options["until"] and any(
+            month > last_month for month in [*site, *github]
+        ):
+            self.stderr.write(
+                f"{this_month} is left out because the month isn't over yet. "
+                f"Add --until {this_month} to see it.",
+                style_func=self.style.WARNING,
+            )

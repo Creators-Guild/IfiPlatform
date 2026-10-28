@@ -1,7 +1,7 @@
 # research_app totals — design notes
 
 Last updated: 2026-10-28
-Covers: ifiplatform/apps/research_app/totals.py, ifiplatform/apps/research_app/github_api.py, ifiplatform/apps/research_app/management/commands/research_totals.py
+Covers: ifiplatform/apps/research_app/totals.py, ifiplatform/apps/research_app/github_api.py, ifiplatform/apps/research_app/management/commands/research_totals.py, ifiplatform/apps/research_app/fake_data.py, ifiplatform/apps/research_app/management/commands/seed_research_data.py
 
 Phase 1 of `docs/claude_plans/research_data_collection.md`: whole-site
 monthly totals, no consent, no new database. Data handling rules for the
@@ -48,3 +48,29 @@ research are in `docs/research/data_handling.md`.
 - **`first_time_pr_authors_merged`** sorts pull requests by `merged_at`
   first, so each author's earliest merge wins. Unmerged ones sort last
   (`"~"` sorts after any date string).
+
+## fake_data.py and seed_research_data
+
+- **`EXPECTED` is written by hand, on purpose.** It's what the site
+  totals should be for the steps in `fake_data.create()`, worked out from
+  the steps, not from the counting code. `FakeDataTests` compares it with
+  `site_totals()`, so a counting bug or a step changed without updating
+  `EXPECTED` fails, naming the month and column. Don't compute it from
+  `totals.py`. Only person 13's two drafts (29 and 31 days before `now`)
+  are added in `expected()`, since their month depends on today's date.
+- **Fake pages are never live.** `_FakeSite.publish` writes the
+  `wagtail.publish` log row and `first_published_at` itself instead of
+  calling Wagtail's `publish()`, which fires `page_published` and marks
+  the page waiting for DeepL. Live pages would also be picked up by the
+  nightly translation catch-up. The totals only read the log rows and
+  `first_published_at`, so nothing is lost. The real `publish()` is
+  still covered by `SiteTotalsTests`.
+- **The parent page sits directly under the tree root** (depth 2,
+  outside every `Site`), so no address reaches the fake pages.
+- **`remove()` deletes log rows and revisions by page ID** before the
+  pages: `PageLogEntry` rows outlive their page and would still be
+  counted.
+- **DEBUG only, no `--force`** (unlike `seed_dev_data`): fake data in a
+  real database would end up in the real totals.
+- The command warns about other data in the same months by running
+  `site_totals()` after `remove()` and before `create()`.
