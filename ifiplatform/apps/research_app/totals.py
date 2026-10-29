@@ -33,6 +33,7 @@ SITE_COLUMNS = [
     "pages_first_published",
     "drafts_never_published",
 ]
+
 GITHUB_COLUMNS = [
     "issues_opened",
     "bug_reports",

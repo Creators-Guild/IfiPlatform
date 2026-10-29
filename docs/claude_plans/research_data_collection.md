@@ -1,14 +1,16 @@
 # Plan: research data collection for the master's thesis
 
-Last updated: 2026-10-28
+Last updated: 2026-10-29
 
 Hanna's thesis asks how a student-run open-source platform turns passive
-users into contributors. The data collection is approved by Sikt. This plan
-covers the code only (no interviews). Delete this plan when the build is
-done.
+users into contributors. The data collection is approved by Sikt. A change
+notice (2026-10-29: the platform part widened and described in more
+detail, plus the Halloween event's participants and helpers) must be
+approved before the first participant. This plan covers the platform's
+code only (no interviews). Delete this plan when the build is done.
 
-**Status:** Phase 1 is built (not merged yet). Phase 2 has started.
-Build each phase only when Hanna says so.
+**Status:** Phase 1 is built (not merged yet). Phase 2 has started; the
+Sikt check is done. Build each phase only when Hanna says so.
 
 Security and data handling (who can reach what, risks, open questions):
 `docs/research/data_handling.md`. Its open questions are Hanna's to decide.
@@ -19,6 +21,11 @@ A rough, exploratory first round: build a small proof of concept in layers,
 look at the data after each layer, and open more research later. With about
 10–15 participants, their data is read as individual paths (an exploratory
 case study), not statistics. The whole-site totals give the big picture.
+
+Reading paths one by one is for the analysis only. The thesis reports
+groups: groups under five are merged, rare roles aren't described one by
+one, and no single participant's path is told as a story (promised to
+Sikt and in the information letter).
 
 Real qualitative data (people's own words) is not in the current design:
 no interviews, no stored text. Adding two or three open questions (for
@@ -115,10 +122,13 @@ then, so between December and May this person had two roles.
   choices) asks: delete my research data too, or keep it. Nothing is
   ticked in advance.
   - **Delete:** the same as withdrawing.
-  - **Keep:** the research rows stay. The link row is deleted, so
-    collection stops and nothing points back to the person any more. The
-    form says that this also means they can't withdraw later, because
-    nobody can find their data again.
+  - **Keep:** the research rows stay. Everything about the pseudonym in
+    the link database is deleted: the link row, the consent record, the
+    GitHub ID copy, the lookup values and all exact times (exact times
+    can be matched to public GitHub timestamps). Collection stops and
+    nothing points back to the person any more. The form says that this
+    also means they can't withdraw later, because nobody can find their
+    data again.
   - The consent text mentions this choice too.
   - The "takes part" flag is deleted with the user, so the website first
     writes a queue row ("user 42 deleted the account: keep / delete
@@ -155,9 +165,18 @@ then, so between December and May this person had two roles.
     one that writes to the research database.
   - Hanna's own research user: the link database by hand, only when
     needed; the research database read-only, for analysis.
-- Data can only be used for what the consent text says. If follow-up
-  research is likely, say so in the consent text now (as far as Sikt
-  allows).
+- Data can only be used for what the consent text says. Decided
+  2026-10-29: no follow-up use is named. The anonymous data left after
+  June 2027 can be reused anyway; anything else needs a new application.
+- **Nobody but Hanna gets root** before June 2027 (decided 2026-10-29).
+  The devops person only gets a limited Linux user, and no login until it
+  exists (`docs/to_fix.md`, Server).
+- **Free text is read in memory only**, to count words and find fixed
+  markers (`Made-with: ifi`, the footer's "Related" line). It is never
+  stored or logged.
+- **Backups** roll off after 14 days, so withdrawn data is gone from them
+  within 14 days. Deletions aren't re-applied after a restore (decided
+  2026-10-29).
 
 ## Questions
 
@@ -191,11 +210,10 @@ Hanna decides these. Don't build the parts that are still open.
      request).
    Site and GitHub give their own role titles. GitHub roles need the
    daily check, which is now part of Phase 5.
-5. **History before consent.** Decided for now: only from the day someone
-   consents, and only this site and this repo. Hanna may go back further
-   later, so the consent form has a second, optional tick: "You may also
-   use what I did on the platform before I consented." Not ticked in
-   advance, and only used if Hanna decides to go back.
+5. **History before consent.** Decided 2026-10-29: only from the day
+   someone consents, and only this site and this repo, plus the signup
+   time and the roles held at consent. No extra tick for older history;
+   going back further needs a new consent and a change notice.
 6. **Drafts.** Decided: a mini-contribution, in two cases:
    - finished by someone else: recorded when the page is published; the
      publisher gets a contribution
@@ -224,36 +242,61 @@ Hanna decides these. Don't build the parts that are still open.
     - a one-time question after signup, or at the next login for existing
       accounts: "Take part in a study? Yes / No / Later"
     - the research section in account settings
-    - Hanna advertises in channels, and asks individuals only for
-      interviews
+    - Hanna advertises in channels, and asks individuals personally only
+      when recruiting for the Halloween interviews. There are no
+      interviews with platform users.
     - the text says clearly that taking part or not never affects roles,
       access or how someone's work is reviewed
-11. **Who can take part.** Decided: UiO students. Accounts can use any
-    email, but joining the study asks for a UiO email address (ending in
-    `uio.no`), which gets a verification link. The UiO address is only
-    used to send the link and is not kept; only "UiO email verified" is
-    stored.
-12. **What the participant is asked.** Decided: the year they started
-    (cohort), the level (bachelor, master, PhD), and earlier project
-    experience: "Have you worked on a software or content project with
-    others before (outside courses)? No / Yes, a little / Yes, a lot".
+11. **Who can take part.** Decided 2026-10-29: students at UiO, mainly
+    bachelor and master students at Ifi, but anyone who says they are a
+    UiO student may join. No email check: the site's email goes through
+    Resend (USA), which the Sikt application would have to name. The
+    student status is part of the one consent tick: «Jeg er student ved
+    UiO, har lest informasjonen over og samtykker til at min
+    bidragsaktivitet brukes i forskningsprosjektet, som beskrevet.»
+12. **What the participant is asked.** Decided 2026-10-29, worded exactly
+    as in the questionnaire sent to Sikt (Norwegian is the source):
+    1. «Har du tidligere bidratt til programmerings- eller åpen
+       kildekode-prosjekter (utenfor dette prosjektet)?» Nei, ingen
+       tidligere erfaring / Noe erfaring (skole-/kursprosjekter, mindre
+       hobbyprosjekter) / Betydelig erfaring (jobb, praksis, omfattende
+       hobbyprosjekter, bidrag til andre åpen kildekode-prosjekter).
+       Optional.
+    2. «Har du tidligere skrevet eller redigert innhold sammen med andre
+       (utenfor emner og utenfor dette prosjektet), f.eks. wiki,
+       studentavis eller nettside for en forening?» Nei, ingen tidligere
+       erfaring / Noe erfaring (enkelte bidrag, mindre prosjekter) /
+       Betydelig erfaring (fast skribent eller redaktør, jobb, omfattende
+       prosjekter). Optional.
+    3. «Hvilket år begynte du på studieprogrammet du går på nå?» A year.
+       Required.
+    4. «Hvilket nivå studerer du på?» Bachelor / Master / Annet.
+       Required.
+
+    Stored on the participant in the research database as ingen/noe/
+    betydelig (or blank), year and level.
 13. **Consent text language.** Decided: Norwegian and English; Norwegian
     is the source of truth.
 
 **Data handling** (details in `docs/research/data_handling.md`)
 
 14. **Keys and exports.** Decided: the backup keys are kept on Microsoft
-    365 for UiO (OneDrive). Where to analyse: later.
+    365 for UiO (OneDrive). Pseudonymised exports for analysis go there
+    too (as the Sikt application says), never the link.
 15. **Consent records after withdrawal.** Decided: not kept.
+16. **Halloween data on this server.** The change notice puts the
+    Halloween participants' GitHub data and link on NREC. Not decided:
+    where, how it's kept apart, and backups
+    (`docs/research/data_handling.md`, question 14).
 
-What the Sikt application lists (Norwegian, summarised): number and type
-of contributions (code, content, bug reports); timing (for example time
-from account creation to first contribution); role and access level and
-changes between roles; study year/cohort; quality-control activity
-(dropped); activity in comments and the size of issues and pull
-requests (words, characters, length); and, for reviews, the reviewer's
-experience (earlier project experience, study year, contributions in
-this project).
+What the Sikt application lists for the platform (Norwegian, summarised,
+as in the change notice): number and type of contributions; the way in;
+timing (coarse in the analysis data, plus milestones); roles and role
+changes, including roles held at consent; cohort and level; the two
+experience questions; quality-control activity (dropped, collecting less
+is fine); activity in comments, the size of issues and pull requests, and
+the size of each contribution (words, or lines changed); and, for
+reviews, the reviewer's experience.
 
 ## Numbers about everyone (not personal data)
 
@@ -293,7 +336,7 @@ The most useful number is probably how far people get, for example
 ## Limits
 
 - GitHub Desktop and the command line look the same in GitHub's data.
-- History starts at consent (for now), so milestones are unknown for
+- History starts at consent, so milestones are unknown for
   anything that happened before it. Someone who contributed before
   consenting has no "days to first contribution".
 - Django keeps no history of group changes. For earlier roles, only what a
@@ -376,9 +419,9 @@ policy already mentions Umami and the totals (2026-10-28). The research
 notice gets its own page, like the content ownership terms
 (`/account/content_terms`), not a section in the privacy policy.
 
-- Check the Sikt application and information letter against the plan:
-  the optional tick for history before consent, and the consent text as
-  a whole. Change notice if needed.
+- ~~Check the Sikt application and information letter against the
+  plan.~~ Done 2026-10-29, see "Sikt check: results" below.
+- Wait for Sikt to approve the change notice.
 - Write the consent text (Norwegian, the source of truth, and English)
   and the privacy policy update.
 - Small decisions, all decided 2026-10-28: sizes per type (see Focus),
@@ -386,34 +429,26 @@ notice gets its own page, like the content ownership terms
   of the main database's backup.
 - Write down the analysis questions, dated, before the first participant.
 
-**Sikt check: what to look for.** Found by comparing the plan with the
-summary of the application (in `docs/research/data_handling.md`), not
-the exact wording, so each one is "check", not "wrong":
+**Sikt check: results** (2026-10-29). The application, the information
+letter, the variable list and the questionnaire were changed in the
+change notice so they match the plan:
 
-1. **Where consent is stored.** The application: in IfiPlatform's
-   database, tied to the pseudonym. The plan: in the link database; the
-   site database only has "takes part: yes/no", with no pseudonym.
-2. **Level** (bachelor, master, PhD). The application lists study
-   year/cohort, but not level.
-3. **Earlier project experience.** The application lists it for
-   reviewers. The plan asks every participant.
-4. **History before consent** (the optional second tick). Does the
-   letter allow using what someone did before they consented?
-5. **Keeping data after the account is deleted** ("keep" in the delete
-   form). Can't be withdrawn after that, because nothing points to the
-   person.
-6. **Backups:** withdrawn data stays in backups for up to 14 days.
-7. **Exact times in the link database.** The application describes it
-   as holding the link between pseudonym and GitHub account.
-8. **A copy of the link database's key on OneDrive** (Microsoft 365 for
-   UiO). The application says everything is on NREC, including the link.
-9. **Follow-up research:** if it's likely, the consent text should say
-   so now.
-10. **The UiO email check:** the address is used once for a link and not
-    kept.
+1. Consent is stored in the link database (application changed).
+2. Level (bachelor, master, other) and cohort, asked at consent.
+3. Two optional experience questions for every participant (Questions 12).
+4. History before consent: dropped from the plan (Questions 5).
+5. "Keep" when deleting the account: described in the letter.
+6. Backups (14 days): described.
+7. Exact times in the link database, coarse times in the analysis data:
+   described.
+8. Keys and analysis copies on OneDrive: described.
+9. Follow-up research: nothing added (see Decided).
+10. UiO email check: dropped (Questions 11).
 
-Whatever the letter doesn't cover goes in a change notice, or out of
-the plan.
+Also added: UiO students (not only Ifi), the way in, the size of each
+contribution, roles as one row per change, milestones, that free text is
+read only by machine, group-level reporting, and the June 2027 steps.
+The consent text on the site must follow the approved letter.
 
 ### Phase 3: research setup, with made-up data only
 
@@ -441,9 +476,9 @@ the App to `docs/operations/access_and_handover.md`.
 ### Phase 5: consent and recording (the first participant)
 
 1. **Consent.** A research section in account settings and the one-time
-   question: consent text (versioned template), the optional history
-   tick, cohort, level, earlier project experience, and the UiO email
-   check (see Questions 10–12). Hanna's own test participation is
+   question: consent text (versioned template, following the approved
+   letter), one tick that also confirms UiO student status, and the four
+   questions (see Questions 10–12). Hanna's own test participation is
    marked. The consent record (pseudonym, time, text version, withdrawal
    time) lives in the link database; the profile only gets "takes part:
    yes/no". When someone consents, the job copies their GitHub ID into
@@ -480,12 +515,20 @@ yet: whether to compare with event dates (workshops, hackathons). If so,
 the job writes each row's position relative to events (for example "3
 days after an event") to the research database.
 
-Make the research data coarser: study year (from cohort and level) in two
-groups (years 1–2, year 3+), experience yes/no, and whatever the matching test calls for
-(sizes, rare roles; see `docs/research/data_handling.md`). Then delete the
-link database and both keys, and delete the GitHub App. The research
-database stays. Backups roll off
-after 14 days. Copies made by hand outside NREC need handling too.
+In this order (promised to Sikt):
+
+1. Make the research data coarser: study year (from cohort and level) in
+   two groups (years 1–2, year 3+, "annet" merged or its own group if
+   big enough), each experience question as none / some-or-more, sizes
+   in ranges, rare roles merged.
+2. Run the matching test (`docs/research/data_handling.md`, question 11)
+   and make the data coarser again if it finds people.
+3. Delete the link database and all its backups the same day, both keys,
+   and the GitHub App. The research database stays.
+4. Delete the key copies on OneDrive, empty both recycle bins (OneDrive
+   keeps deleted files up to 93 days) and check old versions.
+5. Make the analysis copies on OneDrive coarser too, or delete them.
+6. Clear "takes part" on every profile and turn off collection.
 
 ## Later (not in the first round)
 

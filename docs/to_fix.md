@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-10-28
+Last updated: 2026-10-29
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -264,7 +264,24 @@ Decisions to come back to once the planned ifi changes are built.
   deploy key and code getting into `main` are already handled, see
   [operations/access_and_handover.md](operations/access_and_handover.md#protecting-main-and-the-deploy-key).)
 
-  Do this together with the Docker move, since the details differ.
+  Do this together with the Docker move, since the details differ, but
+  it must be done before the devops person gets any access, even if the
+  Docker move is late. Until then they get no server login: the Sikt
+  application says only the student can reach the research data, and
+  root can read it (see
+  [research/data_handling.md](research/data_handling.md), question 1).
+- [ ] **Switch to an email service in the EU/EEA.** Account emails
+  (verification, password reset) go through Resend (`smtp.resend.com`),
+  an American company, so email addresses are sent to the USA. The
+  privacy policy also says the site "does not share your data with any
+  third party", which isn't true while an outside service sends the
+  emails. Fix: pick a provider in the EU/EEA (for example Brevo or
+  Mailjet, both in France), change `EMAIL_HOST`, `EMAIL_HOST_USER` and
+  `EMAIL_HOST_PASSWORD` in `.env`, add the provider's SPF and DKIM DNS
+  records, and send a test email. Then name the provider in the privacy
+  policy and in
+  [operations/access_and_handover.md](operations/access_and_handover.md)
+  (the Email row still says "fill in").
 
 From [operations/server_setup.md](operations/server_setup.md#notes-and-known-issues):
 
