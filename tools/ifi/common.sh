@@ -633,4 +633,10 @@ fetch_base() {
     git_or_explain "$base" "${1:-Download the newest code from the main repo}" fetch --quiet "$base"
 }
 
-git rev-parse --git-dir >/dev/null 2>&1 || die "Run this inside the project folder."
+# Any Git repo isn't enough: in another project, ifi save would commit there
+# and ifi update would add IfiPlatform as its upstream. Looks for ifi's own
+# files rather than this folder, so other clones and worktrees still count.
+top_of_repo="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+[[ -n "$top_of_repo" && -f "$top_of_repo/tools/ifi/ifi" ]] ||
+    die "Run this inside the IfiPlatform project folder."
+unset top_of_repo

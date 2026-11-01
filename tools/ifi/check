@@ -56,7 +56,9 @@ bad() {
 }
 
 # 1. In the project?
-if ! git rev-parse --git-dir >/dev/null 2>&1; then
+# Inside another Git repo counts as outside: common.sh explains why.
+top="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+if [[ -z "$top" || ! -f "$top/tools/ifi/ifi" ]]; then
     printf '❌ %s\n      %s\n' "You're not in the project folder." "cd into the IfiPlatform folder (or open it in VS Code)."
     exit 1
 fi
