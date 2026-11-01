@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# ifi install: makes `ifi` a command in your own terminal, for working
-# without Docker or with Docker outside VS Code. Adds two lines to
-# ~/.bashrc (and ~/.zshrc on a Mac): an alias to the launcher in the repo
-# root, and Tab completion. Safe to run again: it never adds them twice.
+# ifi install: makes `ifi` a command in the project's venv, for working
+# without Docker or with Docker outside VS Code. Nothing outside the
+# project changes: ifi and its Tab completion only exist in a terminal
+# where the venv is active. Puts a small `ifi` launcher in the venv's
+# bin/ (Scripts\ on Windows, plus ifi.cmd for PowerShell and Command
+# Prompt) and adds a line to the venv's bash/zsh activate script that
+# loads shell-setup.sh. Safe to run again. A new venv needs it again.
 # In the dev container ifi is already there.
 set -euo pipefail
 source "$(dirname "$(readlink -f "$0")")/common.sh"
@@ -13,35 +16,63 @@ if in_container; then
 fi
 
 top="$(git rev-parse --show-toplevel)"
-marker="# ifi: IfiPlatform's helper commands"
-added=false
-for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
-    # zsh is the Mac's default shell; only touch .zshrc if it's in use.
-    if [[ "$rc" == */.zshrc && ! -f "$rc" && "$(basename "${SHELL:-}")" != zsh ]]; then
-        continue
+
+# The venv: the active one if it's in this project, else venv/ or .venv/.
+venv=""
+for candidate in "${VIRTUAL_ENV:-}" "$top/venv" "$top/.venv"; do
+    [[ -n "$candidate" && "$candidate" == "$top"/* ]] || continue
+    if [[ -f "$candidate/bin/activate" || -f "$candidate/Scripts/activate" ]]; then
+        venv="$candidate"
+        break
     fi
-    if [[ -f "$rc" ]] && grep -qF "$marker" "$rc"; then
-        if grep -qF "alias ifi='$top/ifi'" "$rc"; then
-            echo "Already in $rc."
-        else
-            echo "$rc has ifi for another project folder. Delete the lines after"
-            echo "\"$marker\" in it, then run ifi install again."
-        fi
-        continue
-    fi
-    {
-        echo
-        echo "$marker"
-        echo "alias ifi='$top/ifi'"
-        [[ "$rc" == */.bashrc ]] && echo "[ -f '$top/tools/ifi/shell-setup.sh' ] && . '$top/tools/ifi/shell-setup.sh'"
-    } >>"$rc"
-    echo "Added ifi to $rc."
-    added=true
 done
+if [[ -z "$venv" ]]; then
+    die "ifi lives in the project's venv, and there isn't one yet. In the repo root, make it:" \
+        "  python -m venv venv      (python3 on a Mac or Linux, py on Windows)" \
+        "Then run ./ifi install again. With Docker outside VS Code, that's all:" \
+        "no pip install, the site's Python is in the container." \
+        "More: docs/contributing/setup_without_docker.md"
+fi
 
-if $added; then
-    cat <<EOF
+bin="$venv/bin"
+[[ -d "$bin" ]] || bin="$venv/Scripts"
 
-Open a new terminal (or run: source ~/.bashrc), then try: ifi check
+cat >"$bin/ifi" <<EOF
+#!/usr/bin/env bash
+# Made by ifi install: runs this project's ifi.
+exec '$top/ifi' "\$@"
 EOF
+chmod +x "$bin/ifi"
+
+# PowerShell and Command Prompt run ifi.cmd, with a Windows path in it.
+if [[ "$bin" == */Scripts ]] && command -v cygpath >/dev/null 2>&1; then
+    printf '@echo off\r\nrem Made by ifi install: runs this project'"'"'s ifi.cmd.\r\n"%s\\ifi.cmd" %%*\r\n' \
+        "$(cygpath -w "$top")" >"$bin/ifi.cmd"
+fi
+
+# Tab completion in bash and zsh. Replaces the line if it's there, so a
+# moved project folder gets the new path.
+activate="$bin/activate"
+marker="# ifi: IfiPlatform's helper commands"
+had_it=false
+if grep -qF "$marker" "$activate"; then
+    had_it=true
+    grep -vF -e "$marker" -e "/tools/ifi/shell-setup.sh" "$activate" >"$activate.ifi-tmp"
+    mv "$activate.ifi-tmp" "$activate"
+fi
+{
+    echo "$marker"
+    echo "[ -f '$top/tools/ifi/shell-setup.sh' ] && . '$top/tools/ifi/shell-setup.sh'"
+} >>"$activate"
+
+venv_name="${venv#"$top"/}"
+if $had_it; then
+    echo "ifi was already in $venv_name. Updated it."
+else
+    echo "Added ifi to $venv_name."
+fi
+if [[ "${VIRTUAL_ENV:-}" == "$venv" ]]; then
+    echo "Deactivate and activate the venv again (or open a new terminal and activate it), then try: ifi check"
+else
+    echo "Activate the venv, then try: ifi check"
 fi

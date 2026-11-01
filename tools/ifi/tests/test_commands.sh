@@ -86,7 +86,7 @@ t_commands_test_refuses_a_misspelled_name() {
 }
 
 t_commands_shell_setup_is_quiet_in_scripts() {
-    # Sourced from ~/.bashrc by ifi install: scp and rsync break if a
+    # Sourced from ~/.bashrc in the container: scp and rsync break if a
     # non-interactive shell prints anything.
     OUT="$(bash --norc --noprofile -c ". '$TOOLS/shell-setup.sh'" 2>&1)"
     same "$OUT" "" "what a non-interactive shell prints"
@@ -101,18 +101,30 @@ t_commands_shell_setup_completes_ifi() {
     has "[docker django]"
 }
 
-t_commands_install_adds_ifi_once() {
+t_commands_install_puts_ifi_in_the_venv_once() {
     [[ -f /.dockerenv ]] && skip "ifi install does nothing inside the container"
     clone_as contributor
-    cd "$REPO" || fail "no repo"
+    mkdir -p venv/bin
+    echo "# the venv's own activate" >venv/bin/activate
     touch "$HOME/.bashrc"
-    USE_POSTGRES="" run_ifi install
+    VIRTUAL_ENV="" USE_POSTGRES="" run_ifi install
     succeeds
-    has "Added ifi to $HOME/.bashrc."
-    grep -qF "alias ifi='$REPO/ifi'" "$HOME/.bashrc" || fail "no alias in .bashrc"
-    USE_POSTGRES="" run_ifi install
-    has "Already in $HOME/.bashrc."
-    same "$(grep -c "alias ifi=" "$HOME/.bashrc")" 1 "aliases in .bashrc"
+    has "Added ifi to venv."
+    grep -qF "exec '$SANDBOX/work/ifi'" venv/bin/ifi || fail "no launcher in venv/bin"
+    [[ -x venv/bin/ifi ]] || fail "the launcher can't run"
+    VIRTUAL_ENV="" USE_POSTGRES="" run_ifi install
+    has "ifi was already in venv. Updated it."
+    same "$(grep -c "shell-setup.sh" venv/bin/activate)" 1 "shell-setup lines in activate"
+    grep -qF "the venv's own activate" venv/bin/activate || fail "activate lost its own lines"
+    same "$(wc -c <"$HOME/.bashrc" | tr -d ' ')" 0 "what was added to ~/.bashrc"
+}
+
+t_commands_install_without_a_venv_says_how() {
+    [[ -f /.dockerenv ]] && skip "ifi install does nothing inside the container"
+    clone_as contributor
+    VIRTUAL_ENV="" USE_POSTGRES="" run_ifi install
+    fails
+    has "python -m venv venv"
 }
 
 
@@ -125,6 +137,14 @@ t_commands_prompt_shows_the_branch() {
     cd "$SANDBOX" || fail "no sandbox"
     OUT="$(bash --norc --noprofile -i -c ". '$TOOLS/shell-setup.sh' >/dev/null 2>&1; echo \"[\$(_ifi_branch ' %s')]\"" 2>/dev/null)"
     same "$OUT" "[]" "the branch outside a repo"
+}
+
+t_commands_prompt_hides_the_branch_in_another_git_repo() {
+    git init --quiet "$SANDBOX/other"
+    cd "$SANDBOX/other" || fail "no folder"
+    git commit --quiet --allow-empty -m "Theirs"
+    OUT="$(bash --norc --noprofile -i -c ". '$TOOLS/shell-setup.sh' >/dev/null 2>&1; echo \"[\$(_ifi_branch ' %s')]\"" 2>/dev/null)"
+    same "$OUT" "[]" "the branch in another repo"
 }
 
 t_commands_shell_setup_stays_quiet_without_a_terminal() {
