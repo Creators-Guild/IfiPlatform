@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ifi for terminals outside the dev container: Mac, Linux, Git Bash on
 # Windows (Windows PowerShell and cmd use ifi.cmd next to this file). Run it
-# as ./ifi from the repo root, or anywhere after `./ifi install`.
+# as ./ifi from the repo root, or as plain ifi with the project's venv active
+# after `./ifi install`.
 #
 # Git commands (status, save, pull-request, ...) run here, on your own
 # computer, where your GitHub login is. The ones that need the site's Python

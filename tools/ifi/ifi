@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # `ifi`: this project's own helper commands. Dockerfile.dev
-# links it into the dev container's PATH; without Docker, `ifi install` adds
-# the launcher in the repo root (../../ifi) to your terminal.
+# links it into the dev container's PATH; without Docker, `ifi install` puts
+# a launcher for the one in the repo root (../../ifi) in the project's venv.
 # Every subcommand is a script next to this one, run with bash, so it works
 # without the x bit (commits from Windows drop it). Tests: tests/run, and
 # tests/playground to try them by hand.
