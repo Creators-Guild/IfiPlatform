@@ -5,6 +5,7 @@ python manage.py migrate                       apply migrations
 python manage.py createsuperuser               make an admin login
 python manage.py makemessages -l nb -l en      collect text to translate
 python manage.py compilemessages               use the new translations
+python manage.py mig  then Tab                 completes commands and --options
 
 http://localhost:8000                          the site
 http://localhost:8000/wagtail-admin            edit pages
