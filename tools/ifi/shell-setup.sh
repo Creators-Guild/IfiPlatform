@@ -1,9 +1,10 @@
 # Sourced by the dev container's ~/.bashrc (Dockerfile.dev), and without
 # Docker by the line `ifi install` adds to the venv's activate script, so
-# only while the venv is active: Tab completion for ifi, a "(container)"
-# mark in the container's prompt, a hint in every new terminal, and a
-# setup check in the first one. Works in bash 3.2 too (a Mac), so no
-# mapfile. In zsh (a Mac's default) only Tab completion and the hint.
+# only while the venv is active: Tab completion for ifi and manage.py, a
+# "(container)" mark in the container's prompt, a hint in every new
+# terminal, and a setup check in the first one. Works in bash 3.2 too (a
+# Mac), so no mapfile. In zsh (a Mac's default) only Tab completion and
+# the hint.
 
 # Only for terminals you type in: scp, rsync and scripts break when a
 # non-interactive shell prints anything, and some ~/.bashrc files don't stop
@@ -31,6 +32,35 @@ _ifi_complete() {
     COMPREPLY=($(compgen -W "$words" -- "$cur"))
 }
 complete -o default -F _ifi_complete ifi
+
+# Tab completion for manage.py's commands (ours too) and their options:
+# Django lists them itself when DJANGO_AUTO_COMPLETE is set, but pip's
+# Django leaves out the script that hooks it up. Each Tab starts Django,
+# so it takes about a second. For `manage.py`, `./manage.py` and
+# `py`/`python`/`python3 manage.py`. Any other python command goes to the
+# completion python had (bash-completion's: options, -m modules), loaded
+# now since it's normally loaded on the first Tab. zsh keeps its own
+# python completion, so there only `py` and `manage.py` get this.
+_ifi_python_complete=""
+if [[ -z "${ZSH_VERSION:-}" ]]; then
+    declare -F _comp_load >/dev/null && _comp_load python 2>/dev/null
+    _ifi_python_complete="$(complete -p python 2>/dev/null | sed -n 's/.* -F \([^ ]*\) .*/\1/p')"
+fi
+_ifi_manage_py_complete() {
+    local python=python script="${COMP_WORDS[@]:0:1}" skip=0
+    if [[ "$script" != *manage.py ]]; then
+        python="$script" script="${COMP_WORDS[@]:1:1}" skip=1
+        if [[ "$script" != *manage.py || $COMP_CWORD -lt 2 ]]; then
+            [[ -n "$_ifi_python_complete" ]] && "$_ifi_python_complete" "$@"
+            return 0
+        fi
+    fi
+    # tr: Python on Windows ends lines with \r\n.
+    COMPREPLY=($(COMP_WORDS="${COMP_WORDS[*]:skip}" COMP_CWORD=$((COMP_CWORD - skip)) \
+        DJANGO_AUTO_COMPLETE=1 "$python" "$script" 2>/dev/null | tr -d '\r'))
+}
+complete -o default -F _ifi_manage_py_complete manage.py ./manage.py py
+[[ -n "${ZSH_VERSION:-}" ]] || complete -o default -F _ifi_manage_py_complete python python3
 
 # The branch you're on, for the prompt: "$1" with %s as the name, like
 # printf. Nothing outside this project (the check common.sh does) or on a
