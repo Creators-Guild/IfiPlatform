@@ -118,7 +118,11 @@ for analysis, since the link database is opened by hand only when needed
   job's (link and research databases), and the student's own (the
   link database by hand when needed, the research database read-only).
 - Numbers about everyone are totals only, per month or term, and 1–4 is
-  shown as "fewer than 5".
+  shown as "fewer than 5". They aren't personal data, so they're kept
+  after the project and used to follow how the site is doing, as the
+  privacy policy says. Only the printed numbers leave the server: the
+  saved monthly totals in the database hold the real counts, 1–4
+  included (decided 2026-11-02).
 - Umami's visitor statistics are not personal data: no cookies, no
   stored IP addresses, nothing linked to an account. They're used for the
   research as numbers about the whole site, and the privacy policy says

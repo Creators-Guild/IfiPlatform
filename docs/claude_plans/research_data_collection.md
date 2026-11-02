@@ -187,6 +187,11 @@ then, so between December and May this person had two roles.
 - **Only this site and repo.** The Halloween part of the change notice
   has its own plan (`halloween_mock_site_totals.md`) and doesn't block
   anything here (decided 2026-11-02).
+- **The totals are kept after the project** (decided 2026-11-02) and
+  used to follow how the site is doing. They aren't personal data, so
+  the Sikt approval and the June 2027 deletion don't cover them. Only the
+  printed numbers (1–4 as `<5`) leave the server: `FrozenTotal` holds the
+  real counts. The privacy policy says the totals are used for both.
 
 ## Questions
 
