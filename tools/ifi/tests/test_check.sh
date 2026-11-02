@@ -117,6 +117,24 @@ t_check_outside_the_project() {
     has "You're not in the project folder."
 }
 
+t_check_in_another_git_repo() {
+    git init --quiet "$SANDBOX/other"
+    cd "$SANDBOX/other" || fail "no folder"
+    run_ifi check
+    fails
+    has "You're not in the project folder."
+}
+
+t_save_in_another_git_repo_commits_nothing() {
+    git init --quiet "$SANDBOX/other"
+    cd "$SANDBOX/other" || fail "no folder"
+    echo "theirs" >file.txt
+    run_ifi save "Should not happen"
+    fails
+    has "Run this inside the IfiPlatform project folder."
+    same "$(git rev-list --all | wc -l | tr -d ' ')" 0 "commits in the other repo"
+}
+
 t_check_quiet_says_only_ok() {
     clone_as contributor
     start_issue

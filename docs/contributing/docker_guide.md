@@ -1,6 +1,6 @@
 # Docker guide
 
-Last updated: 2026-10-26
+Last updated: 2026-11-02
 
 Everything about the Docker setup after the first start: how it works, when
 to restart or rebuild, everyday tasks, and fixing problems. Starting for the
@@ -186,7 +186,9 @@ docker compose exec -u dev web bash
 ```
 Opens a terminal inside the container. From there, every `python manage.py ...` command and `ifi` work as normal. Type `exit` to leave.
 
-**`ifi` from your own terminal.** You can also stay outside the container: use the launcher in the repo root, `./ifi check` (Mac, Linux, Git Bash) or `.\ifi check` (Windows PowerShell; it needs Git Bash, which comes with Git for Windows). `ifi test`, `migrate`, `restart-server` and `reset-database` then run inside the container by themselves. Git commands (`save`, `pull-request`, ...) run on your own computer, where your GitHub login is: inside a container started this way there's no GitHub login. `./ifi install` makes `ifi` work from any folder (Mac, Linux, Git Bash).
+**`ifi` from your own terminal.** You can also stay outside the container: use the launcher in the repo root, `./ifi check` (Mac, Linux, Git Bash) or `.\ifi check` (Windows PowerShell; it needs Git Bash, which comes with Git for Windows). `ifi test`, `migrate`, `restart-server` and `reset-database` then run inside the container by themselves. Git commands (`save`, `pull-request`, ...) run on your own computer, where your GitHub login is: inside a container started this way there's no GitHub login.
+
+To type plain `ifi` instead of `./ifi`, give the project a venv. It needs Python on your computer, but no `pip install`, since the site's Python is in the container. In the repo root, run `python -m venv venv` (`python3` on Mac and Linux, `py` on Windows), then `./ifi install`. Activate the venv with `source venv/bin/activate` (Mac, Linux; `source venv/Scripts/activate` in Git Bash), and `ifi` works, with Tab completion. It only works in a terminal where the venv is active, and nowhere else.
 
 To stop everything: `docker compose down` (your database is kept).
 

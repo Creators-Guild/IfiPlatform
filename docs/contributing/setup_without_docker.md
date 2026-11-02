@@ -1,6 +1,6 @@
 # Setup without Docker (Python + SQLite)
 
-Last updated: 2026-10-26
+Last updated: 2026-11-02
 
 Only use this if Docker is too heavy for your laptop or won't install. The
 recommended setup is [Setup with Docker](setup_with_docker.md).
@@ -138,9 +138,14 @@ Code pick it with the **+** arrow in the terminal panel). In the repo root:
 ```bash
 ./ifi install
 ```
-Open a new terminal, and `ifi help` lists them. They find your venv by
-themselves. In PowerShell, run them from the repo root as `.\ifi check`
-instead (that still needs Git Bash installed).
+This puts `ifi` into your venv, so it only works in a terminal where the
+venv is active, and nothing else on your computer changes. Activate the
+venv again (or open a new terminal and activate it), and `ifi help` lists
+the commands. Tab completes them: type `ifi up` and press Tab. With the
+venv active, PowerShell has `ifi` too, but without Tab completion (it
+still needs Git Bash installed).
+
+If you ever delete the venv and make a new one, run `./ifi install` again.
 
 ## Next
 - New to Django? Read [How this project works](how_this_project_works.md).

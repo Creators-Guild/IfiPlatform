@@ -77,8 +77,10 @@ Do it before ifi moves to a new repo, and after big changes.
 | ✓ | Do | You should see |
 | --- | --- | --- |
 | ☐ | Follow `docs/contributing/setup_without_docker.md` | The site at http://localhost:8000 |
-| ☐ | `./ifi install`, open a new terminal | `ifi` works; Tab completes `ifi up` to `ifi update` |
-| ☐ | `./ifi install` again | "Already in ~/.bashrc" |
+| ☐ | `./ifi install`, new terminal, activate the venv | `ifi` works; Tab completes `ifi up` to `ifi update`; the branch shows in the prompt |
+| ☐ | `./ifi install` again | "ifi was already in venv. Updated it." |
+| ☐ | `deactivate`, or a new terminal without the venv | `ifi: command not found`; ~/.bashrc has no ifi lines |
+| ☐ | Mac (zsh): `./ifi install`, activate the venv | `ifi` works; Tab completes `ifi up` to `ifi update` |
 | ☐ | `scp` or `rsync` to this computer, or `bash -c true` | Prints nothing extra |
 | ☐ | `ifi check` | ⚠️ Not inside the Docker container (fine), and nothing else odd |
 | ☐ | `ifi test` | Runs with the venv's Python, without activating it |
@@ -96,7 +98,8 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | Docker running outside VS Code (`docker compose up -d`), Git Bash: `./ifi test` | Runs inside the container (it says so in the command) |
 | ☐ | PowerShell in the repo folder: `.\ifi check` | Same as Git Bash |
 | ☐ | Command Prompt: `ifi check` | Same as Git Bash |
-| ☐ | Git Bash: `./ifi install`, new Git Bash window | `ifi` works without `./` |
+| ☐ | Git Bash: `./ifi install`, new Git Bash window, activate the venv | `ifi` works without `./` |
+| ☐ | PowerShell: activate the venv, `ifi check` | Same as Git Bash (no Tab completion in PowerShell yet) |
 | ☐ | Git Bash without Python installed: `./ifi fix-issue <nr>`, `./ifi save`, `./ifi pull-request`, `./ifi check` | All work; fix-issue asks for the type and a few words; pull-request shows the link |
 | ☐ | `ifi fix-issue` with a title with æøå | The branch name has ae/o/a, no odd characters |
 

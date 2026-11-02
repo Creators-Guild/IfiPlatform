@@ -71,8 +71,10 @@ new_sandbox() {
         cd "$SANDBOX/teammate"
         git config user.name "Teammate"
         git config user.email "teammate@example.com"
-        mkdir -p ifiplatform/static/css docs
+        mkdir -p ifiplatform/static/css docs tools/ifi
         echo "# The project" >README.md
+        # ifi only runs in a repo that has this file (common.sh).
+        touch tools/ifi/ifi
         echo ".event-card { background: #222; }" >ifiplatform/static/css/cards.css
         echo "Notes" >docs/notes.md
         git add -A

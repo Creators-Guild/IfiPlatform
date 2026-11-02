@@ -17,7 +17,7 @@ The site and your setup:
 ifi restart-server         restart the website
 ifi reset-database         DELETE the local database and start fresh
 ifi rebuild-docker         how to rebuild the container
-ifi install                make ifi a command in your own terminal (no Docker)
+ifi install                make ifi a command in the project's venv (no Docker)
 ifi account                which GitHub account you push as (and commit as)
 ifi account switch <name>  push as another account (no name: back to your usual one)
 

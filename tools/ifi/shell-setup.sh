@@ -1,22 +1,31 @@
 # Sourced by the dev container's ~/.bashrc (Dockerfile.dev), and without
-# Docker by the line `ifi install` adds to ~/.bashrc: Tab completion for
-# ifi, a "(container)" mark in the container's prompt, a hint in every
-# new terminal, and a setup check in the first one. Works in bash 3.2 too (a Mac), so no mapfile.
+# Docker by the line `ifi install` adds to the venv's activate script, so
+# only while the venv is active: Tab completion for ifi, a "(container)"
+# mark in the container's prompt, a hint in every new terminal, and a
+# setup check in the first one. Works in bash 3.2 too (a Mac), so no
+# mapfile. In zsh (a Mac's default) only Tab completion and the hint.
 
 # Only for terminals you type in: scp, rsync and scripts break when a
 # non-interactive shell prints anything, and some ~/.bashrc files don't stop
 # those before the line that loads this.
 [[ $- == *i* ]] || return 0
 
+if [[ -n "${ZSH_VERSION:-}" ]]; then
+    # zsh runs bash completions through bashcompinit, which needs compinit.
+    (( $+functions[compdef] )) || { autoload -Uz compinit && compinit -u; }
+    autoload -Uz bashcompinit && bashcompinit
+fi
+
+# ${COMP_WORDS[@]:i:1}: counts from 0 in zsh too, where COMP_WORDS[i] doesn't.
 _ifi_complete() {
-    local cur="${COMP_WORDS[COMP_CWORD]}" words=""
+    local cur="${COMP_WORDS[@]:COMP_CWORD:1}" first="${COMP_WORDS[@]:1:1}" words=""
     if [[ $COMP_CWORD -eq 1 ]]; then
         words="help check fix-issue save update pull-request undo-file cleanup test migrate restart-server reset-database rebuild-docker install account"
-    elif [[ $COMP_CWORD -eq 2 && "${COMP_WORDS[1]}" == help ]]; then
+    elif [[ $COMP_CWORD -eq 2 && "$first" == help ]]; then
         words="git docker django ifi"
-    elif [[ $COMP_CWORD -eq 2 && "${COMP_WORDS[1]}" == update ]]; then
+    elif [[ $COMP_CWORD -eq 2 && "$first" == update ]]; then
         words="--abort"
-    elif [[ $COMP_CWORD -eq 2 && "${COMP_WORDS[1]}" == account ]]; then
+    elif [[ $COMP_CWORD -eq 2 && "$first" == account ]]; then
         words="switch"
     fi
     COMPREPLY=($(compgen -W "$words" -- "$cur"))
@@ -24,9 +33,12 @@ _ifi_complete() {
 complete -o default -F _ifi_complete ifi
 
 # The branch you're on, for the prompt: "$1" with %s as the name, like
-# printf. Nothing outside a repo or on a detached HEAD.
+# printf. Nothing outside this project (the check common.sh does) or on a
+# detached HEAD.
 _ifi_branch() {
-    local b
+    local top b
+    top="$(git rev-parse --show-toplevel 2>/dev/null)" || return 0
+    [[ -f "$top/tools/ifi/ifi" ]] || return 0
     b="$(git branch --show-current 2>/dev/null)" || return 0
     [[ -n "$b" ]] && printf "$1" "$b"
     return 0
@@ -37,8 +49,11 @@ _ifi_branch() {
 # the branch you're on, so you notice before you commit to the wrong one:
 #   (container) bug/orange-cards ~/ifiplatform $
 # On your own computer the branch goes in front of your own prompt, unless
-# it already shows one (Git Bash's does).
-if [[ -f /.dockerenv ]]; then
+# it already shows one (Git Bash's does). zsh's prompt works differently,
+# so it's left alone there.
+if [[ -n "${ZSH_VERSION:-}" ]]; then
+    :
+elif [[ -f /.dockerenv ]]; then
     PS1='\[\e[1;35m\](container)\[\e[0m\]\[\e[1;33m\]$(_ifi_branch " %s")\[\e[0m\] \w \$ '
 elif [[ "$PS1" != *__git_ps1* && "$PS1" != *_ifi_branch* ]]; then
     PS1='\[\e[1;33m\]$(_ifi_branch "(%s) ")\[\e[0m\]'"$PS1"
