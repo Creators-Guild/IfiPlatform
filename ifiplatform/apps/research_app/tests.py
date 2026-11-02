@@ -11,11 +11,14 @@ from django.test import SimpleTestCase, TestCase, override_settings
 from wagtail.models import Page, PageLogEntry, Revision
 
 from research_app import fake_data
+from research_app.models import FrozenTotal
 from research_app.totals import (
     GITHUB_COLUMNS,
     SITE_COLUMNS,
+    freeze_settled,
     github_totals,
     last_complete_month,
+    last_settled_month,
     month_of,
     months_between,
     show,
@@ -45,6 +48,11 @@ class HelperTests(SimpleTestCase):
     def test_last_complete_month(self):
         self.assertEqual(last_complete_month(_at("2026-11-15 12:00")), "2026-10")
         self.assertEqual(last_complete_month(_at("2027-01-01 12:00")), "2026-12")
+
+    def test_last_settled_month(self):
+        # September is settled 30 days after it ends, on 31 October.
+        self.assertEqual(last_settled_month(_at("2026-10-30 12:00")), "2026-08")
+        self.assertEqual(last_settled_month(_at("2026-10-31 12:00")), "2026-09")
 
     def test_months_are_in_oslo_time(self):
         # 23:30 UTC on 31 October is 00:30 on 1 November in Oslo.
@@ -237,8 +245,10 @@ class FakeDataTests(TestCase):
     def test_remove_leaves_nothing(self):
         now = _at("2026-11-15 12:00")
         fake_data.create(now)
+        FrozenTotal.objects.create(month="2026-01", column="new_accounts", count=3)
         fake_data.remove()
         self.assertEqual(site_totals(now), {})
+        self.assertFalse(FrozenTotal.objects.exists())
         self.assertFalse(
             User.objects.filter(username__startswith=fake_data.USERNAME_PREFIX).exists()
         )
@@ -273,6 +283,8 @@ class CommandTests(TestCase):
                     self.assertEqual(
                         "issues_opened" in totals.read_text(), bool(seed_github)
                     )
+        # Made-up GitHub data is never saved.
+        self.assertFalse(FrozenTotal.objects.filter(column__in=GITHUB_COLUMNS).exists())
 
     def test_bad_github_file(self):
         with self.assertRaises(CommandError):
@@ -340,3 +352,64 @@ class CommandTests(TestCase):
                 "--until",
                 "2026-04",
             )
+
+
+class FrozenTotalTests(TestCase):
+    NOW = _at("2026-11-15 12:00")  # September is settled, October isn't
+
+    def _joined(self, username, when):
+        user = User.objects.create_user(username=username, password="pw")
+        User.objects.filter(pk=user.pk).update(date_joined=_at(when))
+
+    def test_settled_months_survive_deleting_an_account(self):
+        self._joined("ada", "2026-09-05 12:00")
+        self._joined("bob", "2026-10-05 12:00")
+        freeze_settled(site_totals(self.NOW), SITE_COLUMNS, self.NOW)
+        User.objects.all().delete()
+        totals = freeze_settled(site_totals(self.NOW), SITE_COLUMNS, self.NOW)
+        self.assertEqual(totals["2026-09"]["new_accounts"], 1)
+        self.assertNotIn("2026-10", totals)  # not settled, so counted again
+
+    def test_months_without_data_are_saved_as_zero(self):
+        self._joined("ada", "2026-07-05 12:00")
+        freeze_settled(site_totals(self.NOW), SITE_COLUMNS, self.NOW)
+        self.assertEqual(
+            sorted(set(FrozenTotal.objects.values_list("month", flat=True))),
+            ["2026-07", "2026-08", "2026-09"],
+        )
+        saved = FrozenTotal.objects.get(month="2026-08", column="new_accounts")
+        self.assertEqual(saved.count, 0)
+
+    def test_the_command_prints_saved_months(self):
+        self._joined("ada", "2026-01-05 12:00")
+        args = ["--no-github", "--since", "2026-01", "--until", "2026-01"]
+        call_command("research_totals", *args, stdout=StringIO())
+        User.objects.all().delete()
+        out = StringIO()
+        call_command("research_totals", *args, stdout=out)
+        self.assertEqual(out.getvalue().splitlines()[1], "2026-01,<5,0,0,0,0,0")
+
+    def test_github_totals_are_saved_only_for_this_repo(self):
+        issue = {
+            "user": _user("ada", 10),
+            "created_at": "2026-01-10T12:00:00Z",
+            "labels": [],
+            "body": "",
+        }
+        with mock.patch(
+            "research_app.management.commands.research_totals.github_api"
+        ) as api:
+            api.get_issues.return_value = [issue]
+            api.get_pulls.return_value = []
+            api.get_commits.return_value = []
+            for repo in ("someone/fork", "Creators-Guild/IfiPlatform"):
+                call_command(
+                    "research_totals",
+                    "--repo",
+                    repo,
+                    stdout=StringIO(),
+                    stderr=StringIO(),
+                )
+                saved = FrozenTotal.objects.filter(column="issues_opened")
+                self.assertEqual(saved.exists(), repo != "someone/fork")
+        self.assertEqual(saved.get(month="2026-01").count, 1)

@@ -1,6 +1,7 @@
 """Monthly whole-site totals for the research (Phase 1 of the plan). Only
 counts: nothing here returns or prints who did something. People are told
-apart by ID while counting, and only the number of them is kept.
+apart by ID while counting, and only the number of them is kept. Settled
+months are saved (freeze_settled), so they never change later.
 
 Design notes: docs/claude_context/research_totals.md"""
 
@@ -12,6 +13,7 @@ from django.db.models import Min
 from wagtail.models import Page, PageLogEntry, Revision
 
 from ifi_home_app.models.event.constants import SITE_TIMEZONE
+from research_app.models import FrozenTotal
 
 SMALL_NUMBER_LIMIT = 5  # 1 to 4 are shown as "<5"
 DRAFT_ABANDONED_DAYS = 30
@@ -87,6 +89,13 @@ def last_complete_month(now):
     """The month before now's month, as "YYYY-MM"."""
     first_of_this_month = now.astimezone(SITE_TIMEZONE).replace(day=1)
     return month_of(first_of_this_month - timedelta(days=1))
+
+
+def last_settled_month(now):
+    """The last month whose totals are final: over, and with every draft
+    started in it at least DRAFT_ABANDONED_DAYS old, so
+    drafts_never_published can't grow any more."""
+    return last_complete_month(now - timedelta(days=DRAFT_ABANDONED_DAYS))
 
 
 def months_between(first, last):
@@ -228,6 +237,32 @@ def _count_commits(tally, commits):
             "email"
         ]
         tally.add_person(made, "people_using_ifi", person)
+
+
+def freeze_settled(totals, columns, now):
+    """Saves the counts of every settled month that isn't saved yet, from
+    the first month in totals on, zeros included. Returns totals with the
+    saved counts in place of the computed ones, so a settled month never
+    changes, even when accounts are deleted later."""
+    if totals:
+        FrozenTotal.objects.bulk_create(
+            [
+                FrozenTotal(
+                    month=month,
+                    column=column,
+                    count=totals.get(month, {}).get(column, 0),
+                )
+                for month in months_between(min(totals), last_settled_month(now))
+                for column in columns
+            ],
+            ignore_conflicts=True,  # already saved: the saved count stays
+        )
+    result = {month: dict(counts) for month, counts in totals.items()}
+    for month, column, count in FrozenTotal.objects.filter(
+        column__in=columns
+    ).values_list("month", "column", "count"):
+        result.setdefault(month, {})[column] = count
+    return result
 
 
 def rows(site, github, first_month, last_month, include_github=True):

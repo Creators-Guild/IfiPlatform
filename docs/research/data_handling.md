@@ -1,6 +1,6 @@
 # Research data handling
 
-Last updated: 2026-10-29
+Last updated: 2026-11-02
 
 How the data for the master's thesis is kept safe: where it is, who can
 reach it, and what to do at each step. The thesis asks how a student-run
@@ -240,9 +240,10 @@ for analysis, since the link database is opened by hand only when needed
     the Halloween event's participants and helpers. Their GitHub data and
     link (research ID ↔ GitHub username or email) are stored on NREC,
     encrypted and apart from the analysis data, and deleted when the
-    analysis is done, by 30.06.2027 at the latest. **Not decided:** where
-    on the server, how it's kept apart from the platform's research data,
-    and whether it's backed up.
+    analysis is done, by 30.06.2027 at the latest. Where on the server,
+    how it's kept apart from the platform's research data, and whether
+    it's backed up are decided separately and don't hold up the platform
+    (decided 2026-11-02).
 
 ## Later
 

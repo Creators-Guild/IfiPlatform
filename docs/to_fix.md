@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-10-29
+Last updated: 2026-11-02
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -270,18 +270,23 @@ Decisions to come back to once the planned ifi changes are built.
   application says only the student can reach the research data, and
   root can read it (see
   [research/data_handling.md](research/data_handling.md), question 1).
-- [ ] **Switch to an email service in the EU/EEA.** Account emails
+- [ ] **Maybe switch to an email service in the EU/EEA.** Account emails
   (verification, password reset) go through Resend (`smtp.resend.com`),
-  an American company, so email addresses are sent to the USA. The
-  privacy policy also says the site "does not share your data with any
-  third party", which isn't true while an outside service sends the
-  emails. Fix: pick a provider in the EU/EEA (for example Brevo or
-  Mailjet, both in France), change `EMAIL_HOST`, `EMAIL_HOST_USER` and
-  `EMAIL_HOST_PASSWORD` in `.env`, add the provider's SPF and DKIM DNS
-  records, and send a test email. Then name the provider in the privacy
-  policy and in
-  [operations/access_and_handover.md](operations/access_and_handover.md)
-  (the Email row still says "fill in").
+  an American company, so email addresses are sent to the USA. That's
+  allowed for now: Resend is certified under the EU-U.S. Data Privacy
+  Framework, its data processing agreement applies to every account, and
+  the privacy policy names it. The policy says Resend is certified, so
+  check once a year that it's still on the
+  [Data Privacy Framework list](https://www.dataprivacyframework.gov/list).
+  Don't add a tracking subdomain in Resend: it turns on click (and maybe
+  open) tracking, which the policy doesn't mention. An EU provider would
+  keep the addresses in the EU and not depend on the framework lasting.
+  To switch: pick a provider in the EU/EEA, change
+  `EMAIL_HOST`, `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` in `.env`, add
+  the provider's SPF and DKIM DNS records, and send a test email. Then
+  update the "Cookies and third parties" part of the privacy policy (and
+  its Norwegian text in `django.po`) and the Email row in
+  [operations/access_and_handover.md](operations/access_and_handover.md).
 
 From [operations/server_setup.md](operations/server_setup.md#notes-and-known-issues):
 

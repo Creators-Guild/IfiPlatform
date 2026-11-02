@@ -1,6 +1,8 @@
 """Prints monthly whole-site totals for the research as CSV, from the site
 database, GitHub and the commit history. Counts only: 1 to 4 are shown as
-"<5", and nothing names anyone.
+"<5", and nothing names anyone. A month's numbers are saved once it's
+settled (30 days after it ends), and from then on the saved ones are
+printed, so they don't change when accounts are deleted.
 
 Save it to a file:
     python manage.py research_totals --output totals.csv
@@ -17,6 +19,9 @@ from django.utils import timezone
 
 from research_app import github_api
 from research_app.totals import (
+    GITHUB_COLUMNS,
+    SITE_COLUMNS,
+    freeze_settled,
     github_totals,
     last_complete_month,
     month_of,
@@ -25,6 +30,7 @@ from research_app.totals import (
 )
 
 MONTH_FORMAT = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
+DEFAULT_REPO = "Creators-Guild/IfiPlatform"
 
 
 class Command(BaseCommand):
@@ -57,7 +63,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--repo",
-            default="Creators-Guild/IfiPlatform",
+            default=DEFAULT_REPO,
             help="GitHub repo as owner/name. Default: %(default)s.",
         )
         parser.add_argument(
@@ -71,7 +77,7 @@ class Command(BaseCommand):
                 raise CommandError(f"--{option} must look like 2026-11.")
 
         now = timezone.now()
-        site = site_totals(now)
+        site = freeze_settled(site_totals(now), SITE_COLUMNS, now)
         github = {}
         if options["github_file"]:
             try:
@@ -95,6 +101,8 @@ class Command(BaseCommand):
                     f"GitHub API failed: {error}. Run with --no-github, or set "
                     "GITHUB_TOKEN if the rate limit was reached."
                 ) from error
+            if repo == DEFAULT_REPO:  # another repo's numbers aren't saved
+                github = freeze_settled(github, GITHUB_COLUMNS, now)
 
         last_month = options["until"] or last_complete_month(now)
         first_month = options["since"] or min([*site, *github, last_month])

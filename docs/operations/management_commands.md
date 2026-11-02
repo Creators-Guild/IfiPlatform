@@ -1,6 +1,6 @@
 # Custom manage.py commands
 
-Last updated: 2026-10-28
+Last updated: 2026-11-02
 
 This project's own `manage.py` commands, beyond Django's built-in ones
 (`migrate`, `createsuperuser`, `test`, `makemessages`/`compilemessages`,
@@ -380,12 +380,29 @@ needed, so it follows three rules (see
 - only counts, never who: nothing in the output names anyone
 - 1 to 4 are shown as `<5`, so small groups can't be told apart
 - months, in Oslo time; by default from the first month with data to the
-  last complete month, so a printed month never changes later. When the
-  current month is left out, the command says so; add `--until` with the
-  current month to see it.
+  last complete month. When the current month is left out, the command
+  says so; add `--until` with the current month to see it.
 
 Bots on GitHub, and publishing done by code (the Peoply sync), don't
 count.
+
+**Settled months are saved.** A month is settled 30 days after it ends,
+when every draft started in it is old enough to count as never
+published. The first run after that saves the month's numbers in the
+database, and later runs print the saved ones. Without this, old months
+would shrink when people delete their accounts: a deleted account is no
+longer in `new_accounts`, and its drafts no longer count in
+`people_saved_draft` or `drafts_never_published`. Until a month is
+saved, its numbers can still change. GitHub numbers are only saved when
+they're read from GitHub for the project's own repo, not with
+`--github-file` or another `--repo`. To count a month again, for example
+after fixing a counting bug, delete its saved numbers in
+`py manage.py shell` and run the command again:
+
+```python
+from research_app.models import FrozenTotal
+FrozenTotal.objects.filter(month="2026-09").delete()
+```
 
 | Column | Counts |
 | --- | --- |
@@ -439,8 +456,9 @@ The fake pages are under "Fake research data" in the Wagtail admin. They
 are never live, so they don't show on the site. Running the command again
 replaces the fake data, and `--remove` deletes it. If your database has
 other data in the same months, the command warns you that those months
-won't match. It only runs when `DEBUG` is on, so it can never add fake
-data to the real site.
+won't match. It also deletes every saved month (see `research_totals`
+above), so no numbers from fake data are kept. It only runs when `DEBUG`
+is on, so it can never add fake data to the real site.
 
 ## core_app
 

@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from wagtail.models import Page, PageLogEntry, Revision
 
 from ifi_home_app.models.event.constants import SITE_TIMEZONE
+from research_app.models import FrozenTotal
 from research_app.totals import GITHUB_COLUMNS, SITE_COLUMNS, month_of
 
 USERNAME_PREFIX = "fake-research-"
@@ -109,7 +110,8 @@ class _FakeSite:
 
 def remove():
     """Deletes all fake research data. Publish rows outlive their page, so
-    they're deleted by hand."""
+    they're deleted by hand. Saved totals would keep the fake numbers, so
+    every saved total goes too (seed_research_data only runs with DEBUG on)."""
     parent = Page.objects.filter(depth=2, slug=PARENT_SLUG).first()
     if parent:
         page_ids = list(
@@ -121,6 +123,7 @@ def remove():
         ).delete()
         parent.delete()
     get_user_model().objects.filter(username__startswith=USERNAME_PREFIX).delete()
+    FrozenTotal.objects.all().delete()
 
 
 def create(now):

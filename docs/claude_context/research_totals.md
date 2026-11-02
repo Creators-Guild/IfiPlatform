@@ -1,7 +1,7 @@
 # research_app totals — design notes
 
-Last updated: 2026-10-28
-Covers: ifiplatform/apps/research_app/totals.py, ifiplatform/apps/research_app/github_api.py, ifiplatform/apps/research_app/management/commands/research_totals.py, ifiplatform/apps/research_app/fake_data.py, ifiplatform/apps/research_app/management/commands/seed_research_data.py
+Last updated: 2026-11-02
+Covers: ifiplatform/apps/research_app/totals.py, ifiplatform/apps/research_app/models.py, ifiplatform/apps/research_app/github_api.py, ifiplatform/apps/research_app/management/commands/research_totals.py, ifiplatform/apps/research_app/fake_data.py, ifiplatform/apps/research_app/management/commands/seed_research_data.py
 
 Phase 1 of `docs/claude_plans/research_data_collection.md`: whole-site
 monthly totals, no consent, no new database. Data handling rules for the
@@ -19,10 +19,11 @@ research are in `docs/research/data_handling.md`.
 - **Months are in Oslo time** (`SITE_TIMEZONE` from
   `ifi_home_app.models.event.constants`), since `settings.TIME_ZONE` is
   UTC.
-- **The default range ends at the last complete month**, so a printed
-  month never changes later. `drafts_never_published` is still too low for
-  the most recent month: a draft only counts once it's 30 days old
-  (`DRAFT_ABANDONED_DAYS`, the plan's "abandoned draft" rule).
+- **The default range ends at the last complete month.**
+  `drafts_never_published` is still too low for the most recent month: a
+  draft only counts once it's 30 days old (`DRAFT_ABANDONED_DAYS`, the
+  plan's "abandoned draft" rule). Months become final when they're saved
+  (below).
 
 ## Choices that look odd
 
@@ -48,6 +49,34 @@ research are in `docs/research/data_handling.md`.
 - **`first_time_pr_authors_merged`** sorts pull requests by `merged_at`
   first, so each author's earliest merge wins. Unmerged ones sort last
   (`"~"` sorts after any date string).
+
+## Saved months (`FrozenTotal`, `freeze_settled`)
+
+- **Why:** the counts are worked out from scratch on every run, so
+  deleting an account lowered old months. The user row goes
+  (`new_accounts`), and Wagtail sets `Revision.user` to NULL, which the
+  code reads as "done by code" (`people_saved_draft`,
+  `drafts_never_published`). `PageLogEntry.user` is `DO_NOTHING` with no
+  database constraint, so the publish columns keep the old ID and don't
+  shrink. GitHub numbers shift too: relabelled or deleted issues, and
+  deleted accounts all becoming GitHub's one `ghost` user.
+- **Settled** (`last_settled_month`) is the last complete month of
+  `now - DRAFT_ABANDONED_DAYS`: the same 30 × 24 hours as the draft
+  cutoff in `site_totals`, so every draft in a settled month has been
+  judged.
+- **Every month from the first in the totals to the last settled one is
+  saved, zeros included,** in every column. A month whose data later
+  disappears completely still prints its saved numbers.
+  `bulk_create(ignore_conflicts=True)` keeps what's already saved, and
+  two runs at once don't crash.
+- **Saved counts are the real numbers,** not `<5`; `show()` applies when
+  printing, as before. Counts only, no IDs. Keep it out of the admin,
+  like every research model.
+- **Not saved:** GitHub columns from `--github-file` (made-up) or another
+  `--repo`. Site columns are saved whatever the GitHub options are, since
+  they always come from the real database.
+- A column added later is saved for old months with the numbers of that
+  day, the best there is. A renamed column's old rows are just ignored.
 
 ## fake_data.py and seed_research_data
 
@@ -83,5 +112,9 @@ research are in `docs/research/data_handling.md`.
   counted.
 - **DEBUG only, no `--force`** (unlike `seed_dev_data`): fake data in a
   real database would end up in the real totals.
+- **`remove()` deletes every `FrozenTotal`**, not just the fake months:
+  saved numbers from an earlier seed would otherwise be printed instead
+  of the new fake data, and the round trip wouldn't match. Fine, since
+  it only ever runs on a local database.
 - The command warns about other data in the same months by running
   `site_totals()` after `remove()` and before `create()`.

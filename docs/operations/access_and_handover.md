@@ -1,6 +1,6 @@
 # Access and handover
 
-Last updated: 2026-10-27
+Last updated: 2026-11-02
 
 Every account and key the project depends on, who controls it, and what
 to do when someone joins or leaves. If the only person with access to one
@@ -22,7 +22,7 @@ list of names here would go out of date.
 | SSH, analytics VM | Umami server | Hanna K. K. Niemi (`hkkniemi`) | `~/.ssh/authorized_keys` on that server |
 | GitHub `Creators-Guild` | Code, issues, Actions, secrets | Hanna K. K. Niemi (`hkkniemi`) | Org → People, repo → Settings → Collaborators |
 | Domain `ifiplattform.no` | DNS for the site and `stats.` | Hanna K. K. Niemi (`hkkniemi`), at _(fill in: registrar)_ | _(fill in)_ |
-| Email (SMTP) | Account verification emails | Hanna K. K. Niemi (`hkkniemi`), at _(fill in: provider)_ | _(fill in)_ |
+| Email (SMTP) | Account verification and password reset emails | Hanna K. K. Niemi (`hkkniemi`), at Resend | _(fill in)_ |
 | DeepL | Machine translation | Hanna K. K. Niemi (`hkkniemi`) | DeepL account → team members |
 | Umami | Traffic statistics | Hanna K. K. Niemi (`hkkniemi`) | Umami → Settings → Users |
 | Trello | Board that mirrors GitHub issues | Hanna K. K. Niemi (`hkkniemi`) | Trello board → members |

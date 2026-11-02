@@ -1,6 +1,6 @@
 # Plan: research data collection for the master's thesis
 
-Last updated: 2026-10-29
+Last updated: 2026-11-02
 
 Hanna's thesis asks how a student-run open-source platform turns passive
 users into contributors. The data collection is approved by Sikt. A change
@@ -9,8 +9,9 @@ detail, plus the Halloween event's participants and helpers) must be
 approved before the first participant. This plan covers the platform's
 code only (no interviews). Delete this plan when the build is done.
 
-**Status:** Phase 1 is built (not merged yet). Phase 2 has started; the
-Sikt check is done. Build each phase only when Hanna says so.
+**Status:** Phase 1 is built, with saved months (2026-11-02), and Hanna
+merges it after testing by hand. Phase 2 has started; the Sikt check is
+done. Next: Phase 3. Build each phase only when Hanna says so.
 
 Security and data handling (who can reach what, risks, open questions):
 `docs/research/data_handling.md`. Its open questions are Hanna's to decide.
@@ -177,6 +178,15 @@ then, so between December and May this person had two roles.
 - **Backups** roll off after 14 days, so withdrawn data is gone from them
   within 14 days. Deletions aren't re-applied after a restore (decided
   2026-10-29).
+- **Account emails stay with Resend for now** (decided 2026-11-02). It's
+  certified under the EU-U.S. Data Privacy Framework and its data
+  processing agreement applies to every account. The privacy policy names
+  NREC and Resend. Switching to an EU provider is optional
+  (`docs/to_fix.md`). Research data never goes through Resend (no email
+  check, Questions 11).
+- **Only this site and repo.** The Halloween part of the change notice
+  has its own plan (`halloween_mock_site_totals.md`) and doesn't block
+  anything here (decided 2026-11-02).
 
 ## Questions
 
@@ -284,10 +294,8 @@ Hanna decides these. Don't build the parts that are still open.
     365 for UiO (OneDrive). Pseudonymised exports for analysis go there
     too (as the Sikt application says), never the link.
 15. **Consent records after withdrawal.** Decided: not kept.
-16. **Halloween data on this server.** The change notice puts the
-    Halloween participants' GitHub data and link on NREC. Not decided:
-    where, how it's kept apart, and backups
-    (`docs/research/data_handling.md`, question 14).
+16. **Halloween data on this server.** Out of scope: it has its own plan
+    (see Decided).
 
 What the Sikt application lists for the platform (Norwegian, summarised,
 as in the change notice): number and type of contributions; the way in;
@@ -408,6 +416,14 @@ free) and the commit history (through the same API, so it works where
   `docs/architecture/overview.md` and
   `docs/operations/management_commands.md`.
 - Tests with made-up data, no network.
+- **Saved months** (decided 2026-11-02). Each run works the counts out
+  from scratch, so deleting an account lowered old months
+  (`new_accounts`, `people_saved_draft`, `drafts_never_published`). Now a
+  month's numbers are saved in the main database (`FrozenTotal`) once it's
+  settled, 30 days after it ends, and printed from there after that.
+  GitHub numbers are saved only when read live for the project's own repo.
+  Months before the first run on the server keep the deletions that
+  already happened.
 
 Start exploring as soon as this works.
 
@@ -415,19 +431,39 @@ Start exploring as soon as this works.
 
 Decided 2026-10-28: the Sikt check and the consent text wait until later,
 but must be done before Phase 5 (the first participant). The privacy
-policy already mentions Umami and the totals (2026-10-28). The research
-notice gets its own page, like the content ownership terms
+policy already mentions Umami and the totals (2026-10-28), and names NREC
+and Resend (2026-11-02). The research notice gets its own page, like the content ownership terms
 (`/account/content_terms`), not a section in the privacy policy.
 
 - ~~Check the Sikt application and information letter against the
   plan.~~ Done 2026-10-29, see "Sikt check: results" below.
-- Wait for Sikt to approve the change notice.
+- Wait for Sikt to approve the change notice. Until then the original
+  approval holds (see "What is approved now" below).
 - Write the consent text (Norwegian, the source of truth, and English)
   and the privacy policy update.
 - Small decisions, all decided 2026-10-28: sizes per type (see Focus),
   both suggestions in Questions 9, and leaving the queue table's rows out
   of the main database's backup.
 - Write down the analysis questions, dated, before the first participant.
+
+**What is approved now** (Sikt's assessment, ref. 248663, 2026-09-09):
+this site and GitHub, from 30.09.2026 to 30.06.2027, consent as the legal
+basis, bachelor and master students at Ifi, and one optional question
+(earlier programming or open-source experience: ingen/noe/betydelig).
+The change notice adds the rest: all UiO students, the second experience
+question, start year and level, and the storage details in "Sikt check:
+results" below.
+
+Decided 2026-11-02:
+
+- Build Phases 3, 4 and 5 now. Writing code needs no approval; only the
+  first real participant waits for the change notice.
+- Build for the change notice's version (four questions, UiO students),
+  not a cut-down one, to avoid two consent texts and asking everyone
+  again.
+- Fallback, decided when the code is done: if Sikt still hasn't
+  answered, start within the original approval (Ifi bachelor and master
+  students, one question, the original information letter).
 
 **Sikt check: results** (2026-10-29). The application, the information
 letter, the variable list and the questionnaire were changed in the
