@@ -75,9 +75,12 @@ def _page(rows):
     middle = len(payload) // 2
     chunks = [payload[:middle], payload[middle:]]
     scripts = "".join(
-        f"<script>self.__next_f.push([1,{json.dumps(chunk)}])</script>" for chunk in chunks
+        f"<script>self.__next_f.push([1,{json.dumps(chunk)}])</script>"
+        for chunk in chunks
     )
-    return f"<html><body><script>self.__next_f.push([0])</script>{scripts}</body></html>"
+    return (
+        f"<html><body><script>self.__next_f.push([0])</script>{scripts}</body></html>"
+    )
 
 
 SAMPLE_PAGE = _page(
@@ -91,15 +94,36 @@ SAMPLE_PAGE = _page(
                 None,
                 {
                     "children": [
-                        _card("id-15", "output-utg-15", "aaa-623x802.jpg", ">Output utg. 15", _date("april 2026")),
-                        _card("id-11", "output-lilla", "bbb-2620x3370.jpg", ">Output utg. 11", "$L14"),
+                        _card(
+                            "id-15",
+                            "output-utg-15",
+                            "aaa-623x802.jpg",
+                            ">Output utg. 15",
+                            _date("april 2026"),
+                        ),
+                        _card(
+                            "id-11",
+                            "output-lilla",
+                            "bbb-2620x3370.jpg",
+                            ">Output utg. 11",
+                            "$L14",
+                        ),
                         "$L15",
                     ]
                 },
             ],
         ),
         ("14", _date("mars 2024")),
-        ("15", _card("id-14", "rytme", "ccc-2620x3370.jpg", ">Output utg. 14", _date("november 2025"))),
+        (
+            "15",
+            _card(
+                "id-14",
+                "rytme",
+                "ccc-2620x3370.jpg",
+                ">Output utg. 14",
+                _date("november 2025"),
+            ),
+        ),
         ("16", 'I["chunks/app.js"]'),
     ]
 )
@@ -142,11 +166,13 @@ class ParseIssuesTests(SimpleTestCase):
 def _fake_response(text, status_code=200):
     response = Mock(text=text, status_code=status_code)
     if status_code >= 400:
-        response.raise_for_status.side_effect = requests.HTTPError(f"{status_code} error")
+        response.raise_for_status.side_effect = requests.HTTPError(
+            f"{status_code} error"
+        )
     return response
 
 
-def _sync(page=SAMPLE_PAGE, *args):
+def _sync(*args, page=SAMPLE_PAGE):
     out = StringIO()
     with patch(
         "ifi_home_app.integrations.ifiavis.requests.get",
@@ -192,14 +218,14 @@ class SyncOutputMagazineTests(TestCase):
         self.assertIn("1 stored issues are no longer listed there", output)
 
     def test_dry_run_saves_nothing(self):
-        output = _sync(SAMPLE_PAGE, "--dry-run")
+        output = _sync("--dry-run")
         self.assertFalse(MagazineIssue.objects.exists())
         self.assertIn("Dry run", output)
 
     def test_unreadable_page_fails_and_changes_nothing(self):
         _sync()
         with self.assertRaises(CommandError):
-            _sync("<html>redesigned</html>")
+            _sync(page="<html>redesigned</html>")
         self.assertEqual(MagazineIssue.objects.count(), 3)
 
     def test_http_error_fails(self):
@@ -213,7 +239,9 @@ class SyncOutputMagazineTests(TestCase):
 
 class MagazineIssueAdminTests(TestCase):
     def test_nobody_can_add_or_delete_but_admins_can_hide(self):
-        admin = get_user_model().objects.create_superuser("admin", "a@example.com", "pw")
+        admin = get_user_model().objects.create_superuser(
+            "admin", "a@example.com", "pw"
+        )
         policy = MagazineIssueViewSet().permission_policy
         self.assertFalse(policy.user_has_permission(admin, "add"))
         self.assertFalse(policy.user_has_permission(admin, "delete"))
@@ -243,7 +271,11 @@ class MagazineBoxTemplateTests(TestCase):
 
     def test_renders_each_issue_with_its_link(self):
         self._issue()
-        self._issue(sanity_id="id-14", title=">Output utg. 14", url="https://www.ifiavis.no/utgaver/rytme")
+        self._issue(
+            sanity_id="id-14",
+            title=">Output utg. 14",
+            url="https://www.ifiavis.no/utgaver/rytme",
+        )
         html = render_to_string(
             "home/partials/magazinebox/magazinebox.html",
             {"magazine_issues": list(MagazineIssue.objects.all())},
@@ -254,5 +286,7 @@ class MagazineBoxTemplateTests(TestCase):
         self.assertEqual(html.count('loading="lazy"'), 1)
 
     def test_renders_nothing_without_issues(self):
-        html = render_to_string("home/partials/magazinebox/magazinebox.html", {"magazine_issues": []})
+        html = render_to_string(
+            "home/partials/magazinebox/magazinebox.html", {"magazine_issues": []}
+        )
         self.assertEqual(html.strip(), "")

@@ -78,6 +78,8 @@ class _SyncOwnedPermissionPolicy(ModelPermissionPolicy):
 
 
 class MagazineIssueViewSet(SnippetViewSet):
+    """The >OUTPUT issues in the admin: a list plus the "hidden" checkbox."""
+
     model = MagazineIssue
     icon = "doc-full"
     menu_label = ">OUTPUT issues"

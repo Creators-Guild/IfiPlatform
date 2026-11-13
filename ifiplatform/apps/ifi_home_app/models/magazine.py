@@ -8,6 +8,8 @@ from django.db import models
 
 
 class MagazineIssue(models.Model):
+    """One >OUTPUT issue, mirrored from ifiavis.no by sync_output_magazine."""
+
     sanity_id = models.CharField(
         max_length=64,
         unique=True,
@@ -19,7 +21,9 @@ class MagazineIssue(models.Model):
         max_length=500,
         help_text="Cover image on Sanity's image CDN, without a size.",
     )
-    issue_date = models.DateField(help_text="First day of the month the issue came out.")
+    issue_date = models.DateField(
+        help_text="First day of the month the issue came out."
+    )
     hidden = models.BooleanField(
         default=False,
         help_text="Hide this issue from the homepage. The sync never changes this.",
@@ -45,8 +49,10 @@ class MagazineIssue(models.Model):
 
     @property
     def cover_small(self):
+        """The cover for the box's 1x screens."""
         return self.cover_src(400)
 
     @property
     def cover_large(self):
+        """The cover for 2x screens."""
         return self.cover_src(800)

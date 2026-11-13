@@ -36,7 +36,13 @@ MAGAZINE_ISSUE_SPECS = [
 ]
 
 
-class MagazineSeedMixin:
+class MagazineSeedMixin:  # pylint: disable=too-few-public-methods
+    """Adds MAGAZINE_ISSUE_SPECS. Mixed into seed_dev_data's Command,
+    which sets created_count/skipped_count."""
+
+    created_count = 0
+    skipped_count = 0
+
     def _seed_magazine_issues(self):
         for sanity_id, title, slug, cover, issue_date in MAGAZINE_ISSUE_SPECS:
             _issue, created = MagazineIssue.objects.get_or_create(

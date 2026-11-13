@@ -41,6 +41,8 @@ class IfiavisParseError(Exception):
 
 @dataclass(frozen=True)
 class Issue:
+    """One issue as listed on ifiavis.no."""
+
     sanity_id: str
     title: str
     url: str
@@ -127,7 +129,11 @@ def _is_element(node):
 def _issue_from_card(tree, key, props):
     children = props.get("children")
     image = next(
-        (el[3] for el in tree.elements(children) if "cdn.sanity.io" in str(el[3].get("src", ""))),
+        (
+            el[3]
+            for el in tree.elements(children)
+            if "cdn.sanity.io" in str(el[3].get("src", ""))
+        ),
         None,
     )
     texts = [t.strip() for t in tree.texts(children) if t.strip()]
@@ -167,6 +173,7 @@ def parse_issues(html):
 
 
 def get_issues():
+    """Fetch ifiavis.no/utgaver and return its issues (see parse_issues)."""
     response = requests.get(LISTING_URL, timeout=10)
     response.raise_for_status()
     return parse_issues(response.text)
