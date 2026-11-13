@@ -1,6 +1,6 @@
 # ifi: checks by hand
 
-Last updated: 2026-10-27
+Last updated: 2026-11-02
 
 `tools/ifi/tests/run` checks ifi against a fake GitHub. This list is for what
 it can't fake: real GitHub logins, VS Code's pop-ups, Docker, and Windows.
@@ -25,6 +25,7 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | Open a second terminal | No new check: "✅ Setup OK (checked <date> <time>)" and "Check again?  →  ifi check" |
 | ☐ | Ports panel | One port: 8000, labelled **Website**, green dot, shows runserver |
 | ☐ | `ifi check` | No ❌. If "Not logged in": run `git push`, click **Allow**, log in, run it again |
+| ☐ | In `ifiplatform/`: type `python manage.py mig` and press Tab, then `python -m js` and Tab | `migrate` after about a second; then `json` (python's own completion still works) |
 | ☐ | `ifi fix-issue <test issue>` | The issue's title; a branch named `<type>/<few-words>` |
 | ☐ | Change the file, `ifi save "Orange cards"` | "✓ Marked every change in the repo to be committed", with the file under it |
 | ☐ | After the pull request is merged: the commit on GitHub | The message ends with a `Made-with: ifi` line |
@@ -78,9 +79,11 @@ Do it before ifi moves to a new repo, and after big changes.
 | --- | --- | --- |
 | ☐ | Follow `docs/contributing/setup_without_docker.md` | The site at http://localhost:8000 |
 | ☐ | `./ifi install`, new terminal, activate the venv | `ifi` works; Tab completes `ifi up` to `ifi update`; the branch shows in the prompt |
+| ☐ | Venv active, in `ifiplatform/`: `python manage.py mig`, Tab | `migrate` after about a second |
 | ☐ | `./ifi install` again | "ifi was already in venv. Updated it." |
 | ☐ | `deactivate`, or a new terminal without the venv | `ifi: command not found`; ~/.bashrc has no ifi lines |
 | ☐ | Mac (zsh): `./ifi install`, activate the venv | `ifi` works; Tab completes `ifi up` to `ifi update` |
+| ☐ | Mac (zsh), venv active, in `ifiplatform/`: `./manage.py mig`, Tab; then `python -m js`, Tab | `migrate`; then zsh's own python completion, unchanged |
 | ☐ | `scp` or `rsync` to this computer, or `bash -c true` | Prints nothing extra |
 | ☐ | `ifi check` | ⚠️ Not inside the Docker container (fine), and nothing else odd |
 | ☐ | `ifi test` | Runs with the venv's Python, without activating it |
@@ -100,6 +103,7 @@ Do it before ifi moves to a new repo, and after big changes.
 | ☐ | Command Prompt: `ifi check` | Same as Git Bash |
 | ☐ | Git Bash: `./ifi install`, new Git Bash window, activate the venv | `ifi` works without `./` |
 | ☐ | PowerShell: activate the venv, `ifi check` | Same as Git Bash (no Tab completion in PowerShell yet) |
+| ☐ | Git Bash, site set up without Docker, venv active, in `ifiplatform/`: `py manage.py mig`, Tab | `migrate`, with no stray `^M` after it |
 | ☐ | Git Bash without Python installed: `./ifi fix-issue <nr>`, `./ifi save`, `./ifi pull-request`, `./ifi check` | All work; fix-issue asks for the type and a few words; pull-request shows the link |
 | ☐ | `ifi fix-issue` with a title with æøå | The branch name has ae/o/a, no odd characters |
 

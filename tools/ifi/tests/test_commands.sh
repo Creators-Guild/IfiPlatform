@@ -101,6 +101,18 @@ t_commands_shell_setup_completes_ifi() {
     has "[docker django]"
 }
 
+t_commands_shell_setup_completes_manage_py() {
+    # A fake py shows what Django would get, so no Django is needed.
+    mkdir -p "$SANDBOX/bin"
+    printf '#!/usr/bin/env bash\necho "$1|$COMP_WORDS|$COMP_CWORD|$DJANGO_AUTO_COMPLETE"\n' >"$SANDBOX/bin/py"
+    chmod +x "$SANDBOX/bin/py"
+    OUT="$(PATH="$SANDBOX/bin:$PATH" bash --norc --noprofile -i -c ". '$TOOLS/shell-setup.sh' >/dev/null 2>&1
+        COMP_WORDS=(py manage.py research_totals --s); COMP_CWORD=3; _ifi_manage_py_complete; echo \"[\${COMPREPLY[*]}]\"
+        COMP_WORDS=(py other.py x); COMP_CWORD=2; COMPREPLY=(); _ifi_manage_py_complete; echo \"other: [\${COMPREPLY[*]}]\"" 2>/dev/null)"
+    has "[manage.py|manage.py research_totals --s|2|1]"
+    has "other: []"
+}
+
 t_commands_install_puts_ifi_in_the_venv_once() {
     [[ -f /.dockerenv ]] && skip "ifi install does nothing inside the container"
     clone_as contributor
