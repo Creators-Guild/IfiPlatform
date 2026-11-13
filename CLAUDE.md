@@ -4,7 +4,10 @@
 
 - Before editing a file, check its module docstring or top comment for a
   `docs/claude_context/...` pointer. If there is one, read that note first.
-  How to write notes: `docs/claude_context/readme_claude.md`.
+- Before writing or changing a note, read
+  `docs/claude_context/readme_claude.md` and follow its conventions: a
+  one-line pointer in the source file, `Last updated:` and `Covers:` at
+  the top, and nothing a human doc already explains.
 - **Stale check.** Each note starts with `Last updated:` and `Covers:`.
   Run `git log --since=<Last updated> --oneline -p -- <Covers paths>`.
   - Nothing that touches what the note explains: the note is fine. If
@@ -16,11 +19,23 @@
 
 ## Human docs
 
-- Everything in `docs/` except the `claude_*` folders is for people. Follow
-  the rules in `docs/README.md`, including a `Last updated:` date on every
-  doc.
+- Everything in `docs/` except the `claude_*` folders is for people.
+  Before adding or changing one, read `docs/README.md` and follow its
+  rules: the right folder, a `Last updated:` date, a line in its list for
+  a new doc, ticking off "Planned docs", and updating
+  `docs/architecture/overview.md` when a change adds an app, a page type
+  or an external service.
+- Drafts of human docs go in `docs/claude_references/` (read its
+  `readme.md` first). Plans go in `docs/claude_plans/` and are deleted
+  when done.
 - Human docs never link to the claude folders. The one exception is the
   root `README.md`'s link to `docs/claude_references/`.
+
+## Commits
+
+- Never commit unless the user actually asks for it. A finished task,
+  passing tests, or a yes to an earlier commit is not a request to commit
+  now. You may ask whether to commit.
 
 ## Project rules
 

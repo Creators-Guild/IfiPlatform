@@ -1,6 +1,6 @@
 # docs/
 
-Last updated: 2026-10-20
+Last updated: 2026-10-27
 
 Project documentation beyond the main [README.md](../README.md). Each
 folder holds one kind of document. When you add a new doc, put it in the
@@ -85,6 +85,11 @@ below.
   Python + SQLite setup, for when Docker won't work
 - [everyday_commands.md](contributing/everyday_commands.md): migrations,
   tests, translations and the admin pages
+
+## research/ — the master's thesis research
+
+- [data_handling.md](research/data_handling.md): where the research data
+  is, who can reach it, risks, open questions and checklists
 
 ## design/ — UI and visual design
 

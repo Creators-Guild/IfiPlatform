@@ -1,0 +1,20 @@
+{% extends 'global_base.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Services that handle your data" %}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/account_base.css' %}">
+{% endblock extra_head %}
+
+{% block content %}
+    <div class="account_layout">
+        <div class="account-card legal-page">
+            <h1>{% trans "Services that handle your data" %}</h1>
+            <p>{% blocktrans %}Two services handle data for us. The site and its database run on NREC, the Norwegian universities' research and education cloud, in Norway. Account emails (email verification and password reset) are sent through Resend, a company in the USA, so Resend receives your email address. Resend is certified under the EU-U.S. Data Privacy Framework, which allows this transfer under the GDPR.{% endblocktrans %}</p>
+
+            {% url 'privacy_policy' as privacy_policy_url %}
+            <p><a href="{{ privacy_policy_url }}">{% trans "Back to the privacy policy" %}</a></p>
+        </div>
+    </div>
+{% endblock %}

@@ -1,6 +1,6 @@
 # Custom manage.py commands
 
-Last updated: 2026-10-13
+Last updated: 2026-11-02
 
 This project's own `manage.py` commands, beyond Django's built-in ones
 (`migrate`, `createsuperuser`, `test`, `makemessages`/`compilemessages`,
@@ -361,6 +361,104 @@ is meant to be invoked periodically from *outside* Django entirely (host
 cron, or your platform's own scheduled-job feature). Nothing runs it for
 you automatically. Safe to re-run. `--dry-run` lists matching accounts
 without deleting them.
+
+## research_app
+
+### research_totals
+
+```bash
+py manage.py research_totals [--since YYYY-MM] [--until YYYY-MM] [--no-github | --github-file FILE] [--repo owner/name] [--output FILE]
+py manage.py research_totals --output totals.csv     # save it as a file
+```
+
+Prints monthly totals for the master's thesis research as CSV, one row
+per month. It reads the site database, and GitHub's public API for issues,
+pull requests and commits. It's whole-site numbers only, with no consent
+needed, so it follows three rules (see
+[research/data_handling.md](../research/data_handling.md)):
+
+- only counts, never who: nothing in the output names anyone
+- 1 to 4 are shown as `<5`, so small groups can't be told apart
+- months, in Oslo time; by default from the first month with data to the
+  last complete month. When the current month is left out, the command
+  says so; add `--until` with the current month to see it.
+
+Bots on GitHub, and publishing done by code (the Peoply sync), don't
+count.
+
+**Settled months are saved.** A month is settled 30 days after it ends,
+when every draft started in it is old enough to count as never
+published. The first run after that saves the month's numbers in the
+database, and later runs print the saved ones. Without this, old months
+would shrink when people delete their accounts: a deleted account is no
+longer in `new_accounts`, and its drafts no longer count in
+`people_saved_draft` or `drafts_never_published`. Until a month is
+saved, its numbers can still change. GitHub numbers are only saved when
+they're read from GitHub for the project's own repo, not with
+`--github-file` or another `--repo`. To count a month again, for example
+after fixing a counting bug, delete its saved numbers in
+`py manage.py shell` and run the command again:
+
+```python
+from research_app.models import FrozenTotal
+FrozenTotal.objects.filter(month="2026-09").delete()
+```
+
+| Column | Counts |
+| --- | --- |
+| `new_accounts` | Verified accounts created that month |
+| `people_saved_draft` | People who saved a page version |
+| `people_published` | People who published a page |
+| `first_time_publishers` | People who published for the first time |
+| `pages_first_published` | Pages published for the first time by a person |
+| `drafts_never_published` | Pages first saved that month and still not published 30 days later (low for the last month) |
+| `issues_opened` | Issues opened on GitHub |
+| `bug_reports`, `feature_requests`, `docs_issues`, `task_issues` | Issues by template label |
+| `issues_from_site` | Issues opened through the footer's "Report a bug" link |
+| `good_first_issues_closed` | `good first issue` issues closed as completed |
+| `prs_opened`, `prs_merged` | Pull requests opened, and merged |
+| `people_opened_pr` | People who opened a pull request |
+| `first_time_pr_authors_merged` | People whose first pull request was merged |
+| `ifi_commits` | Commits with the `Made-with: ifi` line |
+| `people_using_ifi` | People who made those commits |
+
+`--no-github` leaves out the GitHub columns, for example without
+internet. The repo is public, so no login is needed. If GitHub's limit of
+60 requests an hour is reached, set `GITHUB_TOKEN` to any GitHub token
+(no permissions needed) for 5000 an hour. `--github-file` reads the
+GitHub data from a file instead, such as the made-up data from
+`seed_research_data`.
+
+### seed_research_data
+
+```bash
+py manage.py seed_research_data --github-file fake_github.json --output expected.csv
+py manage.py research_totals --github-file fake_github.json --output totals.csv
+py manage.py seed_research_data --remove
+```
+
+For trying `research_totals` on your own computer. A local database has
+no history to count: everything in it was made the day you set it up.
+This command adds made-up people who join, save drafts and publish over
+the last four months, including the cases that count in a special way,
+such as publishing by the Peoply sync, an unverified account, and drafts
+just under and over 30 days old. It then prints, or saves with
+`--output`, what `research_totals` should print for it. The two files
+should be the same.
+
+`--github-file` also saves made-up issues, pull requests and commits
+for `research_totals --github-file` to read, with cases such as bots,
+an issue from the site's "Report a bug" link, and a commit from an
+email GitHub doesn't know. Without it, compare with
+`research_totals --no-github`.
+
+The fake pages are under "Fake research data" in the Wagtail admin. They
+are never live, so they don't show on the site. Running the command again
+replaces the fake data, and `--remove` deletes it. If your database has
+other data in the same months, the command warns you that those months
+won't match. It also deletes every saved month (see `research_totals`
+above), so no numbers from fake data are kept. It only runs when `DEBUG`
+is on, so it can never add fake data to the real site.
 
 ## core_app
 
