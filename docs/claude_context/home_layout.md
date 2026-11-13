@@ -1,22 +1,33 @@
 # home_layout.css — design rationale
 
-Last updated: 2026-09-24
-Covers: ifiplatform/apps/ifi_home_app/static/css/05_objects/home_layout.css, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_navbar_mobile.css
+Last updated: 2026-11-13
+Covers: ifiplatform/apps/ifi_home_app/static/css/05_objects/home_layout.css, ifiplatform/apps/ifi_home_app/static/css/05_objects/home_index_layout.css, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_navbar_mobile.css
 
-Covers `ifi_home_app/static/css/05_objects/home_layout.css` (the homepage
-grid, `home/home_index.html`), plus `06_components/home/home_navbar_mobile.css`.
-`06_components/home/home_eventsbox.css` holds the card look of the
-same `.eventsbox_container` selector; the box's contents are covered in
-`home_eventsbox.md`.
+Covers the homepage grid (`home/home_index.html`), which lives in
+`ifi_home_app/static/css/05_objects/home_index_layout.css` (loaded only on
+the homepage). `home_layout.css` (loaded on every page using
+`home_base.html`) now only holds `.maincontent`'s padding; the grid moved
+out of it on 2026-09-23. Also covers `06_components/home/home_navbar_mobile.css`.
+`06_components/home/home_eventsbox.css` holds the events box's card look;
+its contents are covered in `home_eventsbox.md`, the magazine box in
+`home_magazinebox.md`.
 
 ## The grid
 
 `.home-layout .maincontent` is a named-area grid: `nav`, `shortcuts`, then
 `content` (`#home-subcontent`: message board + suggestions row) beside
-`details` (`.eventsbox_container`). Columns are `minmax(0, 1fr) auto` —
+`details` (`aside.home-sidecolumn`: the events box, then the >OUTPUT
+magazine box). Columns are `minmax(0, 1fr) auto` —
 `minmax(0, …)` rather than plain `1fr` so the content column can shrink
 below its content's min-content width instead of pushing the events box
 off-screen (a plain `1fr` track has an `auto` minimum).
+
+`.home-sidecolumn` carries the placement the events box used to have
+(`grid-area`, `align-self: start`, `max-width: 23rem`, `margin`); the boxes
+stack inside it with a fixed gap. A grid row per box was rejected: with
+the content column spanning both rows, a tall left column opens a gap
+between the boxes. The covers' intrinsic width makes the column sit at its
+23rem cap.
 
 ## Below 72rem: `#home-subcontent { display: contents }`
 
@@ -26,7 +37,7 @@ Events, then News/Articles — but in the DOM the events box comes after
 `display: contents` un-boxes `#home-subcontent` so its children become
 direct grid items of `.maincontent`, letting `#msg-board` (`msg`) and
 `.suggestions-row` (`suggestions`) be placed on either side of
-`details`. Their `grid-area` rules exist only inside this media query;
+`details` (the side column, so events then magazine). Their `grid-area` rules exist only inside this media query;
 above 72rem they're ordinary children of `#home-subcontent`.
 
 The `72rem` value is shared by eye with `home_eventsbox.css`

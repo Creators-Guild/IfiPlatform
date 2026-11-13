@@ -1,0 +1,235 @@
+/* Design rationale: docs/claude_context/home_magazinebox.md */
+.magazinebox_container {
+  background-color: var(--color-card-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 3px 8px var(--color-shadow);
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.home-magazinebox-heading {
+  margin: 0;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.home-magazinebox-heading a {
+  display: grid;
+  gap: 0.1rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-magazinebox-heading small {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.home-magazinebox-heading a:hover,
+.home-magazinebox-heading a:hover small {
+  color: var(--color-link-hover);
+}
+
+.home-magazinebox-sep {
+  margin: 0 0.35rem;
+  font-weight: 400;
+}
+
+.home-magazinebox-strip {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.home-magazinebox-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.home-magazinebox-slide {
+  min-width: 0;
+  scroll-snap-align: center;
+  display: grid;
+  gap: 0.6rem;
+  align-content: start;
+}
+
+.home-magazinebox-cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.home-magazinebox-caption {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+  text-align: center;
+}
+
+.home-magazinebox-caption a {
+  font-weight: 700;
+  color: var(--color-text);
+  text-decoration: none;
+  text-wrap: balance;
+}
+
+.home-magazinebox-caption a:hover {
+  text-decoration: underline;
+}
+
+.home-magazinebox-caption time {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.home-magazinebox-controls {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.home-magazinebox-controls[hidden] {
+  display: none;
+}
+
+.home-magazinebox-arrow {
+  display: grid;
+  place-items: center;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.home-magazinebox-arrow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.home-magazinebox-arrow:hover {
+  color: var(--color-cta-hover);
+}
+
+.home-magazinebox-arrow[data-step="-1"]:hover {
+  transform: translateX(-2px);
+}
+
+.home-magazinebox-arrow[data-step="1"]:hover {
+  transform: translateX(2px);
+}
+
+.home-magazinebox-arrow:disabled {
+  color: var(--color-slate);
+  opacity: 0.35;
+  cursor: default;
+  transform: none;
+}
+
+.home-magazinebox-bar {
+  --fade-start: 0%;
+  --fade-end: 0%;
+  overflow: hidden;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)),
+    transparent
+  );
+}
+
+.home-magazinebox-bar.has-more-before {
+  --fade-start: 22%;
+}
+
+.home-magazinebox-bar.has-more-after {
+  --fade-end: 22%;
+}
+
+.home-magazinebox-segments {
+  display: flex;
+  gap: 3px;
+  width: max-content;
+  transition: transform 0.25s;
+}
+
+.home-magazinebox-segments button {
+  flex: none;
+  width: 14px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.home-magazinebox-segments button::after {
+  content: "";
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-text-muted);
+  opacity: 0.35;
+}
+
+.home-magazinebox-segments button[aria-current="true"]::after {
+  background: var(--color-text);
+  opacity: 1;
+}
+
+.home-magazinebox-segments button:hover::after {
+  background: var(--color-cta-hover);
+  opacity: 1;
+}
+
+.magazinebox_container a:focus-visible,
+.magazinebox_container button:focus-visible,
+.home-magazinebox-strip:focus-visible {
+  outline: 3px solid var(--color-cta-hover);
+  outline-offset: 2px;
+}
+
+@media (hover: none) {
+  .home-magazinebox-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home-magazinebox-arrow {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-magazinebox-strip {
+    scroll-behavior: auto;
+  }
+
+  .home-magazinebox-arrow,
+  .home-magazinebox-segments {
+    transition: none;
+  }
+}

@@ -1,0 +1,10 @@
+[Unit]
+Description=Sync >OUTPUT magazine issues from ifiavis.no
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/IfiPlatform/ifiplatform
+ExecStart=/home/ubuntu/IfiPlatform/venv/bin/python manage.py sync_output_magazine

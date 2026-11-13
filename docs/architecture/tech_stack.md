@@ -1,6 +1,6 @@
 # Tech stack
 
-Last updated: 2026-10-26
+Last updated: 2026-11-13
 
 What IfiPlatform is built with, and why each piece is there. For how the
 production server runs all of this, see
@@ -107,6 +107,7 @@ table instead (see [docker_setup.md](docker_setup.md)).
 | -------------- | ------------------------------------------------------------------------ | --------------------------------------- |
 | **DeepL**      | Machine translation NB → EN, with a custom glossary of fixed terms        | `DEEPL_API_KEY`, `DEEPL_GLOSSARY_ID`    |
 | **Peoply**     | Source of truth for events; synced into Wagtail event pages on a timer    | `sync_peoply_events` command            |
+| **ifiavis.no** | The >OUTPUT magazine's issue list, read from its public /utgaver page daily | `sync_output_magazine` command          |
 | **Umami**      | Privacy-friendly page analytics                                          | `UMAMI_SCRIPT_URL`, `UMAMI_WEBSITE_ID`  |
 | **SMTP email** | Account verification emails (prints to the console when not configured)  | `EMAIL_HOST` and related keys           |
 

@@ -1,6 +1,6 @@
 # docs/
 
-Last updated: 2026-10-27
+Last updated: 2026-11-13
 
 Project documentation beyond the main [README.md](../README.md). Each
 folder holds one kind of document. When you add a new doc, put it in the
@@ -41,6 +41,8 @@ into one folder per app, and features that span several apps go in
     calendar and the Peoply sync
   - [menus.md](architecture/ifi_home_app/menus.md): how menus are
     modelled and rendered
+  - [magazine.md](architecture/ifi_home_app/magazine.md): the >OUTPUT
+    magazine box on the home page and its daily sync from ifiavis.no
 - `account_app/`, `study_app/`: feature docs per app (no docs yet, see
   [Planned docs](#planned-docs))
 

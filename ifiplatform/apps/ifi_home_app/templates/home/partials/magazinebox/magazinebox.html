@@ -1,0 +1,45 @@
+{% comment %}Design rationale: docs/claude_context/home_magazinebox.md{% endcomment %}
+{% load i18n static %}
+{% if magazine_issues %}
+    <section class="magazinebox_container" aria-labelledby="home-magazinebox-heading" data-magazinebox>
+        <h2 class="home-magazinebox-heading" id="home-magazinebox-heading">
+            <a href="https://www.ifiavis.no/utgaver">
+                <span>&gt;OUTPUT<span class="home-magazinebox-sep" aria-hidden="true">|</span>{% trans "Ifi magazine" %}</span>
+                <small>{% trans "all issues" %} &rarr;</small>
+            </a>
+        </h2>
+        <ol class="home-magazinebox-strip" tabindex="0" aria-label="{% trans 'Issues' %}">
+            {% for issue in magazine_issues %}
+                <li class="home-magazinebox-slide">
+                    <a class="home-magazinebox-cover" href="{{ issue.url }}">
+                        <img src="{{ issue.cover_small }}"
+                             srcset="{{ issue.cover_small }} 400w, {{ issue.cover_large }} 800w"
+                             sizes="(max-width: 72rem) 24rem, 21rem"
+                             width="400" height="533" alt="{{ issue.title }}"
+                             {% if not forloop.first %}loading="lazy"{% endif %}>
+                    </a>
+                    <p class="home-magazinebox-caption">
+                        <a href="{{ issue.url }}">{{ issue.title }}</a>
+                        <time datetime="{{ issue.issue_date|date:'Y-m' }}">{{ issue.issue_date|date:"F Y" }}</time>
+                    </p>
+                </li>
+            {% endfor %}
+        </ol>
+        <div class="home-magazinebox-controls" hidden>
+            <button class="home-magazinebox-arrow" type="button" data-step="-1" aria-label="{% trans 'Newer issue' %}">
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 4 7 12l8 8"/></svg>
+            </button>
+            <div class="home-magazinebox-bar">
+                <div class="home-magazinebox-segments">
+                    {% for issue in magazine_issues %}
+                        <button type="button" aria-label="{{ issue.title }}"></button>
+                    {% endfor %}
+                </div>
+            </div>
+            <button class="home-magazinebox-arrow" type="button" data-step="1" aria-label="{% trans 'Older issue' %}">
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="m9 4 8 8-8 8"/></svg>
+            </button>
+        </div>
+    </section>
+    <script src="{% static 'js/home_magazinebox.js' %}" defer></script>
+{% endif %}
