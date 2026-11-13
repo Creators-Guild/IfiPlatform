@@ -114,6 +114,15 @@ folder.
   a stable form. Fix: contact the ifiavis team, then replace the page
   reader with a Sanity query.
 
+- [ ] **Opening hours: changed hours on a date.** The opening hours box
+  only knows the normal week and whole closed days (`LocationClosure`).
+  Shorter hours in the exam period or on a single day can't be entered.
+  Fix: a date-range override with its own time slots that replaces the
+  week. Where: `models/opening_hours.py`.
+- [ ] **Opening hours: live data for Escape.** Escape's hours are typed in
+  by hand and marked as not guaranteed. When Escape's planned API exists,
+  use it in `opening_hours_now()` in `models/opening_hours.py`.
+
 ## For future features
 
 Problems that don't hurt today, but will once the student resource library

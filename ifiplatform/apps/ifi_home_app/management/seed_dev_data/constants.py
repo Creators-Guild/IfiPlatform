@@ -394,6 +394,26 @@ for _company in NAVET_COMPANY_PRESENTATION_COMPANIES:
         f"Age limit: 18<br/>Seats: 40"
     )
 
+ESCAPE_WARNING = (
+    "Escape drives av frivillige studenter. Dette er de planlagte tidene, "
+    "og det kan åpne senere eller stenge tidligere."
+)
+TRANSLATIONS.update(
+    {
+        "Ole-Johan Dahls hus": "Ole-Johan Dahl's House",
+        "Ifi-biblioteket": "Ifi Library",
+        "Kort + PIN": "Card + PIN",
+        "Betjent": "Staffed",
+        "Kort + kode": "Card + code",
+        "Halvpris siste 30 min": "Half price the last 30 minutes",
+        "Kafé": "Café",
+        ESCAPE_WARNING: (
+            "Escape is run by student volunteers. These are the planned hours, "
+            "and it may open late or close early."
+        ),
+    }
+)
+
 # Text that is the same in English: names, placeholders and the dev banner
 # (already English). Stored as its own English, like DeepL would return it,
 # so these pieces count as translated.
@@ -405,6 +425,9 @@ SAME_IN_ENGLISH = {
     "dagen@ifi",
     BANNER_TEXT,
     "Seed script",
+    "Ole-Johan Spiseri",
+    "Escape",
+    "Bar",
     "Lorem Ipsum 1",
     "Lorem Ipsum 2",
     "Lorem Ipsum 3",

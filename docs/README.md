@@ -43,6 +43,8 @@ into one folder per app, and features that span several apps go in
     modelled and rendered
   - [magazine.md](architecture/ifi_home_app/magazine.md): the >OUTPUT
     magazine box on the home page and its daily sync from ifiavis.no
+  - [opening_hours.md](architecture/ifi_home_app/opening_hours.md): the
+    opening hours box on the home page
 - `account_app/`, `study_app/`: feature docs per app (no docs yet, see
   [Planned docs](#planned-docs))
 

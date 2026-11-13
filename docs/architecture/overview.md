@@ -41,7 +41,7 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
 | App | Built with | URL prefix | Main models | Status |
 | --- | --- | --- | --- | --- |
 | `core_app` | plain Django | none (shared helpers) | none | in use |
-| `ifi_home_app` | Wagtail + Django | `/` (everything not claimed below) | the page types below, `MenuGroup`, `Menu`, `HeaderMessage`, `HomeBoardMessage`, `MagazineIssue`, `ArticleStyle`, `ArticleBlockStyle`, `PeoplySyncLog` | in use |
+| `ifi_home_app` | Wagtail + Django | `/` (everything not claimed below) | the page types below, `MenuGroup`, `Menu`, `HeaderMessage`, `HomeBoardMessage`, `MagazineIssue`, `Location`, `ArticleStyle`, `ArticleBlockStyle`, `PeoplySyncLog` | in use |
 | `account_app` | plain Django | `/account/` | `Profile` | in use |
 | `study_app` | plain Django | `/study/` | `Deck`, `Card` | under development |
 | `yourpage_app` | plain Django | `/yourpage/` | none yet | under development |
@@ -52,7 +52,7 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
   and a few project-wide management commands.
 - **`ifi_home_app`** is the main site: the home page, articles and news,
   student unions, tools, events (synced from Peoply), the >OUTPUT magazine
-  box (synced from ifiavis.no), menus and the
+  box (synced from ifiavis.no), the opening hours box, menus and the
   translation tools in the Wagtail admin.
 - **`account_app`** handles sign-up, login, email verification, the privacy
   policy and the pages it links to, exporting and deleting your data, and the terms editors must
@@ -137,7 +137,7 @@ flowchart LR
         v2["views/article_views.py<br/>views/event_views.py"]
         w["Wagtail looks up the<br/>page tree"]
         m["models/: page types<br/>ArticlePage, CategoryPage, UnionPage,<br/>ToolPage, EventPage ..."]
-        sn["Snippets<br/>Menu, HeaderMessage,<br/>HomeBoardMessage, MagazineIssue"]
+        sn["Snippets<br/>Menu, HeaderMessage,<br/>HomeBoardMessage, MagazineIssue,<br/>Location"]
     end
     subgraph tpl["Templates"]
         t1["home/home_index.html"]
@@ -163,7 +163,8 @@ flowchart LR
 - Details: [articles](ifi_home_app/articles.md),
   [unions and tools](ifi_home_app/unions_and_tools.md),
   [events](ifi_home_app/events.md), [menus](ifi_home_app/menus.md),
-  [the magazine box](ifi_home_app/magazine.md) and
+  [the magazine box](ifi_home_app/magazine.md),
+  [opening hours](ifi_home_app/opening_hours.md) and
   [translations](shared/translations.md).
 
 #### `account_app`: sign-up, login and your data

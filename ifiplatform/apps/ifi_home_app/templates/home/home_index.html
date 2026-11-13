@@ -25,8 +25,9 @@
             </div>
         </div>
     <aside class="home-sidecolumn">
-        {# Temporary (2026-11-13): magazine box first to highlight a new issue. Move it back under the events box afterwards. #}
+        {# Temporary (2026-11-13): magazine box first to highlight a new issue. Afterwards: opening hours, events, magazine. #}
         {% include "home/partials/magazinebox/magazinebox.html" %}
+        {% include "home/partials/openinghours/openinghours.html" %}
         <div class="eventsbox_container">
             <h2>{% blocktrans %}Happening at Ifi{% endblocktrans %}</h2>
             {% include "home/partials/eventsbox/eventsbox.html" %}

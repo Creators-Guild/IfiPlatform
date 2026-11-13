@@ -1,0 +1,53 @@
+{% comment %}Design rationale: docs/claude_context/home_openinghours.md{% endcomment %}
+{% load i18n wagtailcore_tags %}
+{% if opening_hours %}
+    <section class="openinghours_container" aria-labelledby="home-openinghours-heading">
+        <h2 class="home-openinghours-heading" id="home-openinghours-heading">{% trans "Opening hours" %}</h2>
+        <ul class="home-openinghours-places">
+            {% for status in opening_hours %}
+                <li class="home-openinghours-place">
+                    <div class="home-openinghours-row">
+                        <span class="home-openinghours-name">{{ status.location.name }}{% if status.location.hours_unconfirmed %}<span class="home-openinghours-star" aria-hidden="true">*</span>{% endif %}</span>
+                        <span class="home-openinghours-pill is-{{ status.state }}">{% if status.state == "open" %}{% trans "Open" context "opening hours" %}{% elif status.state == "card" %}{% trans "Card needed" %}{% else %}{% trans "Closed" context "opening hours" %}{% endif %}</span>
+                    </div>
+                    {% if status.next_text or status.parts %}
+                        <p class="home-openinghours-next">
+                            {{ status.next_text }}
+                            {% if status.parts and status.state == "open" %}
+                                <span class="home-openinghours-parts">{% for part in status.parts %}<span{% if part.active %} class="is-on"{% endif %}>{{ part.label }}</span>{% endfor %}</span>
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                    {% if status.event %}
+                        <p class="home-openinghours-event">
+                            {% if status.event_running %}{% trans "Now" %}{% else %}{% blocktrans with time=status.event_start|time:"H:i" %}Today {{ time }}{% endblocktrans %}{% endif %}:
+                            <a href="{% pageurl status.event %}">{{ status.event.title }}</a>
+                        </p>
+                    {% endif %}
+                    {% if status.half_price == "now" %}
+                        <p class="home-openinghours-halfprice is-now">{% trans "Half price now!" %}</p>
+                    {% elif status.half_price == "soon" %}
+                        <p class="home-openinghours-halfprice is-soon">{% blocktrans with time=status.half_price_from|time:"H:i" %}Half price from {{ time }}{% endblocktrans %}</p>
+                    {% endif %}
+                    <details class="home-openinghours-hours">
+                        <summary>{% trans "Hours" %}</summary>
+                        <ul>
+                            {% for line in status.hours %}
+                                <li{% if line.today %} class="is-today"{% endif %}>
+                                    <span>{{ line.days }}{% if line.label %} · {{ line.label }}{% endif %}</span>
+                                    <span>{{ line.times }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        {% if status.location.note %}<p class="home-openinghours-note">{{ status.location.note }}</p>{% endif %}
+                    </details>
+                </li>
+            {% endfor %}
+        </ul>
+        {% for status in opening_hours %}
+            {% if status.location.hours_unconfirmed and status.location.warning %}
+                <p class="home-openinghours-footnote"><span class="home-openinghours-star" aria-hidden="true">*</span> {{ status.location.warning }}</p>
+            {% endif %}
+        {% endfor %}
+    </section>
+{% endif %}
