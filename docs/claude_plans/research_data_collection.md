@@ -1,6 +1,6 @@
 # Plan: research data collection for the master's thesis
 
-Last updated: 2026-11-02
+Last updated: 2026-11-13
 
 Hanna's thesis asks how a student-run open-source platform turns passive
 users into contributors. The data collection is approved by Sikt. A change
@@ -438,8 +438,9 @@ Decided 2026-10-28: the Sikt check and the consent text wait until later,
 but must be done before Phase 5 (the first participant). The privacy
 policy is short and links to two pages: "Cookies and statistics"
 (cookies, Umami, the totals) and "Services that handle your data" (NREC,
-Resend), since 2026-11-13. The research notice gets its own page, like the content ownership terms
-(`/account/content_terms`), not a section in the privacy policy.
+Resend), since 2026-11-13. The research notice gets its own page, like
+the content ownership terms (`/account/content_terms`), not a section in
+the privacy policy.
 
 - ~~Check the Sikt application and information letter against the
   plan.~~ Done 2026-10-29, see "Sikt check: results" below.
