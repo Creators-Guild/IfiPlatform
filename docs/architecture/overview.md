@@ -45,6 +45,7 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
 | `account_app` | plain Django | `/account/` | `Profile` | in use |
 | `study_app` | plain Django | `/study/` | `Deck`, `Card` | under development |
 | `yourpage_app` | plain Django | `/yourpage/` | none yet | under development |
+| `research_app` | plain Django | none | `FrozenTotal` | in use (one command) |
 
 - **`core_app`** holds things every app needs: the "deploy coming" banner,
   the sitemap, static file storage, the "under development" placeholder
@@ -54,10 +55,20 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
   box (synced from ifiavis.no), menus and the
   translation tools in the Wagtail admin.
 - **`account_app`** handles sign-up, login, email verification, the privacy
-  policy, exporting and deleting your data, and the terms editors must
+  policy and the pages it links to, exporting and deleting your data, and the terms editors must
   accept before using the Wagtail admin.
 - **`study_app`** and **`yourpage_app`** show a placeholder page for now.
   This is switched by `APPS_UNDER_DEVELOPMENT` in `settings.py`.
+- **`research_app`** holds the code for the master's thesis research. For
+  now that's two commands: `research_totals`, which prints whole-site
+  monthly totals (see
+  [management_commands.md](../operations/management_commands.md#research_totals)),
+  and `seed_research_data`, which adds made-up data for trying it locally.
+  `FrozenTotal` keeps each month's totals once the month is settled, so
+  they don't change later.
+  Changes to it need the code owner's approval (`.github/CODEOWNERS`).
+  How the research data is handled:
+  [research/data_handling.md](../research/data_handling.md).
 
 ### How the apps fit together
 
@@ -162,7 +173,7 @@ flowchart LR
     subgraph addr["Addresses under /account/"]
         a1["signin, login, logout,<br/>verify/..."]
         a2["account_settings, export_data,<br/>delete_account, ..."]
-        a3["privacy_policy"]
+        a3["privacy_policy, content_terms,<br/>cookies_and_statistics,<br/>data_processors"]
     end
     subgraph code["Code in views/"]
         v1["login_views.py"]

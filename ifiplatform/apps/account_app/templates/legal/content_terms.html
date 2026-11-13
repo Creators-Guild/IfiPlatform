@@ -1,0 +1,17 @@
+{% extends 'global_base.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Content ownership for articles and news" %}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/account_base.css' %}">
+{% endblock extra_head %}
+
+{% block content %}
+    <div class="account_layout">
+        <div class="account-card legal-page">
+            <h1>{% trans "Content ownership for articles and news" %}</h1>
+            <p>{% blocktrans %}Info articles and news you write on IfiPlatform become the property of IfiPlatform and the student union(s) it represents -- they aren't deleted if you later delete your account, since they're institutional content, not personal data about you. What does stay your choice is how they're credited: under your real name, your nickname, or anonymously as "Unknown". You'll be asked to explicitly agree to this the first time you're given permission to write pages; if you disagree, that permission is removed again.{% endblocktrans %}</p>
+        </div>
+    </div>
+{% endblock %}

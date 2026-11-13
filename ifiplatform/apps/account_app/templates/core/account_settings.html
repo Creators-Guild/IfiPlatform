@@ -17,10 +17,10 @@
             </div>
 
             {% if show_editor_notice %}
-                {% url 'privacy_policy' as privacy_policy_url %}
+                {% url 'content_terms' as content_terms_url %}
                 <div class="profile-notice profile-notice--editor{% if editor_terms_shake %} shake{% endif %}">
                     <p>
-                        {% blocktrans %}You've been given permission to write info articles and news. Please note: content you write becomes the property of IfiPlatform and the student union(s) it represents, and stays published even if you later delete your account -- see our <a href="{{ privacy_policy_url }}#editor-terms">Privacy Policy</a> for the full terms, including how you can choose to be credited.{% endblocktrans %}
+                        {% blocktrans %}You've been given permission to write info articles and news. Please note: content you write becomes the property of IfiPlatform and the student union(s) it represents, and stays published even if you later delete your account -- the <a href="{{ content_terms_url }}">content ownership terms</a> explain the details, including how you can choose to be credited.{% endblocktrans %}
                     </p>
                     <form action="{% url 'editor_terms_response' %}" method="post" class="editor-terms-actions">
                         {% csrf_token %}

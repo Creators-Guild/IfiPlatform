@@ -14,3 +14,6 @@ ifiplatform/staticfiles/
 .claude/settings.local.json
 # Local Claude plans, not shared.
 .claude/plans/
+# Files saved by the research commands (--output, --github-file), so ifi save skips them.
+*.csv
+fake_github.json

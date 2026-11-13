@@ -162,6 +162,13 @@ those features launch.
 
 ## Safety and cleanup
 
+- [ ] **More thorough logs across the site.** There is little record of
+  who did what. Wagtail logs page actions and the Django admin logs its
+  own changes, but nothing logs logins, failed logins, group and
+  permission changes, account deletions or data exports. Idea: an audit
+  log for these. Logs are personal data too (usernames, IP addresses), so
+  decide how long they're kept, and never log research data (see
+  [research/data_handling.md](research/data_handling.md)).
 - [ ] **Some style save endpoints accept any number.** `save_quick_style`
   (`content_side_padding`), `save_header_style` (font sizes, padding) and
   `save_toc_icon_style` have no range check, unlike `save_block_style` and
@@ -238,6 +245,56 @@ Decisions to come back to once the planned ifi changes are built.
   docs, ci), or ask "Most changes should have an issue. Sure? (y/n)".
 
 ## Server
+
+- [ ] **Move the real site to the Docker setup.** The Halloween mock site
+  already runs on it ([operations/docker_server.md](operations/docker_server.md)).
+  `ifiplattform.no` still runs the old setup in
+  [operations/prod_server.md](operations/prod_server.md). The research
+  databases will need an init script in `compose.prod.yml`.
+- [ ] **Limited server access for the devops person.** Today the only
+  login is `ubuntu`, which has full root, so it can read `.env` and every
+  database, including the research data. The devops person only needs to
+  restart services, read logs and check the server. Idea: their own Linux
+  user and SSH key, with:
+  - a short sudo list (restart services, `systemctl status`). Never
+    commands that can open an editor, a pager or a shell, such as
+    `sudo journalctl`, `sudo nano`, `sudo systemctl edit`,
+    `sudo -u postgres psql` or `sudo apt`.
+  - logs through the `systemd-journal` and `adm` groups instead of sudo
+  - no access to `/home/ubuntu` (code and `.env`), `/mnt/backups` or the
+    database
+  - not a member of the NREC project, since the console, snapshots and
+    volumes get around Linux users
+
+  Also: with Docker, anyone in the `docker` group is root. A restart then
+  needs an exact sudo rule for the one `docker compose` command. (The
+  deploy key and code getting into `main` are already handled, see
+  [operations/access_and_handover.md](operations/access_and_handover.md#protecting-main-and-the-deploy-key).)
+
+  Do this together with the Docker move, since the details differ, but
+  it must be done before the devops person gets any access, even if the
+  Docker move is late. Until then they get no server login: the Sikt
+  application says only the student can reach the research data, and
+  root can read it (see
+  [research/data_handling.md](research/data_handling.md), question 1).
+- [ ] **Maybe switch to an email service in the EU/EEA.** Account emails
+  (verification, password reset) go through Resend (`smtp.resend.com`),
+  an American company, so email addresses are sent to the USA. That's
+  allowed for now: Resend is certified under the EU-U.S. Data Privacy
+  Framework, its data processing agreement applies to every account, and
+  the privacy policy names it. The "Services that handle your data" page
+  (`/account/data_processors`) says Resend is certified, so
+  check once a year that it's still on the
+  [Data Privacy Framework list](https://www.dataprivacyframework.gov/list).
+  Don't add a tracking subdomain in Resend: it turns on click (and maybe
+  open) tracking, which the policy doesn't mention. An EU provider would
+  keep the addresses in the EU and not depend on the framework lasting.
+  To switch: pick a provider in the EU/EEA, change
+  `EMAIL_HOST`, `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` in `.env`, add
+  the provider's SPF and DKIM DNS records, and send a test email. Then
+  update the privacy policy and the "Services that handle your data" page
+  (and their Norwegian text in `django.po`) and the Email row in
+  [operations/access_and_handover.md](operations/access_and_handover.md).
 
 From [operations/server_setup.md](operations/server_setup.md#notes-and-known-issues):
 

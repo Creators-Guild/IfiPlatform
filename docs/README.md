@@ -88,6 +88,11 @@ below.
 - [everyday_commands.md](contributing/everyday_commands.md): migrations,
   tests, translations and the admin pages
 
+## research/ — the master's thesis research
+
+- [data_handling.md](research/data_handling.md): where the research data
+  is, who can reach it, risks, open questions and checklists
+
 ## design/ — UI and visual design
 
 - [figma_links.md](design/figma_links.md): Figma files

@@ -37,7 +37,7 @@ else
     git diff --cached --quiet && die "Nothing to commit: you left out the new files, and nothing else changed."
 fi
 git diff --cached --name-status | sed -E 's/^A\t/        new      /; s/^M\t/        changed  /; s/^D\t/        deleted  /; s/^R[0-9]*\t/        renamed  /; s/^[A-Z][0-9]*\t/        changed  /'
-run "Make the commit (on your computer only)" git commit -m "$message"
+commit_marked "Make the commit (on your computer only)" "$message"
 
 git_recap
 your_turn
