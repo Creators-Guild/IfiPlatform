@@ -436,8 +436,9 @@ Start exploring as soon as this works.
 
 Decided 2026-10-28: the Sikt check and the consent text wait until later,
 but must be done before Phase 5 (the first participant). The privacy
-policy already mentions Umami and the totals (2026-10-28), and names NREC
-and Resend (2026-11-02). The research notice gets its own page, like the content ownership terms
+policy is short and links to two pages: "Cookies and statistics"
+(cookies, Umami, the totals) and "Services that handle your data" (NREC,
+Resend), since 2026-11-13. The research notice gets its own page, like the content ownership terms
 (`/account/content_terms`), not a section in the privacy policy.
 
 - ~~Check the Sikt application and information letter against the

@@ -1,6 +1,6 @@
 # Architecture overview
 
-Last updated: 2026-11-02
+Last updated: 2026-11-13
 
 A map of how IfiPlatform fits together: which app does what, how pages are
 organized, and what happens between a browser request and the HTML that
@@ -53,7 +53,7 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
   student unions, tools, events (synced from Peoply), menus and the
   translation tools in the Wagtail admin.
 - **`account_app`** handles sign-up, login, email verification, the privacy
-  policy, exporting and deleting your data, and the terms editors must
+  policy and the pages it links to, exporting and deleting your data, and the terms editors must
   accept before using the Wagtail admin.
 - **`study_app`** and **`yourpage_app`** show a placeholder page for now.
   This is switched by `APPS_UNDER_DEVELOPMENT` in `settings.py`.
@@ -166,7 +166,7 @@ flowchart LR
     subgraph addr["Addresses under /account/"]
         a1["signin, login, logout,<br/>verify/..."]
         a2["account_settings, export_data,<br/>delete_account, ..."]
-        a3["privacy_policy,<br/>content_terms"]
+        a3["privacy_policy, content_terms,<br/>cookies_and_statistics,<br/>data_processors"]
     end
     subgraph code["Code in views/"]
         v1["login_views.py"]

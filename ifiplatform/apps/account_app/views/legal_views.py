@@ -22,3 +22,15 @@ def content_terms_view(request):
     credited -- the terms account_settings_view's show_editor_notice asks
     new editors to agree to, and links here."""
     return render(request=request, template_name="legal/content_terms.html")
+
+
+def cookies_and_statistics_view(request):
+    """Cookies, Umami visitor statistics and the monthly site-wide totals --
+    the details the short privacy policy links to."""
+    return render(request=request, template_name="legal/cookies_and_statistics.html")
+
+
+def data_processors_view(request):
+    """The outside services that handle personal data for the site (NREC,
+    Resend), linked from the privacy policy."""
+    return render(request=request, template_name="legal/data_processors.html")

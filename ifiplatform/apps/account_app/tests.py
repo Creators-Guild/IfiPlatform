@@ -235,6 +235,23 @@ class LegalPagesTests(TestCase):
         self.assertContains(response, f'href="{content_terms_url}"')
         self.assertNotContains(response, "TODO")
 
+    def test_privacy_policy_links_to_detail_pages(self):
+        with translation.override("en"):
+            response = self.client.get(reverse("privacy_policy"))
+            cookies_url = reverse("cookies_and_statistics")
+            processors_url = reverse("data_processors")
+        self.assertContains(response, f'href="{cookies_url}"')
+        self.assertContains(response, f'href="{processors_url}"')
+        self.assertNotContains(response, "Umami")
+
+    def test_detail_pages_render_in_both_languages(self):
+        for language in ("en", "nb"):
+            with translation.override(language):
+                cookies = self.client.get(reverse("cookies_and_statistics"))
+                processors = self.client.get(reverse("data_processors"))
+            self.assertContains(cookies, "Umami")
+            self.assertContains(processors, "Resend")
+
 
 class WagtailBuiltinGroupsTests(TestCase):
     """is_pending_editor() is a permission check (add_page/change_page),

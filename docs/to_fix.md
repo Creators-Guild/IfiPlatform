@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-11-02
+Last updated: 2026-11-13
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -275,7 +275,8 @@ Decisions to come back to once the planned ifi changes are built.
   an American company, so email addresses are sent to the USA. That's
   allowed for now: Resend is certified under the EU-U.S. Data Privacy
   Framework, its data processing agreement applies to every account, and
-  the privacy policy names it. The policy says Resend is certified, so
+  the privacy policy names it. The "Services that handle your data" page
+  (`/account/data_processors`) says Resend is certified, so
   check once a year that it's still on the
   [Data Privacy Framework list](https://www.dataprivacyframework.gov/list).
   Don't add a tracking subdomain in Resend: it turns on click (and maybe
@@ -284,8 +285,8 @@ Decisions to come back to once the planned ifi changes are built.
   To switch: pick a provider in the EU/EEA, change
   `EMAIL_HOST`, `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` in `.env`, add
   the provider's SPF and DKIM DNS records, and send a test email. Then
-  update the "Cookies and third parties" part of the privacy policy (and
-  its Norwegian text in `django.po`) and the Email row in
+  update the privacy policy and the "Services that handle your data" page
+  (and their Norwegian text in `django.po`) and the Email row in
   [operations/access_and_handover.md](operations/access_and_handover.md).
 
 From [operations/server_setup.md](operations/server_setup.md#notes-and-known-issues):

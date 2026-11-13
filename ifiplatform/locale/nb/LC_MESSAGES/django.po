@@ -168,41 +168,9 @@ msgstr "Slett kontoen min permanent"
 msgid "What we collect"
 msgstr "Hva vi samler inn"
 
-#: .\apps\account_app\templates\legal\privacy_policy.html:16
-msgid ""
-"To create and run your IfiPlatform account, we store your username, email "
-"address, and first and last name. You can optionally set a nickname to be "
-"credited under instead of your real name. We also use a session cookie to "
-"keep you logged in -- this is strictly necessary for the site to work and "
-"isn't a tracking cookie."
-msgstr ""
-"For å opprette og drive IfiPlatform-kontoen din lagrer vi brukernavnet, e-"
-"postadressen og for- og etternavnet ditt. Du kan valgfritt sette et "
-"kallenavn å bli kreditert under i stedet for ditt virkelige navn. Vi bruker "
-"også en øktinformasjonskapsel for å holde deg innlogget -- denne er strengt "
-"nødvendig for at nettstedet skal fungere, og er ikke en sporingskapsel."
-
 #: .\apps\account_app\templates\legal\privacy_policy.html:18
 msgid "Why we collect it"
 msgstr "Hvorfor vi samler det inn"
-
-#: .\apps\account_app\templates\legal\privacy_policy.html:19
-msgid ""
-"This data is used to create and secure your account, verify your email "
-"address, let you write and be credited for articles/news and own study "
-"decks, and reach you if we need to (e.g. a security notice). The legal basis "
-"is contract necessity: we need it to provide the account-based features you "
-"sign up for."
-msgstr ""
-"Disse dataene brukes til å opprette og sikre kontoen din, bekrefte e-"
-"postadressen din, la deg skrive og bli kreditert for artikler/nyheter og eie "
-"studiebunker, og kontakte deg om nødvendig (f.eks. et sikkerhetsvarsel). Det "
-"rettslige grunnlaget er avtalenødvendighet: vi trenger det for å tilby "
-"kontobaserte funksjoner du registrerer deg for."
-
-#: .\apps\account_app\templates\legal\privacy_policy.html:21
-msgid "Cookies and third parties"
-msgstr "Informasjonskapsler og tredjeparter"
 
 #: .\apps\account_app\templates\legal\privacy_policy.html:22
 msgid ""
@@ -236,19 +204,6 @@ msgstr ""
 msgid "How long we keep it"
 msgstr "Hvor lenge vi oppbevarer det"
 
-#: .\apps\account_app\templates\legal\privacy_policy.html:25
-#, python-format
-msgid ""
-"Your account data is kept until you delete your account (see \"Your rights\" "
-"below). If you sign up but never confirm your email address, that unverified "
-"account -- and the name/email on it -- is automatically deleted after "
-"%(retention_days)s days."
-msgstr ""
-"Kontodataene dine oppbevares til du sletter kontoen din (se \"Dine "
-"rettigheter\" nedenfor). Hvis du registrerer deg, men aldri bekrefter e-"
-"postadressen din, blir den ubekreftede kontoen -- og navnet/e-posten på den "
-"-- automatisk slettet etter %(retention_days)s dager."
-
 #: .\apps\account_app\templates\legal\privacy_policy.html:27
 msgid "Content ownership for articles and news"
 msgstr "Eierskap til innhold for artikler og nyheter"
@@ -274,22 +229,6 @@ msgstr ""
 #: .\apps\account_app\templates\legal\privacy_policy.html:30
 msgid "Your rights"
 msgstr "Dine rettigheter"
-
-#: .\apps\account_app\templates\legal\privacy_policy.html:31
-msgid ""
-"You can view and correct your name/email/nickname at any time from Account "
-"Settings. You can download a copy of the personal data we hold on you "
-"(\"Download my data\"). You can delete your account entirely (\"Delete my "
-"account\") -- at that point you also choose whether to delete your study "
-"decks/flashcards outright or keep them, and how any articles you wrote "
-"should be credited going forward."
-msgstr ""
-"Du kan se og rette navnet/e-posten/kallenavnet ditt når som helst fra "
-"Kontoinnstillinger. Du kan laste ned en kopi av personopplysningene vi har "
-"om deg (\"Last ned dataene mine\"). Du kan slette kontoen din helt (\"Slett "
-"kontoen min\") -- da velger du også om studiebunkene/flashkortene dine skal "
-"slettes eller beholdes, og hvordan eventuelle artikler du har skrevet skal "
-"krediteres videre."
 
 #: .\apps\account_app\templates\legal\privacy_policy.html:33
 #: .\apps\ifi_home_app\templates\info_articles\pages\union_page.html:65
@@ -2376,16 +2315,6 @@ msgstr ""
 "totaltall for hele nettstedet: de sier aldri hvem som gjorde hva, og tall "
 "fra 1 til 4 vises som «færre enn 5»."
 
-#, python-format
-msgid ""
-"Articles and news you write stay published after you delete your account, "
-"as described in the <a href=\"%(content_terms_url)s\">content ownership "
-"terms</a>."
-msgstr ""
-"Artikler og nyheter du skriver forblir publisert etter at du sletter "
-"kontoen din, som beskrevet i <a href=\"%(content_terms_url)s\">vilkårene "
-"for eierskap til innhold</a>."
-
 msgid "Want to contribute?"
 msgstr "Vil du bidra?"
 
@@ -2397,3 +2326,69 @@ msgstr "Rapporter en feil"
 
 msgid "Request a feature"
 msgstr "Foreslå en funksjon"
+
+msgid "Cookies and statistics"
+msgstr "Informasjonskapsler og statistikk"
+
+msgid "Cookies"
+msgstr "Informasjonskapsler"
+
+msgid "Services that handle your data"
+msgstr "Tjenester som behandler dataene dine"
+
+msgid "Back to the privacy policy"
+msgstr "Tilbake til personvernerklæringen"
+
+msgid "Who handles it"
+msgstr "Hvem som behandler det"
+
+#, python-format
+msgid ""
+"Your username, email address, first and last name, and an optional "
+"nickname. A session cookie keeps you logged in, and there are no tracking "
+"cookies. We also keep cookie-free visitor statistics and monthly totals for "
+"the whole site, never about you personally. See <a href=\"%(cookies_url)s\""
+">Cookies and statistics</a>."
+msgstr ""
+"Brukernavnet, e-postadressen, for- og etternavnet ditt, og et valgfritt "
+"kallenavn. En øktinformasjonskapsel holder deg innlogget, og det finnes "
+"ingen sporingskapsler. Vi fører også besøksstatistikk uten "
+"informasjonskapsler og tall per måned for hele nettstedet, aldri om deg "
+"personlig. Se <a href=\"%(cookies_url)s\">Informasjonskapsler og "
+"statistikk</a>."
+
+msgid ""
+"To run and secure your account, credit you for what you write, and contact "
+"you if needed. The legal basis is contract necessity."
+msgstr ""
+"For å drive og sikre kontoen din, kreditere deg for det du skriver, og "
+"kontakte deg om nødvendig. Det rettslige grunnlaget er avtalenødvendighet."
+
+#, python-format
+msgid ""
+"The site runs on NREC in Norway, and account emails are sent through Resend "
+"in the USA. We never sell your data. See <a href=\"%(processors_url)s\""
+">Services that handle your data</a>."
+msgstr ""
+"Nettstedet kjører på NREC i Norge, og e-poster om kontoen sendes gjennom "
+"Resend i USA. Vi selger aldri dataene dine. Se <a href=\""
+"%(processors_url)s\">Tjenester som behandler dataene dine</a>."
+
+#, python-format
+msgid ""
+"Until you delete your account. Unverified accounts are deleted after "
+"%(retention_days)s days. Articles and news you write stay published, as the "
+"<a href=\"%(content_terms_url)s\">content ownership terms</a> describe."
+msgstr ""
+"Til du sletter kontoen din. Ubekreftede kontoer slettes etter "
+"%(retention_days)s dager. Artikler og nyheter du skriver forblir publisert, "
+"som beskrevet i <a href=\"%(content_terms_url)s\">vilkårene for eierskap "
+"til innhold</a>."
+
+#, python-format
+msgid ""
+"You can view, correct, download or delete your data in <a href=\""
+"%(account_settings_url)s\">Account Settings</a>."
+msgstr ""
+"Du kan se, rette, laste ned eller slette dataene dine i <a href=\""
+"%(account_settings_url)s\">Kontoinnstillinger</a>."
