@@ -16,8 +16,9 @@ its contents are covered in `home_eventsbox.md`, the magazine box in
 
 `.home-layout .maincontent` is a named-area grid: `nav`, `shortcuts`, then
 `content` (`#home-subcontent`: message board + suggestions row) beside
-`details` (`aside.home-sidecolumn`: the events box, then the >OUTPUT
-magazine box). Columns are `minmax(0, 1fr) auto` —
+`details` (`aside.home-sidecolumn`: normally the opening hours box, the
+events box, then the >OUTPUT magazine box; while the magazine is
+highlighted it comes first, see the comment in `home_index.html`). Columns are `minmax(0, 1fr) auto` —
 `minmax(0, …)` rather than plain `1fr` so the content column can shrink
 below its content's min-content width instead of pushing the events box
 off-screen (a plain `1fr` track has an `auto` minimum).

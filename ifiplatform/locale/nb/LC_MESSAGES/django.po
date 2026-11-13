@@ -2297,6 +2297,117 @@ msgstr "Nyere utgave"
 msgid "Older issue"
 msgstr "Eldre utgave"
 
+#: .\apps\ifi_home_app\templates\home\partials\openinghours\openinghours.html
+msgid "Opening hours"
+msgstr "Åpningstider"
+
+#: .\apps\ifi_home_app\templates\home\partials\openinghours\openinghours.html
+msgctxt "opening hours"
+msgid "Open"
+msgstr "Åpent"
+
+#: .\apps\ifi_home_app\templates\home\partials\openinghours\openinghours.html
+msgid "Card needed"
+msgstr "Kort kreves"
+
+#: .\apps\ifi_home_app\templates\home\partials\openinghours\openinghours.html
+msgctxt "opening hours"
+msgid "Closed"
+msgstr "Stengt"
+
+#: .\apps\ifi_home_app\templates\home\partials\openinghours\openinghours.html
+msgid "Now"
+msgstr "Nå"
+
+#: .\apps\ifi_home_app\templates\home\partials\openinghours\openinghours.html
+#, python-format
+msgid "Today %(time)s"
+msgstr "I dag %(time)s"
+
+#: .\apps\ifi_home_app\templates\home\partials\openinghours\openinghours.html
+msgid "Half price now!"
+msgstr "Halvpris nå!"
+
+#: .\apps\ifi_home_app\templates\home\partials\openinghours\openinghours.html
+#, python-format
+msgid "Half price from %(time)s"
+msgstr "Halvpris fra %(time)s"
+
+#: .\apps\ifi_home_app\templates\home\partials\openinghours\openinghours.html
+msgid "Hours"
+msgstr "Tider"
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+msgid "Mon"
+msgstr "man."
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+msgid "Tue"
+msgstr "tir."
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+msgid "Wed"
+msgstr "ons."
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+msgid "Thu"
+msgstr "tor."
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+msgid "Fri"
+msgstr "fre."
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+msgid "Sat"
+msgstr "lør."
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+msgid "Sun"
+msgstr "søn."
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+msgid "Event"
+msgstr "Arrangement"
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+#, python-format
+msgid "%(day)s %(time)s"
+msgstr "%(day)s %(time)s"
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+#, python-format
+msgid "card needed from %(when)s"
+msgstr "kort kreves fra %(when)s"
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+#, python-format
+msgid "until %(when)s"
+msgstr "til %(when)s"
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+#, python-format
+msgid "open without card from %(when)s"
+msgstr "åpent uten kort fra %(when)s"
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+#, python-format
+msgid "opens %(when)s"
+msgstr "åpner %(when)s"
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+#, python-format
+msgid "card access from %(when)s"
+msgstr "kortadgang fra %(when)s"
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+msgid "Every day"
+msgstr "Alle dager"
+
+#: .\apps\ifi_home_app\models\opening_hours.py
+#, python-format
+msgid "Closed: %(reason)s"
+msgstr "Stengt: %(reason)s"
+
 msgid "Visitor statistics"
 msgstr "Besøksstatistikk"
 

@@ -14,6 +14,7 @@ from ..dummydata import (
 )
 from ..models.home_models import HomeBoardMessage, IfiTool, NewsItem, StudentUnion
 from ..models.magazine import MagazineIssue
+from ..models.opening_hours import opening_hours_now
 
 
 def main_view(request):
@@ -66,6 +67,7 @@ def main_view(request):
         "upcoming_events": upcoming_events,
         "upcoming_event_days": group_events_by_day(upcoming_events),
         "magazine_issues": list(MagazineIssue.objects.filter(hidden=False)),
+        "opening_hours": opening_hours_now(),
     }
 
     return render(

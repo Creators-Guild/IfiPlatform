@@ -20,7 +20,7 @@ from wagtail.permission_policies import ModelPermissionPolicy
 from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet
 
-from .models import HeaderMessage, HomeBoardMessage, MagazineIssue, MenuGroup
+from .models import HeaderMessage, HomeBoardMessage, Location, MagazineIssue, MenuGroup
 from . import admin_dashboard
 from .translation import english_editor, nudge
 
@@ -100,6 +100,18 @@ class MagazineIssueViewSet(SnippetViewSet):
 
 
 register_snippet(MagazineIssueViewSet)
+
+
+class LocationViewSet(SnippetViewSet):
+    """The places in the homepage's opening hours box, with their time slots."""
+
+    model = Location
+    icon = "time"
+    menu_label = "Opening hours"
+    list_display = ["name", "sort_order", "is_active", "hours_unconfirmed"]
+
+
+register_snippet(LocationViewSet)
 
 hooks.register("after_publish_page", nudge.warn_after_publish)
 hooks.register("before_edit_page", nudge.warn_on_edit)

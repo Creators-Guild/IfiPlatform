@@ -10,6 +10,9 @@ __all__ = [
     "EventPage",
     "GlossarySyncState",
     "MagazineIssue",
+    "Location",
+    "OpeningPeriod",
+    "LocationClosure",
     "Menu",
     "MenuGroup",
     "MenuGroupLink",
@@ -27,6 +30,7 @@ from .event.pages import EventIndexPage, EventPage
 from .event import peoply  # noqa: F401 -- imported so Django registers its models
 from .glossary_models import GlossarySyncState
 from .magazine import MagazineIssue
+from .opening_hours import Location, LocationClosure, OpeningPeriod
 from .menus import Menu, MenuGroup, MenuGroupLink, MenuSlot
 from .translation import (
     EnglishSlug,

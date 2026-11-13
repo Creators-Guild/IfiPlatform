@@ -1,0 +1,182 @@
+/* Design rationale: docs/claude_context/home_openinghours.md */
+.openinghours_container {
+  background-color: var(--color-card-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 3px 8px var(--color-shadow);
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.home-openinghours-heading {
+  margin: 0;
+  text-align: center;
+  text-decoration: underline;
+}
+
+.home-openinghours-places {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.home-openinghours-place {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.home-openinghours-place + .home-openinghours-place {
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.7rem;
+}
+
+.home-openinghours-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.home-openinghours-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.home-openinghours-star {
+  color: var(--color-pastel-orange);
+  font-weight: 800;
+  margin-left: 0.1rem;
+}
+
+.home-openinghours-pill {
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  color: var(--color-text);
+}
+
+.home-openinghours-pill.is-open {
+  background: var(--color-pastel-green);
+}
+
+.home-openinghours-pill.is-card {
+  background: var(--color-pastel-orange);
+}
+
+.home-openinghours-pill.is-closed {
+  background: none;
+  border: 1px solid var(--color-text-muted);
+  color: var(--color-text-muted);
+}
+
+.home-openinghours-next,
+.home-openinghours-event,
+.home-openinghours-note,
+.home-openinghours-footnote {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.home-openinghours-next {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.home-openinghours-parts > span {
+  color: var(--color-text-muted);
+}
+
+.home-openinghours-parts > span + span::before {
+  content: "|";
+  margin: 0 0.25rem;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.home-openinghours-parts > span.is-on {
+  color: var(--color-text);
+  font-weight: 800;
+}
+
+.home-openinghours-event a {
+  color: var(--color-link);
+  font-weight: 700;
+}
+
+.home-openinghours-halfprice {
+  justify-self: start;
+  margin: 0.1rem 0 0;
+  padding: 0.1rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.home-openinghours-halfprice.is-soon {
+  background: var(--color-bright-yellow);
+  color: var(--color-text);
+}
+
+.home-openinghours-halfprice.is-now {
+  background: var(--color-cta);
+  color: var(--color-bright);
+  animation: home-openinghours-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes home-openinghours-pulse {
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+.home-openinghours-hours summary {
+  width: max-content;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.home-openinghours-hours ul {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.1rem;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.home-openinghours-hours li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-openinghours-hours li.is-today {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.home-openinghours-note {
+  margin-top: 0.25rem;
+  color: var(--color-text-muted);
+}
+
+.home-openinghours-footnote {
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-openinghours-halfprice.is-now {
+    animation: none;
+  }
+}

@@ -84,6 +84,17 @@
     "seo_title": "seo_title",
     "title": "title"
   },
+  "ifi_home_app.Location": {
+    "name": "name",
+    "note": "note",
+    "warning": "warning"
+  },
+  "ifi_home_app.OpeningPeriod": {
+    "label": "label"
+  },
+  "ifi_home_app.LocationClosure": {
+    "reason": "reason"
+  },
   "ifi_home_app.MenuGroup": {
     "short_title": "short_title",
     "title": "title"
