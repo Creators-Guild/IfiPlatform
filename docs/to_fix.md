@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-10-27
+Last updated: 2026-11-13
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -106,6 +106,13 @@ folder.
     the home page shortcuts
 
   Where: `panels` on `MenuGroupLink` and `MenuGroup` in `models/menus.py`.
+- [ ] **Ask ifiavis for read access to their Sanity content.** The
+  homepage's >OUTPUT magazine box gets its issues by reading the
+  ifiavis.no/utgaver page. That breaks if they redesign the site. Their
+  site runs on Sanity (project `z7zut3cm`, dataset `production`), and a
+  read-only API token or a public dataset would give us the same data in
+  a stable form. Fix: contact the ifiavis team, then replace the page
+  reader with a Sanity query.
 
 ## For future features
 

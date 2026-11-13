@@ -3,19 +3,24 @@
 The English editor (its URL, the "English" buttons on pages and snippets,
 the read-only "Stored English" list -- see translation/english_editor.py),
 the translate-now nudges (see translation/nudge.py), the translated
-snippets' registration, and hiding what's left of wagtail-localize's admin
+snippets' registration, the sync-owned >OUTPUT issues snippet
+(docs/claude_context/home_magazinebox.md), and hiding what's left of wagtail-localize's admin
 -- add further hooks here rather than starting new files, unless a hook is
 specific enough to a single feature area to warrant its own module."""
 
+from django.contrib.auth import get_user_model
 from django.templatetags.static import static
 from django.urls import path
 from django.utils.html import format_html
 from wagtail import hooks
 from wagtail.admin.menu import MenuItem
 from wagtail.admin.ui.sidebar import LinkMenuItem
+from wagtail.admin.panels import FieldPanel
+from wagtail.permission_policies import ModelPermissionPolicy
 from wagtail.snippets.models import register_snippet
+from wagtail.snippets.views.snippets import SnippetViewSet
 
-from .models import HeaderMessage, HomeBoardMessage, MenuGroup
+from .models import HeaderMessage, HomeBoardMessage, MagazineIssue, MenuGroup
 from . import admin_dashboard
 from .translation import english_editor, nudge
 
@@ -54,6 +59,45 @@ hooks.register("register_snippet_listing_buttons", english_editor.snippet_button
 
 for _snippet_model in (HeaderMessage, HomeBoardMessage, MenuGroup):
     register_snippet(_snippet_model)
+
+
+class _SyncOwnedPermissionPolicy(ModelPermissionPolicy):
+    """sync_output_magazine creates the rows and never deletes them, so
+    nobody (superusers included) can add or delete one here."""
+
+    def user_has_permission(self, user, action):
+        if action in ("add", "delete"):
+            return False
+        return super().user_has_permission(user, action)
+
+    def users_with_any_permission(self, actions):
+        actions = [action for action in actions if action not in ("add", "delete")]
+        if not actions:
+            return get_user_model().objects.none()
+        return super().users_with_any_permission(actions)
+
+
+class MagazineIssueViewSet(SnippetViewSet):
+    model = MagazineIssue
+    icon = "doc-full"
+    menu_label = ">OUTPUT issues"
+    list_display = ["title", "issue_date", "hidden", "last_seen_at"]
+    list_filter = ["hidden"]
+    panels = [
+        FieldPanel("hidden"),
+        FieldPanel("title", read_only=True),
+        FieldPanel("issue_date", read_only=True),
+        FieldPanel("url", read_only=True),
+        FieldPanel("cover_url", read_only=True),
+        FieldPanel("last_seen_at", read_only=True),
+    ]
+
+    @property
+    def permission_policy(self):
+        return _SyncOwnedPermissionPolicy(self.model)
+
+
+register_snippet(MagazineIssueViewSet)
 
 hooks.register("after_publish_page", nudge.warn_after_publish)
 hooks.register("before_edit_page", nudge.warn_on_edit)

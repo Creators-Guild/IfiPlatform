@@ -1,3 +1,4 @@
+/* Design rationale: docs/claude_context/home_layout.md */
 .home-layout .maincontent {
     display: grid;
     grid-template:
@@ -25,12 +26,17 @@
     padding: 1rem 1rem 1rem 2rem;
 }
 
-.eventsbox_container {
+.home-sidecolumn {
     grid-area: details;
     align-self: start;
+    display: grid;
+    gap: 2rem;
     max-width: 23rem;
-    padding: 1rem;
     margin: 2rem;
+}
+
+.eventsbox_container {
+    padding: 1rem;
 }
 
 @media (max-width: 72rem) {
@@ -56,9 +62,15 @@
         grid-area: suggestions;
     }
 
-    .eventsbox_container {
+    .home-sidecolumn {
         max-width: none;
         margin: 1rem 0;
+    }
+
+    .magazinebox_container {
+        justify-self: center;
+        width: 100%;
+        max-width: 24rem;
     }
 }
 

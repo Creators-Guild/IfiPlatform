@@ -1,6 +1,6 @@
 # Production server
 
-Last updated: 2026-10-27
+Last updated: 2026-11-13
 
 How the live IfiPlatform site is hosted, deployed and secured. For the
 software itself, see [architecture/tech_stack.md](../architecture/tech_stack.md).
@@ -71,6 +71,7 @@ by git, so deploys leave them alone.
 | `fail2ban.service`          | Bans IPs after repeated failed logins or scans                       | Ubuntu package              |
 | `sync-peoply-events.timer`  | Runs `sync_peoply_events` at 00/06/12/18:00 daily, plus 14:00 and 16:00 on weekdays | [deploy/systemd/](../../deploy/systemd/) |
 | `ifiplatform-backup.timer`  | Backs up the database and `media/` daily at 05:00                    | [deploy/systemd/](../../deploy/systemd/) |
+| `sync-output-magazine.timer` | Runs `sync_output_magazine` daily at 05:30: the >OUTPUT issues for the home page | [deploy/systemd/](../../deploy/systemd/) |
 | `ifiplatform-translate.timer` | Runs `translate_english` every minute: DeepL English for newly published pages and saved menus/messages | [deploy/systemd/](../../deploy/systemd/) |
 | `ifiplatform-translate-nightly.timer` | Runs `translate_english --nightly` at 03:30: catches up on missing English, cleans up old translation rows | [deploy/systemd/](../../deploy/systemd/) |
 
@@ -182,7 +183,7 @@ problems, is explained in [server_toolbox.md](server_toolbox.md).
 ```bash
 sudo certbot renew --dry-run        # certificate auto-renewal still works
 systemctl status gunicorn nginx postgresql fail2ban
-systemctl list-timers               # sync-peoply-events, ifiplatform-backup and both ifiplatform-translate timers are scheduled
+systemctl list-timers               # sync-peoply-events, sync-output-magazine, ifiplatform-backup and both ifiplatform-translate timers are scheduled
 journalctl -u ifiplatform-backup -n 5   # last backups say "Backup completed"
 journalctl -u gunicorn -n 100       # recent app errors (Django logs errors here)
 journalctl -u sync-peoply-events    # last Peoply sync runs

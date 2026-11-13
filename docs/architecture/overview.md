@@ -1,6 +1,6 @@
 # Architecture overview
 
-Last updated: 2026-10-26
+Last updated: 2026-11-13
 
 A map of how IfiPlatform fits together: which app does what, how pages are
 organized, and what happens between a browser request and the HTML that
@@ -26,6 +26,7 @@ planned, but not open to users yet.
 | **IFI** | Institutt for informatikk, the Department of Informatics at the University of Oslo |
 | **Student union** | A *linjeforening* or other student organization at IFI. Each one has a `UnionPage` |
 | **Peoply** | The event platform student unions use. Our events are copied from it |
+| **>OUTPUT** | The IFI student magazine, published at ifiavis.no. The home page shows its issues |
 | **nb / en** | Norwegian Bokmål and English, the two languages of the site. `nb` is the main one |
 | **Wagtail** | The CMS that editors use to write and publish pages |
 | **Wagtail admin** | The editor interface at `/<lang>/wagtail-admin/`, for pages, menus and messages |
@@ -40,7 +41,7 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
 | App | Built with | URL prefix | Main models | Status |
 | --- | --- | --- | --- | --- |
 | `core_app` | plain Django | none (shared helpers) | none | in use |
-| `ifi_home_app` | Wagtail + Django | `/` (everything not claimed below) | the page types below, `MenuGroup`, `Menu`, `HeaderMessage`, `HomeBoardMessage`, `ArticleStyle`, `ArticleBlockStyle`, `PeoplySyncLog` | in use |
+| `ifi_home_app` | Wagtail + Django | `/` (everything not claimed below) | the page types below, `MenuGroup`, `Menu`, `HeaderMessage`, `HomeBoardMessage`, `MagazineIssue`, `ArticleStyle`, `ArticleBlockStyle`, `PeoplySyncLog` | in use |
 | `account_app` | plain Django | `/account/` | `Profile` | in use |
 | `study_app` | plain Django | `/study/` | `Deck`, `Card` | under development |
 | `yourpage_app` | plain Django | `/yourpage/` | none yet | under development |
@@ -49,7 +50,8 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
   the sitemap, static file storage, the "under development" placeholder
   and a few project-wide management commands.
 - **`ifi_home_app`** is the main site: the home page, articles and news,
-  student unions, tools, events (synced from Peoply), menus and the
+  student unions, tools, events (synced from Peoply), the >OUTPUT magazine
+  box (synced from ifiavis.no), menus and the
   translation tools in the Wagtail admin.
 - **`account_app`** handles sign-up, login, email verification, the privacy
   policy, exporting and deleting your data, and the terms editors must
@@ -91,9 +93,11 @@ flowchart TD
         direction LR
         peoply{{"Peoply"}}
         deepl{{"DeepL"}}
+        ifiavis{{"ifiavis.no"}}
     end
 
     peoply -- "events" --> home
+    ifiavis -- "magazine issues" --> home
     deepl -- "translations" --> home
 ```
 
@@ -122,7 +126,7 @@ flowchart LR
         v2["views/article_views.py<br/>views/event_views.py"]
         w["Wagtail looks up the<br/>page tree"]
         m["models/: page types<br/>ArticlePage, CategoryPage, UnionPage,<br/>ToolPage, EventPage ..."]
-        sn["Snippets<br/>Menu, HeaderMessage,<br/>HomeBoardMessage"]
+        sn["Snippets<br/>Menu, HeaderMessage,<br/>HomeBoardMessage, MagazineIssue"]
     end
     subgraph tpl["Templates"]
         t1["home/home_index.html"]
@@ -136,16 +140,19 @@ flowchart LR
     m --> t3
     sn -. "shown inside pages" .-> t1
     peoply{{"Peoply"}} -- "sync_peoply_events" --> m
+    ifiavis{{"ifiavis.no"}} -- "sync_output_magazine" --> sn
     deepl{{"DeepL"}} <-- "translation/" --> m
 ```
 
 - The `/api/...` endpoints are for buttons on the site: the article
   editor's style and publish buttons, and "Sync Peoply now".
-- Translation code is in `translation/`, and the Peoply client in
-  `integrations/peoply_api.py`.
+- Translation code is in `translation/`, the Peoply client in
+  `integrations/peoply_api.py`, and the ifiavis.no client in
+  `integrations/ifiavis.py`.
 - Details: [articles](ifi_home_app/articles.md),
   [unions and tools](ifi_home_app/unions_and_tools.md),
-  [events](ifi_home_app/events.md), [menus](ifi_home_app/menus.md) and
+  [events](ifi_home_app/events.md), [menus](ifi_home_app/menus.md),
+  [the magazine box](ifi_home_app/magazine.md) and
   [translations](shared/translations.md).
 
 #### `account_app`: sign-up, login and your data
@@ -343,6 +350,7 @@ shows the commands. Both are explained in
 | Service | What it does here | Where in the code |
 | --- | --- | --- |
 | **Peoply** | Events are copied from Peoply into `EventPage`s. Peoply is the source of truth for the synced fields | `ifi_home_app/integrations/peoply_api.py`, the `sync_peoply_events` command |
+| **ifiavis.no** | The >OUTPUT magazine's issues are copied into `MagazineIssue` for the home page box, read from the public /utgaver page | `ifi_home_app/integrations/ifiavis.py`, the `sync_output_magazine` command |
 | **DeepL** | Machine translation nb → en, with a glossary of fixed terms | `ifi_home_app/translation/`, the `sync_deepl_glossary` command |
 | **Umami** | Page analytics | `core_app/context_processors.py` |
 

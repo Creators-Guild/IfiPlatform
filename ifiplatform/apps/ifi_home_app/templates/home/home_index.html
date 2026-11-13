@@ -24,8 +24,12 @@
                 </div>
             </div>
         </div>
-    <div class="eventsbox_container">
-        <h2>{% blocktrans %}Happening at Ifi{% endblocktrans %}</h2>
-        {% include "home/partials/eventsbox/eventsbox.html" %}
-    </div>
+    <aside class="home-sidecolumn">
+        {# Temporary (2026-11-13): magazine box first to highlight a new issue. Move it back under the events box afterwards. #}
+        {% include "home/partials/magazinebox/magazinebox.html" %}
+        <div class="eventsbox_container">
+            <h2>{% blocktrans %}Happening at Ifi{% endblocktrans %}</h2>
+            {% include "home/partials/eventsbox/eventsbox.html" %}
+        </div>
+    </aside>
 {% endblock maincontent %}

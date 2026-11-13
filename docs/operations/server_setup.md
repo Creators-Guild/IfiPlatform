@@ -1,6 +1,6 @@
 # Server setup
 
-Last updated: 2026-10-27
+Last updated: 2026-11-13
 
 How to build the production server from zero, for example if the VM is
 lost or has to be replaced. Follow the steps in order. For how the
@@ -327,8 +327,8 @@ Run the routine checks from
 
 - Open https://www.ifiplattform.no. Check a few pages, some images, and
   log in to the Wagtail admin.
-- `systemctl list-timers`: `sync-peoply-events` and `ifiplatform-backup`
-  are scheduled.
+- `systemctl list-timers`: `sync-peoply-events`, `sync-output-magazine`
+  and `ifiplatform-backup` are scheduled.
 - `ls -lt /mnt/backups/postgres/ | head -3`: the first deploy wrote a
   backup.
 - Run a deploy from GitHub Actions to check that the secrets work.

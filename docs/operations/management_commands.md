@@ -1,6 +1,6 @@
 # Custom manage.py commands
 
-Last updated: 2026-10-13
+Last updated: 2026-11-13
 
 This project's own `manage.py` commands, beyond Django's built-in ones
 (`migrate`, `createsuperuser`, `test`, `makemessages`/`compilemessages`,
@@ -337,6 +337,35 @@ Two of the four have an extra admin action beyond delete:
 Both re-fetch and re-verify at click time rather than trusting `label`,
 and both marking `resolved_at` immediately rather than waiting for the
 next scheduled `check_peoply_union_matches` run to notice.
+
+### sync_output_magazine
+
+```bash
+python manage.py sync_output_magazine [--dry-run]
+```
+
+Copies the list of >OUTPUT magazine issues from
+https://www.ifiavis.no/utgaver into `MagazineIssue`, for the magazine box on
+the home page. New issues are added, and known ones get their title, link,
+cover and month updated. It never deletes an issue and never changes the
+**Hidden** setting admins use. `--dry-run` prints what would change and
+saves nothing.
+
+If ifiavis.no can't be reached or the page has changed so the issues can't
+be read, the command stops with an error and changes nothing. How it works
+is in [architecture/ifi_home_app/magazine.md](../architecture/ifi_home_app/magazine.md).
+
+On the server, `sync-output-magazine.timer` runs it every day at 05:30.
+Like the Peoply timer, `deploy/deploy.sh` installs and enables it on every
+deploy. To check on it or run it now:
+```bash
+systemctl list-timers sync-output-magazine.timer
+journalctl -u sync-output-magazine.service
+sudo systemctl start sync-output-magazine.service
+```
+
+Locally, `seed_dev_data` adds three issues, so you only need this command
+to get the full list.
 
 ## account_app
 

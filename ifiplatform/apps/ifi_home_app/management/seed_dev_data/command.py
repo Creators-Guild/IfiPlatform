@@ -9,7 +9,7 @@ Safe to re-run: every page is looked up by (parent, slug, locale) before
 creation, so running this twice does not create duplicates.
 
 Split into one mixin per content area (unions.py/news.py/events.py/
-tools.py/messages.py) plus generic helpers.py, combined here into one
+tools.py/messages.py/magazine.py) plus generic helpers.py, combined here into one
 Command -- every seeding method is still called as a plain self._seed_x(...)
 regardless of which mixin actually defines it."""
 
@@ -25,6 +25,7 @@ from ifi_home_app.models.article_models import CategoryPage
 from .constants import CATEGORY_SPECS
 from .events import EventSeedMixin
 from .helpers import SeedHelpersMixin
+from .magazine import MagazineSeedMixin
 from .menus import MenuSeedMixin
 from .messages import MessageSeedMixin
 from .news import NewsSeedMixin
@@ -40,6 +41,7 @@ class Command(
     EventSeedMixin,
     ToolSeedMixin,
     MessageSeedMixin,
+    MagazineSeedMixin,
     MenuSeedMixin,
     UserSeedMixin,
     BaseCommand,
@@ -137,6 +139,7 @@ class Command(
 
         self._seed_header_message(nb_locale)
         self._seed_home_board_message(nb_locale)
+        self._seed_magazine_issues()
         self._seed_menus(nb_locale)
 
         self.stdout.write(

@@ -2321,3 +2321,23 @@ msgstr "Maskinoversett nå"
 #: .\apps\ifi_home_app\templates\info_articles\partials\translation_nudge.html
 msgid "Open translation editor"
 msgstr "Åpne oversettelsesredigering"
+
+#: .\apps\ifi_home_app\templates\home\partials\magazinebox\magazinebox.html
+msgid "Ifi magazine"
+msgstr "Ifi-magasinet"
+
+#: .\apps\ifi_home_app\templates\home\partials\magazinebox\magazinebox.html
+msgid "all issues"
+msgstr "alle utgaver"
+
+#: .\apps\ifi_home_app\templates\home\partials\magazinebox\magazinebox.html
+msgid "Issues"
+msgstr "Utgaver"
+
+#: .\apps\ifi_home_app\templates\home\partials\magazinebox\magazinebox.html
+msgid "Newer issue"
+msgstr "Nyere utgave"
+
+#: .\apps\ifi_home_app\templates\home\partials\magazinebox\magazinebox.html
+msgid "Older issue"
+msgstr "Eldre utgave"

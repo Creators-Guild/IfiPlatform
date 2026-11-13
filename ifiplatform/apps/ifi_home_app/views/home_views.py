@@ -13,6 +13,7 @@ from ..dummydata import (
     dummy_tools_objects,
 )
 from ..models.home_models import HomeBoardMessage, IfiTool, NewsItem, StudentUnion
+from ..models.magazine import MagazineIssue
 
 
 def main_view(request):
@@ -64,6 +65,7 @@ def main_view(request):
         "show_board_controls": len(board_messages) > 1,
         "upcoming_events": upcoming_events,
         "upcoming_event_days": group_events_by_day(upcoming_events),
+        "magazine_issues": list(MagazineIssue.objects.filter(hidden=False)),
     }
 
     return render(

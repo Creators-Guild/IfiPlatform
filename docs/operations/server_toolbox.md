@@ -1,6 +1,6 @@
 # Server toolbox
 
-Last updated: 2026-09-29
+Last updated: 2026-11-13
 
 The tools you use to find out what's going on with the production server,
 and how to use them. The goal is to teach the tools, not just list fixed
@@ -36,6 +36,7 @@ what does its log say?*
 | CSS or images missing (404)               | Did `collectstatic` run in the deploy? Then `sudo tail /var/log/nginx/error.log`   |
 | Browser warns about the certificate       | `sudo certbot certificates` and `sudo certbot renew --dry-run`                     |
 | Events from Peoply not updating           | `systemctl list-timers` and `journalctl -u sync-peoply-events -e`                  |
+| Magazine box missing new issues          | `systemctl list-timers` and `journalctl -u sync-output-magazine -e`                |
 | Backups missing or old                    | `journalctl -u ifiplatform-backup -e`, see [backups_and_recovery.md](backups_and_recovery.md#checking-that-it-runs) |
 | Can't SSH in                              | Your IP may be banned by fail2ban (see [fail2ban](#fail2ban)), or the NREC security group changed |
 | Deploy failed                             | The failed run in GitHub → Actions → Deploy. Its log shows the server's output     |
