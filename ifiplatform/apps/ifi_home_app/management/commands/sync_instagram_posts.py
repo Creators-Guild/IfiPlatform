@@ -2,7 +2,8 @@
 Graph API (Business Discovery) into InstagramPost rows, downloading each
 image once (Meta's image links expire). Synced posts get their caption and
 link updated; `hidden` is never touched; only the newest 12 synced posts per
-account are kept (older ones and their images are deleted). Posts added by
+account, and only from the last year (POST_MAX_AGE), are kept; older ones
+and their images are deleted. Posts added by
 hand are never changed. The 12 posts the feed shows (shown_posts()) also
 get their video file and every album picture; posts that leave the feed
 lose them again. One account failing (e.g. a personal account) is
@@ -23,6 +24,7 @@ from PIL import Image, UnidentifiedImageError
 from ifi_home_app.integrations import instagram
 from ifi_home_app.models.instagram import (
     ALBUM,
+    POST_MAX_AGE,
     POSTS_KEPT_PER_ACCOUNT,
     SYNCED,
     VIDEO,
@@ -108,7 +110,10 @@ class Command(BaseCommand):
             post.instagram_id: post for post in account.posts.filter(source=SYNCED)
         }
         created = 0
+        cutoff = timezone.now() - POST_MAX_AGE
         for post in found.posts:
+            if post.posted_at < cutoff:
+                continue
             self.remote[post.instagram_id] = post
             row = existing.get(post.instagram_id)
             if row is not None:
@@ -132,10 +137,11 @@ class Command(BaseCommand):
             row.save()
             created += 1
 
-        keep = account.posts.filter(source=SYNCED).values_list("pk", flat=True)[
+        synced = account.posts.filter(source=SYNCED)
+        keep = synced.filter(posted_at__gte=cutoff).values_list("pk", flat=True)[
             :POSTS_KEPT_PER_ACCOUNT
         ]
-        for old in account.posts.filter(source=SYNCED).exclude(pk__in=list(keep)):
+        for old in synced.exclude(pk__in=list(keep)):
             old.delete()
         return created
 

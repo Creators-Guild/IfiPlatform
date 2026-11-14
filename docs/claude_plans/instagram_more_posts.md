@@ -34,6 +34,9 @@ The database isn't the cost; media files are, and videos most of all.
   refreshed by the sync, not fetched when a visitor asks.
 - Asking Meta per visitor would be slow and use up rate limits.
 
+Since 2026-11-15 synced posts older than a year aren't kept at all
+(`POST_MAX_AGE`); any "more posts" design starts from that limit.
+
 ## Idea: three layers
 
 1. **More rows.** Keep the newest 30–50 posts per account

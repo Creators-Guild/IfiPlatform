@@ -79,8 +79,9 @@ All in `models/instagram.py`:
   development and tests never contact Meta.
 - For each active account it fetches the 12 newest posts, downloads new
   pictures (resized to at most 1080 px), updates captions, and keeps only
-  the 12 newest synced posts per account. Older ones and their pictures
-  are deleted.
+  the 12 newest synced posts per account, and none older than a year.
+  Older ones and their pictures are deleted, so an account that hasn't
+  posted for a year has nothing stored until it posts again.
 - One account failing doesn't stop the others. The error is saved on the
   account, and the command ends with an error so it shows in the log.
 - It checks when the token expires. A week before, it logs a warning and

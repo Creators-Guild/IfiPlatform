@@ -176,6 +176,21 @@ class SyncTests(TestCase):
         self.assertNotIn("14", list(synced.values_list("instagram_id", flat=True)))
         self.assertTrue(InstagramPost.objects.filter(pk=manual.pk).exists())
 
+    def test_posts_older_than_a_year_are_not_kept(self):
+        old = _post(1, hours_ago=24 * 400)
+        self.sync([_post(2), old])
+        self.assertEqual(
+            list(self.account.posts.values_list("instagram_id", flat=True)), ["2"]
+        )
+        stale = self.account.posts.get()
+        InstagramPost.objects.filter(pk=stale.pk).update(
+            posted_at=timezone.now() - timedelta(days=400)
+        )
+        image = stale.image.name
+        self.sync([])
+        self.assertFalse(self.account.posts.exists())
+        self.assertFalse(stale.image.storage.exists(image))
+
     def test_one_failing_account_is_recorded_and_others_still_sync(self):
         other = InstagramAccount.objects.get(username="digok.memes")
         other.is_active = True

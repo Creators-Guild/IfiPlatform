@@ -19,6 +19,9 @@ OFFICIAL, MEME = "official", "meme"
 SYNCED, MANUAL = "synced", "manual"
 IMAGE, VIDEO, ALBUM = "image", "video", "album"
 POSTS_KEPT_PER_ACCOUNT = 12
+# Synced posts older than this aren't kept, so quiet accounts don't keep
+# posts from years ago (user, 2026-11-15).
+POST_MAX_AGE = timedelta(days=365)
 # The feed shows this many; only they get their video and album pictures.
 SHOWN_POSTS = 12
 

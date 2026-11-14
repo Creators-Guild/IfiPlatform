@@ -43,8 +43,11 @@ accounts while the app was in Development mode.
 - Synced posts are sync-owned: `InstagramPostForm` disables every field but
   `hidden` when `source == synced` (works for any edit, no custom view).
   Manual posts (`source` defaults to manual) are never touched or pruned.
-- Keep the 12 newest *synced* posts per account; older rows are deleted
-  and the `post_delete` receiver removes their files (disk is 20 GB).
+- Keep the 12 newest *synced* posts per account, none older than
+  `POST_MAX_AGE` (365 days, user 2026-11-15: quiet accounts kept posts from
+  2020); older rows are deleted and the `post_delete` receiver removes
+  their files (disk is 20 GB). Posts Meta returns that are already too old
+  aren't created at all.
 - Profile pictures are only downloaded when empty (Meta's URL changes on
   every call, so there is nothing to compare). Clearing it re-fetches.
 - One failing account doesn't stop the others; the command raises
