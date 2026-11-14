@@ -504,6 +504,80 @@ html:has(.home-instagram-viewer[open]) {
   overflow-y: auto;
 }
 
+@media (width > 45rem) {
+  .home-instagram-viewer-post:is([data-layout="side"], [data-layout="overlap"]:has(.home-instagram-caption.is-expanded)) {
+    --cover: var(--fit-cover, 0px);
+    width: min(100%, calc((100dvh - 4rem) * var(--ratio, 0.8) + 27.25rem));
+    grid-template-columns: minmax(0, 1fr) 24rem;
+    grid-template-rows: auto minmax(0, max-content) auto minmax(0, 1fr) auto;
+    column-gap: 1.25rem;
+  }
+
+  .home-instagram-viewer-post:is([data-layout="side"], [data-layout="overlap"]:has(.home-instagram-caption.is-expanded)) > * {
+    grid-column: 2;
+    z-index: 2;
+  }
+
+  .home-instagram-viewer-post:is([data-layout="side"], [data-layout="overlap"]:has(.home-instagram-caption.is-expanded)) > .home-instagram-media {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    justify-self: start;
+    width: min(100%, calc((100dvh - 4rem) * var(--ratio, 0.8)));
+    z-index: 0;
+  }
+
+  .home-instagram-viewer-post:is([data-layout="side"], [data-layout="overlap"]:has(.home-instagram-caption.is-expanded))::after {
+    content: "";
+    grid-column: 2;
+    grid-row: 1 / -1;
+    margin: -1rem -1rem -1rem -1.25rem;
+    border-radius: 0 10px 10px 0;
+    background: var(--color-card-bg);
+    z-index: 1;
+  }
+
+  .home-instagram-viewer-post[data-layout="overlap"]::after {
+    box-shadow: -12px 0 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .home-instagram-viewer-post:is([data-layout="side"], [data-layout="overlap"]) .home-instagram-caption {
+    max-height: none;
+  }
+
+  .home-instagram-viewer-post[data-layout="side"] .home-instagram-caption {
+    display: block;
+    -webkit-line-clamp: none;
+    line-clamp: none;
+    overflow-y: auto;
+    white-space: pre-line;
+  }
+
+  .home-instagram-viewer-post[data-layout="side"] .home-instagram-more {
+    display: none;
+  }
+
+  .home-instagram-viewer-post:is([data-layout="side"], [data-layout="overlap"]:has(.home-instagram-caption.is-expanded)) > .home-instagram-date {
+    grid-row: 4;
+    align-self: end;
+  }
+
+  .home-instagram-viewer-post:is([data-layout="side"], [data-layout="overlap"]:has(.home-instagram-caption.is-expanded)) > .home-instagram-viewer-foot {
+    grid-row: 5;
+  }
+
+  .home-instagram-viewer-post .home-instagram-album-nav[data-step="1"] {
+    right: calc(var(--cover, 0px) + 0.5rem);
+  }
+
+  .home-instagram-viewer-post .home-instagram-album-dots {
+    right: var(--cover, 0px);
+  }
+
+  .home-instagram-viewer-post .home-instagram-watch {
+    right: calc(var(--cover, 0px) + 0.75rem);
+  }
+}
+
 .home-instagram-date {
   margin: 0;
   font-size: 0.85rem;

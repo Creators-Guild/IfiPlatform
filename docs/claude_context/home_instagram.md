@@ -180,6 +180,35 @@ accounts while the app was in Development mode.
   contain` on black). Captions start clamped with "… more" / "less" in the
   viewer and the feed (same button, `data-more`/`data-less`); an opened
   caption in the viewer scrolls inside `max-height: 30dvh`.
+- Layouts above 45rem (user, 2026-11-15). `fitCards()` in
+  `home_instagram.js` sets `data-layout` on each card when the viewer opens,
+  for fetched cards and on resize, because whether a post fits depends on
+  its `--ratio` and the window, which no media or container query can
+  compare. It reads sizes once and only writes in the loop (212 cards).
+  - `side`: the picture at full height plus the 24rem text column fit.
+    Instagram's desktop layout ("everything text", user's pick over "only
+    the caption"): media spans every row in column 1, byline, caption,
+    date and foot fill column 2, the whole caption shows and "… more" is
+    hidden. Every post with room gets it, short captions too (user: same
+    look while scrolling).
+  - `overlap`: doesn't fit, but the text column would cover at most 45% of
+    the picture (`MAX_COVER`, user: "a bit less than half"). Collapsed
+    until "… more", which opens the column over the picture's right edge
+    (white `::after` panel with a shadow; the picture keeps its size).
+    `--fit-cover` (px, from the script) moves the album's right arrow,
+    dots and "Watch on Instagram" out from under it. Videos never overlap,
+    the column would cover the native controls.
+  - `stack`: everything else, and phones: "… more" opens below, 30dvh.
+  - No JS → no `data-layout` → `stack`.
+  - Grid: columns `minmax(0, 1fr) 24rem`, media `grid-column: 1 / -1`,
+    `justify-self: start`, width `min(100%, full-height width)`, so in `side`
+    it fills column 1 exactly and in `overlap` it runs under the panel.
+    Card width = full-height width + 27.25rem (padding 2 + gap 1.25 + 24),
+    capped at 100%; `TEXT_COLUMN_REM` in the script must match. Rows `auto
+    minmax(0, max-content) auto minmax(0, 1fr) auto`: the caption grows to
+    its text and only scrolls when it doesn't fit; date and foot are pinned
+    to rows 4 and 5 so they sit at the bottom even without a caption (a
+    plain 1fr caption row would leave "less" far below a short caption).
 - Card width follows the picture (user: a fixed 34rem left black bars
   around portrait pictures): the template sets `--ratio: w / h` from the
   stored size (plain digits via `stringformat:'d'`, a localised thousands

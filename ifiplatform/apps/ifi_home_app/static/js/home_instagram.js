@@ -47,6 +47,44 @@ const albumPreload = hasObserver
     })
   : null;
 
+// Viewer card layouts above the phone breakpoint (home_instagram.css):
+// "side" when the picture at full height and the text column fit next to
+// each other (whole caption, no "… more"); "overlap" when the text column
+// would cover at most MAX_COVER of the picture, so "… more" opens it over
+// the picture's right edge; otherwise "stack", where "… more" opens below.
+// Videos never overlap: the column would cover their controls.
+const TEXT_COLUMN_REM = 24 + 1.25; // the CSS's text column + gap
+const MAX_COVER = 0.45;
+const phone = window.matchMedia("(max-width: 45rem)");
+
+function fitCards(feed, cards) {
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const feedStyle = getComputedStyle(feed);
+  const cardStyle = getComputedStyle(cards[0]);
+  const padX = parseFloat(cardStyle.paddingLeft) + parseFloat(cardStyle.paddingRight);
+  const padY = parseFloat(cardStyle.paddingTop) + parseFloat(cardStyle.paddingBottom);
+  const inner = feed.clientWidth - parseFloat(feedStyle.paddingLeft) - parseFloat(feedStyle.paddingRight) - padX;
+  const mediaHeight = cards[0].clientHeight - padY;
+  const text = TEXT_COLUMN_REM * rem;
+  cards.forEach((card) => {
+    let layout = "stack";
+    let cover = 0;
+    if (!phone.matches) {
+      const [w, h] = (card.style.getPropertyValue("--ratio") || "4 / 5").split("/").map(Number);
+      const media = mediaHeight * (w / h);
+      if (media + text <= inner) {
+        layout = "side";
+      } else if (!card.querySelector(".home-instagram-video")) {
+        const shown = Math.min(media, inner);
+        cover = shown - (inner - text);
+        layout = cover <= MAX_COVER * shown ? "overlap" : "stack";
+      }
+    }
+    card.dataset.layout = layout;
+    card.style.setProperty("--fit-cover", `${Math.max(cover, 0)}px`);
+  });
+}
+
 function wireCaptions(root) {
   root.querySelectorAll(".home-instagram-more").forEach((button) => {
     const caption = button.previousElementSibling;
@@ -131,6 +169,7 @@ function setUpViewer(section) {
         feed.append(batch.content);
         loaded = true;
         cards.forEach(wire);
+        fit(cards);
       })
       .catch(() => {})
       .finally(() => {
@@ -157,8 +196,22 @@ function setUpViewer(section) {
     return best;
   };
 
+  // Card sizes are only known while the dialog is open, so this runs on
+  // every open, for fetched cards, and on resize.
+  const fit = (cards = posts()) => {
+    if (viewer.open && cards.length) {
+      fitCards(feed, cards);
+    }
+  };
+  let refit = 0;
+  window.addEventListener("resize", () => {
+    cancelAnimationFrame(refit);
+    refit = requestAnimationFrame(() => fit());
+  });
+
   const open = (index) => {
     viewer.showModal();
+    fit();
     scrollTo(index, false);
     loadRest();
   };

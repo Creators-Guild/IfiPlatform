@@ -62,6 +62,13 @@ All in `models/instagram.py`:
   (arrows or swipe) and the video itself (click to play, with sound). ↓ ↑
   jump between posts, Esc or a click outside closes it. "Show more"
   opens the viewer too, at the first post that wasn't shown.
+- **The viewer on bigger screens than a phone.** When there's room, a post
+  shows like Instagram on a computer: the picture on the left, and the
+  account, the whole caption, the date and the link in a column on the
+  right. When there isn't, the caption starts at two lines. "… more" then
+  opens the column over the right edge of the picture, if it would cover
+  less than about half of it, or under the picture otherwise. Videos
+  always open it under, so their controls stay visible.
 - A video Instagram gives us no file for (often reels with licensed music)
   shows its cover with "Watch on Instagram". A video inside an album shows
   as its cover picture.
