@@ -1,6 +1,6 @@
 # Ifi Instagram feed
 
-Last updated: 2026-11-13
+Last updated: 2026-11-14
 
 How the home page shows recent Instagram posts from IFI's student unions
 and meme accounts: where the posts come from, how they're stored and how
@@ -10,9 +10,14 @@ the feed works. Setting up the Meta side is in
 ## What it is
 
 - **Visitors** see "Ifi Instagram" under the news on the home page: the
-  12 newest posts in rows, newest first. Each post shows the account, how long ago, the picture and the
-  whole caption, and links to the post on Instagram. Meme accounts get a
-  yellow "meme" tag.
+  12 newest posts in rows, newest first, styled like Instagram posts.
+  Each post shows the account and how long ago, the picture (no frame,
+  never taller than 4:5), and the first two lines of the caption. A long
+  caption has a "… more" button that shows the whole caption in place
+  (it needs JavaScript; without it the caption stays at two lines). Only
+  the "See on Instagram →" link under each post leaves the site; the
+  picture and the account name aren't links. Meme accounts get a yellow
+  "meme" tag.
 - **Admins** manage the list of accounts under Snippets → "Instagram
   accounts", and can hide a post or add one by hand under "Instagram
   posts".
@@ -40,6 +45,7 @@ All in `models/instagram.py`:
 
 | Model | What it holds |
 | --- | --- |
+| `InstagramPostImage` | The 2nd, 3rd … picture of an album post, only for posts the feed shows |
 | `InstagramAccount` | An account in the feed: username, display name, official or meme, order, active, profile picture, and the last sync's time and error |
 | `InstagramPost` | A post: account, link, caption, time, image/video/album, picture, hidden, and whether it was synced or added by hand |
 | `InstagramSyncState` | One row: when the access token expires |
@@ -47,8 +53,20 @@ All in `models/instagram.py`:
 - Synced posts belong to the sync: in the admin only **Hidden** can be
   changed. Posts added by hand can be edited freely and are never touched
   by the sync.
-- A video shows its cover picture with a play icon, and an album its first
-  picture with an icon. Clicking opens the post on Instagram.
+- **Seeing a post without Instagram.** On laptops and wide screens,
+  clicking a post's picture opens a viewer over the page, like reels: one
+  post fills the screen and each scroll moves to the next, starting at the
+  one you clicked. Each post has its caption ("… more" / "less") and date, all the pictures of an album
+  (arrows or swipe) and the video itself (click to play, with sound). ↓ ↑
+  jump between posts, Esc or a click outside closes it. On phones there's
+  no viewer: albums swipe and videos play right in the feed.
+- A video Instagram gives us no file for (often reels with licensed music)
+  shows its cover with "Watch on Instagram". A video inside an album shows
+  as its cover picture.
+- Only the 12 posts the feed shows keep their video and album pictures.
+  The sync downloads them and deletes them again when a post drops out of
+  the 12, so they take about 50–150 MB in total. Other stored posts keep
+  just their cover.
 - The first account list (the accounts Ifi Creators' Guild follows) was
   added by migration `0164_instagram_accounts`.
 
@@ -74,10 +92,15 @@ All in `models/instagram.py`:
 
 - Template: `templates/home/partials/instagram/instagram.html`, included
   in `home/home_index.html` after the news. Styles:
-  `static/css/06_components/home/home_instagram.css`. No JavaScript.
-- All 12 posts are shown, with no scrolling inside the box. Posts are at
-  most 16rem wide, and as many sit side by side as fit at that size (up to
-  five), with lines only between rows.
+  `static/css/06_components/home/home_instagram.css`. The script
+  `static/js/home_instagram.js` runs the viewer, the album arrows and
+  "… more". Without it the feed, the pictures, swiping albums, playing
+  videos on phones and "See on Instagram" all still work.
+- One row of posts shows at first, up to 4 on wide screens and 3 on a
+  laptop. On phone-sized screens (under 45rem, like the rest of the
+  site's phone layout) it's one post per row, with 2 shown at first. "Show more" opens the rest of the 12 in place, and "Show
+  less" closes them. It's a native toggle, so it works without JavaScript.
+  Rows are separated by space, not lines.
 - `seed_dev_data` adds four example posts with generated pictures.
 
 ## Where to change things

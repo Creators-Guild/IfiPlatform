@@ -1,0 +1,13 @@
+<div class="home-instagram-who">
+    {% if post.account.profile_picture %}
+        <img class="home-instagram-avatar" src="{{ post.account.profile_picture.url }}" alt="" width="32" height="32" loading="lazy">
+    {% else %}
+        <span class="home-instagram-avatar is-initials" aria-hidden="true">{{ post.account.initials }}</span>
+    {% endif %}
+    <p class="home-instagram-byline">
+        <span class="home-instagram-handle">{{ post.account.username }}</span>
+        <span class="home-instagram-age" aria-hidden="true">•</span>
+        <time class="home-instagram-age" datetime="{{ post.posted_at|date:'c' }}">{{ post.age }}</time>
+        {% if post.account.kind == "meme" %}<span class="home-instagram-tag">meme</span>{% endif %}
+    </p>
+</div>

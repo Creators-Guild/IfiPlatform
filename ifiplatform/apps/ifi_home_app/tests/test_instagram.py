@@ -37,6 +37,7 @@ BUSINESS_DISCOVERY = {
                     "id": "2",
                     "media_type": "VIDEO",
                     "thumbnail_url": "https://cdn.example/2-thumb.jpg",
+                    "media_url": "https://cdn.example/2.mp4",
                     "permalink": "https://www.instagram.com/reel/BBB/",
                     "timestamp": "2026-11-11T10:00:00+0000",
                 },
@@ -56,7 +57,11 @@ BUSINESS_DISCOVERY = {
                             {
                                 "media_type": "IMAGE",
                                 "media_url": "https://cdn.example/4a.jpg",
-                            }
+                            },
+                            {
+                                "media_type": "VIDEO",
+                                "thumbnail_url": "https://cdn.example/4b.jpg",
+                            },
                         ]
                     },
                 },
@@ -234,6 +239,10 @@ class FeedTemplateTests(TestCase):
         self.assertIn(">meme<", html)
         self.assertIn('title="Video"', html)
         self.assertIn("3 h", html)
+        self.assertIn(
+            'class="home-instagram-open" href="https://www.instagram.com/p/X/"', html
+        )
+        self.assertNotIn('<a class="home-instagram-image"', html)
         self.assertIn("That's the 1 newest posts.", html)
 
     def test_renders_nothing_without_posts(self):
@@ -247,3 +256,182 @@ class FeedTemplateTests(TestCase):
         post = InstagramPost(posted_at=now - timedelta(days=10))
         with translation.override("nb"):
             self.assertEqual(post.age(now), "1 u")
+
+
+class CaptionMoreTests(SimpleTestCase):
+    def test_only_long_or_multiline_captions_get_more(self):
+        self.assertFalse(InstagramPost(caption="Fredagsbar kl. 18").caption_is_long)
+        self.assertTrue(InstagramPost(caption="x" * 71).caption_is_long)
+        self.assertTrue(InstagramPost(caption="Linje én\nLinje to").caption_is_long)
+
+
+class ShowMoreToggleTests(TestCase):
+    def _posts(self, n):
+        account = InstagramAccount.objects.get(username="unioslo_ifi")
+        posts = []
+        for i in range(n):
+            post = InstagramPost(
+                account=account,
+                permalink=f"https://www.instagram.com/p/{i}/",
+                posted_at=timezone.now(),
+            )
+            post.image.name = f"instagram/posts/{i}.jpg"
+            posts.append(post)
+        return posts
+
+    def render(self, n):
+        return render_to_string(
+            "home/partials/instagram/instagram.html",
+            {"instagram_posts": self._posts(n)},
+        )
+
+    def test_toggle_only_when_there_is_more_than_one_row_on_phones(self):
+        self.assertNotIn("home-instagram-toggle", self.render(2))
+        self.assertIn("home-instagram-toggle", self.render(3))
+
+
+class ParseMediaTests(SimpleTestCase):
+    def test_video_file_and_album_pictures(self):
+        posts = {
+            p.instagram_id: p for p in instagram.parse_account(BUSINESS_DISCOVERY).posts
+        }
+        self.assertEqual(posts["2"].video_url, "https://cdn.example/2.mp4")
+        self.assertEqual(posts["1"].video_url, "")
+        self.assertEqual(
+            posts["4"].album_urls,
+            ("https://cdn.example/4a.jpg", "https://cdn.example/4b.jpg"),
+        )
+
+
+def _video_file():
+    out = tempfile.NamedTemporaryFile(
+        suffix=".mp4"
+    )  # pylint: disable=consider-using-with
+    out.write(b"fake mp4")
+    out.flush()
+    out.seek(0)
+    return out
+
+
+class ShownMediaSyncTests(TestCase):
+    def setUp(self):
+        self.media = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.media)
+        self.enterContext(
+            override_settings(
+                MEDIA_ROOT=self.media,
+                INSTAGRAM_ACCESS_TOKEN="t",
+                INSTAGRAM_BUSINESS_ACCOUNT_ID="1",
+            )
+        )
+        InstagramAccount.objects.update(is_active=False)
+        self.account = InstagramAccount.objects.get(username="unioslo_ifi")
+        self.account.is_active = True
+        self.account.save()
+        self.enterContext(
+            patch.object(instagram, "download", return_value=_jpeg_bytes())
+        )
+        self.enterContext(
+            patch.object(instagram, "token_expires_at", return_value=None)
+        )
+        self.enterContext(
+            patch.object(
+                instagram, "download_video", side_effect=lambda url: _video_file()
+            )
+        )
+        now = timezone.now()
+        self.posts = [
+            instagram.Post(
+                "v",
+                "https://www.instagram.com/p/v/",
+                "",
+                now,
+                "video",
+                "https://cdn.example/v.jpg",
+                video_url="https://cdn.example/v.mp4",
+            ),
+            instagram.Post(
+                "n",
+                "https://www.instagram.com/p/n/",
+                "",
+                now - timedelta(hours=1),
+                "video",
+                "https://cdn.example/n.jpg",
+            ),
+            instagram.Post(
+                "a",
+                "https://www.instagram.com/p/a/",
+                "",
+                now - timedelta(hours=2),
+                "album",
+                "https://cdn.example/a1.jpg",
+                album_urls=(
+                    "https://cdn.example/a1.jpg",
+                    "https://cdn.example/a2.jpg",
+                    "https://cdn.example/a3.jpg",
+                ),
+            ),
+        ]
+
+    def sync(self):
+        with patch.object(instagram, "get_account", return_value=_found(self.posts)):
+            call_command(
+                "sync_instagram_posts", stdout=io.StringIO(), stderr=io.StringIO()
+            )
+
+    def test_shown_posts_get_video_and_album_pictures(self):
+        self.sync()
+        video = InstagramPost.objects.get(instagram_id="v")
+        self.assertTrue(video.video)
+        self.assertFalse(InstagramPost.objects.get(instagram_id="n").video)
+        album = InstagramPost.objects.get(instagram_id="a")
+        self.assertEqual(album.album_images.count(), 2)
+        self.assertEqual(len(album.pictures), 3)
+
+    def test_posts_leaving_the_feed_lose_them(self):
+        self.sync()
+        InstagramPost.objects.filter(instagram_id__in=["v", "a"]).update(hidden=True)
+        self.sync()
+        self.assertFalse(InstagramPost.objects.get(instagram_id="v").video)
+        self.assertEqual(
+            InstagramPost.objects.get(instagram_id="a").album_images.count(), 0
+        )
+
+
+class ViewerTemplateTests(TestCase):
+    def _post(self, **kwargs):
+        post = InstagramPost(
+            account=InstagramAccount.objects.get(username="unioslo_ifi"),
+            permalink="https://www.instagram.com/p/X/",
+            caption="Hei",
+            posted_at=timezone.now(),
+            **kwargs,
+        )
+        post.image.name = "instagram/posts/x.jpg"
+        return post
+
+    def render(self, post):
+        with translation.override("en"):
+            return render_to_string(
+                "home/partials/instagram/instagram.html", {"instagram_posts": [post]}
+            )
+
+    def test_video_with_a_file_plays_on_the_site(self):
+        post = self._post(media_type="video")
+        post.video.name = "instagram/videos/x.mp4"
+        html = self.render(post)
+        self.assertIn(
+            '<video class="home-instagram-video" controls preload="none"', html
+        )
+        self.assertNotIn("Watch on Instagram", html)
+
+    def test_video_without_a_file_links_to_instagram(self):
+        html = self.render(self._post(media_type="video"))
+        self.assertNotIn("<video", html)
+        self.assertIn("Watch on Instagram", html)
+
+    def test_viewer_dialog_has_every_post(self):
+        html = self.render(self._post())
+        self.assertIn('<dialog class="home-instagram-viewer"', html)
+        self.assertIn('data-index="0"', html)
+        self.assertIn("1 / 1", html)

@@ -2422,8 +2422,51 @@ msgid "Several images"
 msgstr "Flere bilder"
 
 #: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
-msgid "Open on Instagram"
-msgstr "Åpne på Instagram"
+msgid "more"
+msgstr "mer"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "less"
+msgstr "mindre"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "See on Instagram"
+msgstr "Se på Instagram"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\media.html
+msgid "Watch on Instagram"
+msgstr "Se videoen på Instagram"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\media.html
+#, python-format
+msgid "Picture %(n)s of %(total)s"
+msgstr "Bilde %(n)s av %(total)s"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\media.html
+msgid "Previous picture"
+msgstr "Forrige bilde"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\media.html
+msgid "Next picture"
+msgstr "Neste bilde"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+#, python-format
+msgid "Open post by @%(handle)s"
+msgstr "Åpne innlegg fra @%(handle)s"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+#, python-format
+msgid "Post %(n)s of %(total)s"
+msgstr "Innlegg %(n)s av %(total)s"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Show more"
+msgstr "Vis flere"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Show less"
+msgstr "Vis færre"
 
 #: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
 #, python-format
