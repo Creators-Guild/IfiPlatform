@@ -10,7 +10,7 @@ from ifi_home_app.management.seed_dev_data.opening_hours import (
     LOCATION_SPECS,
     build_location,
 )
-from ifi_home_app.models import LocationClosure
+from ifi_home_app.models import Location, LocationClosure
 from ifi_home_app.models.event.constants import SITE_TIMEZONE
 from ifi_home_app.models.opening_hours import location_status, opening_hours_now
 
@@ -120,6 +120,7 @@ class LocationStatusTests(SimpleTestCase):
 
 class OpeningHoursBoxTests(TestCase):
     def test_renders_statuses_and_warning(self):
+        Location.objects.all().delete()  # the ones migration 0162 adds
         for order, name in enumerate(["Ole-Johan Dahls hus", "Escape"]):
             location = _location(name)
             location.sort_order = order
@@ -144,3 +145,17 @@ class OpeningHoursBoxTests(TestCase):
             "home/partials/openinghours/openinghours.html", {"opening_hours": []}
         )
         self.assertEqual(html.strip(), "")
+
+
+class InitialPlacesMigrationTests(TestCase):
+    def test_fresh_database_has_the_four_places(self):
+        self.assertEqual(
+            list(Location.objects.values_list("name", flat=True)),
+            ["Ole-Johan Dahls hus", "Ifi-biblioteket", "Ole-Johan Spiseri", "Escape"],
+        )
+        escape = Location.objects.get(name="Escape")
+        self.assertEqual(escape.event_location, "Escape")
+        self.assertEqual(
+            [(p.label, p.friday) for p in escape.periods.all()],
+            [("Kafé", True), ("Bar", True)],
+        )

@@ -1,6 +1,6 @@
 # Homepage opening hours box — design rationale
 
-Last updated: 2026-11-13
+Last updated: 2026-11-14
 Covers: ifiplatform/apps/ifi_home_app/models/opening_hours.py, ifiplatform/apps/ifi_home_app/templates/home/partials/openinghours/openinghours.html, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_openinghours.css, ifiplatform/apps/ifi_home_app/management/seed_dev_data/opening_hours.py
 
 The side-column box saying, per IFI place, whether it's open right now.
@@ -27,6 +27,11 @@ a mockup page); don't change them without asking.
   (Nov 2026). Escape's bar is **Friday only** in the static data (user
   correction): other bar nights are Peoply events at Escape.
   `build_location()` is shared with the tests.
+- `migrations/0162_opening_hours_places.py` adds the same four places to
+  any database that has none (production had an empty box after deploy;
+  user chose a data migration). It keeps its own frozen copy of the hours.
+  The seeder then only stores English for them; on production English
+  comes from the nightly `translate_english` run (DeepL).
 
 ## Status logic: `location_status()`
 
