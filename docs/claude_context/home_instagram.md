@@ -142,12 +142,17 @@ accounts while the app was in Development mode.
   `home_instagram.js`, user: stop when scrolled past), in the viewer and
   the phone feed; closing the viewer pauses all of them too.
 - Viewer: design "A2" from a mockup. A native `<dialog>` with all shown
-  posts server-rendered as white cards in one vertical scroll; opening
-  scrolls to the clicked post. Laptop/wide only: the cover is a
-  `<button disabled>` the script enables; under 45rem it's hidden and the
-  inline media (`.home-instagram-inline`) shows instead, so phones get no
-  popup (user: the phone feed already is a vertical post list). `html:has(
-  dialog[open])` locks page scroll; closing pauses videos.
+  posts server-rendered as cards in one vertical scroll; opening scrolls to
+  the clicked post. Every screen uses it (user, 2026-11-15: phones too):
+  the feed shows covers as `<button disabled>` the script enables, so
+  without JS there are covers and "See on Instagram" only. On phones the
+  viewer posts are edge to edge, full height, with room under the close
+  button (which has a dark round background so it shows over a white
+  card). `html:has(dialog[open])` locks page scroll; closing pauses videos.
+- "Show more" opens the viewer at the first hidden post instead of opening
+  the list on screens matching `SHOW_MORE_OPENS_VIEWER` in
+  `home_instagram.js` (phones, `(max-width: 45rem)`; the user may want it
+  everywhere later: set it to "all").
 - Reels-style (user): each viewer post is the window's height
   (`grid-auto-rows: 100dvh`, card `calc(100dvh - 2rem)`), `scroll-snap-type:
   y mandatory` + `scroll-snap-stop: always`, so a scroll moves exactly one
@@ -162,8 +167,8 @@ accounts while the app was in Development mode.
   `--chrome` (~13rem: account line, two caption lines, date, footer) times
   that ratio, at least 22rem so captions stay readable. An opened caption
   or an album picture of another shape can still show thin bars.
-- Media markup is in `media.html`, used twice per post (phone inline and
-  viewer). Hidden copies don't load: images are `loading="lazy"` and
+- Media markup is in `media.html`, used by the viewer only. Closed-dialog
+  copies don't load: images are `loading="lazy"` and
   videos `preload="none"`. When an album comes into view, the script switches
   all its pictures to `loading="eager"`, so the 3rd and later are ready
   before they're swiped to (user saw empty slides). `InstagramPost.pictures` reads stored sizes so

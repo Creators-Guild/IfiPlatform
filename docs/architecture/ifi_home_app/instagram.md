@@ -53,13 +53,13 @@ All in `models/instagram.py`:
 - Synced posts belong to the sync: in the admin only **Hidden** can be
   changed. Posts added by hand can be edited freely and are never touched
   by the sync.
-- **Seeing a post without Instagram.** On laptops and wide screens,
-  clicking a post's picture opens a viewer over the page, like reels: one
+- **Seeing a post without Instagram.** On every screen, clicking or
+  tapping a post's picture opens a viewer over the page, like reels: one
   post fills the screen and each scroll moves to the next, starting at the
   one you clicked. Each post has its caption ("… more" / "less") and date, all the pictures of an album
   (arrows or swipe) and the video itself (click to play, with sound). ↓ ↑
-  jump between posts, Esc or a click outside closes it. On phones there's
-  no viewer: albums swipe and videos play right in the feed.
+  jump between posts, Esc or a click outside closes it. On phones,
+  "Show more" opens the viewer too, at the first post that wasn't shown.
 - A video Instagram gives us no file for (often reels with licensed music)
   shows its cover with "Watch on Instagram". A video inside an album shows
   as its cover picture.

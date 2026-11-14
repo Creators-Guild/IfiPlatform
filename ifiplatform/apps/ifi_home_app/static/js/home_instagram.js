@@ -2,10 +2,16 @@
 // - "… more" / "less" opens and folds a caption in place (the button stays
 //   hidden without this script);
 // - album arrows and dots (without the script the strip still swipes);
-// - the desktop viewer: clicking a post opens a <dialog> at that post, which
-//   scrolls vertically through all posts. Phones never see the covers that
-//   open it; their feed shows the media inline.
+// - the viewer: clicking a post opens a <dialog> at that post, which
+//   scrolls vertically through all posts, one screen each;
+// - on screens matching SHOW_MORE_OPENS_VIEWER, "Show more" opens the viewer
+//   at the first hidden post instead of opening the rest of the list.
 // Design rationale: docs/claude_context/home_instagram.md
+
+// Where "Show more" opens the viewer. Phones only for now; use "all" for
+// every screen.
+const SHOW_MORE_OPENS_VIEWER = "(max-width: 45rem)";
+
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".home-instagram-more").forEach((button) => {
     const caption = button.previousElementSibling;
@@ -99,13 +105,28 @@ document.addEventListener("DOMContentLoaded", () => {
       return best;
     };
 
+    const open = (index) => {
+      viewer.showModal();
+      scrollTo(index, false);
+    };
     section.querySelectorAll(".home-instagram-thumb").forEach((thumb) => {
       thumb.disabled = false;
-      thumb.addEventListener("click", () => {
-        viewer.showModal();
-        scrollTo(Number(thumb.dataset.index), false);
-      });
+      thumb.addEventListener("click", () => open(Number(thumb.dataset.index)));
     });
+
+    const showMore = section.querySelector(".home-instagram-toggle summary");
+    const toggle = section.querySelector(".home-instagram-toggle");
+    if (showMore) {
+      showMore.addEventListener("click", (event) => {
+        if (toggle.open || !window.matchMedia(SHOW_MORE_OPENS_VIEWER).matches) {
+          return;
+        }
+        event.preventDefault();
+        const feedPosts = [...section.querySelectorAll(".home-instagram-post")];
+        const firstHidden = feedPosts.findIndex((post) => post.offsetParent === null);
+        open(firstHidden === -1 ? 0 : firstHidden);
+      });
+    }
     viewer.querySelector(".home-instagram-viewer-close").addEventListener("click", () => viewer.close());
     viewer.addEventListener("click", (event) => {
       if (event.target === viewer || event.target === feed) {
