@@ -151,8 +151,9 @@ accounts while the app was in Development mode.
   card). `html:has(dialog[open])` locks page scroll; closing pauses videos.
 - "Show more" opens the viewer at the first hidden post instead of opening
   the list on screens matching `SHOW_MORE_OPENS_VIEWER` in
-  `home_instagram.js` (phones, `(max-width: 45rem)`; the user may want it
-  everywhere later: set it to "all").
+  `home_instagram.js`: "all" since 2026-11-15 (user; it was phones only
+  first). The native `<details>` still opens the list without JavaScript,
+  so the collapsed CSS stays.
 - Reels-style (user): each viewer post is the window's height
   (`grid-auto-rows: 100dvh`, card `calc(100dvh - 2rem)`), `scroll-snap-type:
   y mandatory` + `scroll-snap-stop: always`, so a scroll moves exactly one

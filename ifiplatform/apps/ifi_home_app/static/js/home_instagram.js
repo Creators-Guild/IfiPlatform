@@ -8,9 +8,10 @@
 //   at the first hidden post instead of opening the rest of the list.
 // Design rationale: docs/claude_context/home_instagram.md
 
-// Where "Show more" opens the viewer. Phones only for now; use "all" for
-// every screen.
-const SHOW_MORE_OPENS_VIEWER = "(max-width: 45rem)";
+// Where "Show more" opens the viewer instead of the rest of the list: every
+// screen (user, 2026-11-15). A media query such as "(max-width: 45rem)"
+// limits it to phones again.
+const SHOW_MORE_OPENS_VIEWER = "all";
 
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".home-instagram-more").forEach((button) => {

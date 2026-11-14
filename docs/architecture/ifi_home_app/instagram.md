@@ -58,8 +58,8 @@ All in `models/instagram.py`:
   post fills the screen and each scroll moves to the next, starting at the
   one you clicked. Each post has its caption ("… more" / "less") and date, all the pictures of an album
   (arrows or swipe) and the video itself (click to play, with sound). ↓ ↑
-  jump between posts, Esc or a click outside closes it. On phones,
-  "Show more" opens the viewer too, at the first post that wasn't shown.
+  jump between posts, Esc or a click outside closes it. "Show more"
+  opens the viewer too, at the first post that wasn't shown.
 - A video Instagram gives us no file for (often reels with licensed music)
   shows its cover with "Watch on Instagram". A video inside an album shows
   as its cover picture.
@@ -94,13 +94,15 @@ All in `models/instagram.py`:
   in `home/home_index.html` after the news. Styles:
   `static/css/06_components/home/home_instagram.css`. The script
   `static/js/home_instagram.js` runs the viewer, the album arrows and
-  "… more". Without it the feed, the pictures, swiping albums, playing
-  videos on phones and "See on Instagram" all still work.
+  "… more". Without it the feed shows the covers, captions and "See on
+  Instagram", but no viewer, videos or full albums.
 - One row of posts shows at first: 2 on a laptop (at most about 32rem
-  each, centered), 3 or 4 on wide screens, filling the row. On phone-sized screens (under 45rem, like the rest of the
-  site's phone layout) it's one post per row, with 2 shown at first. "Show more" opens the rest of the 12 in place, and "Show
-  less" closes them. It's a native toggle, so it works without JavaScript.
-  Rows are separated by space, not lines.
+  each, centered), 3 or 4 on wide screens, filling the row. On
+  phone-sized screens (under 45rem, like the rest of the site's phone
+  layout) it's one post per row, with 2 shown at first. "Show more" opens
+  the viewer at the next post. Without JavaScript it opens the rest of the
+  12 in place instead ("Show less" closes them). Rows are separated by
+  space, not lines.
 - `seed_dev_data` adds four example posts with generated pictures.
 
 ## Where to change things
