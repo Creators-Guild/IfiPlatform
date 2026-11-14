@@ -68,8 +68,13 @@ accounts while the app was in Development mode.
   more"/"Show less" toggle (`.home-instagram-toggle`). B's spacing: card
   padding 1.5rem, column gap 2rem, row gap 2.75rem, at most 4 per row.
 - The column count is explicit (container `instagram` on
-  `.home-instagram-card`: 1, 2 at 32rem, 3 at 49rem, 4 at 66rem = n × 15rem
-  + gaps) because the collapsed state must know how many posts make one
+  `.home-instagram-card`: 1, 2 at 54rem, 3 at 96rem, 4 at 128rem. With 1–2
+  columns (laptop) posts are capped at 32rem and centered; with 3–4
+  (wide screens) they fill the row, ≥ ~30rem, ~43rem on the user's wide
+  screen, which they liked. User, 2026-11-15: 19rem too small on a laptop,
+  40rem too big there, 26rem "a bit bigger"; capping wide screens too
+  "ruined" them. Phones (<45rem) still get full-width posts from the
+  @media rule) because the collapsed state must know how many posts make one
   row. Collapsed = `.instagram_container:not(:has(.home-instagram-toggle[open]))`
   hides posts from nth-child 3 (2 on phones and at 2 columns), and the
   wider queries show the 3rd/4th again. The details element is empty; it's

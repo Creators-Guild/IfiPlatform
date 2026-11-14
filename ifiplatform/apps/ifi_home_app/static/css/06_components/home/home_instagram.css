@@ -15,7 +15,8 @@
 
 .home-instagram-feed {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 32rem);
+  justify-content: center;
   align-items: start;
   gap: 2.75rem 2rem;
 }
@@ -25,13 +26,13 @@
   display: none;
 }
 
-@container instagram (min-width: 32rem) {
+@container instagram (min-width: 54rem) {
   .home-instagram-feed {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 32rem));
   }
 }
 
-@container instagram (min-width: 49rem) {
+@container instagram (min-width: 96rem) {
   .home-instagram-feed {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -41,7 +42,7 @@
   }
 }
 
-@container instagram (min-width: 66rem) {
+@container instagram (min-width: 128rem) {
   .home-instagram-feed {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }

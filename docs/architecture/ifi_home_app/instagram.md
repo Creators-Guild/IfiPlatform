@@ -96,8 +96,8 @@ All in `models/instagram.py`:
   `static/js/home_instagram.js` runs the viewer, the album arrows and
   "… more". Without it the feed, the pictures, swiping albums, playing
   videos on phones and "See on Instagram" all still work.
-- One row of posts shows at first, up to 4 on wide screens and 3 on a
-  laptop. On phone-sized screens (under 45rem, like the rest of the
+- One row of posts shows at first: 2 on a laptop (at most about 32rem
+  each, centered), 3 or 4 on wide screens, filling the row. On phone-sized screens (under 45rem, like the rest of the
   site's phone layout) it's one post per row, with 2 shown at first. "Show more" opens the rest of the 12 in place, and "Show
   less" closes them. It's a native toggle, so it works without JavaScript.
   Rows are separated by space, not lines.
