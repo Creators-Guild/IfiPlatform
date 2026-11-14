@@ -1,6 +1,6 @@
 # Opening hours box
 
-Last updated: 2026-11-13
+Last updated: 2026-11-14
 
 How the home page shows whether IFI's places (Ole-Johan Dahls hus, the
 library, Ole-Johan Spiseri and Escape) are open right now. Read
@@ -16,6 +16,9 @@ from the Peoply sync, see [events.md](events.md).
 - **Admins** edit the places and their hours under Snippets → "Opening
   hours" in the Wagtail admin. English is added like for other snippets.
 - The hours are typed in by hand. A live API for Escape is planned.
+- The four places are added by migration `0162_opening_hours_places` on a
+  database that has none, so production has them after the first deploy.
+  Their English comes from the nightly DeepL run.
 
 ## Models
 
@@ -63,7 +66,7 @@ Times are always worked out in Oslo time, even though the server's
 | Hours, notes, warnings | The "Opening hours" snippet in the Wagtail admin |
 | How "open now" is worked out | `location_status()` in `models/opening_hours.py` |
 | The box's look | the template and CSS above |
-| Hours on a fresh local database | `management/seed_dev_data/opening_hours.py` |
+| Hours on a fresh local database | `management/seed_dev_data/opening_hours.py` (English) and migration `0162_opening_hours_places` (the places) |
 
 Tests are in `tests/test_opening_hours.py`.
 

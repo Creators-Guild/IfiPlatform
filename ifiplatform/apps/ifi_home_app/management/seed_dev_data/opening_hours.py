@@ -85,14 +85,17 @@ class OpeningHoursSeedMixin:  # pylint: disable=too-few-public-methods
     skipped_count = 0
 
     def _seed_opening_hours(self):
+        # Migration 0162 already adds these places to a fresh database; then
+        # only their English is stored here.
         for order, spec in enumerate(LOCATION_SPECS):
-            if Location.objects.filter(name=spec[0]).exists():
+            location = Location.objects.filter(name=spec[0]).first()
+            if location is not None:
                 self.skipped_count += 1
-                continue
-            location = build_location(spec, order)
-            location.save()
-            self.created_count += 1
-            self.stdout.write(f"  created Location: {location.name}")
+            else:
+                location = build_location(spec, order)
+                location.save()
+                self.created_count += 1
+                self.stdout.write(f"  created Location: {location.name}")
             self._translate_page(location)
             for period in location.periods.all():
                 self._translate_page(period)
