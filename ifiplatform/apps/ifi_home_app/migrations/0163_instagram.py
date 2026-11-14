@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("ifi_home_app", "0161_opening_hours"),
+        ("ifi_home_app", "0162_opening_hours_places"),
     ]
 
     operations = [

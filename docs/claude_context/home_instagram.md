@@ -75,7 +75,7 @@ to v23.0 and can be changed in `.env`.
   counts. The All/Official/Memes filter was dropped for now (to_fix.md).
 - Placement: in `#home-subcontent` after the news; under 72rem it's a grid
   item with area `instagram` (`home_index_layout.css`).
-- `migrations/0163_instagram_accounts.py` holds the initial list (the
+- `migrations/0164_instagram_accounts.py` holds the initial list (the
   accounts @ificreatorsguild follows, minus a personal account the user
   removed); `gangen_i_tredje` and `digok.memes` are memes.
 - The privacy page (`legal/data_processors.html`) got a paragraph: posts

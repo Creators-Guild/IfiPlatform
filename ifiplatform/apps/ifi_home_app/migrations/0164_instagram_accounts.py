@@ -59,6 +59,6 @@ def remove_accounts(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("ifi_home_app", "0162_instagram")]
+    dependencies = [("ifi_home_app", "0163_instagram")]
 
     operations = [migrations.RunPython(add_accounts, remove_accounts)]

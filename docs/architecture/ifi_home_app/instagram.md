@@ -50,7 +50,7 @@ All in `models/instagram.py`:
 - A video shows its cover picture with a play icon, and an album its first
   picture with an icon. Clicking opens the post on Instagram.
 - The first account list (the accounts Ifi Creators' Guild follows) was
-  added by migration `0163_instagram_accounts`.
+  added by migration `0164_instagram_accounts`.
 
 ## The sync: `sync_instagram_posts`
 

@@ -1,6 +1,6 @@
 """InstagramPost seeding: a few example posts, added "by hand" with
 generated images, so the homepage's Instagram feed shows locally without a
-Meta token. The accounts themselves come from migration 0163."""
+Meta token. The accounts themselves come from migration 0164."""
 
 import io
 from datetime import timedelta
