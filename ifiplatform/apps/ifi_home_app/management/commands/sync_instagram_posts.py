@@ -3,7 +3,9 @@ Graph API (Business Discovery) into InstagramPost rows, downloading each
 image once (Meta's image links expire). Synced posts get their caption and
 link updated; `hidden` is never touched; only the newest 12 synced posts per
 account are kept (older ones and their images are deleted). Posts added by
-hand are never changed. One account failing (e.g. a personal account) is
+hand are never changed. The 12 posts the feed shows (shown_posts()) also
+get their video file and every album picture; posts that leave the feed
+lose them again. One account failing (e.g. a personal account) is
 recorded on the account and doesn't stop the others. Without a token in
 .env it does nothing. Runs hourly 07-23 from the sync-instagram-posts
 systemd timer.
@@ -12,6 +14,7 @@ Design rationale: docs/claude_context/home_instagram.md"""
 
 import io
 
+from django.core.files import File
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
@@ -19,11 +22,15 @@ from PIL import Image, UnidentifiedImageError
 
 from ifi_home_app.integrations import instagram
 from ifi_home_app.models.instagram import (
+    ALBUM,
     POSTS_KEPT_PER_ACCOUNT,
     SYNCED,
+    VIDEO,
     InstagramAccount,
     InstagramPost,
+    InstagramPostImage,
     InstagramSyncState,
+    shown_posts,
 )
 
 POST_IMAGE_SIZE = 1080
@@ -47,12 +54,15 @@ class Command(BaseCommand):
     """See the module docstring."""
 
     help = "Sync the newest posts of the Instagram accounts in the feed."
+    # instagram_id -> integrations.instagram.Post fetched this run
+    remote = None
 
     def handle(self, *args, **options):
         if not instagram.is_configured():
             self.stdout.write("No INSTAGRAM_ACCESS_TOKEN in .env: nothing to sync.")
             return
         self._check_token()
+        self.remote = {}
         failed = []
         for account in InstagramAccount.objects.filter(is_active=True):
             try:
@@ -63,6 +73,7 @@ class Command(BaseCommand):
                 failed.append(f"@{account.username}: {error}")
                 continue
             self.stdout.write(f"@{account.username}: {created} new")
+        self._sync_shown_media()
         if failed:
             raise CommandError(
                 f"{len(failed)} account(s) failed:\n" + "\n".join(failed)
@@ -98,6 +109,7 @@ class Command(BaseCommand):
         }
         created = 0
         for post in found.posts:
+            self.remote[post.instagram_id] = post
             row = existing.get(post.instagram_id)
             if row is not None:
                 row.caption, row.permalink = post.caption, post.permalink
@@ -126,3 +138,40 @@ class Command(BaseCommand):
         for old in account.posts.filter(source=SYNCED).exclude(pk__in=list(keep)):
             old.delete()
         return created
+
+    def _sync_shown_media(self):
+        """Videos and album pictures, only for the posts the feed shows.
+        Posts that left the feed lose theirs, to save disk."""
+        shown = list(shown_posts())
+        for post in InstagramPost.objects.filter(source=SYNCED).exclude(
+            pk__in=[p.pk for p in shown]
+        ):
+            if post.video:
+                post.video.delete(save=True)
+            post.album_images.all().delete()
+        for post in shown:
+            remote = self.remote.get(post.instagram_id)
+            if post.source != SYNCED or remote is None:
+                continue
+            try:
+                self._fetch_media(post, remote)
+            except instagram.InstagramError as error:
+                self.stderr.write(f"{post}: {error}")
+
+    def _fetch_media(self, post, remote):
+        if post.media_type == VIDEO and not post.video and remote.video_url:
+            with instagram.download_video(remote.video_url) as video:
+                post.video.save(f"{post.instagram_id}.mp4", File(video), save=True)
+        if post.media_type == ALBUM and not post.album_images.all():
+            added = []
+            try:
+                # The cover (the album's 1st picture) is post.image already.
+                for order, url in enumerate(remote.album_urls[1:], start=1):
+                    extra = InstagramPostImage(post=post, sort_order=order)
+                    picture = _jpeg(instagram.download(url), POST_IMAGE_SIZE)
+                    extra.image.save(f"{post.instagram_id}-{order}.jpg", picture)
+                    added.append(extra)
+            except instagram.InstagramError:
+                for extra in added:
+                    extra.delete()
+                raise

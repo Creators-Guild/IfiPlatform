@@ -19,6 +19,8 @@ OFFICIAL, MEME = "official", "meme"
 SYNCED, MANUAL = "synced", "manual"
 IMAGE, VIDEO, ALBUM = "image", "video", "album"
 POSTS_KEPT_PER_ACCOUNT = 12
+# The feed shows this many; only they get their video and album pictures.
+SHOWN_POSTS = 12
 
 
 class InstagramAccount(models.Model):
@@ -114,6 +116,11 @@ class InstagramPost(models.Model):
     )
     image_width = models.PositiveIntegerField(null=True, editable=False)
     image_height = models.PositiveIntegerField(null=True, editable=False)
+    video = models.FileField(
+        upload_to="instagram/videos/",
+        blank=True,
+        help_text="Synced only for posts in the feed. Empty: the cover links to Instagram.",
+    )
     hidden = models.BooleanField(
         default=False, help_text="Hide this post from the homepage."
     )
@@ -128,6 +135,7 @@ class InstagramPost(models.Model):
         FieldPanel("permalink"),
         FieldRowPanel([FieldPanel("posted_at"), FieldPanel("media_type")]),
         FieldPanel("image"),
+        FieldPanel("video"),
         FieldPanel("caption"),
     ]
 
@@ -145,6 +153,28 @@ class InstagramPost(models.Model):
     def __str__(self):
         return f"@{self.account.username} {self.posted_at:%Y-%m-%d}"
 
+    @property
+    def pictures(self):
+        """The cover, then the rest of an album, as {url, width, height}.
+        Uses the stored sizes, so no file is opened."""
+        extras = self.album_images.all() if self.pk else []
+        pictures = [self.image] + [extra.image for extra in extras]
+        return [
+            {
+                "url": p.url,
+                "width": p.instance.image_width,
+                "height": p.instance.image_height,
+            }
+            for p in pictures
+            if p
+        ]
+
+    @property
+    def caption_is_long(self):
+        """Whether the feed's two-line caption is cut off, roughly: the
+        template then adds "… more"."""
+        return len(self.caption) > 70 or "\n" in self.caption.strip()
+
     def age(self, now=None):
         """'45 min', '2 h', '3 d', '1 w', or the date for old posts."""
         delta = (now or timezone.now()) - self.posted_at
@@ -159,8 +189,46 @@ class InstagramPost(models.Model):
         return timezone.localtime(self.posted_at).strftime("%d.%m.%Y")
 
 
+class InstagramPostImage(models.Model):
+    """The 2nd, 3rd ... picture of an album post. Only kept for posts the
+    feed shows (see SHOWN_POSTS)."""
+
+    post = models.ForeignKey(
+        InstagramPost, on_delete=models.CASCADE, related_name="album_images"
+    )
+    image = models.ImageField(
+        upload_to="instagram/albums/",
+        width_field="image_width",
+        height_field="image_height",
+    )
+    image_width = models.PositiveIntegerField(null=True, editable=False)
+    image_height = models.PositiveIntegerField(null=True, editable=False)
+    sort_order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "pk"]
+
+
+def shown_posts():
+    """The posts the homepage feed shows, newest first. The sync gives
+    exactly these their video and album pictures."""
+    return (
+        InstagramPost.objects.filter(hidden=False, account__is_active=True)
+        .select_related("account")
+        .prefetch_related("album_images")[:SHOWN_POSTS]
+    )
+
+
 @receiver(post_delete, sender=InstagramPost)
-def _delete_post_image(sender, instance, **kwargs):  # pylint: disable=unused-argument
+def _delete_post_files(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    if instance.image:
+        instance.image.delete(save=False)
+    if instance.video:
+        instance.video.delete(save=False)
+
+
+@receiver(post_delete, sender=InstagramPostImage)
+def _delete_album_image(sender, instance, **kwargs):  # pylint: disable=unused-argument
     if instance.image:
         instance.image.delete(save=False)
 

@@ -8,11 +8,14 @@ Design rationale: docs/claude_context/home_instagram.md"""
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
+import tempfile
+
 import requests
 from django.conf import settings
 
 GRAPH_URL = "https://graph.facebook.com"
 MAX_IMAGE_BYTES = 15 * 1024 * 1024
+MAX_VIDEO_BYTES = 100 * 1024 * 1024
 
 IMAGE, VIDEO, ALBUM = "image", "video", "album"
 _MEDIA_TYPES = {"IMAGE": IMAGE, "VIDEO": VIDEO, "CAROUSEL_ALBUM": ALBUM}
@@ -23,7 +26,7 @@ class InstagramError(Exception):
 
 
 @dataclass(frozen=True)
-class Post:
+class Post:  # pylint: disable=too-many-instance-attributes
     """One post as Business Discovery returns it."""
 
     instagram_id: str
@@ -32,6 +35,8 @@ class Post:
     posted_at: datetime
     media_type: str
     image_url: str
+    video_url: str = ""
+    album_urls: tuple = ()
 
 
 @dataclass(frozen=True)
@@ -89,6 +94,23 @@ def _image_url(media):
     return media.get("media_url", "")
 
 
+def _album_urls(media):
+    """Every picture of an album, in order (a video in an album counts as
+    its thumbnail)."""
+    if media.get("media_type") != "CAROUSEL_ALBUM":
+        return ()
+    children = (media.get("children") or {}).get("data") or []
+    urls = []
+    for child in children:
+        if child.get("media_type") == "VIDEO":
+            url = child.get("thumbnail_url", "")
+        else:
+            url = child.get("media_url", "")
+        if url:
+            urls.append(url)
+    return tuple(urls)
+
+
 def parse_account(data):
     """An Account from a Business Discovery response. Posts without a
     picture we may download (e.g. a video Meta gives no thumbnail for) are
@@ -111,6 +133,13 @@ def parse_account(data):
                 ),
                 media_type=_MEDIA_TYPES.get(media.get("media_type"), IMAGE),
                 image_url=image_url,
+                # Meta leaves media_url out for some videos (often licensed music).
+                video_url=(
+                    media.get("media_url", "")
+                    if media.get("media_type") == "VIDEO"
+                    else ""
+                ),
+                album_urls=_album_urls(media),
             )
         )
     return Account(
@@ -156,3 +185,29 @@ def download(url):
     except requests.RequestException as error:
         raise InstagramError(f"Could not download image: {error}") from error
     return b"".join(chunks)
+
+
+def download_video(url):
+    """A temporary file holding the video behind `url` (caller closes it).
+    Videos go to disk, not memory: a reel is often tens of MB."""
+    # The caller gets the open file and closes it.
+    # pylint: disable-next=consider-using-with
+    out = tempfile.NamedTemporaryFile(suffix=".mp4")
+    try:
+        response = requests.get(url, timeout=60, stream=True)
+        response.raise_for_status()
+        size = 0
+        for chunk in response.iter_content(256 * 1024):
+            size += len(chunk)
+            if size > MAX_VIDEO_BYTES:
+                raise InstagramError("Video is larger than 100 MB")
+            out.write(chunk)
+    except requests.RequestException as error:
+        out.close()
+        raise InstagramError(f"Could not download video: {error}") from error
+    except InstagramError:
+        out.close()
+        raise
+    out.flush()
+    out.seek(0)
+    return out
