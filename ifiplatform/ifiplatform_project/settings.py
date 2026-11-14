@@ -417,7 +417,7 @@ if "test" in sys.argv[1:2]:
 # docs/operations/instagram_setup.md
 INSTAGRAM_ACCESS_TOKEN = os.environ.get("INSTAGRAM_ACCESS_TOKEN", "")  # check .env
 INSTAGRAM_BUSINESS_ACCOUNT_ID = os.environ.get("INSTAGRAM_BUSINESS_ACCOUNT_ID", "")
-INSTAGRAM_GRAPH_VERSION = os.environ.get("INSTAGRAM_GRAPH_VERSION", "v23.0")
+INSTAGRAM_GRAPH_VERSION = os.environ.get("INSTAGRAM_GRAPH_VERSION", "v27.0")
 if "test" in sys.argv[1:2]:
     INSTAGRAM_ACCESS_TOKEN = INSTAGRAM_BUSINESS_ACCOUNT_ID = ""
 

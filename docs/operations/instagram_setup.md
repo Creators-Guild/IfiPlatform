@@ -1,6 +1,6 @@
 # Setting up the Instagram feed
 
-Last updated: 2026-11-13
+Last updated: 2026-11-14
 
 The home page's "Ifi Instagram" feed reads other accounts' public posts
 through Meta's Graph API, using the Ifi Creators' Guild account
@@ -49,14 +49,22 @@ the Instagram Graph API's "Business Discovery" is the source of truth.
 In the app's **Graph API Explorer**:
 
 1. Generate a user token with the permissions `instagram_basic`,
-   `pages_show_list` and `pages_read_engagement`.
+   `instagram_manage_insights`, `pages_show_list`,
+   `pages_read_engagement` and `business_management`. Without
+   `instagram_manage_insights`, Business Discovery fails with "(#10)
+   Application does not have permission". Without `business_management`,
+   `me/accounts` comes back empty when the Page belongs to the union's
+   business portfolio. In the login window, pick "current Pages only" and
+   tick the union's Page and @ificreatorsguild.
 2. Run `me/accounts`. Note the Page's `id`.
 3. Run `<page id>?fields=instagram_business_account`. The `id` that comes
    back is **INSTAGRAM_BUSINESS_ACCOUNT_ID**.
 4. Test reading another account:
    `<that id>?fields=business_discovery.username(unioslo_ifi){media.limit(3){caption,media_url,permalink,timestamp}}`.
-   Captions, image links and dates should come back. Before App Review,
-   this only works for @ificreatorsguild itself.
+   Captions, image links and dates should come back. Put the inner `id`
+   in `<that id>` (from `instagram_business_account`, it starts with
+   `1784`), not the Page's id. In November 2026 this also worked for other
+   accounts (@unioslo_ifi) while the app was still in Development mode.
 
 ## 4. Get a token that lasts
 
