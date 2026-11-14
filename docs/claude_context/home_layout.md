@@ -23,6 +23,19 @@ highlighted it comes first, see the comment in `home_index.html`). Columns are `
 below its content's min-content width instead of pushing the events box
 off-screen (a plain `1fr` track has an `auto` minimum).
 
+Main-column spacing (user, 2026-11-14: the boxes sat too close): the gap
+between message board, news and Instagram is 4.5rem each ("way more"
+than the first 2.5rem): `margin-top` on `.suggestions-row` (4rem, plus
+the message board's 0.5rem bottom margin) and `.instagram_container`
+(4.5rem).
+Set outside the media queries, so it holds in both layouts. The news and
+Instagram titles (both `.newsbar-heading`) sit *inside* their cards (user's
+choice): on the homepage the card style is on `.newsbar_container`
+(`home_newsbar.css`), not the article grid, and the Instagram `<h2>` is
+inside `.home-instagram-card`. `#home-subcontent .newsbar-heading` gives
+both the same margins inside the card (scoped so news headings on other
+pages keep theirs).
+
 `.home-sidecolumn` carries the placement the events box used to have
 (`grid-area`, `align-self: start`, `max-width: 23rem`, `margin`); the boxes
 stack inside it with a fixed gap. A grid row per box was rejected: with
@@ -38,7 +51,9 @@ Events, then News/Articles — but in the DOM the events box comes after
 `display: contents` un-boxes `#home-subcontent` so its children become
 direct grid items of `.maincontent`, letting `#msg-board` (`msg`) and
 `.suggestions-row` (`suggestions`) be placed on either side of
-`details` (the side column, so events then magazine). Their `grid-area` rules exist only inside this media query;
+`details` (the side column, so events then magazine). The Instagram feed (`.instagram_container`,
+the last child of `#home-subcontent`) gets its own `instagram` area after
+`suggestions`, so on phones it comes last. Their `grid-area` rules exist only inside this media query;
 above 72rem they're ordinary children of `#home-subcontent`.
 
 The `72rem` value is shared by eye with `home_eventsbox.css`

@@ -45,6 +45,8 @@ into one folder per app, and features that span several apps go in
     magazine box on the home page and its daily sync from ifiavis.no
   - [opening_hours.md](architecture/ifi_home_app/opening_hours.md): the
     opening hours box on the home page
+  - [instagram.md](architecture/ifi_home_app/instagram.md): the Ifi
+    Instagram feed on the home page and its hourly sync
 - `account_app/`, `study_app/`: feature docs per app (no docs yet, see
   [Planned docs](#planned-docs))
 
@@ -62,6 +64,8 @@ into one folder per app, and features that span several apps go in
   production server from zero
 - [docker_server.md](operations/docker_server.md): setting up and running
   a server with Docker (the mock site now, the real site later)
+- [instagram_setup.md](operations/instagram_setup.md): setting up the
+  Meta app and token for the Instagram feed, and keeping it working
 - [access_and_handover.md](operations/access_and_handover.md): accounts
   and keys, and checklists for adding, removing and handing over people
 

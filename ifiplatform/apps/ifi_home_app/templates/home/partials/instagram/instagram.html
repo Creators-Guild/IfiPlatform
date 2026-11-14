@@ -1,0 +1,43 @@
+{% comment %}Design rationale: docs/claude_context/home_instagram.md{% endcomment %}
+{% load i18n %}
+{% if instagram_posts %}
+    <section class="instagram_container" aria-labelledby="home-instagram-heading">
+        <div class="home-instagram-card">
+            <h2 class="newsbar-heading newsbar-heading--news" id="home-instagram-heading">Ifi Instagram</h2>
+            <div class="home-instagram-feed">
+                {% for post in instagram_posts %}
+                    <article class="home-instagram-post{% if post.account.kind == 'meme' %} is-meme{% endif %}">
+                        <div class="home-instagram-who">
+                            {% if post.account.profile_picture %}
+                                <img class="home-instagram-avatar" src="{{ post.account.profile_picture.url }}" alt="" width="32" height="32" loading="lazy">
+                            {% else %}
+                                <span class="home-instagram-avatar is-initials" aria-hidden="true">{{ post.account.initials }}</span>
+                            {% endif %}
+                            <span class="home-instagram-names">
+                                <a class="home-instagram-handle" href="{{ post.account.url }}">@{{ post.account.username }}</a>
+                                <span class="home-instagram-age">
+                                    <time datetime="{{ post.posted_at|date:'c' }}">{{ post.age }}</time>{% if post.account.kind == "meme" %} · <span class="home-instagram-tag">meme</span>{% endif %}
+                                </span>
+                            </span>
+                        </div>
+                        <a class="home-instagram-image" href="{{ post.permalink }}">
+                            <img src="{{ post.image.url }}" alt="{% blocktrans with handle=post.account.username %}Post by @{{ handle }}{% endblocktrans %}"
+                                 {% if post.image_width %}width="{{ post.image_width }}" height="{{ post.image_height }}"{% endif %}
+                                 {% if not forloop.first %}loading="lazy"{% endif %}>
+                            {% if post.media_type == "video" %}
+                                <span class="home-instagram-kind" title="{% trans 'Video' %}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+                            {% elif post.media_type == "album" %}
+                                <span class="home-instagram-kind" title="{% trans 'Several images' %}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 3h14v14H7zM3 7v14h14" fill="none"/></svg></span>
+                            {% endif %}
+                        </a>
+                        {% if post.caption %}
+                            <p class="home-instagram-caption"><b>@{{ post.account.username }}</b> {{ post.caption|linebreaksbr }}</p>
+                        {% endif %}
+                        <a class="home-instagram-open" href="{{ post.permalink }}">{% trans "Open on Instagram" %} &rarr;</a>
+                    </article>
+                {% endfor %}
+                <p class="home-instagram-end">{% blocktrans with n=instagram_posts|length %}That's the {{ n }} newest posts.{% endblocktrans %}</p>
+            </div>
+        </div>
+    </section>
+{% endif %}

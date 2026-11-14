@@ -12,6 +12,7 @@
         <div class="account-card legal-page">
             <h1>{% trans "Services that handle your data" %}</h1>
             <p>{% blocktrans %}Two services handle data for us. The site and its database run on NREC, the Norwegian universities' research and education cloud, in Norway. Account emails (email verification and password reset) are sent through Resend, a company in the USA, so Resend receives your email address. Resend is certified under the EU-U.S. Data Privacy Framework, which allows this transfer under the GDPR.{% endblocktrans %}</p>
+            <p>{% blocktrans %}The home page shows public posts from chosen Instagram accounts. Our server copies them through Meta's API, so your browser doesn't contact Instagram unless you open a post, and no data about you is sent to Meta. The posts come from public accounts we have chosen. If you appear in one and have concerns about it, contact us and we'll help, for example by hiding the post on our site or pointing you to the account that posted it.{% endblocktrans %}</p>
 
             {% url 'privacy_policy' as privacy_policy_url %}
             <p><a href="{{ privacy_policy_url }}">{% trans "Back to the privacy policy" %}</a></p>

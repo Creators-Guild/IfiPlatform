@@ -72,6 +72,7 @@ by git, so deploys leave them alone.
 | `sync-peoply-events.timer`  | Runs `sync_peoply_events` at 00/06/12/18:00 daily, plus 14:00 and 16:00 on weekdays | [deploy/systemd/](../../deploy/systemd/) |
 | `ifiplatform-backup.timer`  | Backs up the database and `media/` daily at 05:00                    | [deploy/systemd/](../../deploy/systemd/) |
 | `sync-output-magazine.timer` | Runs `sync_output_magazine` daily at 05:30: the >OUTPUT issues for the home page | [deploy/systemd/](../../deploy/systemd/) |
+| `sync-instagram-posts.timer` | Runs `sync_instagram_posts` every hour 07:00–23:00: the Instagram feed on the home page | [deploy/systemd/](../../deploy/systemd/) |
 | `ifiplatform-translate.timer` | Runs `translate_english` every minute: DeepL English for newly published pages and saved menus/messages | [deploy/systemd/](../../deploy/systemd/) |
 | `ifiplatform-translate-nightly.timer` | Runs `translate_english --nightly` at 03:30: catches up on missing English, cleans up old translation rows | [deploy/systemd/](../../deploy/systemd/) |
 
@@ -183,7 +184,7 @@ problems, is explained in [server_toolbox.md](server_toolbox.md).
 ```bash
 sudo certbot renew --dry-run        # certificate auto-renewal still works
 systemctl status gunicorn nginx postgresql fail2ban
-systemctl list-timers               # sync-peoply-events, sync-output-magazine, ifiplatform-backup and both ifiplatform-translate timers are scheduled
+systemctl list-timers               # sync-peoply-events, sync-output-magazine, sync-instagram-posts, ifiplatform-backup and both ifiplatform-translate timers are scheduled
 journalctl -u ifiplatform-backup -n 5   # last backups say "Backup completed"
 journalctl -u gunicorn -n 100       # recent app errors (Django logs errors here)
 journalctl -u sync-peoply-events    # last Peoply sync runs

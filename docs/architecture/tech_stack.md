@@ -108,6 +108,7 @@ table instead (see [docker_setup.md](docker_setup.md)).
 | **DeepL**      | Machine translation NB → EN, with a custom glossary of fixed terms        | `DEEPL_API_KEY`, `DEEPL_GLOSSARY_ID`    |
 | **Peoply**     | Source of truth for events; synced into Wagtail event pages on a timer    | `sync_peoply_events` command            |
 | **ifiavis.no** | The >OUTPUT magazine's issue list, read from its public /utgaver page daily | `sync_output_magazine` command          |
+| **Meta Graph API** | Instagram posts for the home page feed, synced hourly | `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_BUSINESS_ACCOUNT_ID` |
 | **Umami**      | Privacy-friendly page analytics                                          | `UMAMI_SCRIPT_URL`, `UMAMI_WEBSITE_ID`  |
 | **SMTP email** | Account verification emails (prints to the console when not configured)  | `EMAIL_HOST` and related keys           |
 

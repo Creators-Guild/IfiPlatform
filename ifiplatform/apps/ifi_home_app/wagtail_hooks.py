@@ -20,7 +20,15 @@ from wagtail.permission_policies import ModelPermissionPolicy
 from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet
 
-from .models import HeaderMessage, HomeBoardMessage, Location, MagazineIssue, MenuGroup
+from .models import (
+    HeaderMessage,
+    HomeBoardMessage,
+    InstagramAccount,
+    InstagramPost,
+    Location,
+    MagazineIssue,
+    MenuGroup,
+)
 from . import admin_dashboard
 from .translation import english_editor, nudge
 
@@ -112,6 +120,39 @@ class LocationViewSet(SnippetViewSet):
 
 
 register_snippet(LocationViewSet)
+
+
+class InstagramAccountViewSet(SnippetViewSet):
+    """The curated accounts in the homepage's Instagram feed."""
+
+    model = InstagramAccount
+    icon = "user"
+    menu_label = "Instagram accounts"
+    list_display = [
+        "username",
+        "display_name",
+        "kind",
+        "is_active",
+        "last_synced_at",
+        "last_error",
+    ]
+    list_filter = ["kind", "is_active"]
+    search_fields = ["username", "display_name"]
+
+
+class InstagramPostViewSet(SnippetViewSet):
+    """Posts in the feed: synced ones (only "hidden" editable) and ones
+    added by hand."""
+
+    model = InstagramPost
+    icon = "image"
+    menu_label = "Instagram posts"
+    list_display = ["__str__", "source", "hidden", "posted_at"]
+    list_filter = ["source", "hidden", "account"]
+
+
+register_snippet(InstagramAccountViewSet)
+register_snippet(InstagramPostViewSet)
 
 hooks.register("after_publish_page", nudge.warn_after_publish)
 hooks.register("before_edit_page", nudge.warn_on_edit)

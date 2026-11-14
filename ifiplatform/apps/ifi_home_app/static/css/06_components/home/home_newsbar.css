@@ -1,5 +1,5 @@
-/* News/Info Articles grids read as one card each; the article cards inside drop their own */
-.home-layout .maincontent .suggestions-row .newsbar-layout {
+/* The news box reads as one card, title included; the article cards inside drop their own */
+.home-layout .maincontent .suggestions-row .newsbar_container {
   padding: 1rem;
   background-color: var(--color-card-bg);
   border-radius: 12px;

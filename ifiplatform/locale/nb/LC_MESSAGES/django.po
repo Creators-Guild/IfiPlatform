@@ -2408,6 +2408,52 @@ msgstr "Alle dager"
 msgid "Closed: %(reason)s"
 msgstr "Stengt: %(reason)s"
 
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+#, python-format
+msgid "Post by @%(handle)s"
+msgstr "Innlegg fra @%(handle)s"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Video"
+msgstr "Video"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Several images"
+msgstr "Flere bilder"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Open on Instagram"
+msgstr "Åpne på Instagram"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+#, python-format
+msgid "That's the %(n)s newest posts."
+msgstr "Det var de %(n)s nyeste innleggene."
+
+#: .\apps\ifi_home_app\models\instagram.py
+#, python-format
+msgid "%(n)s min"
+msgstr "%(n)s min"
+
+#: .\apps\ifi_home_app\models\instagram.py
+#, python-format
+msgid "%(n)s h"
+msgstr "%(n)s t"
+
+#: .\apps\ifi_home_app\models\instagram.py
+#, python-format
+msgid "%(n)s d"
+msgstr "%(n)s d"
+
+#: .\apps\ifi_home_app\models\instagram.py
+#, python-format
+msgid "%(n)s w"
+msgstr "%(n)s u"
+
+#: .\apps\account_app\templates\legal\data_processors.html
+msgid "The home page shows public posts from chosen Instagram accounts. Our server copies them through Meta's API, so your browser doesn't contact Instagram unless you open a post, and no data about you is sent to Meta. The posts come from public accounts we have chosen. If you appear in one and have concerns about it, contact us and we'll help, for example by hiding the post on our site or pointing you to the account that posted it."
+msgstr "Forsiden viser offentlige innlegg fra utvalgte Instagram-kontoer. Serveren vår henter dem gjennom Metas API, så nettleseren din kontakter ikke Instagram før du åpner et innlegg, og ingen data om deg sendes til Meta. Innleggene kommer fra offentlige kontoer vi har valgt. Hvis du er med i et innlegg og er bekymret for det, kontakt oss, så hjelper vi deg, for eksempel ved å skjule innlegget på nettstedet vårt eller vise deg til kontoen som la det ut."
+
 msgid "Visitor statistics"
 msgstr "Besøksstatistikk"
 

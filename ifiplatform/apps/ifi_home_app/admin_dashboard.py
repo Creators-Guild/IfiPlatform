@@ -1,6 +1,7 @@
 """The Wagtail dashboard's own panels: "How this site works" (a short guide
-for editors) and "Shortcuts" (links to the parts of the admin editors use
-most, each shown only to users who may open it)."""
+for editors), "Shortcuts" (links to the parts of the admin editors use
+most, each shown only to users who may open it), and a warning for
+superusers when the Instagram token is about to expire."""
 
 from django.urls import reverse
 from wagtail.admin.ui.components import Component
@@ -61,6 +62,25 @@ class ShortcutsPanel(Component):
         return {"shortcuts": shortcuts, "settings": settings}
 
 
+class InstagramTokenPanel(Component):
+    """Warns superusers that the Instagram token expires within a week."""
+
+    name = "instagram_token"
+    order = 20  # a warning, so above the guide (30)
+    template_name = "wagtailadmin/home/instagram_token.html"
+
+    def __init__(self, expires_at):
+        self.expires_at = expires_at
+
+    def get_context_data(self, parent_context=None):
+        return {"expires_at": self.expires_at}
+
+
 def add_dashboard_panel(request, panels):
+    from .models import InstagramSyncState  # pylint: disable=import-outside-toplevel
+
+    state = InstagramSyncState.load()
+    if request.user.is_superuser and state and state.expires_soon():
+        panels.append(InstagramTokenPanel(state.token_expires_at))
     panels.append(GuidePanel())
     panels.append(ShortcutsPanel(request))

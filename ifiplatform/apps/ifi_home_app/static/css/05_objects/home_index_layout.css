@@ -26,6 +26,18 @@
     padding: 1rem 1rem 1rem 2rem;
 }
 
+.suggestions-row {
+    margin-top: 4rem;
+}
+
+.instagram_container {
+    margin-top: 4.5rem;
+}
+
+#home-subcontent .newsbar-heading {
+    margin: 0.25rem 0.5rem 1.25rem;
+}
+
 .home-sidecolumn {
     grid-area: details;
     align-self: start;
@@ -47,6 +59,7 @@
             "msg" auto
             "details" auto
             "suggestions" auto
+            "instagram" auto
             / minmax(0, 1fr);
     }
 
@@ -60,6 +73,10 @@
 
     .suggestions-row {
         grid-area: suggestions;
+    }
+
+    .instagram_container {
+        grid-area: instagram;
     }
 
     .home-sidecolumn {

@@ -411,6 +411,16 @@ DEEPL_GLOSSARY_ID = os.environ.get("DEEPL_GLOSSARY_ID", "")  # check .env
 if "test" in sys.argv[1:2]:
     DEEPL_API_KEY = DEEPL_GLOSSARY_ID = ""
 
+# Instagram feed on the homepage: Meta's Graph API (Business Discovery)
+# through the Ifi Creators' Guild account. Without a token the sync does
+# nothing and only hand-added posts show. Setup:
+# docs/operations/instagram_setup.md
+INSTAGRAM_ACCESS_TOKEN = os.environ.get("INSTAGRAM_ACCESS_TOKEN", "")  # check .env
+INSTAGRAM_BUSINESS_ACCOUNT_ID = os.environ.get("INSTAGRAM_BUSINESS_ACCOUNT_ID", "")
+INSTAGRAM_GRAPH_VERSION = os.environ.get("INSTAGRAM_GRAPH_VERSION", "v23.0")
+if "test" in sys.argv[1:2]:
+    INSTAGRAM_ACCESS_TOKEN = INSTAGRAM_BUSINESS_ACCOUNT_ID = ""
+
 # Umami
 UMAMI_SCRIPT_URL = os.environ.get("UMAMI_SCRIPT_URL", "")
 UMAMI_WEBSITE_ID = os.environ.get("UMAMI_WEBSITE_ID", "")

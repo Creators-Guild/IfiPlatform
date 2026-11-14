@@ -122,6 +122,18 @@ folder.
 - [ ] **Opening hours: live data for Escape.** Escape's hours are typed in
   by hand and marked as not guaranteed. When Escape's planned API exists,
   use it in `opening_hours_now()` in `models/opening_hours.py`.
+- [ ] **Ifi Instagram: filter by Official / Memes.** The Instagram section
+  on the home page shows posts from official union accounts and meme
+  accounts in one feed. Meme accounts get a "meme" tag, but visitors can't
+  choose to see only one kind. Fix: All / Official / Memes buttons above
+  the feed, using each account's kind (official or meme).
+- [ ] **Ifi Instagram: posts deleted on Instagram stay on our site.** The
+  sync only reads each account's 12 newest posts, so a stored post that is
+  deleted on Instagram stays in the feed until newer posts push it out,
+  which can take weeks for a quiet account. Fix: when a stored synced post
+  is missing from the account's newest posts, check whether it still
+  exists and hide it if it's gone. Where:
+  `management/commands/sync_instagram_posts.py`.
 
 ## For future features
 

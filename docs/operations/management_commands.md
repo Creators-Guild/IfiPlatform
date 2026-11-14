@@ -367,6 +367,34 @@ sudo systemctl start sync-output-magazine.service
 Locally, `seed_dev_data` adds three issues, so you only need this command
 to get the full list.
 
+### sync_instagram_posts
+
+```bash
+python manage.py sync_instagram_posts
+```
+
+Copies the newest posts of every active Instagram account (Snippets →
+"Instagram accounts") from Meta's Graph API into `InstagramPost`, for the
+Instagram feed on the home page. It downloads new pictures, updates
+captions, keeps the 12 newest synced posts per account, and never changes
+**Hidden** or posts added by hand. Without `INSTAGRAM_ACCESS_TOKEN` in
+`.env` it does nothing.
+
+If an account can't be read (for example a personal account), the error is
+saved on the account, the other accounts still sync, and the command ends
+with an error. It also warns a week before the token expires. Setup and
+token renewal: [instagram_setup.md](instagram_setup.md).
+
+On the server, `sync-instagram-posts.timer` runs it every hour from 07:00
+to 23:00, installed by `deploy/deploy.sh`:
+```bash
+systemctl list-timers sync-instagram-posts.timer
+journalctl -u sync-instagram-posts.service
+sudo systemctl start sync-instagram-posts.service
+```
+
+Locally, `seed_dev_data` adds four example posts added "by hand".
+
 ## account_app
 
 ### cleanup_unverified_accounts

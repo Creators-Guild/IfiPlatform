@@ -41,7 +41,7 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
 | App | Built with | URL prefix | Main models | Status |
 | --- | --- | --- | --- | --- |
 | `core_app` | plain Django | none (shared helpers) | none | in use |
-| `ifi_home_app` | Wagtail + Django | `/` (everything not claimed below) | the page types below, `MenuGroup`, `Menu`, `HeaderMessage`, `HomeBoardMessage`, `MagazineIssue`, `Location`, `ArticleStyle`, `ArticleBlockStyle`, `PeoplySyncLog` | in use |
+| `ifi_home_app` | Wagtail + Django | `/` (everything not claimed below) | the page types below, `MenuGroup`, `Menu`, `HeaderMessage`, `HomeBoardMessage`, `MagazineIssue`, `Location`, `InstagramAccount`, `InstagramPost`, `ArticleStyle`, `ArticleBlockStyle`, `PeoplySyncLog` | in use |
 | `account_app` | plain Django | `/account/` | `Profile` | in use |
 | `study_app` | plain Django | `/study/` | `Deck`, `Card` | under development |
 | `yourpage_app` | plain Django | `/yourpage/` | none yet | under development |
@@ -52,7 +52,7 @@ in `ifiplatform/ifiplatform_project/`. `core_app` sits directly in
   and a few project-wide management commands.
 - **`ifi_home_app`** is the main site: the home page, articles and news,
   student unions, tools, events (synced from Peoply), the >OUTPUT magazine
-  box (synced from ifiavis.no), the opening hours box, menus and the
+  box (synced from ifiavis.no), the opening hours box, the Instagram feed (synced from Meta), menus and the
   translation tools in the Wagtail admin.
 - **`account_app`** handles sign-up, login, email verification, the privacy
   policy and the pages it links to, exporting and deleting your data, and the terms editors must
@@ -105,10 +105,12 @@ flowchart TD
         peoply{{"Peoply"}}
         deepl{{"DeepL"}}
         ifiavis{{"ifiavis.no"}}
+        meta{{"Meta (Instagram)"}}
     end
 
     peoply -- "events" --> home
     ifiavis -- "magazine issues" --> home
+    meta -- "Instagram posts" --> home
     deepl -- "translations" --> home
 ```
 
@@ -164,7 +166,8 @@ flowchart LR
   [unions and tools](ifi_home_app/unions_and_tools.md),
   [events](ifi_home_app/events.md), [menus](ifi_home_app/menus.md),
   [the magazine box](ifi_home_app/magazine.md),
-  [opening hours](ifi_home_app/opening_hours.md) and
+  [opening hours](ifi_home_app/opening_hours.md),
+  [the Instagram feed](ifi_home_app/instagram.md) and
   [translations](shared/translations.md).
 
 #### `account_app`: sign-up, login and your data
@@ -363,6 +366,7 @@ shows the commands. Both are explained in
 | --- | --- | --- |
 | **Peoply** | Events are copied from Peoply into `EventPage`s. Peoply is the source of truth for the synced fields | `ifi_home_app/integrations/peoply_api.py`, the `sync_peoply_events` command |
 | **ifiavis.no** | The >OUTPUT magazine's issues are copied into `MagazineIssue` for the home page box, read from the public /utgaver page | `ifi_home_app/integrations/ifiavis.py`, the `sync_output_magazine` command |
+| **Meta Graph API** | Public posts from chosen Instagram accounts are copied into `InstagramPost` for the home page feed, through the Ifi Creators' Guild account | `ifi_home_app/integrations/instagram.py`, the `sync_instagram_posts` command |
 | **DeepL** | Machine translation nb → en, with a glossary of fixed terms | `ifi_home_app/translation/`, the `sync_deepl_glossary` command |
 | **Umami** | Page analytics | `core_app/context_processors.py` |
 
