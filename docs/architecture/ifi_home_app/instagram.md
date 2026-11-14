@@ -1,6 +1,6 @@
 # Ifi Instagram feed
 
-Last updated: 2026-11-14
+Last updated: 2026-11-15
 
 How the home page shows recent Instagram posts from IFI's student unions
 and meme accounts: where the posts come from, how they're stored and how
@@ -45,7 +45,7 @@ All in `models/instagram.py`:
 
 | Model | What it holds |
 | --- | --- |
-| `InstagramPostImage` | The 2nd, 3rd … picture of an album post, only for posts the feed shows |
+| `InstagramPostImage` | The 2nd, 3rd … picture of an album post |
 | `InstagramAccount` | An account in the feed: username, display name, official or meme, order, active, profile picture, and the last sync's time and error |
 | `InstagramPost` | A post: account, link, caption, time, image/video/album, picture, hidden, and whether it was synced or added by hand |
 | `InstagramSyncState` | One row: when the access token expires |
@@ -56,17 +56,19 @@ All in `models/instagram.py`:
 - **Seeing a post without Instagram.** On every screen, clicking or
   tapping a post's picture opens a viewer over the page, like reels: one
   post fills the screen and each scroll moves to the next, starting at the
-  one you clicked. Each post has its caption ("… more" / "less") and date, all the pictures of an album
+  one you clicked. It goes through every stored post, newest first, not
+  only the 12 on the page; the rest load the first time it opens. Each
+  post has its caption ("… more" / "less") and date, all the pictures of an album
   (arrows or swipe) and the video itself (click to play, with sound). ↓ ↑
   jump between posts, Esc or a click outside closes it. "Show more"
   opens the viewer too, at the first post that wasn't shown.
 - A video Instagram gives us no file for (often reels with licensed music)
   shows its cover with "Watch on Instagram". A video inside an album shows
   as its cover picture.
-- Only the 12 posts the feed shows keep their video and album pictures.
-  The sync downloads them and deletes them again when a post drops out of
-  the 12, so they take about 50–150 MB in total. Other stored posts keep
-  just their cover.
+- Every stored post keeps its video and album pictures. The sync
+  downloads them once, and they're deleted with the post. With today's
+  accounts that's about 250 MB of media in total (November 2026: 212
+  posts, 16 videos, 96 albums).
 - The first account list (the accounts Ifi Creators' Guild follows) was
   added by migration `0164_instagram_accounts`.
 
@@ -97,6 +99,10 @@ All in `models/instagram.py`:
   `static/js/home_instagram.js` runs the viewer, the album arrows and
   "… more". Without it the feed shows the covers, captions and "See on
   Instagram", but no viewer, videos or full albums.
+- The viewer's posts after the first 12 come from `api/instagram/posts/`
+  (`instagram_more_posts` in `views/home_views.py`, template
+  `viewer_posts.html`), which the script fetches when the viewer first
+  opens.
 - One row of posts shows at first: 2 on a laptop (at most about 32rem
   each, centered), 3 or 4 on wide screens, filling the row. On
   phone-sized screens (under 45rem, like the rest of the site's phone

@@ -6,10 +6,12 @@ from datetime import datetime, timedelta, timezone as dt_timezone
 from unittest.mock import Mock, patch
 
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.template.loader import render_to_string
 from django.test import SimpleTestCase, TestCase, override_settings
+from django.urls import reverse
 from django.utils import timezone, translation
 from PIL import Image
 from wagtail.admin.panels import get_edit_handler
@@ -319,9 +321,8 @@ class ParseMediaTests(SimpleTestCase):
 
 
 def _video_file():
-    out = tempfile.NamedTemporaryFile(
-        suffix=".mp4"
-    )  # pylint: disable=consider-using-with
+    # pylint: disable-next=consider-using-with
+    out = tempfile.NamedTemporaryFile(suffix=".mp4")
     out.write(b"fake mp4")
     out.flush()
     out.seek(0)
@@ -403,14 +404,42 @@ class ShownMediaSyncTests(TestCase):
         self.assertEqual(album.album_images.count(), 2)
         self.assertEqual(len(album.pictures), 3)
 
-    def test_posts_leaving_the_feed_lose_them(self):
+    def test_posts_outside_the_feed_keep_their_media_until_deleted(self):
         self.sync()
         InstagramPost.objects.filter(instagram_id__in=["v", "a"]).update(hidden=True)
         self.sync()
-        self.assertFalse(InstagramPost.objects.get(instagram_id="v").video)
+        video = InstagramPost.objects.get(instagram_id="v")
+        self.assertTrue(video.video)
+        name = video.video.name
         self.assertEqual(
-            InstagramPost.objects.get(instagram_id="a").album_images.count(), 0
+            InstagramPost.objects.get(instagram_id="a").album_images.count(), 2
         )
+        video.delete()
+        self.assertFalse(default_storage.exists(name))
+
+
+class MorePostsViewTests(TestCase):
+    def setUp(self):
+        self.media = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.media)
+        self.enterContext(override_settings(MEDIA_ROOT=self.media))
+
+    def test_returns_the_cards_after_the_first_twelve(self):
+        account = InstagramAccount.objects.get(username="unioslo_ifi")
+        now = timezone.now()
+        for i in range(14):
+            InstagramPost.objects.create(
+                account=account,
+                permalink=f"https://www.instagram.com/p/{i}/",
+                posted_at=now - timedelta(hours=i),
+                image=ContentFile(_jpeg_bytes(), name=f"{i}.jpg"),
+            )
+        with translation.override("en"):
+            html = self.client.get(reverse("instagram_more_posts")).content.decode()
+        self.assertEqual(html.count('class="home-instagram-viewer-post"'), 2)
+        self.assertIn("13 / 14", html)
+        self.assertIn('data-index="12"', html)
+        self.assertIn("https://www.instagram.com/p/13/", html)
 
 
 class ViewerTemplateTests(TestCase):
@@ -425,10 +454,11 @@ class ViewerTemplateTests(TestCase):
         post.image.name = "instagram/posts/x.jpg"
         return post
 
-    def render(self, post):
+    def render(self, post, **context):
         with translation.override("en"):
             return render_to_string(
-                "home/partials/instagram/instagram.html", {"instagram_posts": [post]}
+                "home/partials/instagram/instagram.html",
+                {"instagram_posts": [post], **context},
             )
 
     def test_video_with_a_file_plays_on_the_site(self):
@@ -450,3 +480,9 @@ class ViewerTemplateTests(TestCase):
         self.assertIn('<dialog class="home-instagram-viewer"', html)
         self.assertIn('data-index="0"', html)
         self.assertIn("1 / 1", html)
+        self.assertNotIn("data-more-url", html)
+
+    def test_viewer_counts_every_stored_post_and_loads_the_rest(self):
+        html = self.render(self._post(), instagram_total=14)
+        self.assertIn("1 / 14", html)
+        self.assertIn('data-more-url="/en/api/instagram/posts/"', html)

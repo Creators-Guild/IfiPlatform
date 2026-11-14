@@ -6,6 +6,11 @@ Last updated: 2026-11-15
 maybe expand later (2026-11-15). Nothing here is decided. Delete this file
 when it's built or dropped.
 
+**Already built (2026-11-15):** the viewer shows every stored post (the
+12 shown, then the rest fetched when it first opens, `instagram_more_posts`),
+and every stored post keeps its video and album pictures. What's left is
+keeping more than 12 per account.
+
 ---
 
 ## Goal
@@ -17,10 +22,10 @@ server's 20 GB disk filling up.
 
 | Stored | Count | Size |
 |---|---|---|
-| Rows (caption, link, date) | ~260 | negligible, a few kB each |
-| Covers | 260 (12 per account) | 34 MB, ~130 kB each |
-| Album pictures | 5 shown albums | 3 MB |
-| Videos | 4 shown | 55 MB, ~14 MB each |
+| Rows (caption, link, date) | 212 | negligible, a few kB each |
+| Covers | 212 (≤ 12 per account, ≤ 1 year) | 29 MB, ~140 kB each |
+| Album pictures | 96 albums | 58 MB |
+| Videos | 16 with a file (of 23) | 167 MB, ~10 MB each |
 
 The database isn't the cost; media files are, and videos most of all.
 
@@ -44,21 +49,23 @@ Since 2026-11-15 synced posts older than a year aren't kept at all
    bigger `media.limit`; it also keeps their media links fresh. Store the
    remote video/album links on the row (they're only in memory today,
    `Command.remote`).
-2. **Covers for every stored post.** ~130 kB each: 50 × 23 accounts ≈ 150 MB.
-3. **Videos and album pictures on demand, cached with a cap.** A view like
+2. **Covers for every stored post.** ~140 kB each: 50 × 23 accounts ≈ 160 MB.
+3. **Videos and album pictures on demand, cached with a cap.** (Today the
+   sync downloads them for every stored post: ~225 MB for 212 posts, so
+   ~1 GB at 50 per account.) A view like
    `/instagram/media/<post>/` downloads from Meta (using the link from the
    last sync) the first time someone opens the post, stores it, serves it
    from our server. A cleanup job deletes the least recently opened files
    when the cache passes a cap (e.g. 2 GB). Visitors never contact Meta, so
-   the privacy page stays true. Today's "only the 12 shown get media" rule
-   (`shown_posts()`, `_sync_shown_media()`) would become "the 12 shown are
-   pre-warmed".
+   the privacy page stays true. Today's "every stored post gets media"
+   (`_sync_media()`) would become "the newest N are pre-warmed".
 
 ## On the site
 
 - Feed: unchanged (12 newest, "Show more").
-- Viewer: when you reach the end, fetch the next batch (an HTML fragment
-  view) and append it, like endless scrolling.
+- Viewer: today it fetches all the rest in one go when it first opens
+  (~420 kB of HTML for 200 posts). With hundreds more, page it instead:
+  fetch the next batch near the end, like endless scrolling.
 - Maybe: a viewer per account (tap a username → that account's posts).
 
 ## Downsides

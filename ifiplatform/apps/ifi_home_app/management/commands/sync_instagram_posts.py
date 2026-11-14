@@ -3,11 +3,10 @@ Graph API (Business Discovery) into InstagramPost rows, downloading each
 image once (Meta's image links expire). Synced posts get their caption and
 link updated; `hidden` is never touched; only the newest 12 synced posts per
 account, and only from the last year (POST_MAX_AGE), are kept; older ones
-and their images are deleted. Posts added by
-hand are never changed. The 12 posts the feed shows (shown_posts()) also
-get their video file and every album picture; posts that leave the feed
-lose them again. One account failing (e.g. a personal account) is
-recorded on the account and doesn't stop the others. Without a token in
+and their images are deleted. Posts added by hand are never changed.
+Every stored synced post also gets its video file and every album picture;
+they go when the post is deleted. One account failing (e.g. a personal
+account) is recorded on the account and doesn't stop the others. Without a token in
 .env it does nothing. Runs hourly 07-23 from the sync-instagram-posts
 systemd timer.
 
@@ -32,7 +31,6 @@ from ifi_home_app.models.instagram import (
     InstagramPost,
     InstagramPostImage,
     InstagramSyncState,
-    shown_posts,
 )
 
 POST_IMAGE_SIZE = 1080
@@ -75,7 +73,7 @@ class Command(BaseCommand):
                 failed.append(f"@{account.username}: {error}")
                 continue
             self.stdout.write(f"@{account.username}: {created} new")
-        self._sync_shown_media()
+        self._sync_media()
         if failed:
             raise CommandError(
                 f"{len(failed)} account(s) failed:\n" + "\n".join(failed)
@@ -145,20 +143,15 @@ class Command(BaseCommand):
             old.delete()
         return created
 
-    def _sync_shown_media(self):
-        """Videos and album pictures, only for the posts the feed shows.
-        Posts that left the feed lose theirs, to save disk."""
-        shown = list(shown_posts())
-        for post in InstagramPost.objects.filter(source=SYNCED).exclude(
-            pk__in=[p.pk for p in shown]
-        ):
-            if post.video:
-                post.video.delete(save=True)
-            post.album_images.all().delete()
-        for post in shown:
-            remote = self.remote.get(post.instagram_id)
-            if post.source != SYNCED or remote is None:
-                continue
+    def _sync_media(self):
+        """Videos and album pictures for every stored synced post that's
+        missing them, using the links Meta gave this run (a post whose
+        account failed waits for the next run)."""
+        posts = InstagramPost.objects.filter(
+            source=SYNCED, instagram_id__in=list(self.remote)
+        ).prefetch_related("album_images")
+        for post in posts:
+            remote = self.remote[post.instagram_id]
             try:
                 self._fetch_media(post, remote)
             except instagram.InstagramError as error:

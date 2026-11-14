@@ -60,6 +60,12 @@ ifi_api_urlpatterns = [
     ),
     # Not page-scoped -- triggers the site-wide sync_peoply_events command,
     # see event_views.force_sync_peoply_events.
+    # The Instagram viewer's posts after the first 12, loaded when it opens.
+    path(
+        "api/instagram/posts/",
+        home_views.instagram_more_posts,
+        name="instagram_more_posts",
+    ),
     path(
         "api/peoply/force-sync/",
         event_views.force_sync_peoply_events,

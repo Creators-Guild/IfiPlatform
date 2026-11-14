@@ -22,7 +22,7 @@ POSTS_KEPT_PER_ACCOUNT = 12
 # Synced posts older than this aren't kept, so quiet accounts don't keep
 # posts from years ago (user, 2026-11-15).
 POST_MAX_AGE = timedelta(days=365)
-# The feed shows this many; only they get their video and album pictures.
+# The homepage feed (and the viewer before it loads the rest) shows this many.
 SHOWN_POSTS = 12
 
 
@@ -122,7 +122,7 @@ class InstagramPost(models.Model):
     video = models.FileField(
         upload_to="instagram/videos/",
         blank=True,
-        help_text="Synced only for posts in the feed. Empty: the cover links to Instagram.",
+        help_text="Empty when Instagram gives no video file; the cover then links to Instagram.",
     )
     hidden = models.BooleanField(
         default=False, help_text="Hide this post from the homepage."
@@ -193,8 +193,7 @@ class InstagramPost(models.Model):
 
 
 class InstagramPostImage(models.Model):
-    """The 2nd, 3rd ... picture of an album post. Only kept for posts the
-    feed shows (see SHOWN_POSTS)."""
+    """The 2nd, 3rd ... picture of an album post."""
 
     post = models.ForeignKey(
         InstagramPost, on_delete=models.CASCADE, related_name="album_images"
@@ -212,14 +211,19 @@ class InstagramPostImage(models.Model):
         ordering = ["sort_order", "pk"]
 
 
-def shown_posts():
-    """The posts the homepage feed shows, newest first. The sync gives
-    exactly these their video and album pictures."""
+def visible_posts():
+    """Every post the viewer may show, newest first."""
     return (
         InstagramPost.objects.filter(hidden=False, account__is_active=True)
         .select_related("account")
-        .prefetch_related("album_images")[:SHOWN_POSTS]
+        .prefetch_related("album_images")
     )
+
+
+def shown_posts():
+    """The posts the homepage feed shows: the first SHOWN_POSTS of
+    visible_posts(), so the viewer's later batch continues the same order."""
+    return visible_posts()[:SHOWN_POSTS]
 
 
 @receiver(post_delete, sender=InstagramPost)

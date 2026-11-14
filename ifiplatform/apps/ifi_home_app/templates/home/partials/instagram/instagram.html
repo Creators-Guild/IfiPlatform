@@ -35,26 +35,16 @@
                 </details>
             {% endif %}
         </div>
-        <dialog class="home-instagram-viewer" aria-label="Ifi Instagram">
-            <button class="home-instagram-viewer-close" type="button" aria-label="{% trans 'Close' %}">&times;</button>
-            <div class="home-instagram-viewer-feed">
-                {% for post in instagram_posts %}
-                    <article class="home-instagram-viewer-post" data-index="{{ forloop.counter0 }}"{% if post.image_width %} style="--ratio: {{ post.image_width|stringformat:'d' }} / {{ post.image_height|stringformat:'d' }}"{% endif %} aria-label="{% blocktrans with n=forloop.counter total=instagram_posts|length %}Post {{ n }} of {{ total }}{% endblocktrans %}">
-                        {% include "home/partials/instagram/byline.html" %}
-                        {% include "home/partials/instagram/media.html" %}
-                        {% if post.caption %}
-                            <p class="home-instagram-caption"><b>{{ post.account.username }}</b> {{ post.caption }}</p>
-                            {% if post.caption_is_long %}<button class="home-instagram-more" type="button" data-more="&hellip; {% trans 'more' %}" data-less="{% trans 'less' %}" hidden>&hellip; {% trans "more" %}</button>{% endif %}
-                        {% endif %}
-                        <p class="home-instagram-date">{{ post.posted_at|date:"j. F Y" }}</p>
-                        <p class="home-instagram-viewer-foot">
-                            <a class="home-instagram-open" href="{{ post.permalink }}">{% trans "See on Instagram" %} &rarr;</a>
-                            <span>{{ forloop.counter }} / {{ instagram_posts|length }}</span>
-                        </p>
-                    </article>
-                {% endfor %}
-            </div>
-        </dialog>
+        {% with shown=instagram_posts|length %}
+            <dialog class="home-instagram-viewer" aria-label="Ifi Instagram"{% if instagram_total > shown %} data-more-url="{% url 'instagram_more_posts' %}"{% endif %}>
+                <button class="home-instagram-viewer-close" type="button" aria-label="{% trans 'Close' %}">&times;</button>
+                <div class="home-instagram-viewer-feed">
+                    {% for post in instagram_posts %}
+                        {% include "home/partials/instagram/viewer_post.html" with number=forloop.counter total=instagram_total|default:shown %}
+                    {% endfor %}
+                </div>
+            </dialog>
+        {% endwith %}
     </section>
     <script src="{% static 'js/home_instagram.js' %}" defer></script>
 {% endif %}

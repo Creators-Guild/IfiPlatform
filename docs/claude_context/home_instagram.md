@@ -1,7 +1,7 @@
 # Homepage Ifi Instagram feed — design rationale
 
-Last updated: 2026-11-14
-Covers: ifiplatform/apps/ifi_home_app/integrations/instagram.py, ifiplatform/apps/ifi_home_app/models/instagram.py, ifiplatform/apps/ifi_home_app/management/commands/sync_instagram_posts.py, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/instagram.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/media.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/byline.html, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_instagram.css, ifiplatform/apps/ifi_home_app/static/js/home_instagram.js
+Last updated: 2026-11-15
+Covers: ifiplatform/apps/ifi_home_app/integrations/instagram.py, ifiplatform/apps/ifi_home_app/models/instagram.py, ifiplatform/apps/ifi_home_app/management/commands/sync_instagram_posts.py, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/instagram.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/media.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/byline.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_post.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_posts.html, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_instagram.css, ifiplatform/apps/ifi_home_app/static/js/home_instagram.js
 
 The human docs (`architecture/ifi_home_app/instagram.md`,
 `operations/instagram_setup.md`) explain what it does. This note keeps the
@@ -127,13 +127,17 @@ accounts while the app was in Development mode.
 
 ## Videos, albums and the viewer (user's choices, 2026-11-14)
 
-- Goal: let people see posts without an Instagram account. Only the 12
-  posts the feed shows (`shown_posts()`, `SHOWN_POSTS`; the view uses the
-  same query) get their video (`InstagramPost.video`) and the rest of an
-  album (`InstagramPostImage`). `_sync_shown_media()` runs after all
-  accounts and frees both from posts that left the 12; the remote URLs
-  come from this run only (`self.remote`), so a post whose account failed
-  waits for the next run. Measured: 4 videos = 55 MB.
+- Goal: let people see posts without an Instagram account. Every stored
+  synced post gets its video (`InstagramPost.video`) and the rest of an
+  album (`InstagramPostImage`) (user, 2026-11-15; before that only the 12
+  shown did, and the sync freed them when a post left the 12).
+  `_sync_media()` runs after all accounts, only for posts Meta returned in
+  this run, because the remote URLs live in memory (`self.remote`); a post
+  whose account failed waits for the next run. Each file is downloaded
+  once and only goes with its post (`post_delete`): older than
+  `POST_MAX_AGE` or out of the account's newest 12. Measured 2026-11-15:
+  212 posts, 16 of 23 videos with a file, 96 of 97 albums; 253 MB in
+  `media/instagram/` (videos 167, albums 58, covers 29).
 - `download_video()` streams to a temp file (100 MB cap), not memory.
   Album downloads are all-or-nothing per post (partial ones are deleted).
 - Meta omits `media_url` for some videos (licensed music): `video` stays
@@ -142,16 +146,28 @@ accounts while the app was in Development mode.
 - Playback: native `<video controls preload="none">`, click to play with
   sound (user). Nothing downloads until someone presses play. A playing video
   pauses when less than half of it is in view (an IntersectionObserver in
-  `home_instagram.js`, user: stop when scrolled past), in the viewer and
-  the phone feed; closing the viewer pauses all of them too.
-- Viewer: design "A2" from a mockup. A native `<dialog>` with all shown
-  posts server-rendered as cards in one vertical scroll; opening scrolls to
-  the clicked post. Every screen uses it (user, 2026-11-15: phones too):
+  `home_instagram.js`, user: stop when scrolled past); closing the viewer
+  pauses all of them too.
+- Viewer: design "A2" from a mockup. A native `<dialog>` with the posts as
+  cards in one vertical scroll; opening scrolls to the clicked post. Every screen uses it (user, 2026-11-15: phones too):
   the feed shows covers as `<button disabled>` the script enables, so
   without JS there are covers and "See on Instagram" only. On phones the
   viewer posts are edge to edge, full height, with room under the close
   button (which has a dark round background so it shows over a white
   card). `html:has(dialog[open])` locks page scroll; closing pauses videos.
+- The viewer holds every visible post, not only the 12 (user, 2026-11-15,
+  "load when the viewer opens"). The homepage renders the 12 shown cards;
+  the rest come from `instagram_more_posts` (`api/instagram/posts/`,
+  `viewer_posts.html`), fetched by `home_instagram.js` the first time the
+  viewer opens (`data-more-url`, set only when there are more), so the
+  homepage stays small (200 cards were ~420 kB of HTML). A failed fetch
+  retries on the next open. Indexes must line up: thumbs' `data-index` and
+  the script's `posts()` are positions, so `shown_posts()` is
+  `visible_posts()[:SHOWN_POSTS]` and the ordering ends in `-pk` (a tie on
+  `posted_at` could otherwise order the two queries differently). The
+  counter "n / total" uses `instagram_total` (all visible posts) from the
+  start. Fetched cards are wired with `wire()` after they're in the page
+  (captions, album arrows, preload and pause observers).
 - "Show more" opens the viewer at the first hidden post instead of opening
   the list on screens matching `SHOW_MORE_OPENS_VIEWER` in
   `home_instagram.js`: "all" since 2026-11-15 (user; it was phones only

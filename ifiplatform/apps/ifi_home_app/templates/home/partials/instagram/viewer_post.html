@@ -1,0 +1,15 @@
+{% comment %}One card in the Instagram viewer. Needs post, number (1-based) and total. Design rationale: docs/claude_context/home_instagram.md{% endcomment %}
+{% load i18n %}
+<article class="home-instagram-viewer-post" data-index="{{ number|add:'-1' }}"{% if post.image_width %} style="--ratio: {{ post.image_width|stringformat:'d' }} / {{ post.image_height|stringformat:'d' }}"{% endif %} aria-label="{% blocktrans with n=number %}Post {{ n }} of {{ total }}{% endblocktrans %}">
+    {% include "home/partials/instagram/byline.html" %}
+    {% include "home/partials/instagram/media.html" %}
+    {% if post.caption %}
+        <p class="home-instagram-caption"><b>{{ post.account.username }}</b> {{ post.caption }}</p>
+        {% if post.caption_is_long %}<button class="home-instagram-more" type="button" data-more="&hellip; {% trans 'more' %}" data-less="{% trans 'less' %}" hidden>&hellip; {% trans "more" %}</button>{% endif %}
+    {% endif %}
+    <p class="home-instagram-date">{{ post.posted_at|date:"j. F Y" }}</p>
+    <p class="home-instagram-viewer-foot">
+        <a class="home-instagram-open" href="{{ post.permalink }}">{% trans "See on Instagram" %} &rarr;</a>
+        <span>{{ number }} / {{ total }}</span>
+    </p>
+</article>
