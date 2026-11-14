@@ -3,7 +3,7 @@
 {% with pictures=post.pictures %}
     <div class="home-instagram-media">
         {% if post.media_type == "video" and post.video %}
-            <video class="home-instagram-video" controls preload="none" playsinline poster="{{ post.image.url }}"{% if post.image_width %} width="{{ post.image_width }}" height="{{ post.image_height }}"{% endif %}>
+            <video class="home-instagram-video" controls preload="none" loop playsinline poster="{{ post.image.url }}"{% if post.image_width %} width="{{ post.image_width }}" height="{{ post.image_height }}"{% endif %}>
                 <source src="{{ post.video.url }}" type="video/mp4">
             </video>
         {% elif post.media_type == "video" %}

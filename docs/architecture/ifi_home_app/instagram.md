@@ -59,7 +59,8 @@ All in `models/instagram.py`:
   one you clicked. It goes through every stored post, newest first, not
   only the 12 on the page; the rest load the first time it opens. Each
   post has its caption ("… more" / "less") and date, all the pictures of an album
-  (arrows or swipe) and the video itself (click to play, with sound). ↓ ↑
+  (arrows or swipe) and the video itself, which plays with sound and
+  loops while it's in view. ↓ ↑
   jump between posts, Esc or a click outside closes it. "Show more"
   opens the viewer too, at the first post that wasn't shown.
 - **The viewer on bigger screens than a phone.** When there's room, a post

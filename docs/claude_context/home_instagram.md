@@ -143,11 +143,16 @@ accounts while the app was in Development mode.
 - Meta omits `media_url` for some videos (licensed music): `video` stays
   empty and `media.html` shows the cover + "Watch on Instagram". Videos
   inside albums are stored as their thumbnail.
-- Playback: native `<video controls preload="none">`, click to play with
-  sound (user). Nothing downloads until someone presses play. A playing video
-  pauses when less than half of it is in view (an IntersectionObserver in
-  `home_instagram.js`, user: stop when scrolled past); closing the viewer
-  pauses all of them too.
+- Playback: native `<video controls preload="none" loop>`. Autoplay with
+  sound and looping (user, 2026-11-15; it was click to play): the
+  `viewerVideos` IntersectionObserver in `home_instagram.js` plays a video
+  once at least half is in view and pauses it below half (user: stop when
+  scrolled past). Opening the viewer is a click, so Chrome and Firefox
+  allow sound; when `play()` is refused (`NotAllowedError`, e.g. Safari) it
+  retries muted. `startMuted` follows the last `volumechange`, so muting
+  or unmuting carries over to the next video. Nothing downloads until a
+  video is in view; a video the visitor paused stays paused until it
+  leaves and comes back. Closing the viewer pauses all of them.
 - Viewer: design "A2" from a mockup. A native `<dialog>` with the posts as
   cards in one vertical scroll; opening scrolls to the clicked post. Every screen uses it (user, 2026-11-15: phones too):
   the feed shows covers as `<button disabled>` the script enables, so
@@ -206,9 +211,14 @@ accounts while the app was in Development mode.
     Card width = full-height width + 27.25rem (padding 2 + gap 1.25 + 24),
     capped at 100%; `TEXT_COLUMN_REM` in the script must match. Rows `auto
     minmax(0, max-content) auto minmax(0, 1fr) auto`: the caption grows to
-    its text and only scrolls when it doesn't fit; date and foot are pinned
-    to rows 4 and 5 so they sit at the bottom even without a caption (a
-    plain 1fr caption row would leave "less" far below a short caption).
+    its text and only scrolls when it doesn't fit (a plain 1fr caption row
+    would leave "less" far below a short caption). Every text item has an
+    explicit row (byline 1, caption 2, "less" 3, date 4, foot 5): the
+    media covers both columns, so auto-placement found no free cell in
+    column 2 and pushed the text into implicit rows under the media
+    (2026-11-15, the user's screenshot: date on top, squeezed video,
+    caption not scrolling). Explicit rows also keep date and foot at the
+    bottom without a caption.
 - Card width follows the picture (user: a fixed 34rem left black bars
   around portrait pictures): the template sets `--ratio: w / h` from the
   stored size (plain digits via `stringformat:'d'`, a localised thousands

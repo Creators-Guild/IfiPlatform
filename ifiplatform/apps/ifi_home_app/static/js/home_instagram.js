@@ -17,13 +17,33 @@ const SHOW_MORE_OPENS_VIEWER = "all";
 
 const hasObserver = "IntersectionObserver" in window;
 
-// A playing video pauses once it's mostly scrolled out of view.
-const offscreenVideos = hasObserver
+// Viewer videos play once at least half in view and pause when scrolled
+// past (user, 2026-11-15: autoplay with sound, looping). If the browser
+// blocks sound, the video plays muted; muting or unmuting carries over to
+// the next video.
+let startMuted = false;
+
+function autoplay(video) {
+  video.muted = startMuted;
+  video.play().catch((error) => {
+    if (error.name === "NotAllowedError" && !video.muted) {
+      video.muted = true;
+      video.play().catch(() => {});
+    }
+  });
+}
+
+const viewerVideos = hasObserver
   ? new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.intersectionRatio < 0.5 && !entry.target.paused) {
-            entry.target.pause();
+          const video = entry.target;
+          if (entry.intersectionRatio >= 0.5) {
+            if (video.paused) {
+              autoplay(video);
+            }
+          } else if (!video.paused) {
+            video.pause();
           }
         });
       },
@@ -126,9 +146,14 @@ function wireAlbums(root) {
 }
 
 function wireVideos(root) {
-  if (offscreenVideos) {
-    root.querySelectorAll(".home-instagram-video").forEach((video) => offscreenVideos.observe(video));
-  }
+  root.querySelectorAll(".home-instagram-video").forEach((video) => {
+    video.addEventListener("volumechange", () => {
+      startMuted = video.muted;
+    });
+    if (viewerVideos) {
+      viewerVideos.observe(video);
+    }
+  });
 }
 
 function wire(root) {
