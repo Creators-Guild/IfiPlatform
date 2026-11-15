@@ -226,6 +226,12 @@ accounts while the app was in Development mode.
   `--chrome` (~13rem: account line, two caption lines, date, footer) times
   that ratio, at least 22rem so captions stay readable. An opened caption
   or an album picture of another shape can still show thin bars.
+- No scrolling inside a viewer post except a long caption (user,
+  2026-11-15). The album strip's `overflow-x: auto` turns its
+  `overflow-y` into `auto` too, so a picture a pixel taller than the box
+  scrolled vertically: in the viewer the strip has `overflow-y: hidden`
+  and one `minmax(0, 1fr)` row, the media box is `overflow: clip`, and the
+  feed is `overflow-x: hidden`.
 - Media markup is in `media.html`, used by the viewer only. Closed-dialog
   copies don't load: images are `loading="lazy"` and
   videos `preload="none"`. When an album comes into view, the script switches

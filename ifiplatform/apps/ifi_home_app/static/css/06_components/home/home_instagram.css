@@ -443,6 +443,7 @@ html:has(.home-instagram-viewer[open]) {
   height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
+  overflow-x: hidden;
   scroll-snap-type: y mandatory;
   display: grid;
   grid-auto-rows: 100dvh;
@@ -480,6 +481,7 @@ html:has(.home-instagram-viewer[open]) {
 }
 
 .home-instagram-viewer-post .home-instagram-media {
+  overflow: clip;
   border-radius: 4px;
   background: var(--color-black);
 }
@@ -493,6 +495,8 @@ html:has(.home-instagram-viewer[open]) {
 
 .home-instagram-viewer-post .home-instagram-album-strip {
   height: 100%;
+  grid-template-rows: minmax(0, 1fr);
+  overflow-y: hidden;
 }
 
 .home-instagram-viewer-post .home-instagram-album-strip img {
@@ -554,6 +558,18 @@ html:has(.home-instagram-viewer[open]) {
 
   .home-instagram-viewer-post[data-layout="side"] .home-instagram-more {
     display: none;
+  }
+
+  .home-instagram-viewer-post:is([data-layout="side"], [data-layout="overlap"]:has(.home-instagram-caption.is-expanded)) > .home-instagram-who {
+    grid-row: 1;
+  }
+
+  .home-instagram-viewer-post:is([data-layout="side"], [data-layout="overlap"]:has(.home-instagram-caption.is-expanded)) > .home-instagram-caption {
+    grid-row: 2;
+  }
+
+  .home-instagram-viewer-post:is([data-layout="side"], [data-layout="overlap"]:has(.home-instagram-caption.is-expanded)) > .home-instagram-more {
+    grid-row: 3;
   }
 
   .home-instagram-viewer-post:is([data-layout="side"], [data-layout="overlap"]:has(.home-instagram-caption.is-expanded)) > .home-instagram-date {
