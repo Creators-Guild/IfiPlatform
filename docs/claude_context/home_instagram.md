@@ -275,6 +275,11 @@ accounts while the app was in Development mode.
   `required=False` and `clean()` raises one explanation, instead of two
   "This field is required". "Next" is only dimmed by CSS (`:has(... not
   (:checked))`), still clickable, so the server's explanation shows.
+- Look (user, from mockups): the site's own form style, a white card
+  with a plain 2px ink border (no pink top edge), a "Step 1 of 2" label,
+  the site's pink `.btn`, plain radio buttons for the type. A first
+  version with grey chips, a dark button and boxed radios "looked AI" and
+  didn't match the site.
 - The main button comes first in the HTML and `row-reverse` puts it on the
   right: Enter in a text field submits the first submit button, which was
   "← Back".

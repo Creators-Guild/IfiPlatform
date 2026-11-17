@@ -16,10 +16,7 @@
                 <p>{% blocktrans %}An admin will look at your request. If you left an email, the answer comes there. Approved accounts show up in Ifi Instagram within an hour.{% endblocktrans %}</p>
                 <p><a class="instagram-request-link" href="{% url 'ifi_home' %}">&larr; {% trans "Back to the home page" %}</a></p>
             {% else %}
-                <ol class="instagram-request-steps">
-                    <li{% if step == "check" %} aria-current="step"{% endif %}>1 · {% trans "Check" %}{% if step == "request" %} ✓{% endif %}</li>
-                    <li{% if step == "request" %} aria-current="step"{% endif %}>2 · {% trans "Request" %}</li>
-                </ol>
+                <p class="instagram-request-step">{% if step == "check" %}{% trans "Step 1 of 2 · Check" %}{% else %}{% trans "Step 2 of 2 · Suggest" %}{% endif %}</p>
                 <form method="post" novalidate>
                     {% csrf_token %}
                     {% if step == "check" %}
@@ -45,7 +42,7 @@
                             <p class="instagram-request-blocker" role="alert">{{ error }}</p>
                         {% endfor %}
                         <div class="instagram-request-actions">
-                            <button class="instagram-request-next" type="submit" name="step" value="check">{% trans "Next" %} &rarr;</button>
+                            <button class="btn instagram-request-next" type="submit" name="step" value="check">{% trans "Next" %} &rarr;</button>
                             <a class="instagram-request-link" href="{% url 'ifi_home' %}">{% trans "Cancel" %}</a>
                         </div>
                     {% else %}
@@ -83,7 +80,7 @@
                             {% for error in form.contact_email.errors %}<p class="instagram-request-error">{{ error }}</p>{% endfor %}
                         </div>
                         <div class="instagram-request-actions">
-                            <button class="instagram-request-next" type="submit" name="step" value="request">{% trans "Send request" %}</button>
+                            <button class="btn instagram-request-next" type="submit" name="step" value="request">{% trans "Send request" %}</button>
                             <button class="instagram-request-link" type="submit" name="step" value="back" formnovalidate>&larr; {% trans "Back" %}</button>
                         </div>
                     {% endif %}

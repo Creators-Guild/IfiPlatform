@@ -2458,12 +2458,12 @@ msgid "Back to the home page"
 msgstr "Tilbake til forsiden"
 
 #: Ifi Instagram account requests
-msgid "Check"
-msgstr "Sjekk"
+msgid "Step 1 of 2 · Check"
+msgstr "Steg 1 av 2 · Sjekk"
 
 #: Ifi Instagram account requests
-msgid "Request"
-msgstr "Forespørsel"
+msgid "Step 2 of 2 · Suggest"
+msgstr "Steg 2 av 2 · Foreslå"
 
 #: Ifi Instagram account requests
 msgid "Ifi Instagram on the home page shows posts from IFI-related accounts. Suggest yours or another account, and an admin will look at it."
