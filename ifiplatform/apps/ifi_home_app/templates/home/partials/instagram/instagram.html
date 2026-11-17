@@ -6,8 +6,8 @@
             <h2 class="newsbar-heading newsbar-heading--news" id="home-instagram-heading">Ifi Instagram</h2>
             <div class="home-instagram-feed">
                 {% for post in instagram_posts %}
-                    <article class="home-instagram-post{% if post.account.kind == 'meme' %} is-meme{% endif %}">
-                        {% include "home/partials/instagram/byline.html" %}
+                    <article class="home-instagram-post is-{{ post.account.kind }}">
+                        {% include "home/partials/instagram/post_header.html" %}
                         <button class="home-instagram-image home-instagram-thumb" type="button" data-index="{{ forloop.counter0 }}" disabled aria-label="{% blocktrans with handle=post.account.username %}Open post by @{{ handle }}{% endblocktrans %}">
                             <img src="{{ post.image.url }}" alt=""
                                  {% if post.image_width %}width="{{ post.image_width }}" height="{{ post.image_height }}"{% endif %}

@@ -132,6 +132,7 @@ class InstagramAccountViewSet(SnippetViewSet):
         "username",
         "display_name",
         "kind",
+        "union_page",
         "is_active",
         "last_synced_at",
         "last_error",

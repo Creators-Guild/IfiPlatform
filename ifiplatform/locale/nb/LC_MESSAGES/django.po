@@ -2437,6 +2437,27 @@ msgstr "Se på Instagram"
 msgid "Watch on Instagram"
 msgstr "Se videoen på Instagram"
 
+#: .\apps\ifi_home_app\templates\home\partials\instagram\post_header.html
+#, python-format
+msgid "About %(name)s"
+msgstr "Om %(name)s"
+
+#: .\apps\ifi_home_app\models\instagram.py
+msgid "union"
+msgstr "forening"
+
+#: .\apps\ifi_home_app\models\instagram.py
+msgid "student democracy"
+msgstr "studentdemokrati"
+
+#: .\apps\ifi_home_app\models\instagram.py
+msgid "media"
+msgstr "medier"
+
+#: .\apps\ifi_home_app\models\instagram.py
+msgid "humour"
+msgstr "humor"
+
 #: .\apps\ifi_home_app\templates\home\partials\instagram\media.html
 #, python-format
 msgid "Picture %(n)s of %(total)s"

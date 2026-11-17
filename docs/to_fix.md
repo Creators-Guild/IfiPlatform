@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-11-13
+Last updated: 2026-11-17
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -122,11 +122,11 @@ folder.
 - [ ] **Opening hours: live data for Escape.** Escape's hours are typed in
   by hand and marked as not guaranteed. When Escape's planned API exists,
   use it in `opening_hours_now()` in `models/opening_hours.py`.
-- [ ] **Ifi Instagram: filter by Official / Memes.** The Instagram section
-  on the home page shows posts from official union accounts and meme
-  accounts in one feed. Meme accounts get a "meme" tag, but visitors can't
-  choose to see only one kind. Fix: All / Official / Memes buttons above
-  the feed, using each account's kind (official or meme).
+- [ ] **Ifi Instagram: filter by type.** The Instagram section on the
+  home page shows posts from unions, student democracy, the university,
+  media and humour accounts in one feed. Each post has a tag with its
+  type, but visitors can't choose to see only one type. Fix: type buttons
+  above the feed, using each account's type.
 - [ ] **Ifi Instagram: posts deleted on Instagram stay on our site.** The
   sync only reads each account's 12 newest posts, so a stored post that is
   deleted on Instagram stays in the feed until newer posts push it out,

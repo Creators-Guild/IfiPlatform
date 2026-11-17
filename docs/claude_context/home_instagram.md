@@ -1,7 +1,7 @@
 # Homepage Ifi Instagram feed — design rationale
 
-Last updated: 2026-11-15
-Covers: ifiplatform/apps/ifi_home_app/integrations/instagram.py, ifiplatform/apps/ifi_home_app/models/instagram.py, ifiplatform/apps/ifi_home_app/management/commands/sync_instagram_posts.py, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/instagram.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/media.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/byline.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_post.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_posts.html, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_instagram.css, ifiplatform/apps/ifi_home_app/static/js/home_instagram.js
+Last updated: 2026-11-17
+Covers: ifiplatform/apps/ifi_home_app/integrations/instagram.py, ifiplatform/apps/ifi_home_app/models/instagram.py, ifiplatform/apps/ifi_home_app/management/commands/sync_instagram_posts.py, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/instagram.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/media.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/post_header.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_post.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_posts.html, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_instagram.css, ifiplatform/apps/ifi_home_app/static/js/home_instagram.js
 
 The human docs (`architecture/ifi_home_app/instagram.md`,
 `operations/instagram_setup.md`) explain what it does. This note keeps the
@@ -14,7 +14,7 @@ Instagram has no anonymous API (Basic Display died Dec 2024) and scraping
 breaks its terms. Business Discovery reads other *public business/creator*
 accounts through one account we own (@ificreatorsguild), Facebook Login
 setup only (not the Instagram Login API on graph.instagram.com). Needs App
-Review for Advanced Access. Personal accounts (many meme accounts) error,
+Review for Advanced Access. Personal accounts (many humour accounts) error,
 hence manual posts as a fallback and `InstagramAccount.last_error`.
 Third-party sources (not Meta's docs) said recent Graph versions narrow
 fields for unowned accounts; the client only asks for basic fields and
@@ -101,7 +101,7 @@ accounts while the app was in Development mode.
   card (12px radius, the same shadow, 1rem padding). The column container
   queries measure `.home-instagram-card`.
 - Post style (user, 2026-11-14: "follow Instagram's post style closely"):
-  no picture or avatar borders, byline "username • age" (no @), caption
+  no picture or avatar borders, post header "username • age" (no @), caption
   clamped to 2 lines with the username in bold, and a "… more" `<button>`
   when `InstagramPost.caption_is_long` (over 70 characters or a line
   break; CSS can't detect a clamp, so it's an estimate). It's `hidden` in
@@ -115,13 +115,37 @@ accounts while the app was in Development mode.
   (`.home-instagram-open`) leaves the site. The picture and the username
   are deliberately not links, so a click on the post never navigates. Pictures are capped at 4:5 with
   `object-fit: cover`, like Instagram's feed (real videos are 9:16).
-- Meme accounts: yellow tag only (the dashed border went with the
-  Instagram restyle). No like/comment counts. The All/Official/Memes filter was dropped for now (to_fix.md).
+- Account types (user, 2026-11-17, from a mockup): `InstagramAccount.kind`
+  (labelled "type") is union, democracy, university, media or humour,
+  replacing official/meme. "meme" was renamed "humour" everywhere, values
+  and code included (user: consistent), except `0163`/`0164`, which stay
+  as they ran; `0166` converts them (`new_type()`: listed usernames by
+  hand, FUI is a union by the user's word, the rest union). Every post's
+  header shows the type's tag (`InstagramAccount.tag`, nb strings in
+  django.po); humour is yellow, the rest light grey (a `color-mix` of
+  slate, the palette has no light grey). No like/comment counts. A type
+  filter is in to_fix.md.
+- Union link (user, from mockups): `InstagramAccount.union_page` (FK to
+  the nb/default `UnionPage`) shows as a second line under the username,
+  "About Navet →" / "Om Navet →" (`post_header.html`, `.home-instagram-union`),
+  where Instagram puts the location. Not the tag (user: unclear what a
+  linked tag does; the tag is plain text) and not the username or picture,
+  so a click on the post itself still never navigates. The name is the
+  union page's title in the visitor's language. `InstagramAccount.union`
+  uses `Page.localized`, which queries on every call; views run
+  `with_union_links()` to look each page up once and set
+  `account.union_link` / `union_name`, which the template reads (missing =
+  no line).
+  `match_union_pages()` (start of every sync, works without a token)
+  links accounts that have no union page to the default-locale union page
+  whose `social_links` has an instagram URL ending in that username; it
+  never replaces a set one. Only Navet had a real Instagram link
+  (2026-11-17); the rest are set by admins in the account snippet.
 - Placement: in `#home-subcontent` after the news; under 72rem it's a grid
   item with area `instagram` (`home_index_layout.css`).
 - `migrations/0164_instagram_accounts.py` holds the initial list (the
   accounts @ificreatorsguild follows, minus a personal account the user
-  removed); `gangen_i_tredje` and `digok.memes` are memes.
+  removed); `0166` sorts them into types.
 - The privacy page (`legal/data_processors.html`) got a paragraph: posts
   are copied server-side, visitors' browsers don't contact Instagram.
 
@@ -192,7 +216,7 @@ accounts while the app was in Development mode.
   compare. It reads sizes once and only writes in the loop (212 cards).
   - `side`: the picture at full height plus the 24rem text column fit.
     Instagram's desktop layout ("everything text", user's pick over "only
-    the caption"): media spans every row in column 1, byline, caption,
+    the caption"): media spans every row in column 1, post header, caption,
     date and foot fill column 2, the whole caption shows and "… more" is
     hidden. Every post with room gets it, short captions too (user: same
     look while scrolling).
@@ -213,7 +237,7 @@ accounts while the app was in Development mode.
     minmax(0, max-content) auto minmax(0, 1fr) auto`: the caption grows to
     its text and only scrolls when it doesn't fit (a plain 1fr caption row
     would leave "less" far below a short caption). Every text item has an
-    explicit row (byline 1, caption 2, "less" 3, date 4, foot 5): the
+    explicit row (post header 1, caption 2, "less" 3, date 4, foot 5): the
     media covers both columns, so auto-placement found no free cell in
     column 2 and pushed the text into implicit rows under the media
     (2026-11-15, the user's screenshot: date on top, squeezed video,

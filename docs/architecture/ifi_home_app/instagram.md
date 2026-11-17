@@ -1,9 +1,9 @@
 # Ifi Instagram feed
 
-Last updated: 2026-11-15
+Last updated: 2026-11-17
 
-How the home page shows recent Instagram posts from IFI's student unions
-and meme accounts: where the posts come from, how they're stored and how
+How the home page shows recent Instagram posts from IFI's student unions,
+the university and humour accounts: where the posts come from, how they're stored and how
 the feed works. Setting up the Meta side is in
 [operations/instagram_setup.md](../../operations/instagram_setup.md).
 
@@ -16,11 +16,15 @@ the feed works. Setting up the Meta side is in
   caption has a "… more" button that shows the whole caption in place
   (it needs JavaScript; without it the caption stays at two lines). Only
   the "See on Instagram →" link under each post leaves the site; the
-  picture and the account name aren't links. Meme accounts get a yellow
-  "meme" tag.
+  picture and the account name aren't links. Each post has a small tag
+  with the account's type: union, student democracy, UiO, media or
+  humour (yellow). When the account is connected to its union page on
+  this site, an "About Navet →" line under the username links there.
 - **Admins** manage the list of accounts under Snippets → "Instagram
   accounts", and can hide a post or add one by hand under "Instagram
-  posts".
+  posts". Each account has a type and can be connected to its union page;
+  the sync connects it by itself when a union page's social links include
+  the account.
 - An **hourly sync** (07:00–23:00) copies the newest posts.
 
 The feed shows the 12 newest visible posts. If there are none, the box
@@ -46,7 +50,7 @@ All in `models/instagram.py`:
 | Model | What it holds |
 | --- | --- |
 | `InstagramPostImage` | The 2nd, 3rd … picture of an album post |
-| `InstagramAccount` | An account in the feed: username, display name, official or meme, order, active, profile picture, and the last sync's time and error |
+| `InstagramAccount` | An account in the feed: username, display name, type, union page, order, active, profile picture, and the last sync's time and error |
 | `InstagramPost` | A post: account, link, caption, time, image/video/album, picture, hidden, and whether it was synced or added by hand |
 | `InstagramSyncState` | One row: when the access token expires |
 

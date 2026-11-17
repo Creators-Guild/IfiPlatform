@@ -14,8 +14,25 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from wagtail.admin.forms import WagtailAdminModelForm
 from wagtail.admin.panels import FieldPanel, FieldRowPanel
+from wagtail.models import Locale
 
-OFFICIAL, MEME = "official", "meme"
+from .article.unions import UnionPage
+
+# Account types (user, 2026-11-17). Each shows as a tag on its posts.
+UNION, DEMOCRACY, UNIVERSITY, MEDIA, HUMOUR = (
+    "union",
+    "democracy",
+    "university",
+    "media",
+    "humour",
+)
+KIND_CHOICES = [
+    (UNION, "Union or association"),
+    (DEMOCRACY, "Student democracy"),
+    (UNIVERSITY, "University or department"),
+    (MEDIA, "Media"),
+    (HUMOUR, "Humour"),
+]
 SYNCED, MANUAL = "synced", "manual"
 IMAGE, VIDEO, ALBUM = "image", "video", "album"
 POSTS_KEPT_PER_ACCOUNT = 12
@@ -29,17 +46,25 @@ SHOWN_POSTS = 12
 class InstagramAccount(models.Model):
     """An account whose posts may show in the feed."""
 
-    KIND_CHOICES = [(OFFICIAL, "Official"), (MEME, "Meme")]
-
     username = models.CharField(
         max_length=30, unique=True, help_text="Without @, e.g. 'unioslo_ifi'."
     )
     display_name = models.CharField(max_length=100, blank=True)
     kind = models.CharField(
-        max_length=10,
+        "type",
+        max_length=12,
         choices=KIND_CHOICES,
-        default=OFFICIAL,
-        help_text="Meme accounts get a 'meme' tag in the feed.",
+        default=UNION,
+        help_text="Shown as a tag on the account's posts.",
+    )
+    union_page = models.ForeignKey(
+        UnionPage,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="The union's page on this site. Its tag on the posts links "
+        "there. The sync fills it in when a union page lists this account.",
     )
     sort_order = models.IntegerField(default=0)
     is_active = models.BooleanField(
@@ -62,6 +87,7 @@ class InstagramAccount(models.Model):
         FieldRowPanel(
             [FieldPanel("kind"), FieldPanel("sort_order"), FieldPanel("is_active")]
         ),
+        FieldPanel("union_page"),
         FieldPanel("profile_picture"),
         FieldPanel("last_synced_at", read_only=True),
         FieldPanel("last_error", read_only=True),
@@ -85,6 +111,27 @@ class InstagramAccount(models.Model):
     def url(self):
         """The account's page on Instagram."""
         return f"https://www.instagram.com/{self.username}/"
+
+    @property
+    def tag(self):
+        """The short type tag on its posts, in the active language."""
+        return {
+            UNION: _("union"),
+            DEMOCRACY: _("student democracy"),
+            UNIVERSITY: "UiO",
+            MEDIA: _("media"),
+            HUMOUR: _("humour"),
+        }.get(self.kind, "")
+
+    @property
+    def union(self):
+        """(url, name) of the union page in the visitor's language, or
+        ("", "") without a live one."""
+        page = self.union_page
+        if page is None or not page.live:
+            return ("", "")
+        page = page.localized
+        return (page.url or "", page.title)
 
 
 class InstagramPostForm(WagtailAdminModelForm):  # pylint: disable=too-many-ancestors
@@ -215,9 +262,54 @@ def visible_posts():
     """Every post the viewer may show, newest first."""
     return (
         InstagramPost.objects.filter(hidden=False, account__is_active=True)
-        .select_related("account")
+        .select_related("account__union_page")
         .prefetch_related("album_images")
     )
+
+
+def _instagram_username(url):
+    """'https://www.instagram.com/ifinavet/?hl=nb' -> 'ifinavet'."""
+    path = url.split("?")[0].split("#")[0].rstrip("/")
+    return path.rsplit("/", 1)[-1].lstrip("@").lower()
+
+
+def match_union_pages():
+    """Links accounts without a union page to the union page whose social
+    links include that Instagram account. Never changes a link an admin set.
+    Returns how many accounts it linked."""
+    accounts = {
+        account.username.lower(): account
+        for account in InstagramAccount.objects.filter(union_page__isnull=True)
+    }
+    if not accounts:
+        return 0
+    linked = 0
+    for page in UnionPage.objects.filter(locale=Locale.get_default()):
+        for block in page.social_links:
+            if block.value.get("platform") != "instagram":
+                continue
+            account = accounts.pop(
+                _instagram_username(block.value.get("url", "")), None
+            )
+            if account is not None:
+                account.union_page = page
+                account.save(update_fields=["union_page"])
+                linked += 1
+    return linked
+
+
+def with_union_links(posts):
+    """Sets account.union_link and union_name on each post's account,
+    looking each union page's translation up once (Page.localized queries
+    every time)."""
+    posts = list(posts)
+    unions = {}
+    for post in posts:
+        account = post.account
+        if account.union_page_id not in unions:
+            unions[account.union_page_id] = account.union
+        account.union_link, account.union_name = unions[account.union_page_id]
+    return posts
 
 
 def shown_posts():

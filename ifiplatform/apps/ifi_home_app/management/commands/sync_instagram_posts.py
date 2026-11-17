@@ -6,8 +6,9 @@ account, and only from the last year (POST_MAX_AGE), are kept; older ones
 and their images are deleted. Posts added by hand are never changed.
 Every stored synced post also gets its video file and every album picture;
 they go when the post is deleted. One account failing (e.g. a personal
-account) is recorded on the account and doesn't stop the others. Without a token in
-.env it does nothing. Runs hourly 07-23 from the sync-instagram-posts
+account) is recorded on the account and doesn't stop the others. Accounts
+without a union page are linked to the union page that lists them.
+Without a token in .env it does nothing more. Runs hourly 07-23 from the sync-instagram-posts
 systemd timer.
 
 Design rationale: docs/claude_context/home_instagram.md"""
@@ -31,6 +32,7 @@ from ifi_home_app.models.instagram import (
     InstagramPost,
     InstagramPostImage,
     InstagramSyncState,
+    match_union_pages,
 )
 
 POST_IMAGE_SIZE = 1080
@@ -58,6 +60,9 @@ class Command(BaseCommand):
     remote = None
 
     def handle(self, *args, **options):
+        linked = match_union_pages()
+        if linked:
+            self.stdout.write(f"Linked {linked} account(s) to their union page.")
         if not instagram.is_configured():
             self.stdout.write("No INSTAGRAM_ACCESS_TOKEN in .env: nothing to sync.")
             return

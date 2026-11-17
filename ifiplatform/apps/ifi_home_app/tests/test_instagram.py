@@ -1,4 +1,5 @@
 # pylint: disable=C0114,C0115,C0116
+import importlib
 import io
 import shutil
 import tempfile
@@ -15,10 +16,20 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from PIL import Image
 from wagtail.admin.panels import get_edit_handler
+from wagtail.models import Locale, Site
 
 from ifi_home_app.integrations import instagram
 from ifi_home_app.models import InstagramAccount, InstagramPost, InstagramSyncState
-from ifi_home_app.models.instagram import SYNCED, InstagramPostForm
+from ifi_home_app.models.article.unions import UnionPage
+from ifi_home_app.models.instagram import (
+    DEMOCRACY,
+    HUMOUR,
+    SYNCED,
+    UNIVERSITY,
+    InstagramPostForm,
+    match_union_pages,
+    with_union_links,
+)
 
 BUSINESS_DISCOVERY = {
     "business_discovery": {
@@ -238,10 +249,10 @@ class PostAdminFormTests(TestCase):
 
 
 class FeedTemplateTests(TestCase):
-    def test_renders_posts_with_meme_tag_and_video_icon(self):
-        meme = InstagramAccount.objects.get(username="digok.memes")
+    def test_renders_posts_with_humour_tag_and_video_icon(self):
+        humour = InstagramAccount.objects.get(username="digok.memes")
         post = InstagramPost(
-            account=meme,
+            account=humour,
             permalink="https://www.instagram.com/p/X/",
             caption="når obligen er innlevert",
             posted_at=timezone.now() - timedelta(hours=3),
@@ -252,8 +263,7 @@ class FeedTemplateTests(TestCase):
             html = render_to_string(
                 "home/partials/instagram/instagram.html", {"instagram_posts": [post]}
             )
-        self.assertIn("is-meme", html)
-        self.assertIn(">meme<", html)
+        self.assertIn('<span class="home-instagram-tag is-humour">humour</span>', html)
         self.assertIn('title="Video"', html)
         self.assertIn("3 h", html)
         self.assertIn(
@@ -486,3 +496,79 @@ class ViewerTemplateTests(TestCase):
         html = self.render(self._post(), instagram_total=14)
         self.assertIn("1 / 14", html)
         self.assertIn('data-more-url="/en/api/instagram/posts/"', html)
+
+
+def _make_union_page(title, instagram_url):
+    root = Site.objects.get(is_default_site=True).root_page
+    union = UnionPage(
+        title=title,
+        slug=title.lower(),
+        locale=Locale.get_default(),
+        social_links=[("social_link", {"platform": "instagram", "url": instagram_url})],
+    )
+    root.add_child(instance=union)
+    union.save_revision().publish()
+    return union
+
+
+class AccountTypeTests(TestCase):
+    def test_migration_sorts_the_existing_accounts(self):
+        migration = importlib.import_module(
+            "ifi_home_app.migrations.0166_instagram_account_types"
+        )
+        self.assertEqual(migration.new_type("digok.memes", "meme"), "humour")
+        self.assertEqual(migration.new_type("unioslo_ifi", "official"), "university")
+        self.assertEqual(migration.new_type("sp_uio", "official"), "democracy")
+        self.assertEqual(migration.new_type("outputifi", "official"), "media")
+        self.assertEqual(migration.new_type("fui_ifi", "official"), "union")
+        self.assertEqual(
+            InstagramAccount.objects.get(username="gangen_i_tredje").kind, HUMOUR
+        )
+
+    def test_tags_are_translated(self):
+        account = InstagramAccount(username="x", kind=DEMOCRACY)
+        with translation.override("nb"):
+            self.assertEqual(account.tag, "studentdemokrati")
+        account.kind = UNIVERSITY
+        self.assertEqual(account.tag, "UiO")
+
+
+class UnionLinkTests(TestCase):
+    def test_sync_links_accounts_listed_on_a_union_page(self):
+        navet = _make_union_page("Navet", "https://www.instagram.com/IfiNavet/?hl=nb")
+        _make_union_page("Other", "https://instagram.com/somebody_else")
+        self.assertEqual(match_union_pages(), 1)
+        account = InstagramAccount.objects.get(username="ifinavet")
+        self.assertEqual(account.union_page_id, navet.pk)
+        self.assertEqual(match_union_pages(), 0)
+
+    def test_sync_never_replaces_a_link_an_admin_set(self):
+        chosen = _make_union_page("Chosen", "https://instagram.com/nobody")
+        _make_union_page("Navet", "https://instagram.com/ifinavet")
+        account = InstagramAccount.objects.get(username="ifinavet")
+        account.union_page = chosen
+        account.save()
+        match_union_pages()
+        account.refresh_from_db()
+        self.assertEqual(account.union_page_id, chosen.pk)
+
+    def test_about_line_links_to_the_union_page(self):
+        navet = _make_union_page("Navet", "https://instagram.com/ifinavet")
+        match_union_pages()
+        post = InstagramPost(
+            account=InstagramAccount.objects.get(username="ifinavet"),
+            permalink="https://www.instagram.com/p/X/",
+            posted_at=timezone.now(),
+        )
+        post.image.name = "instagram/posts/x.jpg"
+        [post] = with_union_links([post])
+        with translation.override("en"):
+            html = render_to_string(
+                "home/partials/instagram/post_header.html", {"post": post}
+            )
+        self.assertIn('<span class="home-instagram-tag is-union">union</span>', html)
+        self.assertIn(
+            f'<a class="home-instagram-union" href="{navet.localized.url}">'
+            "About Navet &rarr;</a>",
+            html,
+        )

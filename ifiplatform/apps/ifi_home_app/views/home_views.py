@@ -14,7 +14,12 @@ from ..dummydata import (
 )
 from ..models.home_models import HomeBoardMessage, IfiTool, NewsItem, StudentUnion
 from ..models.magazine import MagazineIssue
-from ..models.instagram import SHOWN_POSTS, shown_posts, visible_posts
+from ..models.instagram import (
+    SHOWN_POSTS,
+    shown_posts,
+    visible_posts,
+    with_union_links,
+)
 from ..models.opening_hours import opening_hours_now
 
 
@@ -69,7 +74,7 @@ def main_view(request):
         "upcoming_event_days": group_events_by_day(upcoming_events),
         "magazine_issues": list(MagazineIssue.objects.filter(hidden=False)),
         "opening_hours": opening_hours_now(),
-        "instagram_posts": list(shown_posts()),
+        "instagram_posts": with_union_links(shown_posts()),
         "instagram_total": visible_posts().count(),
     }
 
@@ -83,7 +88,7 @@ def main_view(request):
 def instagram_more_posts(request):
     """The Instagram viewer's cards after the first SHOWN_POSTS, as an HTML
     fragment the viewer appends the first time it opens."""
-    posts = list(visible_posts())
+    posts = with_union_links(visible_posts())
     numbered = list(enumerate(posts, start=1))[SHOWN_POSTS:]
     return render(
         request,

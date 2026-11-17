@@ -117,7 +117,7 @@
   background: var(--color-pastel-turq);
 }
 
-.home-instagram-byline {
+.home-instagram-post-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -146,8 +146,26 @@
   font-weight: 800;
   padding: 0 0.35rem;
   border-radius: 999px;
-  background: var(--color-pastel-yellow);
+  background: color-mix(in srgb, var(--color-slate) 16%, var(--color-white));
   color: var(--color-text);
+  white-space: nowrap;
+}
+
+.home-instagram-tag.is-humour {
+  background: var(--color-pastel-yellow);
+}
+
+.home-instagram-who-text {
+  display: grid;
+  min-width: 0;
+}
+
+.home-instagram-union {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .home-instagram-image {
