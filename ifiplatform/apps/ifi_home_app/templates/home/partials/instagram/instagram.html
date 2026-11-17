@@ -38,6 +38,7 @@
                 </details>
             {% endif %}
             <p class="home-instagram-suggest">{% trans "Run an IFI-related account?" %} <a href="{% url 'instagram_request' %}">{% trans "Suggest an account to show here" %} &rarr;</a></p>
+            {% include "home/partials/instagram/sync_button.html" %}
         </div>
             <dialog class="home-instagram-viewer" aria-label="Ifi Instagram"{% if instagram_total > shown %} data-more-url="{% url 'instagram_more_posts' %}"{% endif %}>
                 <button class="home-instagram-viewer-close" type="button" aria-label="{% trans 'Close' %}">&times;</button>
@@ -59,6 +60,5 @@
                 </div>
             </dialog>
     </section>
-    {% include "home/partials/instagram/sync_button.html" %}
     <script src="{% static 'js/home_instagram.js' %}" defer></script>
 {% endwith %}{% endif %}

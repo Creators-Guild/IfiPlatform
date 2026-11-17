@@ -52,6 +52,10 @@
   color: var(--color-text-muted);
 }
 
+.home-instagram-card .instagram-sync-form {
+  margin: 0;
+}
+
 .home-instagram-suggest a {
   color: var(--color-text);
   font-weight: 700;
