@@ -13,6 +13,43 @@
   container: instagram / inline-size;
 }
 
+.home-instagram-head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
+  column-gap: 1rem;
+}
+
+.home-instagram-head .newsbar-heading {
+  grid-column: 2;
+}
+
+.home-instagram-add {
+  grid-column: 3;
+  justify-self: end;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+@container instagram (width < 40rem) {
+  .home-instagram-head {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .home-instagram-head .newsbar-heading,
+  .home-instagram-add {
+    grid-column: 1;
+    justify-self: center;
+  }
+
+  #home-subcontent .home-instagram-head .newsbar-heading {
+    margin-bottom: 0.25rem;
+  }
+}
+
 .home-instagram-feed {
   display: grid;
   grid-template-columns: minmax(0, 32rem);

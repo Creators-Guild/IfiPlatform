@@ -1,0 +1,10 @@
+{% load i18n %}{% autoescape off %}{% if request.status == "approved" %}{% blocktrans with handle=request.username %}Hi!
+
+@{{ handle }} is now in Ifi Instagram on the home page of Ifi Platform. Its newest posts show up within an hour.{% endblocktrans %}{% else %}{% blocktrans with handle=request.username %}Hi!
+
+@{{ handle }} won't be shown in Ifi Instagram on Ifi Platform.{% endblocktrans %}{% endif %}{% if request.answer %}
+
+{{ request.answer }}{% endif %}
+
+{% trans "Ifi Platform" %}
+{% endautoescape %}

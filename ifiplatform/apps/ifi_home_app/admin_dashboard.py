@@ -1,7 +1,8 @@
 """The Wagtail dashboard's own panels: "How this site works" (a short guide
 for editors), "Shortcuts" (links to the parts of the admin editors use
-most, each shown only to users who may open it), and a warning for
-superusers when the Instagram token is about to expire."""
+most, each shown only to users who may open it), a warning for
+superusers when the Instagram token is about to expire, and a notice when
+visitors' Instagram account requests are waiting."""
 
 from django.urls import reverse
 from wagtail.admin.ui.components import Component
@@ -76,11 +77,32 @@ class InstagramTokenPanel(Component):
         return {"expires_at": self.expires_at}
 
 
+class InstagramRequestsPanel(Component):
+    """Tells admins who can answer them how many account requests wait."""
+
+    name = "instagram_requests"
+    order = 21  # next to the token warning
+    template_name = "wagtailadmin/home/instagram_requests.html"
+
+    def __init__(self, waiting):
+        self.waiting = waiting
+
+    def get_context_data(self, parent_context=None):
+        url = reverse("wagtailsnippets_ifi_home_app_instagramaccountrequest:list")
+        return {"waiting": self.waiting, "url": f"{url}?status=pending"}
+
+
 def add_dashboard_panel(request, panels):
-    from .models import InstagramSyncState  # pylint: disable=import-outside-toplevel
+    # pylint: disable=import-outside-toplevel
+    from .models import InstagramSyncState
+    from .models.instagram_request import waiting_requests
 
     state = InstagramSyncState.load()
     if request.user.is_superuser and state and state.expires_soon():
         panels.append(InstagramTokenPanel(state.token_expires_at))
+    if request.user.has_perm("ifi_home_app.change_instagramaccountrequest"):
+        waiting = waiting_requests()
+        if waiting:
+            panels.append(InstagramRequestsPanel(waiting))
     panels.append(GuidePanel())
     panels.append(ShortcutsPanel(request))

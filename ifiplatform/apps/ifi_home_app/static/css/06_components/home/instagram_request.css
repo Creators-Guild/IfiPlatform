@@ -1,0 +1,231 @@
+.instagram-request {
+  display: grid;
+  justify-items: center;
+  padding: 2.5rem 1rem 4rem;
+}
+
+.instagram-request-card {
+  --line: color-mix(in srgb, var(--color-slate) 30%, var(--color-white));
+  width: min(100%, 32rem);
+  box-sizing: border-box;
+  display: grid;
+  gap: 1rem;
+  padding: 1.75rem;
+  border-radius: 12px;
+  background: var(--color-card-bg);
+  box-shadow: 0 10px 40px var(--color-shadow);
+}
+
+.instagram-request-card h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  text-wrap: balance;
+}
+
+.instagram-request-card p {
+  margin: 0;
+}
+
+.instagram-request-card form {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.instagram-request-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+}
+
+.instagram-request-steps li {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-slate) 16%, var(--color-white));
+  color: var(--color-text-muted);
+}
+
+.instagram-request-steps li[aria-current="step"] {
+  background: var(--color-text);
+  color: var(--color-on-accent);
+}
+
+.instagram-request-checks {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.instagram-request-check {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem;
+  align-items: start;
+  cursor: pointer;
+}
+
+.instagram-request-check input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0.15rem 0 0;
+  accent-color: var(--color-text);
+}
+
+.instagram-request-check em {
+  margin-left: 0.25rem;
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-cta-border);
+}
+
+.instagram-request-check small,
+.instagram-request-field small {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.instagram-request-blocker {
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid var(--color-cta-border);
+  border-radius: 0 6px 6px 0;
+  background: color-mix(in srgb, var(--color-pink) 8%, var(--color-white));
+  font-size: 0.9rem;
+}
+
+.instagram-request-field {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.instagram-request-field > label,
+.instagram-request-field legend {
+  padding: 0;
+  font-weight: 700;
+}
+
+.instagram-request-field legend {
+  margin-bottom: 0.35rem;
+}
+
+.instagram-request-field input[type="text"],
+.instagram-request-field input[type="email"],
+.instagram-request-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--color-white);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.instagram-request-field textarea {
+  resize: vertical;
+}
+
+.instagram-request-at {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--color-white);
+}
+
+.instagram-request-at span {
+  padding-left: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.instagram-request-field .instagram-request-at input {
+  border: 0;
+  padding-left: 0.2rem;
+}
+
+.instagram-request-kinds {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.instagram-request-kinds label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.instagram-request-kinds label:has(input:checked) {
+  border-color: var(--color-text);
+}
+
+.instagram-request-kinds input {
+  margin: 0;
+  accent-color: var(--color-text);
+}
+
+.instagram-request-error {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-error);
+}
+
+.instagram-request-actions {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.instagram-request-next {
+  padding: 0.55rem 1.1rem;
+  border: 0;
+  border-radius: 6px;
+  background: var(--color-text);
+  color: var(--color-on-accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.instagram-request-card form:has(.is-required input:not(:checked)) .instagram-request-next {
+  opacity: 0.4;
+}
+
+.instagram-request-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.instagram-request-honeypot {
+  position: absolute;
+  left: -100vw;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.instagram-request-card :is(input, textarea, button, a):focus-visible {
+  outline: 3px solid var(--color-cta-hover);
+  outline-offset: 2px;
+}

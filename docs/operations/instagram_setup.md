@@ -1,6 +1,6 @@
 # Setting up the Instagram feed
 
-Last updated: 2026-11-14
+Last updated: 2026-11-17
 
 The home page's "Ifi Instagram" feed reads other accounts' public posts
 through Meta's Graph API, using the Ifi Creators' Guild account
@@ -109,6 +109,20 @@ permissions above in the app's **App Review**. Meta asks for:
 Until it's approved, accounts other than @ificreatorsguild fail with a
 permission error. Their posts can be added by hand in the meantime
 (Snippets → "Instagram posts" → Add).
+
+## Handling account requests
+
+Visitors can ask for an account to be added (the "Suggest an account to show here →" link
+by the feed). The Wagtail dashboard shows how many requests wait. Open
+Snippets → "Instagram account requests", check the account on Instagram,
+then set the status:
+
+- **Approved** adds the account to the feed. Fix the type first if the
+  requester picked the wrong one. Its posts show up after the next hourly
+  sync. If the account turns out to be personal, its error shows in
+  "Instagram accounts".
+- **Declined** adds nothing. Write a short answer if you can: it's sent to
+  the requester when they left an email.
 
 ## Keeping it working
 

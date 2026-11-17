@@ -24,6 +24,7 @@ from .models import (
     HeaderMessage,
     HomeBoardMessage,
     InstagramAccount,
+    InstagramAccountRequest,
     InstagramPost,
     Location,
     MagazineIssue,
@@ -152,8 +153,39 @@ class InstagramPostViewSet(SnippetViewSet):
     list_filter = ["source", "hidden", "account"]
 
 
+class _NoAddPermissionPolicy(ModelPermissionPolicy):
+    """Rows that only come from outside the admin (visitors' requests), so
+    nobody can add one here."""
+
+    def user_has_permission(self, user, action):
+        return action != "add" and super().user_has_permission(user, action)
+
+    def users_with_any_permission(self, actions):
+        actions = [action for action in actions if action != "add"]
+        if not actions:
+            return get_user_model().objects.none()
+        return super().users_with_any_permission(actions)
+
+
+class InstagramAccountRequestViewSet(SnippetViewSet):
+    """Visitors' requests to add their account to the feed. Approving one
+    adds the account (InstagramAccountRequest.save)."""
+
+    model = InstagramAccountRequest
+    icon = "mail"
+    menu_label = "Instagram account requests"
+    list_display = ["username", "kind", "status", "created_at"]
+    list_filter = ["status"]
+    search_fields = ["username"]
+
+    @property
+    def permission_policy(self):
+        return _NoAddPermissionPolicy(self.model)
+
+
 register_snippet(InstagramAccountViewSet)
 register_snippet(InstagramPostViewSet)
+register_snippet(InstagramAccountRequestViewSet)
 
 hooks.register("after_publish_page", nudge.warn_after_publish)
 hooks.register("before_edit_page", nudge.warn_on_edit)

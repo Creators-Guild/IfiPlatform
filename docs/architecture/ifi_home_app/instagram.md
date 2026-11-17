@@ -53,6 +53,7 @@ All in `models/instagram.py`:
 | `InstagramAccount` | An account in the feed: username, display name, type, union page, order, active, profile picture, and the last sync's time and error |
 | `InstagramPost` | A post: account, link, caption, time, image/video/album, picture, hidden, and whether it was synced or added by hand |
 | `InstagramSyncState` | One row: when the access token expires |
+| `InstagramAccountRequest` | A visitor's request to add an account: username, type, how it's IFI-related (or why it should be shown anyway), optional email, status, answer, and when it was sent and decided |
 
 - Synced posts belong to the sync: in the admin only **Hidden** can be
   changed. Posts added by hand can be edited freely and are never touched
@@ -83,6 +84,35 @@ All in `models/instagram.py`:
   posts, 16 videos, 96 albums).
 - The first account list (the accounts Ifi Creators' Guild follows) was
   added by migration `0164_instagram_accounts`.
+
+## Account requests
+
+Anyone can ask for an account to be added, through "Suggest an account to show here →"
+next to the feed's heading. The page (`instagram/request/`,
+`views/instagram_views.py`, `forms.py`, template
+`home/instagram_request.html`) has two steps:
+
+1. **Check.** The account must be public and a business or creator
+   account, because Meta can't read other accounts. Both boxes are
+   required, and the page explains how to switch. "It's related to IFI"
+   can be left empty: that's the one rule with exceptions.
+2. **Request.** Username (a pasted Instagram address works too), type, how
+   it's related to IFI (or, without the IFI box, why it should be shown
+   anyway) and an optional email for the answer.
+
+Usernames already in the feed or already requested are refused. A hidden
+field catches simple bots, and the whole site takes at most 10 requests
+an hour.
+
+Admins answer under Snippets → "Instagram account requests"; the
+dashboard shows how many wait. Setting the status to **Approved** adds the
+account to the feed (or turns it back on), and its posts appear after
+the next sync. **Declined** does nothing more. Either way, a requester who
+left an email gets the answer in the language they used, with the
+optional answer text. Only the first decision counts: changing it later
+doesn't add or remove anything, so remove an account in "Instagram
+accounts". The sync deletes decided requests six months after the
+decision, as the privacy page says.
 
 ## The sync: `sync_instagram_posts`
 
@@ -136,5 +166,7 @@ All in `models/instagram.py`:
 | How posts are stored or cleaned up | `management/commands/sync_instagram_posts.py` |
 | How often it runs | `deploy/systemd/sync-instagram-posts.timer` |
 | The feed's look | the template and CSS above |
+| The request page | `views/instagram_views.py`, `forms.py`, `templates/home/instagram_request.html`, `static/css/06_components/home/instagram_request.css` |
+| Answer requests | Snippets → "Instagram account requests" |
 
 Tests are in `tests/test_instagram.py`.

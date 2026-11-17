@@ -3,7 +3,10 @@
 {% if instagram_posts %}
     <section class="instagram_container" aria-labelledby="home-instagram-heading">
         <div class="home-instagram-card">
-            <h2 class="newsbar-heading newsbar-heading--news" id="home-instagram-heading">Ifi Instagram</h2>
+            <div class="home-instagram-head">
+                <h2 class="newsbar-heading newsbar-heading--news" id="home-instagram-heading">Ifi Instagram</h2>
+                <a class="home-instagram-add" href="{% url 'instagram_request' %}">{% trans "Suggest an account to show here" %} &rarr;</a>
+            </div>
             <div class="home-instagram-feed">
                 {% for post in instagram_posts %}
                     <article class="home-instagram-post is-{{ post.account.kind }}">

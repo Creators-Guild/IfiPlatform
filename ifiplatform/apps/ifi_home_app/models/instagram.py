@@ -267,9 +267,10 @@ def visible_posts():
     )
 
 
-def _instagram_username(url):
-    """'https://www.instagram.com/ifinavet/?hl=nb' -> 'ifinavet'."""
-    path = url.split("?")[0].split("#")[0].rstrip("/")
+def instagram_username(text):
+    """'https://www.instagram.com/IfiNavet/?hl=nb', '@IfiNavet' or
+    ' ifinavet ' -> 'ifinavet'."""
+    path = text.strip().split("?")[0].split("#")[0].rstrip("/")
     return path.rsplit("/", 1)[-1].lstrip("@").lower()
 
 
@@ -288,9 +289,7 @@ def match_union_pages():
         for block in page.social_links:
             if block.value.get("platform") != "instagram":
                 continue
-            account = accounts.pop(
-                _instagram_username(block.value.get("url", "")), None
-            )
+            account = accounts.pop(instagram_username(block.value.get("url", "")), None)
             if account is not None:
                 account.union_page = page
                 account.save(update_fields=["union_page"])

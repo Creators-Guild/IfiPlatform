@@ -7,7 +7,8 @@ and their images are deleted. Posts added by hand are never changed.
 Every stored synced post also gets its video file and every album picture;
 they go when the post is deleted. One account failing (e.g. a personal
 account) is recorded on the account and doesn't stop the others. Accounts
-without a union page are linked to the union page that lists them.
+without a union page are linked to the union page that lists them, and
+account requests decided over six months ago are deleted.
 Without a token in .env it does nothing more. Runs hourly 07-23 from the sync-instagram-posts
 systemd timer.
 
@@ -34,6 +35,7 @@ from ifi_home_app.models.instagram import (
     InstagramSyncState,
     match_union_pages,
 )
+from ifi_home_app.models.instagram_request import delete_old_requests
 
 POST_IMAGE_SIZE = 1080
 AVATAR_SIZE = 150
@@ -63,6 +65,9 @@ class Command(BaseCommand):
         linked = match_union_pages()
         if linked:
             self.stdout.write(f"Linked {linked} account(s) to their union page.")
+        deleted = delete_old_requests()
+        if deleted:
+            self.stdout.write(f"Deleted {deleted} old account request(s).")
         if not instagram.is_configured():
             self.stdout.write("No INSTAGRAM_ACCESS_TOKEN in .env: nothing to sync.")
             return

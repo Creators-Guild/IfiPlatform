@@ -1,7 +1,7 @@
 # Homepage Ifi Instagram feed — design rationale
 
 Last updated: 2026-11-17
-Covers: ifiplatform/apps/ifi_home_app/integrations/instagram.py, ifiplatform/apps/ifi_home_app/models/instagram.py, ifiplatform/apps/ifi_home_app/management/commands/sync_instagram_posts.py, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/instagram.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/media.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/post_header.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_post.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_posts.html, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_instagram.css, ifiplatform/apps/ifi_home_app/static/js/home_instagram.js
+Covers: ifiplatform/apps/ifi_home_app/integrations/instagram.py, ifiplatform/apps/ifi_home_app/models/instagram.py, ifiplatform/apps/ifi_home_app/management/commands/sync_instagram_posts.py, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/instagram.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/media.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/post_header.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_post.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_posts.html, ifiplatform/apps/ifi_home_app/models/instagram_request.py, ifiplatform/apps/ifi_home_app/forms.py, ifiplatform/apps/ifi_home_app/views/instagram_views.py, ifiplatform/apps/ifi_home_app/templates/home/instagram_request.html, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_instagram.css, ifiplatform/apps/ifi_home_app/static/js/home_instagram.js
 
 The human docs (`architecture/ifi_home_app/instagram.md`,
 `operations/instagram_setup.md`) explain what it does. This note keeps the
@@ -262,3 +262,35 @@ accounts while the app was in Development mode.
   all its pictures to `loading="eager"`, so the 3rd and later are ready
   before they're swiped to (user saw empty slides). `InstagramPost.pictures` reads stored sizes so
   no file is opened, and skips the album query for unsaved posts (tests).
+
+## Account requests (user's choices, 2026-11-17, from mockups)
+
+- Entry: "Suggest an account to show here →" on the heading's line, right
+  (`.home-instagram-head`: grid `1fr auto 1fr` keeps the heading centered;
+  under 40rem card width the link drops under it).
+- Own page, not a dialog, two steps in one view (`step` POST field: check /
+  request / back), plain form posts so it works without JS. The user's
+  rule: public + business/creator are required (Meta can't read anything
+  else), only IFI-relatedness may be an exception. Step 1's fields are
+  `required=False` and `clean()` raises one explanation, instead of two
+  "This field is required". "Next" is only dimmed by CSS (`:has(... not
+  (:checked))`), still clickable, so the server's explanation shows.
+- The main button comes first in the HTML and `row-reverse` puts it on the
+  right: Enter in a text field submits the first submit button, which was
+  "← Back".
+- The form's `username` is 200 long so a pasted Instagram address fits;
+  `clean_username` shortens it with `instagram_username()` (shared with
+  `match_union_pages`) and checks it against `[a-z0-9._]{1,30}`.
+- Spam: a honeypot (`website`, off-screen, "succeeds" silently) and
+  `REQUESTS_PER_HOUR` for the whole site. Not per visitor: nginx passes no
+  client address (no X-Forwarded-For), so every visitor looks the same.
+- Approval lives in `InstagramAccountRequest.save()`: only the first change
+  away from pending counts (dated, account added or turned back on, email
+  in the requester's `language`). Later changes do nothing, so nothing is
+  added or removed by accident. The email goes after the transaction; an
+  SMTP error is logged, not raised, so the admin save still works.
+- Admin: the snippet's permission policy forbids "add" (rows come only
+  from the page). Dashboard panel for users who can change requests.
+- Privacy: requests, and their email, are deleted 180 days after the
+  decision (`delete_old_requests()`, start of every sync); the paragraph
+  is on `legal/data_processors.html`, since the answer goes through Resend.

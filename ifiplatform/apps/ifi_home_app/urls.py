@@ -7,8 +7,16 @@ from core_app.deploy_notice import deploy_notice_status_view
 from .views import home_views
 from .views import article_views
 from .views import event_views
+from .views import instagram_views
 
-ifi_home_urlpatterns = [path("", home_views.main_view, name="ifi_home")]
+ifi_home_urlpatterns = [
+    path("", home_views.main_view, name="ifi_home"),
+    path(
+        "instagram/request/",
+        instagram_views.instagram_request,
+        name="instagram_request",
+    ),
+]
 
 ifi_api_urlpatterns = [
     path(

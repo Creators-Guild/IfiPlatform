@@ -17,6 +17,7 @@ __all__ = [
     "InstagramPost",
     "InstagramPostImage",
     "InstagramSyncState",
+    "InstagramAccountRequest",
     "Menu",
     "MenuGroup",
     "MenuGroupLink",
@@ -41,6 +42,7 @@ from .instagram import (
     InstagramPostImage,
     InstagramSyncState,
 )
+from .instagram_request import InstagramAccountRequest
 from .menus import Menu, MenuGroup, MenuGroupLink, MenuSlot
 from .translation import (
     EnglishSlug,

@@ -2437,6 +2437,163 @@ msgstr "Se på Instagram"
 msgid "Watch on Instagram"
 msgstr "Se videoen på Instagram"
 
+#: Ifi Instagram account requests
+msgid "Suggest an account to show here"
+msgstr "Foreslå en konto som skal vises her"
+
+#: Ifi Instagram account requests
+msgid "Suggest an account for Ifi Instagram"
+msgstr "Foreslå en konto til Ifi Instagram"
+
+#: Ifi Instagram account requests
+msgid "Thanks!"
+msgstr "Takk!"
+
+#: Ifi Instagram account requests
+msgid "An admin will look at your request. If you left an email, the answer comes there. Approved accounts show up in Ifi Instagram within an hour."
+msgstr "En admin ser på forespørselen din. Hvis du la igjen en e-postadresse, kommer svaret dit. Godkjente kontoer dukker opp i Ifi Instagram innen en time."
+
+#: Ifi Instagram account requests
+msgid "Back to the home page"
+msgstr "Tilbake til forsiden"
+
+#: Ifi Instagram account requests
+msgid "Check"
+msgstr "Sjekk"
+
+#: Ifi Instagram account requests
+msgid "Request"
+msgstr "Forespørsel"
+
+#: Ifi Instagram account requests
+msgid "Ifi Instagram on the home page shows posts from IFI-related accounts. Suggest yours or another account, and an admin will look at it."
+msgstr "Ifi Instagram på forsiden viser innlegg fra kontoer med tilknytning til IFI. Foreslå din egen eller en annen konto, så ser en admin på det."
+
+#: Ifi Instagram account requests
+msgid "Can the account be shown?"
+msgstr "Kan kontoen vises?"
+
+#: Ifi Instagram account requests
+msgid "required"
+msgstr "påkrevd"
+
+#: Ifi Instagram account requests
+msgid "Free to switch: in Instagram, Settings → Account type and tools."
+msgstr "Gratis å bytte: i Instagram, Innstillinger → Kontotype og verktøy."
+
+#: Ifi Instagram account requests
+msgid "A union, a group, the university or a humour account about IFI. Not quite? You can ask for an exception in the next step."
+msgstr "En forening, en gruppe, universitetet eller en humorkonto om IFI. Ikke helt? Du kan be om et unntak i neste steg."
+
+#: Ifi Instagram account requests
+#: Ifi Instagram account requests
+msgid "Send request"
+msgstr "Send forespørsel"
+
+#: Ifi Instagram account requests
+msgid "It's public"
+msgstr "Den er offentlig"
+
+#: Ifi Instagram account requests
+msgid "It's a business or creator account"
+msgstr "Den er en bedrifts- eller innholdsskaperkonto"
+
+#: Ifi Instagram account requests
+msgid "It's related to IFI"
+msgstr "Den har tilknytning til IFI"
+
+#: Ifi Instagram account requests
+msgid "Instagram only lets us show public business or creator accounts. Switching is free: in Instagram, go to Settings, then Account type and tools. Then come back here."
+msgstr "Instagram lar oss bare vise offentlige bedrifts- eller innholdsskaperkontoer. Det er gratis å bytte: i Instagram, gå til Innstillinger og så Kontotype og verktøy. Kom så tilbake hit."
+
+#: Ifi Instagram account requests
+msgid "Union or association"
+msgstr "Forening eller organisasjon"
+
+#: Ifi Instagram account requests
+msgid "Student democracy"
+msgstr "Studentdemokrati"
+
+#: Ifi Instagram account requests
+msgid "University or department"
+msgstr "Universitet eller institutt"
+
+#: Ifi Instagram account requests
+msgid "Media"
+msgstr "Medier"
+
+#: Ifi Instagram account requests
+msgid "Humour"
+msgstr "Humor"
+
+#: Ifi Instagram account requests
+msgid "Instagram username"
+msgstr "Instagram-brukernavn"
+
+#: Ifi Instagram account requests
+msgid "What kind of account is it?"
+msgstr "Hva slags konto er det?"
+
+#: Ifi Instagram account requests
+msgid "How is it related to IFI?"
+msgstr "Hvilken tilknytning har den til IFI?"
+
+#: Ifi Instagram account requests
+msgid "Email for the answer (optional)"
+msgstr "E-postadresse for svaret (valgfritt)"
+
+#: Ifi Instagram account requests
+msgid "Why should it be shown anyway?"
+msgstr "Hvorfor bør den vises likevel?"
+
+#: Ifi Instagram account requests
+msgid "Use the name from the account's Instagram address, e.g. ifinavet."
+msgstr "Bruk navnet fra kontoens Instagram-adresse, f.eks. ifinavet."
+
+#: Ifi Instagram account requests
+#, python-format
+msgid "@%(username)s is already in Ifi Instagram."
+msgstr "@%(username)s er allerede med i Ifi Instagram."
+
+#: Ifi Instagram account requests
+#, python-format
+msgid "@%(username)s has already been requested. An admin will look at it soon."
+msgstr "Noen har allerede bedt om @%(username)s. En admin ser på det snart."
+
+#: Ifi Instagram account requests
+msgid "We've had a lot of requests in the last hour. Please try again later."
+msgstr "Vi har fått mange forespørsler den siste timen. Prøv igjen senere."
+
+#: Ifi Instagram account requests
+msgid "Your Ifi Instagram request"
+msgstr "Forespørselen din til Ifi Instagram"
+
+#: Ifi Instagram account requests
+#, python-format
+msgid ""
+"Hi!\n"
+"\n"
+"@%(handle)s is now in Ifi Instagram on the home page of Ifi Platform. Its newest posts show up within an hour."
+msgstr ""
+"Hei!\n"
+"\n"
+"@%(handle)s er nå med i Ifi Instagram på forsiden av Ifi Plattform. De nyeste innleggene dukker opp innen en time."
+
+#: Ifi Instagram account requests
+#, python-format
+msgid ""
+"Hi!\n"
+"\n"
+"@%(handle)s won't be shown in Ifi Instagram on Ifi Platform."
+msgstr ""
+"Hei!\n"
+"\n"
+"@%(handle)s blir ikke vist i Ifi Instagram på Ifi Plattform."
+
+#: Ifi Instagram account requests
+msgid "Anyone can ask for an Instagram account to be added to the home page. We keep the request (the account name, what you wrote and, if you give one, your email address) until an admin has answered, and delete it six months after the answer. If you give an email address, the answer is sent to it through Resend."
+msgstr "Hvem som helst kan be om at en Instagram-konto legges til på forsiden. Vi tar vare på forespørselen (kontonavnet, det du skrev og e-postadressen din hvis du oppgir en) til en admin har svart, og sletter den seks måneder etter svaret. Hvis du oppgir en e-postadresse, sendes svaret dit gjennom Resend."
+
 #: .\apps\ifi_home_app\templates\home\partials\instagram\post_header.html
 #, python-format
 msgid "About %(name)s"
