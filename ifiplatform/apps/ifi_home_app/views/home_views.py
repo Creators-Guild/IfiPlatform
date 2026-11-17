@@ -15,7 +15,6 @@ from ..dummydata import (
 from ..models.home_models import HomeBoardMessage, IfiTool, NewsItem, StudentUnion
 from ..models.magazine import MagazineIssue
 from ..models.instagram import (
-    SHOWN_POSTS,
     shown_posts,
     visible_posts,
     with_union_links,
@@ -86,10 +85,13 @@ def main_view(request):
 
 
 def instagram_more_posts(request):
-    """The Instagram viewer's cards after the first SHOWN_POSTS, as an HTML
-    fragment the viewer appends the first time it opens."""
+    """Every visible post as Instagram viewer cards, an HTML fragment the
+    viewer appends the first time it opens."""
+    # All of them, not just after the first SHOWN_POSTS: a sync since the
+    # homepage loaded can shift the list, and the script drops the cards it
+    # already has, so nothing is skipped or shown twice.
     posts = with_union_links(visible_posts())
-    numbered = list(enumerate(posts, start=1))[SHOWN_POSTS:]
+    numbered = list(enumerate(posts, start=1))
     return render(
         request,
         "home/partials/instagram/viewer_posts.html",

@@ -7,6 +7,7 @@ Design rationale: docs/claude_context/home_instagram.md"""
 
 from datetime import timedelta
 
+from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
@@ -344,17 +345,69 @@ def _delete_post_files(sender, instance, **kwargs):  # pylint: disable=unused-ar
         instance.video.delete(save=False)
 
 
+@receiver(post_delete, sender=InstagramAccount)
+def _delete_profile_picture(
+    sender, instance, **kwargs
+):  # pylint: disable=unused-argument
+    if instance.profile_picture:
+        instance.profile_picture.delete(save=False)
+
+
+def delete_old_posts():
+    """Deletes synced posts older than POST_MAX_AGE for every account,
+    paused and inactive ones too (the sync's own cleanup only reaches the
+    accounts it syncs). Returns how many."""
+    old = InstagramPost.objects.filter(
+        source=SYNCED, posted_at__lt=timezone.now() - POST_MAX_AGE
+    )
+    count = 0
+    for post in old:
+        post.delete()  # one by one, so post_delete removes the files
+        count += 1
+    return count
+
+
 @receiver(post_delete, sender=InstagramPostImage)
 def _delete_album_image(sender, instance, **kwargs):  # pylint: disable=unused-argument
     if instance.image:
         instance.image.delete(save=False)
 
 
+# A sync that started longer ago than this is taken to have died (a crash or
+# a killed process), so a new one may start.
+RUN_STALE_AFTER = timedelta(minutes=30)
+
+
 class InstagramSyncState(models.Model):
-    """Singleton row (pk=1): what the last sync learnt about the token."""
+    """Singleton row (pk=1): what the last sync learnt about the token, and
+    whether a sync is running (so the timer and the "Sync Instagram now"
+    button never run two at once)."""
 
     token_expires_at = models.DateTimeField(null=True, blank=True)
     checked_at = models.DateTimeField(auto_now=True)
+    running_since = models.DateTimeField(null=True, blank=True)
+
+    @classmethod
+    def claim_run(cls):
+        """Marks a sync as running; False if another one already is."""
+        cls.objects.get_or_create(pk=1)
+        now = timezone.now()
+        free = models.Q(running_since__isnull=True) | models.Q(
+            running_since__lt=now - RUN_STALE_AFTER
+        )
+        return bool(cls.objects.filter(free, pk=1).update(running_since=now))
+
+    @classmethod
+    def finish_run(cls):
+        """Marks the running sync as done."""
+        cls.objects.filter(pk=1).update(running_since=None)
+
+    @classmethod
+    def is_running(cls):
+        """Whether a sync started less than RUN_STALE_AFTER ago is running."""
+        return cls.objects.filter(
+            pk=1, running_since__gte=timezone.now() - RUN_STALE_AFTER
+        ).exists()
 
     @classmethod
     def load(cls):
@@ -375,3 +428,20 @@ class InstagramSyncState(models.Model):
             self.token_expires_at
             and self.token_expires_at - timezone.now() < timedelta(days=days)
         )
+
+
+class InstagramSyncLog(models.Model):
+    """One row per click of "Sync Instagram now" (instagram/sync_button.html,
+    instagram_views.force_sync_instagram): who started a sync by hand and
+    when, like PeoplySyncLog. Superuser-only in Django admin."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
+    )
+    triggered_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-triggered_at"]
+
+    def __str__(self):
+        return f"{self.user} at {self.triggered_at}"

@@ -138,6 +138,13 @@ decision, as the privacy page says.
   the 12 newest synced posts per account, and none older than a year.
   Older ones and their pictures are deleted, so an account that hasn't
   posted for a year has nothing stored until it posts again.
+- Staff see a **"Sync Instagram now"** button under the box, like the
+  Peoply one. It starts the sync in the background and the page comes
+  back at once ("New posts show up in a minute or two"). Every click is
+  logged (superusers see the log in Django admin). Only one sync runs at
+  a time: a click, or the hourly timer, while one runs does nothing.
+- A collab post (one post on two accounts' profiles) is stored once,
+  under whichever account the sync reached first.
 - One account failing doesn't stop the others. The error is saved on the
   account, and the command ends with an error so it shows in the log.
 - When Meta can't read an account three runs in a row (a personal or

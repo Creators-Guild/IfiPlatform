@@ -1,6 +1,7 @@
 # pylint: disable=C0114,C0115,C0116
 import importlib
 import io
+import os
 import shutil
 import tempfile
 from datetime import datetime, timedelta, timezone as dt_timezone
@@ -204,6 +205,55 @@ class SyncTests(TestCase):
         self.account.refresh_from_db()
         self.assertFalse(self.account.sync_paused)
         self.assertEqual(self.account.failed_runs, 0)
+
+    def test_a_run_where_every_account_fails_is_not_counted(self):
+        other = InstagramAccount.objects.get(username="ifinavet")
+        other.is_active = True
+        other.save()
+        error = instagram.AccountNotReadable("Meta refused: Invalid user id")
+        for _ in range(4):
+            self.run_failing(error)
+        self.account.refresh_from_db()
+        self.assertFalse(self.account.sync_paused)
+        self.assertEqual(self.account.failed_runs, 0)
+
+    def test_a_collab_post_stays_under_the_first_account(self):
+        other = InstagramAccount.objects.get(username="ifinavet")
+        other.is_active = True
+        other.save()
+
+        def fake(username, **_kwargs):
+            return _found([_post(1)], username=username)
+
+        with patch.object(instagram, "get_account", side_effect=fake):
+            call_command(
+                "sync_instagram_posts", stdout=io.StringIO(), stderr=io.StringIO()
+            )
+            call_command(
+                "sync_instagram_posts", stdout=io.StringIO(), stderr=io.StringIO()
+            )
+        self.assertEqual(InstagramPost.objects.filter(instagram_id="1").count(), 1)
+        self.assertEqual(
+            len(os.listdir(os.path.join(self.media, "instagram/posts"))), 1
+        )
+
+    def test_old_posts_of_paused_accounts_are_deleted(self):
+        self.sync([_post(1)])
+        post = self.account.posts.get()
+        InstagramPost.objects.filter(pk=post.pk).update(
+            posted_at=timezone.now() - timedelta(days=400)
+        )
+        InstagramAccount.objects.filter(pk=self.account.pk).update(sync_paused=True)
+        self.sync([])
+        self.assertFalse(InstagramPost.objects.filter(pk=post.pk).exists())
+        self.assertFalse(default_storage.exists(post.image.name))
+
+    def test_deleting_an_account_deletes_its_profile_picture(self):
+        self.account.profile_picture.save("x.jpg", ContentFile(_jpeg_bytes()))
+        name = self.account.profile_picture.name
+        self.assertTrue(default_storage.exists(name))
+        self.account.delete()
+        self.assertFalse(default_storage.exists(name))
 
     def test_a_good_run_resets_the_count(self):
         InstagramAccount.objects.filter(pk=self.account.pk).update(failed_runs=2)
@@ -493,7 +543,7 @@ class MorePostsViewTests(TestCase):
         self.addCleanup(shutil.rmtree, self.media)
         self.enterContext(override_settings(MEDIA_ROOT=self.media))
 
-    def test_returns_the_cards_after_the_first_twelve(self):
+    def test_returns_every_post_so_the_viewer_can_drop_what_it_has(self):
         account = InstagramAccount.objects.get(username="unioslo_ifi")
         now = timezone.now()
         for i in range(14):
@@ -505,7 +555,7 @@ class MorePostsViewTests(TestCase):
             )
         with translation.override("en"):
             html = self.client.get(reverse("instagram_more_posts")).content.decode()
-        self.assertEqual(html.count('class="home-instagram-viewer-post"'), 2)
+        self.assertEqual(html.count('class="home-instagram-viewer-post"'), 14)
         self.assertIn('aria-label="Post 13 of 14"', html)
         self.assertIn('data-index="12"', html)
         self.assertIn("https://www.instagram.com/p/13/", html)

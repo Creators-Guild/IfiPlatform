@@ -870,6 +870,18 @@ msgstr "(sist synkronisert %(time)s)"
 msgid "Sync Peoply now"
 msgstr "Synkroniser Peoply nå"
 
+#: .\apps\ifi_home_app\templates\home\partials\instagram\sync_button.html
+msgid "Sync Instagram now"
+msgstr "Synkroniser Instagram nå"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\sync_button.html
+msgid "Instagram sync started. New posts show up in a minute or two."
+msgstr "Instagram-synkroniseringen har startet. Nye innlegg dukker opp om et minutt eller to."
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\sync_button.html
+msgid "An Instagram sync is already running."
+msgstr "En Instagram-synkronisering kjører allerede."
+
 #: .\apps\ifi_home_app\templates\events\partials\peoply_sync_button.html:7
 msgid "Don't spam!"
 msgstr "Ikke spam!"

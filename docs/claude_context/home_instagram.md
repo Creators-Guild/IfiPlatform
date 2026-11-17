@@ -1,7 +1,7 @@
 # Homepage Ifi Instagram feed — design rationale
 
 Last updated: 2026-11-17
-Covers: ifiplatform/apps/ifi_home_app/integrations/instagram.py, ifiplatform/apps/ifi_home_app/models/instagram.py, ifiplatform/apps/ifi_home_app/management/commands/sync_instagram_posts.py, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/instagram.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/media.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/post_header.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_post.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_posts.html, ifiplatform/apps/ifi_home_app/models/instagram_request.py, ifiplatform/apps/ifi_home_app/forms.py, ifiplatform/apps/ifi_home_app/views/instagram_views.py, ifiplatform/apps/ifi_home_app/templates/home/instagram_request.html, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_instagram.css, ifiplatform/apps/ifi_home_app/static/js/home_instagram.js
+Covers: ifiplatform/apps/ifi_home_app/integrations/instagram.py, ifiplatform/apps/ifi_home_app/models/instagram.py, ifiplatform/apps/ifi_home_app/management/commands/sync_instagram_posts.py, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/instagram.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/media.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/post_header.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_post.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_posts.html, ifiplatform/apps/ifi_home_app/models/instagram_request.py, ifiplatform/apps/ifi_home_app/forms.py, ifiplatform/apps/ifi_home_app/views/instagram_views.py, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/sync_button.html, ifiplatform/apps/ifi_home_app/templates/home/instagram_request.html, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_instagram.css, ifiplatform/apps/ifi_home_app/static/js/home_instagram.js
 
 The human docs (`architecture/ifi_home_app/instagram.md`,
 `operations/instagram_setup.md`) explain what it does. This note keeps the
@@ -50,6 +50,29 @@ accounts while the app was in Development mode.
   aren't created at all.
 - Profile pictures are only downloaded when empty (Meta's URL changes on
   every call, so there is nothing to compare). Clearing it re-fetches.
+- "Sync Instagram now" (user, 2026-11-17, "like Peoply"):
+  `instagram_views.force_sync_instagram`, staff only, logged in
+  `InstagramSyncLog` (admin reuses `PeoplySyncLogAdmin`). Unlike Peoply
+  it doesn't run the sync in the request: a run takes ~30 s to minutes
+  (32 Meta calls plus media), past the server's request timeout, so it
+  `Popen`s `manage.py sync_instagram_posts` in a new session and
+  redirects with `?instagram_sync=started|running` for the status text.
+  The command holds a run lock (`InstagramSyncState.claim_run`, an atomic
+  UPDATE on `running_since`, stale after 30 min), so the timer and the
+  button never sync at once. The background run's output goes nowhere;
+  per-account errors are on the accounts. The form has its own class so
+  `peoply_sync_button.js`'s cooldown doesn't attach; it shares only the
+  Peoply button's CSS.
+- Collab posts (review, 2026-11-17): one Instagram post on two profiles
+  has one id, and `instagram_id` is unique across accounts, so the second
+  account crashed the whole run with an IntegrityError. `_sync_account`
+  skips ids already stored under another account: a collab shows once,
+  under whichever account stored it first.
+- Age cleanup also runs for every account once per sync
+  (`delete_old_posts()`), since `_sync_account` only reaches active,
+  unpaused accounts; paused accounts' posts still show and would never
+  age out. Deleting an account also deletes its profile picture
+  (`_delete_profile_picture`).
 - One failing account doesn't stop the others; the command raises
   `CommandError` at the end so the timer's journal shows it.
 - Pausing (user, 2026-11-17): `AccountNotReadable` (a subclass of
@@ -57,7 +80,9 @@ accounts while the app was in Development mode.
   subcode 2207013) counts toward `failed_runs`; at
   `FAILED_RUNS_BEFORE_PAUSE` (3) the account gets `sync_paused` and the
   run doesn't fail for it. Any other error (token, network, odd answer)
-  never counts, so one bad hour can't pause all accounts. Paused, not
+  never counts, and neither does a run where *every* account (2 or more)
+  was unreadable (`_handle_unreadable`): that's a broken setup, not 32
+  personal accounts, so one bad hour can't pause everything. Paused, not
   inactive: its posts still show (user's pick). A good run resets the
   count; unticking "paused" resets it in `InstagramAccount.save()`;
   approving a request resumes it. Dashboard notice:
@@ -201,7 +226,10 @@ accounts while the app was in Development mode.
   the rest come from `instagram_more_posts` (`api/instagram/posts/`,
   `viewer_posts.html`), fetched by `home_instagram.js` the first time the
   viewer opens (`data-more-url`, set only when there are more), so the
-  homepage stays small (200 cards were ~420 kB of HTML). A failed fetch
+  homepage stays small (200 cards were ~420 kB of HTML). It returns every
+  visible post, the first 12 too, and the script drops cards whose
+  `data-post` it already has: a sync between page load and opening the
+  viewer would otherwise shift the list and skip or repeat a post. A failed fetch
   retries on the next open. Indexes must line up: thumbs' `data-index` and
   the script's `posts()` are positions, so `shown_posts()` is
   `visible_posts()[:SHOWN_POSTS]` and the ordering ends in `-pk` (a tie on

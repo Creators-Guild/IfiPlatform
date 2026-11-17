@@ -1,14 +1,18 @@
 # pylint: disable=C0114,C0115,C0116
+import io
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.core.management import call_command
 from django.template.loader import render_to_string
-from django.test import TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone, translation
 
 from ifi_home_app.models import InstagramAccount, InstagramAccountRequest, InstagramPost
+from ifi_home_app.models.instagram import InstagramSyncLog, InstagramSyncState
 from ifi_home_app.models.instagram_request import (
     APPROVED,
     DECLINED,
@@ -252,3 +256,89 @@ class DashboardTests(TestCase):
         self.assertEqual(edit.status_code, 200)
         self.assertContains(edit, "The board game group at IFI.")
         self.assertNotEqual(self.client.get(reverse(f"{prefix}:add")).status_code, 200)
+
+
+class ForceSyncTests(TestCase):
+    def setUp(self):
+        self.enterContext(translation.override("en"))
+        self.staff = get_user_model().objects.create_user(
+            "staff", "s@example.com", "pw", is_staff=True
+        )
+        self.popen = self.enterContext(
+            patch("ifi_home_app.views.instagram_views.subprocess.Popen")
+        )
+
+    def post(self):
+        return self.client.post(reverse("force_sync_instagram"), {"next": "/en/"})
+
+    def test_staff_start_a_background_sync_and_it_is_logged(self):
+        self.client.force_login(self.staff)
+        response = self.post()
+        self.assertRedirects(
+            response,
+            "/en/?instagram_sync=started#home-instagram-heading",
+            fetch_redirect_response=False,
+        )
+        self.popen.assert_called_once()
+        self.assertIn("sync_instagram_posts", self.popen.call_args.args[0])
+        self.assertEqual(InstagramSyncLog.objects.get().user, self.staff)
+
+    def test_a_running_sync_is_not_started_again(self):
+        self.client.force_login(self.staff)
+        self.assertTrue(InstagramSyncState.claim_run())
+        response = self.post()
+        self.assertIn("instagram_sync=running", response.url)
+        self.popen.assert_not_called()
+
+    def test_others_are_refused(self):
+        user = get_user_model().objects.create_user("plain", "p@example.com", "pw")
+        self.client.force_login(user)
+        self.assertEqual(self.post().status_code, 403)
+        self.popen.assert_not_called()
+
+    def test_the_lock_frees_up_after_a_stale_run(self):
+        self.assertTrue(InstagramSyncState.claim_run())
+        self.assertFalse(InstagramSyncState.claim_run())
+        InstagramSyncState.objects.update(
+            running_since=timezone.now() - timedelta(hours=1)
+        )
+        self.assertTrue(InstagramSyncState.claim_run())
+        InstagramSyncState.finish_run()
+        self.assertFalse(InstagramSyncState.is_running())
+
+    def test_the_command_skips_while_another_sync_runs(self):
+        InstagramSyncState.claim_run()
+        out = io.StringIO()
+        with override_settings(
+            INSTAGRAM_ACCESS_TOKEN="t", INSTAGRAM_BUSINESS_ACCOUNT_ID="1"
+        ):
+            call_command("sync_instagram_posts", stdout=out, stderr=io.StringIO())
+        self.assertIn("Another Instagram sync is running", out.getvalue())
+
+    def test_button_only_for_staff_with_the_status(self):
+        account = InstagramAccount.objects.get(username="ifinavet")
+        post = InstagramPost(
+            account=account,
+            permalink="https://www.instagram.com/p/X/",
+            posted_at=timezone.now(),
+        )
+        post.image.name = "instagram/posts/x.jpg"
+        factory = RequestFactory()
+        request = factory.get("/en/?instagram_sync=started")
+        request.user = self.staff
+        html = render_to_string(
+            "home/partials/instagram/instagram.html",
+            {"instagram_posts": [post]},
+            request=request,
+        )
+        self.assertIn("Sync Instagram now", html)
+        self.assertIn("Instagram sync started.", html)
+        request.user = get_user_model().objects.create_user(
+            "plain", "p@example.com", "pw"
+        )
+        html = render_to_string(
+            "home/partials/instagram/instagram.html",
+            {"instagram_posts": [post]},
+            request=request,
+        )
+        self.assertNotIn("Sync Instagram now", html)

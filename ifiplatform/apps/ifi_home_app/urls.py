@@ -66,14 +66,21 @@ ifi_api_urlpatterns = [
         article_views.save_banner_style,
         name="page_banner_style",
     ),
-    # Not page-scoped -- triggers the site-wide sync_peoply_events command,
-    # see event_views.force_sync_peoply_events.
-    # The Instagram viewer's posts after the first 12, loaded when it opens.
+    # Every Instagram post as viewer cards, loaded when the viewer opens.
     path(
         "api/instagram/posts/",
         home_views.instagram_more_posts,
         name="instagram_more_posts",
     ),
+    # Starts sync_instagram_posts in the background, see
+    # instagram_views.force_sync_instagram.
+    path(
+        "api/instagram/force-sync/",
+        instagram_views.force_sync_instagram,
+        name="force_sync_instagram",
+    ),
+    # Not page-scoped -- triggers the site-wide sync_peoply_events command,
+    # see event_views.force_sync_peoply_events.
     path(
         "api/peoply/force-sync/",
         event_views.force_sync_peoply_events,

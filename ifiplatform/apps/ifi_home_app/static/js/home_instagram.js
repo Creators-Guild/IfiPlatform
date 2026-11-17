@@ -316,6 +316,10 @@ function setUpViewer(section) {
       .then((html) => {
         const batch = document.createElement("template");
         batch.innerHTML = html;
+        const have = new Set(posts().map((card) => card.dataset.post));
+        [...batch.content.children]
+          .filter((card) => have.has(card.dataset.post))
+          .forEach((card) => card.remove());
         const cards = [...batch.content.children];
         feed.append(batch.content);
         loaded = true;

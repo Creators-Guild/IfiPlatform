@@ -34,6 +34,7 @@ from ifi_home_app.models.instagram import (
     InstagramPost,
     InstagramPostImage,
     InstagramSyncState,
+    delete_old_posts,
     match_union_pages,
 )
 from ifi_home_app.models.instagram_request import delete_old_requests
@@ -69,25 +70,33 @@ class Command(BaseCommand):
         deleted = delete_old_requests()
         if deleted:
             self.stdout.write(f"Deleted {deleted} old account request(s).")
+        deleted = delete_old_posts()
+        if deleted:
+            self.stdout.write(f"Deleted {deleted} post(s) older than a year.")
         if not instagram.is_configured():
             self.stdout.write("No INSTAGRAM_ACCESS_TOKEN in .env: nothing to sync.")
             return
+        if not InstagramSyncState.claim_run():
+            self.stdout.write("Another Instagram sync is running: skipped.")
+            return
+        try:
+            self._sync_all()
+        finally:
+            InstagramSyncState.finish_run()
+
+    def _sync_all(self):
         self._check_token()
         self.remote = {}
         failed = []
-        for account in InstagramAccount.objects.filter(
-            is_active=True, sync_paused=False
-        ):
+        unreadable = []
+        accounts = list(
+            InstagramAccount.objects.filter(is_active=True, sync_paused=False)
+        )
+        for account in accounts:
             try:
                 created = self._sync_account(account)
             except instagram.AccountNotReadable as error:
-                if self._count_unreadable(account, error):
-                    self.stdout.write(
-                        f"@{account.username}: paused, Meta can't read it "
-                        f"({FAILED_RUNS_BEFORE_PAUSE} runs in a row)"
-                    )
-                else:
-                    failed.append(f"@{account.username}: {error}")
+                unreadable.append((account, error))
                 continue
             except instagram.InstagramError as error:
                 account.last_error = str(error)[:300]
@@ -95,12 +104,33 @@ class Command(BaseCommand):
                 failed.append(f"@{account.username}: {error}")
                 continue
             self.stdout.write(f"@{account.username}: {created} new")
+        self._handle_unreadable(unreadable, len(accounts), failed)
         self._sync_media()
         if failed:
             raise CommandError(
                 f"{len(failed)} account(s) failed:\n" + "\n".join(failed)
             )
         self.stdout.write(self.style.SUCCESS("Instagram sync done."))
+
+    def _handle_unreadable(self, unreadable, tried, failed):
+        """Counts this run toward pausing the accounts Meta couldn't read,
+        unless it couldn't read any of them: then the setup is broken (token
+        or account id), not the accounts, so nothing is counted."""
+        everyone = tried > 1 and len(unreadable) == tried
+        for account, error in unreadable:
+            if everyone:
+                account.last_error = str(error)[:300]
+                account.save(update_fields=["last_error"])
+                failed.append(
+                    f"@{account.username}: {error} (not counted: every account failed)"
+                )
+            elif self._count_unreadable(account, error):
+                self.stdout.write(
+                    f"@{account.username}: paused, Meta can't read it "
+                    f"({FAILED_RUNS_BEFORE_PAUSE} runs in a row)"
+                )
+            else:
+                failed.append(f"@{account.username}: {error}")
 
     def _count_unreadable(self, account, error):
         """Counts a run where Meta can't read the account; pauses it after
@@ -139,12 +169,21 @@ class Command(BaseCommand):
         existing = {
             post.instagram_id: post for post in account.posts.filter(source=SYNCED)
         }
+        # A collab post is one Instagram post on two profiles, with one id;
+        # ids are unique, so it stays under the account that stored it first.
+        elsewhere = set(
+            InstagramPost.objects.exclude(account=account)
+            .filter(instagram_id__in=[post.instagram_id for post in found.posts])
+            .values_list("instagram_id", flat=True)
+        )
         created = 0
         cutoff = timezone.now() - POST_MAX_AGE
         for post in found.posts:
             if post.posted_at < cutoff:
                 continue
             self.remote[post.instagram_id] = post
+            if post.instagram_id in elsewhere:
+                continue
             row = existing.get(post.instagram_id)
             if row is not None:
                 row.caption, row.permalink = post.caption, post.permalink

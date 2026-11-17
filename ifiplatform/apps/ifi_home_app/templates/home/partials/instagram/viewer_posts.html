@@ -1,4 +1,4 @@
-{% comment %}The viewer's cards after the first 12, fetched by home_instagram.js when the viewer first opens (home_views.instagram_more_posts). Design rationale: docs/claude_context/home_instagram.md{% endcomment %}
+{% comment %}Every visible post as viewer cards, fetched by home_instagram.js when the viewer first opens (home_views.instagram_more_posts). Design rationale: docs/claude_context/home_instagram.md{% endcomment %}
 {% for number, post in numbered %}
     {% include "home/partials/instagram/viewer_post.html" %}
 {% endfor %}
