@@ -1,16 +1,24 @@
 {% comment %}One card in the Instagram viewer. Needs post, number (1-based) and total. Design rationale: docs/claude_context/home_instagram.md{% endcomment %}
 {% load i18n %}
 <article class="home-instagram-viewer-post" data-post="{{ post.pk }}" data-index="{{ number|add:'-1' }}"{% if post.image_width %} style="--ratio: {{ post.image_width|stringformat:'d' }} / {{ post.image_height|stringformat:'d' }}"{% endif %} aria-label="{% blocktrans with n=number %}Post {{ n }} of {{ total }}{% endblocktrans %}">
-    {% include "home/partials/instagram/post_header.html" %}
     {% include "home/partials/instagram/media.html" %}
-    {% if post.caption %}
-        <p class="home-instagram-caption"><b>{{ post.account.username }}</b> {{ post.caption }}</p>
-        {% if post.caption_is_long %}<button class="home-instagram-more" type="button" data-more="&hellip; {% trans 'more' %}" data-less="{% trans 'less' %}" hidden>&hellip; {% trans "more" %}</button>{% endif %}
+    {% if post.media_type == "video" and post.video %}
+        <button class="home-instagram-sound" type="button" aria-label="{% trans 'Sound on or off' %}"><svg class="home-instagram-sound-on" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><svg class="home-instagram-sound-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button>
+        <span class="home-instagram-play" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span>
     {% endif %}
-    <p class="home-instagram-date">{{ post.posted_at|date:"j. F Y" }}</p>
-    <footer class="home-instagram-viewer-footer">
-        <p class="home-instagram-viewer-foot">
-            <a class="home-instagram-open" href="{{ post.permalink }}">{% trans "See on Instagram" %} &rarr;</a>
-        </p>
-    </footer>
+    {% comment %}The text: on phones it sits over the bottom of the media on its own fade; elsewhere display: contents, so its children are the card's grid items.{% endcomment %}
+    <div class="home-instagram-viewer-text">
+        {% if post.media_type == "video" and post.video %}<span class="home-instagram-progress" aria-hidden="true"><i></i></span>{% endif %}
+        {% include "home/partials/instagram/post_header.html" %}
+        {% if post.caption %}
+            <p class="home-instagram-caption"><b>{{ post.account.username }}</b> {{ post.caption }}</p>
+            {% if post.caption_is_long %}<button class="home-instagram-more" type="button" data-more="&hellip; {% trans 'more' %}" data-less="{% trans 'less' %}" hidden>&hellip; {% trans "more" %}</button>{% endif %}
+        {% endif %}
+        <p class="home-instagram-date">{{ post.posted_at|date:"j. F Y" }}</p>
+        <footer class="home-instagram-viewer-footer">
+            <p class="home-instagram-viewer-foot">
+                <a class="home-instagram-open" href="{{ post.permalink }}">{% trans "See on Instagram" %} &rarr;</a>
+            </p>
+        </footer>
+    </div>
 </article>

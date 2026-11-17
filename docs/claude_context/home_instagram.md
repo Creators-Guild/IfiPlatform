@@ -213,8 +213,12 @@ accounts while the app was in Development mode.
   once at least half is in view and pauses it below half (user: stop when
   scrolled past). Opening the viewer is a click, so Chrome and Firefox
   allow sound; when `play()` is refused (`NotAllowedError`, e.g. Safari) it
-  retries muted. `startMuted` follows the last `volumechange`, so muting
-  or unmuting carries over to the next video. Nothing downloads until a
+  retries muted. `wantSound` is the visitor's own choice and carries over
+  to the next video. The browser's fallback mute sets `data-auto-muted`
+  and must not touch `wantSound`: it used to, so on phones (which often
+  refuse sound without a tap on that video) one refused video muted every
+  later one even after the visitor unmuted (user, 2026-11-17). The first
+  tap on an auto-muted video turns sound on instead of pausing. Nothing downloads until a
   video is in view; a video the visitor paused stays paused until it
   leaves and comes back. Closing the viewer pauses all of them.
 - Viewer: design "A2" from a mockup. A native `<dialog>` with the posts as
@@ -398,6 +402,38 @@ accounts while the app was in Development mode.
   card (`.home-instagram-viewer-end`, also a `.home-instagram-viewer-post`
   so it snaps, but without `data-post`) is moved last after each fetch;
   "Show them anyway" turns the switch off.
+- Phones (user, 2026-11-17, mockup "P1"; the white card left the video
+  small): each viewer post is black and full screen, the media `position:
+  absolute; inset: 0` behind everything, and the post header, caption,
+  date and link sit at the bottom in `.home-instagram-viewer-text`, in
+  white, on that wrapper's own fade (`::before`, so an opened caption
+  grows it; user). Its shape is mockup "F4b" (user): a curved dark fade,
+  95% black at the bottom, so there's no visible starting line (a straight
+  fade showed one). It had a backdrop blur; the user removed it. An opened
+  caption stops following the fade (user): the wrapper becomes a dark
+  bottom sheet (mockup "L2": rounded top, handle from the same `::before`)
+  that is as tall as the text needs, up to `88dvh`; past that the caption
+  scrolls inside it with a masked fade at its end. The picture dims, the
+  sound button and play mark hide, and a tap outside the sheet closes it
+  (a capture-phase click on the feed, so the video doesn't also pause). On laptops the
+  wrapper is `display: contents`, so its children stay the card's grid
+  items (the side-layout rules match them as descendants, and the header
+  gets `order: -1` because it now comes after the media in the HTML). The
+  top is plain white text on a short `::after` fade (counter left; switch
+  and × right; mockup "Q1"), since pills looked cut off over narrow
+  videos' black side bars. "✓ Seen" moves into the account line on phones
+  (`data-seen` on the post header too). The browser's video control
+  bar would sit under that text, so on phones the viewer gets `.is-reels`
+  and videos lose `controls` (`useReelsControls()`, re-run when the phone
+  query changes): a tap pauses or plays (`.is-paused` shows a play mark),
+  a round sound button sits bottom right within thumb reach (user's
+  Instagram screenshot; its z-index is above the fade), and a thin line
+  under the caption, above the date, shows progress (`--played`, via
+  flex `order`; user). Icons are inline SVG, not
+  emoji (user). Text on video posts keeps 3.2rem free on the right for the
+  button. Album dots, the "✓ Seen" badge and "Watch on Instagram" move to
+  the top or middle so the text doesn't cover them. Laptops keep the
+  white card and the browser's controls.
 - Seen posts that are shown (switch off, or the clicked one) get a "✓
   Seen" badge on the picture (user's pick "S2" from mockups): a
   `::after` on `.home-instagram-media[data-seen]`, the label from the

@@ -77,6 +77,11 @@ All in `models/instagram.py`:
   opens the column over the right edge of the picture, if it would cover
   less than about half of it, or under the picture otherwise. Videos
   always open it under, so their controls stay visible.
+- **On phones** the viewer shows each post full screen, like reels: the
+  picture or video fills the screen and the account, caption and link sit
+  over the bottom. Videos have no control bar there: tap to pause or play,
+  the round button at the bottom right turns sound on or off, and a thin
+  line shows how far it has played.
 - **Hiding seen posts.** The viewer remembers which posts you've looked
   at (at least half on screen for a second) and hides them the next time
   it opens, so you only scroll through what's new. A pill at the top of
