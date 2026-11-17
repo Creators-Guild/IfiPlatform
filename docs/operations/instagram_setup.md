@@ -131,9 +131,10 @@ then set the status:
   dashboard. Make a new token (step 4) and replace it in `.env`.
 - **An account fails:** Snippets → "Instagram accounts" shows the last
   error for each account. "Not a business account" or "Invalid user"
-  usually means a personal account or a changed username. Ask the account
-  to switch to a creator account, fix the username, or add its posts by
-  hand.
+  usually means a personal account or a changed username. After three
+  runs like that the sync pauses the account and the dashboard lists it.
+  Ask the account to switch to a creator account or fix the username, then
+  untick "paused" on it. Or add its posts by hand.
 - **Nothing syncs at all:** check `journalctl -u sync-instagram-posts -e`.
   A permission error on every account usually means the token was revoked
   or App Review access was removed.

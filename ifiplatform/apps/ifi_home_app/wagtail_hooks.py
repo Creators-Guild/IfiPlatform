@@ -135,10 +135,11 @@ class InstagramAccountViewSet(SnippetViewSet):
         "kind",
         "union_page",
         "is_active",
+        "sync_paused",
         "last_synced_at",
         "last_error",
     ]
-    list_filter = ["kind", "is_active"]
+    list_filter = ["kind", "is_active", "sync_paused"]
     search_fields = ["username", "display_name"]
 
 

@@ -159,11 +159,16 @@ class DecisionTests(TestCase):
         self.assertIn("@ifitestgroup er nå med i Ifi Instagram", mail.outbox[0].body)
 
     def test_approving_turns_a_switched_off_account_back_on(self):
-        InstagramAccount.objects.filter(username="ifinavet").update(is_active=False)
+        InstagramAccount.objects.filter(username="ifinavet").update(
+            is_active=False, sync_paused=True, failed_runs=3
+        )
         request = _request(username="ifinavet")
         request.status = APPROVED
         request.save()
-        self.assertTrue(InstagramAccount.objects.get(username="ifinavet").is_active)
+        account = InstagramAccount.objects.get(username="ifinavet")
+        self.assertTrue(account.is_active)
+        self.assertFalse(account.sync_paused)
+        self.assertEqual(account.failed_runs, 0)
 
     def test_declining_tells_the_requester_with_the_answer(self):
         request = _request(contact_email="a@example.com", language="en")
@@ -224,6 +229,16 @@ class DashboardTests(TestCase):
         html = self.client.get(reverse("wagtailadmin_home")).content.decode()
         self.assertIn("1 Instagram account request waiting", html)
         self.assertIn("instagramaccountrequest/?status=pending", html)
+
+    def test_admins_see_paused_accounts(self):
+        admin = get_user_model().objects.create_superuser(
+            "admin", "x@example.com", "pw"
+        )
+        self.client.force_login(admin)
+        InstagramAccount.objects.filter(username="mapsuio").update(sync_paused=True)
+        html = self.client.get(reverse("wagtailadmin_home")).content.decode()
+        self.assertIn("1 Instagram account paused", html)
+        self.assertIn("@mapsuio", html)
 
     def test_admins_can_open_and_answer_a_request_but_not_add_one(self):
         admin = get_user_model().objects.create_superuser(

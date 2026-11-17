@@ -25,6 +25,19 @@ class InstagramError(Exception):
     """Meta refused the request or answered with something we can't use."""
 
 
+class AccountNotReadable(InstagramError):
+    """Business Discovery can't read this account: a personal or private
+    account, or a username that doesn't exist. Not a token or network
+    problem, so sync_instagram_posts may pause the account after a few runs."""
+
+
+# Meta's answer for such accounts (seen 2026-11-14 for every personal
+# account): code 110 "Invalid user id"; 2207013 is the documented
+# Business Discovery subcode for "not a business account".
+NOT_READABLE_MESSAGES = ("Invalid user id",)
+NOT_READABLE_SUBCODES = (2207013,)
+
+
 @dataclass(frozen=True)
 class Post:  # pylint: disable=too-many-instance-attributes
     """One post as Business Discovery returns it."""
@@ -70,7 +83,12 @@ def _get(path, params):
             f"Meta answered {response.status_code} without JSON"
         ) from error
     if "error" in data:
-        message = data["error"].get("message", "unknown error")
+        error = data["error"]
+        message = error.get("message", "unknown error")
+        if error.get("error_subcode") in NOT_READABLE_SUBCODES or any(
+            text in message for text in NOT_READABLE_MESSAGES
+        ):
+            raise AccountNotReadable(f"Meta refused: {message}")
         raise InstagramError(f"Meta refused: {message}")
     if response.status_code >= 400:
         raise InstagramError(f"Meta answered {response.status_code}")

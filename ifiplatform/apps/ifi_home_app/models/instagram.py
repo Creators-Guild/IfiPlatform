@@ -39,6 +39,9 @@ POSTS_KEPT_PER_ACCOUNT = 12
 # Synced posts older than this aren't kept, so quiet accounts don't keep
 # posts from years ago (user, 2026-11-15).
 POST_MAX_AGE = timedelta(days=365)
+# After this many runs in a row where Meta can't read an account (personal or
+# private), the sync pauses it (user, 2026-11-17).
+FAILED_RUNS_BEFORE_PAUSE = 3
 # The homepage feed (and the viewer before it loads the rest) shows this many.
 SHOWN_POSTS = 12
 
@@ -75,6 +78,16 @@ class InstagramAccount(models.Model):
         blank=True,
         help_text="Filled in by the sync. Clear it to fetch a new one.",
     )
+    sync_paused = models.BooleanField(
+        "paused",
+        default=False,
+        help_text="Set by the sync when Meta couldn't read the account "
+        f"{FAILED_RUNS_BEFORE_PAUSE} runs in a row (a personal or private "
+        "account). Its posts still show. Untick to try again.",
+    )
+    failed_runs = models.PositiveSmallIntegerField(
+        default=0, help_text="Runs in a row where Meta couldn't read it."
+    )
     last_synced_at = models.DateTimeField(null=True, blank=True)
     last_error = models.CharField(
         max_length=300,
@@ -89,6 +102,7 @@ class InstagramAccount(models.Model):
         ),
         FieldPanel("union_page"),
         FieldPanel("profile_picture"),
+        FieldPanel("sync_paused"),
         FieldPanel("last_synced_at", read_only=True),
         FieldPanel("last_error", read_only=True),
     ]
@@ -99,6 +113,11 @@ class InstagramAccount(models.Model):
 
     def __str__(self):
         return f"@{self.username}"
+
+    def save(self, *args, **kwargs):
+        if not self.sync_paused and self.failed_runs >= FAILED_RUNS_BEFORE_PAUSE:
+            self.failed_runs = 0  # an admin unticked "paused": try again
+        super().save(*args, **kwargs)
 
     @property
     def initials(self):

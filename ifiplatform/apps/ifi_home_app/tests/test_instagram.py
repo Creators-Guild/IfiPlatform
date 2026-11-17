@@ -114,8 +114,23 @@ class ParseAccountTests(SimpleTestCase):
         with patch(
             "ifi_home_app.integrations.instagram.requests.get", return_value=response
         ):
-            with self.assertRaisesMessage(instagram.InstagramError, "Invalid user id"):
+            with self.assertRaisesMessage(
+                instagram.AccountNotReadable, "Invalid user id"
+            ):
                 instagram.get_account("someone_personal")
+
+    @override_settings(INSTAGRAM_ACCESS_TOKEN="t", INSTAGRAM_BUSINESS_ACCOUNT_ID="1")
+    def test_token_errors_are_not_unreadable_accounts(self):
+        response = Mock(status_code=400)
+        response.json.return_value = {
+            "error": {"message": "Error validating access token", "code": 190}
+        }
+        with patch(
+            "ifi_home_app.integrations.instagram.requests.get", return_value=response
+        ):
+            with self.assertRaises(instagram.InstagramError) as caught:
+                instagram.get_account("unioslo_ifi")
+        self.assertNotIsInstance(caught.exception, instagram.AccountNotReadable)
 
 
 def _found(posts, username="unioslo_ifi"):
@@ -161,6 +176,50 @@ class SyncTests(TestCase):
             call_command(
                 "sync_instagram_posts", stdout=io.StringIO(), stderr=io.StringIO()
             )
+
+    def run_failing(self, error):
+        """One sync run where Meta raises `error`; True if the run failed."""
+        with patch.object(instagram, "get_account", side_effect=error) as fake:
+            try:
+                call_command(
+                    "sync_instagram_posts", stdout=io.StringIO(), stderr=io.StringIO()
+                )
+            except CommandError:
+                return True, fake.called
+        return False, fake.called
+
+    def test_unreadable_account_is_paused_after_three_runs(self):
+        error = instagram.AccountNotReadable("Meta refused: Invalid user id")
+        self.assertEqual(self.run_failing(error), (True, True))
+        self.assertEqual(self.run_failing(error), (True, True))
+        self.assertEqual(self.run_failing(error), (False, True))
+        self.account.refresh_from_db()
+        self.assertTrue(self.account.sync_paused)
+        self.assertEqual(self.run_failing(error), (False, False))
+
+    def test_other_errors_never_pause(self):
+        error = instagram.InstagramError("Could not reach Meta: timeout")
+        for _ in range(4):
+            self.run_failing(error)
+        self.account.refresh_from_db()
+        self.assertFalse(self.account.sync_paused)
+        self.assertEqual(self.account.failed_runs, 0)
+
+    def test_a_good_run_resets_the_count(self):
+        InstagramAccount.objects.filter(pk=self.account.pk).update(failed_runs=2)
+        self.sync([_post(1)])
+        self.account.refresh_from_db()
+        self.assertEqual(self.account.failed_runs, 0)
+
+    def test_unticking_paused_tries_again(self):
+        self.account.sync_paused = True
+        self.account.failed_runs = 3
+        self.account.save()
+        self.account.sync_paused = False
+        self.account.save()
+        self.assertEqual(self.account.failed_runs, 0)
+        self.sync([_post(1)])
+        self.assertTrue(self.account.posts.exists())
 
     def test_creates_posts_with_their_images(self):
         self.sync([_post(1), _post(2)])

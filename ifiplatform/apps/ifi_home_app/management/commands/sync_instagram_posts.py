@@ -27,6 +27,7 @@ from ifi_home_app.models.instagram import (
     ALBUM,
     POST_MAX_AGE,
     POSTS_KEPT_PER_ACCOUNT,
+    FAILED_RUNS_BEFORE_PAUSE,
     SYNCED,
     VIDEO,
     InstagramAccount,
@@ -74,9 +75,20 @@ class Command(BaseCommand):
         self._check_token()
         self.remote = {}
         failed = []
-        for account in InstagramAccount.objects.filter(is_active=True):
+        for account in InstagramAccount.objects.filter(
+            is_active=True, sync_paused=False
+        ):
             try:
                 created = self._sync_account(account)
+            except instagram.AccountNotReadable as error:
+                if self._count_unreadable(account, error):
+                    self.stdout.write(
+                        f"@{account.username}: paused, Meta can't read it "
+                        f"({FAILED_RUNS_BEFORE_PAUSE} runs in a row)"
+                    )
+                else:
+                    failed.append(f"@{account.username}: {error}")
+                continue
             except instagram.InstagramError as error:
                 account.last_error = str(error)[:300]
                 account.save(update_fields=["last_error"])
@@ -89,6 +101,15 @@ class Command(BaseCommand):
                 f"{len(failed)} account(s) failed:\n" + "\n".join(failed)
             )
         self.stdout.write(self.style.SUCCESS("Instagram sync done."))
+
+    def _count_unreadable(self, account, error):
+        """Counts a run where Meta can't read the account; pauses it after
+        FAILED_RUNS_BEFORE_PAUSE in a row. Returns True when it paused."""
+        account.last_error = str(error)[:300]
+        account.failed_runs += 1
+        account.sync_paused = account.failed_runs >= FAILED_RUNS_BEFORE_PAUSE
+        account.save(update_fields=["last_error", "failed_runs", "sync_paused"])
+        return account.sync_paused
 
     def _check_token(self):
         try:
@@ -112,6 +133,7 @@ class Command(BaseCommand):
             account.profile_picture.save(f"{account.username}.jpg", picture, save=False)
         account.last_synced_at = timezone.now()
         account.last_error = ""
+        account.failed_runs = 0
         account.save()
 
         existing = {

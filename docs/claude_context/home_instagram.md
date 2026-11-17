@@ -52,6 +52,18 @@ accounts while the app was in Development mode.
   every call, so there is nothing to compare). Clearing it re-fetches.
 - One failing account doesn't stop the others; the command raises
   `CommandError` at the end so the timer's journal shows it.
+- Pausing (user, 2026-11-17): `AccountNotReadable` (a subclass of
+  `InstagramError`, raised for Meta's "Invalid user id" message or
+  subcode 2207013) counts toward `failed_runs`; at
+  `FAILED_RUNS_BEFORE_PAUSE` (3) the account gets `sync_paused` and the
+  run doesn't fail for it. Any other error (token, network, odd answer)
+  never counts, so one bad hour can't pause all accounts. Paused, not
+  inactive: its posts still show (user's pick). A good run resets the
+  count; unticking "paused" resets it in `InstagramAccount.save()`;
+  approving a request resumes it. Dashboard notice:
+  `admin_dashboard.InstagramPausedPanel`. The subcode is Meta's
+  documented one, untested against a real answer; the message match is
+  what the real personal accounts returned.
 - No token → print and return 0, so dev/tests/CI never call Meta (tests
   also force the settings empty).
 - Token expiry from `debug_token` goes in `InstagramSyncState`; within 7

@@ -126,9 +126,12 @@ class InstagramAccountRequest(models.Model):
         account, created = InstagramAccount.objects.get_or_create(
             username=self.username, defaults={"kind": self.kind}
         )
-        if not created and not account.is_active:
+        if not created:
+            # Approving again turns it back on and resumes a paused sync.
             account.is_active = True
-            account.save(update_fields=["is_active"])
+            account.sync_paused = False
+            account.failed_runs = 0
+            account.save(update_fields=["is_active", "sync_paused", "failed_runs"])
 
     def _tell_requester(self):
         if not self.contact_email:

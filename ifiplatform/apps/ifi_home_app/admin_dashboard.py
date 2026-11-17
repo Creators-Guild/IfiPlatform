@@ -92,9 +92,24 @@ class InstagramRequestsPanel(Component):
         return {"waiting": self.waiting, "url": f"{url}?status=pending"}
 
 
+class InstagramPausedPanel(Component):
+    """Tells admins which Instagram accounts the sync paused."""
+
+    name = "instagram_paused"
+    order = 22  # with the other Instagram notices
+    template_name = "wagtailadmin/home/instagram_paused.html"
+
+    def __init__(self, paused):
+        self.paused = paused
+
+    def get_context_data(self, parent_context=None):
+        url = reverse("wagtailsnippets_ifi_home_app_instagramaccount:list")
+        return {"paused": self.paused, "url": f"{url}?sync_paused=true"}
+
+
 def add_dashboard_panel(request, panels):
     # pylint: disable=import-outside-toplevel
-    from .models import InstagramSyncState
+    from .models import InstagramAccount, InstagramSyncState
     from .models.instagram_request import waiting_requests
 
     state = InstagramSyncState.load()
@@ -104,5 +119,9 @@ def add_dashboard_panel(request, panels):
         waiting = waiting_requests()
         if waiting:
             panels.append(InstagramRequestsPanel(waiting))
+    if request.user.has_perm("ifi_home_app.change_instagramaccount"):
+        paused = list(InstagramAccount.objects.filter(is_active=True, sync_paused=True))
+        if paused:
+            panels.append(InstagramPausedPanel(paused))
     panels.append(GuidePanel())
     panels.append(ShortcutsPanel(request))

@@ -140,6 +140,12 @@ decision, as the privacy page says.
   posted for a year has nothing stored until it posts again.
 - One account failing doesn't stop the others. The error is saved on the
   account, and the command ends with an error so it shows in the log.
+- When Meta can't read an account three runs in a row (a personal or
+  private account), the sync **pauses** it: it stops asking for it, the
+  log stops reporting it, and the dashboard says which accounts are
+  paused. Posts added by hand still show. Untick "paused" on the account
+  to try again (approving a new request for it does too). Token or
+  network errors never pause anything.
 - It checks when the token expires. A week before, it logs a warning and
   superusers see a warning on the Wagtail dashboard.
 - Runs from `deploy/systemd/sync-instagram-posts.timer`. See
