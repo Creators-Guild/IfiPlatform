@@ -1,0 +1,4 @@
+<section class="w-panel w-panel--dashboard help-block help-warning" id="instagram-paused-section">
+    <h2 class="w-panel__heading">{{ paused|length }} Instagram account{{ paused|length|pluralize }} paused</h2>
+    <p>Meta couldn't read {{ paused|join:", " }} several runs in a row, usually because {{ paused|length|pluralize:"it is a personal or private account,they are personal or private accounts" }}. The sync stopped trying; posts added by hand still show. Ask the account to switch to a creator account, then untick "paused" <a href="{{ url }}">in the list</a> to try again.</p>
+</section>

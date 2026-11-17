@@ -16,6 +16,7 @@ from .integrations.peoply_api import (
     get_organizations,
 )
 from .models import StudentUnion
+from .models.instagram import InstagramSyncLog
 from .models.article.unions import StudentUnionCategoryPage, UnionPage
 from .models.event.peoply import (
     PeoplyOrgsWithoutUnion,
@@ -52,6 +53,12 @@ class PeoplySyncLogAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(InstagramSyncLog)
+class InstagramSyncLogAdmin(PeoplySyncLogAdmin):
+    """Read-only, superuser-only log of "Sync Instagram now" clicks
+    (instagram_views.force_sync_instagram), like PeoplySyncLogAdmin."""
 
 
 @admin.register(PeoplyRemovedEvent)

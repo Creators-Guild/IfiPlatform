@@ -1,0 +1,64 @@
+{% comment %}Design rationale: docs/claude_context/home_instagram.md{% endcomment %}
+{% load i18n static %}
+{% if instagram_posts %}{% with shown=instagram_posts|length %}
+    <section class="instagram_container" aria-labelledby="home-instagram-heading">
+        <div class="home-instagram-card">
+            <div class="home-instagram-head">
+                <h2 class="newsbar-heading newsbar-heading--news" id="home-instagram-heading">Ifi Instagram</h2>
+                <button class="home-instagram-view-all" type="button" hidden>{% trans "Show more" %}</button>
+            </div>
+            <div class="home-instagram-feed">
+                {% for post in instagram_posts %}
+                    <article class="home-instagram-post is-{{ post.account.kind }}">
+                        {% include "home/partials/instagram/post_header.html" %}
+                        <button class="home-instagram-image home-instagram-thumb" type="button" data-index="{{ forloop.counter0 }}" disabled aria-label="{% blocktrans with handle=post.account.username %}Open post by @{{ handle }}{% endblocktrans %}">
+                            <img src="{{ post.image.url }}" alt=""
+                                 {% if post.image_width %}width="{{ post.image_width }}" height="{{ post.image_height }}"{% endif %}
+                                 {% if not forloop.first %}loading="lazy"{% endif %}>
+                            {% if post.media_type == "video" %}
+                                <span class="home-instagram-kind" title="{% trans 'Video' %}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+                            {% elif post.media_type == "album" %}
+                                <span class="home-instagram-kind" title="{% trans 'Several images' %}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 3h14v14H7zM3 7v14h14" fill="none"/></svg></span>
+                            {% endif %}
+                        </button>
+                        {% if post.caption %}
+                            <p class="home-instagram-caption"><b>{{ post.account.username }}</b> {{ post.caption }}</p>
+                            {% if post.caption_is_long %}
+                                <button class="home-instagram-more" type="button" data-more="&hellip; {% trans 'more' %}" data-less="{% trans 'less' %}" hidden>&hellip; {% trans "more" %}</button>
+                            {% endif %}
+                        {% endif %}
+                        <a class="home-instagram-open" href="{{ post.permalink }}">{% trans "See on Instagram" %} &rarr;</a>
+                    </article>
+                {% endfor %}
+                <p class="home-instagram-end">{% blocktrans with n=instagram_posts|length %}That's the {{ n }} newest posts.{% endblocktrans %}</p>
+            </div>
+            {% if instagram_posts|length > 2 %}
+                <details class="home-instagram-toggle">
+                    <summary><span class="home-instagram-toggle-more">{% trans "Show more" %}</span><span class="home-instagram-toggle-less">{% trans "Show less" %}</span></summary>
+                </details>
+            {% endif %}
+            <p class="home-instagram-suggest">{% trans "Run an IFI-related account?" %} <a href="{% url 'instagram_request' %}">{% trans "Suggest an account to show here" %} &rarr;</a></p>
+            {% include "home/partials/instagram/sync_button.html" %}
+        </div>
+            <dialog class="home-instagram-viewer" aria-label="Ifi Instagram"{% if instagram_total > shown %} data-more-url="{% url 'instagram_more_posts' %}"{% endif %}>
+                <button class="home-instagram-viewer-close" type="button" aria-label="{% trans 'Close' %}">&times;</button>
+                <p class="home-instagram-viewer-status" hidden>
+                    <span class="home-instagram-viewer-position"></span>
+                    <span class="home-instagram-viewer-hidden"></span>
+                    <label class="home-instagram-seen-switch" hidden data-on="{% trans 'Hiding seen' %}" data-off="{% trans 'Showing seen' %}"><input type="checkbox" checked> <span>{% trans "Hiding seen" %}</span></label>
+                </p>
+                <div class="home-instagram-viewer-feed" data-total="{{ instagram_total|default:shown }}" data-new="{% trans 'new' %}" data-seen-label="{% trans 'Seen' %}" data-hidden-count="{% trans '{n} seen hidden' %}">
+                    {% for post in instagram_posts %}
+                        {% include "home/partials/instagram/viewer_post.html" with number=forloop.counter total=instagram_total|default:shown %}
+                    {% endfor %}
+                    <section class="home-instagram-viewer-post home-instagram-viewer-end" hidden>
+                        <p class="home-instagram-viewer-loading">{% trans "Loading posts…" %}</p>
+                        <p><strong>{% trans "You've seen all the new posts." %}</strong></p>
+                        <p>{% trans "New ones show up as the accounts post." %}</p>
+                        <button class="btn home-instagram-show-seen" type="button">{% trans "Show them anyway" %}</button>
+                    </section>
+                </div>
+            </dialog>
+    </section>
+    <script src="{% static 'js/home_instagram.js' %}" defer></script>
+{% endwith %}{% endif %}

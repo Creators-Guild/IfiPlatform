@@ -1,0 +1,16 @@
+{% comment %}Staff-only "Sync Instagram now" under the Ifi Instagram box, like the Peoply button (instagram_views.force_sync_instagram). Design rationale: docs/claude_context/home_instagram.md{% endcomment %}
+{% load i18n %}
+{% if request.user.is_staff %}
+    <form method="post" action="{% url 'force_sync_instagram' %}" class="instagram-sync-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+        <button type="submit" class="peoply-sync-button">{% trans "Sync Instagram now" %}</button>
+        {% if request.GET.instagram_sync == "started" %}
+            <span class="instagram-sync-status" role="status">{% trans "Instagram sync started. New posts show up in a minute or two." %}</span>
+        {% elif request.GET.instagram_sync == "running" %}
+            <span class="instagram-sync-status" role="status">{% trans "An Instagram sync is already running." %}</span>
+        {% else %}
+            <span class="peoply-sync-warning">{% trans "Don't spam!" %}</span>
+        {% endif %}
+    </form>
+{% endif %}

@@ -1,6 +1,6 @@
 # To fix
 
-Last updated: 2026-11-13
+Last updated: 2026-11-17
 
 Known problems found while writing the docs, waiting to be turned into
 GitHub issues. When you create an issue for one, delete it here. Paths are
@@ -122,6 +122,18 @@ folder.
 - [ ] **Opening hours: live data for Escape.** Escape's hours are typed in
   by hand and marked as not guaranteed. When Escape's planned API exists,
   use it in `opening_hours_now()` in `models/opening_hours.py`.
+- [ ] **Ifi Instagram: filter by type.** The Instagram section on the
+  home page shows posts from unions, student democracy, the university,
+  media and humour accounts in one feed. Each post has a tag with its
+  type, but visitors can't choose to see only one type. Fix: type buttons
+  above the feed, using each account's type.
+- [ ] **Ifi Instagram: posts deleted on Instagram stay on our site.** The
+  sync only reads each account's 12 newest posts, so a stored post that is
+  deleted on Instagram stays in the feed until newer posts push it out,
+  which can take weeks for a quiet account. Fix: when a stored synced post
+  is missing from the account's newest posts, check whether it still
+  exists and hide it if it's gone. Where:
+  `management/commands/sync_instagram_posts.py`.
 
 ## For future features
 

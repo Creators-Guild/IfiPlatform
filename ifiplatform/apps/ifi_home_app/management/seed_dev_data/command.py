@@ -9,7 +9,7 @@ Safe to re-run: every page is looked up by (parent, slug, locale) before
 creation, so running this twice does not create duplicates.
 
 Split into one mixin per content area (unions.py/news.py/events.py/
-tools.py/messages.py/magazine.py/opening_hours.py) plus generic helpers.py, combined here into one
+tools.py/messages.py/magazine.py/opening_hours.py/instagram.py) plus generic helpers.py, combined here into one
 Command -- every seeding method is still called as a plain self._seed_x(...)
 regardless of which mixin actually defines it."""
 
@@ -27,6 +27,7 @@ from .events import EventSeedMixin
 from .helpers import SeedHelpersMixin
 from .magazine import MagazineSeedMixin
 from .opening_hours import OpeningHoursSeedMixin
+from .instagram import InstagramSeedMixin
 from .menus import MenuSeedMixin
 from .messages import MessageSeedMixin
 from .news import NewsSeedMixin
@@ -44,6 +45,7 @@ class Command(
     MessageSeedMixin,
     MagazineSeedMixin,
     OpeningHoursSeedMixin,
+    InstagramSeedMixin,
     MenuSeedMixin,
     UserSeedMixin,
     BaseCommand,
@@ -143,6 +145,7 @@ class Command(
         self._seed_home_board_message(nb_locale)
         self._seed_magazine_issues()
         self._seed_opening_hours()
+        self._seed_instagram_posts()
         self._seed_menus(nb_locale)
 
         self.stdout.write(

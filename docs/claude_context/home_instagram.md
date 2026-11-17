@@ -1,0 +1,405 @@
+# Homepage Ifi Instagram feed — design rationale
+
+Last updated: 2026-11-17
+Covers: ifiplatform/apps/ifi_home_app/integrations/instagram.py, ifiplatform/apps/ifi_home_app/models/instagram.py, ifiplatform/apps/ifi_home_app/management/commands/sync_instagram_posts.py, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/instagram.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/media.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/post_header.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_post.html, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/viewer_posts.html, ifiplatform/apps/ifi_home_app/models/instagram_request.py, ifiplatform/apps/ifi_home_app/forms.py, ifiplatform/apps/ifi_home_app/views/instagram_views.py, ifiplatform/apps/ifi_home_app/templates/home/partials/instagram/sync_button.html, ifiplatform/apps/ifi_home_app/templates/home/instagram_request.html, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_instagram.css, ifiplatform/apps/ifi_home_app/static/js/home_instagram.js
+
+The human docs (`architecture/ifi_home_app/instagram.md`,
+`operations/instagram_setup.md`) explain what it does. This note keeps the
+reasons and the traps. The user chose every behaviour on 2026-11-13; don't
+change them without asking.
+
+## Why Business Discovery
+
+Instagram has no anonymous API (Basic Display died Dec 2024) and scraping
+breaks its terms. Business Discovery reads other *public business/creator*
+accounts through one account we own (@ificreatorsguild), Facebook Login
+setup only (not the Instagram Login API on graph.instagram.com). Needs App
+Review for Advanced Access. Personal accounts (many humour accounts) error,
+hence manual posts as a fallback and `InstagramAccount.last_error`.
+Third-party sources (not Meta's docs) said recent Graph versions narrow
+fields for unowned accounts; the client only asks for basic fields and
+skips posts without a usable picture. `INSTAGRAM_GRAPH_VERSION` defaults
+to v27.0 (what Graph API Explorer used when the setup was tested,
+2026-11-14) and can be changed in `.env`. Tested for real then: the
+response fields matched `parse_account()` (albums carry `media_url` on the
+post itself; picture links end in .webp but are served as JPEG). Business
+Discovery needed `instagram_manage_insights` too, and worked for other
+accounts while the app was in Development mode.
+
+## Client traps (`integrations/instagram.py`)
+
+- Graph timestamps are `...+0000`; `fromisoformat` gets `+00:00`.
+- Picture: IMAGE → `media_url`; VIDEO → `thumbnail_url` (may be missing,
+  then the post is skipped); CAROUSEL_ALBUM → its `media_url` or the first
+  child's.
+- Errors come back as `{"error": {...}}` (sometimes with 200) →
+  `InstagramError` with Meta's message.
+- `download()` streams with a 15 MB cap: image links are signed and expire,
+  so every picture is copied to `media/instagram/` and resized to 1080 px
+  (avatars 150 px) as JPEG.
+
+## Sync rules (user's choices)
+
+- Synced posts are sync-owned: `InstagramPostForm` disables every field but
+  `hidden` when `source == synced` (works for any edit, no custom view).
+  Manual posts (`source` defaults to manual) are never touched or pruned.
+- Keep the 12 newest *synced* posts per account, none older than
+  `POST_MAX_AGE` (365 days, user 2026-11-15: quiet accounts kept posts from
+  2020); older rows are deleted and the `post_delete` receiver removes
+  their files (disk is 20 GB). Posts Meta returns that are already too old
+  aren't created at all.
+- Profile pictures are only downloaded when empty (Meta's URL changes on
+  every call, so there is nothing to compare). Clearing it re-fetches.
+- "Sync Instagram now" (user, 2026-11-17, "like Peoply"):
+  `instagram_views.force_sync_instagram`, staff only, logged in
+  `InstagramSyncLog` (admin reuses `PeoplySyncLogAdmin`). Unlike Peoply
+  it doesn't run the sync in the request: a run takes ~30 s to minutes
+  (32 Meta calls plus media), past the server's request timeout, so it
+  `Popen`s `manage.py sync_instagram_posts` in a new session and
+  redirects with `?instagram_sync=started|running` for the status text.
+  The command holds a run lock (`InstagramSyncState.claim_run`, an atomic
+  UPDATE on `running_since`, stale after 30 min), so the timer and the
+  button never sync at once. The background run's output goes nowhere;
+  per-account errors are on the accounts. The form has its own class so
+  `peoply_sync_button.js`'s cooldown doesn't attach; it shares only the
+  Peoply button's CSS.
+- Collab posts (review, 2026-11-17): one Instagram post on two profiles
+  has one id, and `instagram_id` is unique across accounts, so the second
+  account crashed the whole run with an IntegrityError. `_sync_account`
+  skips ids already stored under another account: a collab shows once,
+  under whichever account stored it first.
+- Age cleanup also runs for every account once per sync
+  (`delete_old_posts()`), since `_sync_account` only reaches active,
+  unpaused accounts; paused accounts' posts still show and would never
+  age out. Deleting an account also deletes its profile picture
+  (`_delete_profile_picture`).
+- One failing account doesn't stop the others; the command raises
+  `CommandError` at the end so the timer's journal shows it.
+- Pausing (user, 2026-11-17): `AccountNotReadable` (a subclass of
+  `InstagramError`, raised for Meta's "Invalid user id" message or
+  subcode 2207013) counts toward `failed_runs`; at
+  `FAILED_RUNS_BEFORE_PAUSE` (3) the account gets `sync_paused` and the
+  run doesn't fail for it. Any other error (token, network, odd answer)
+  never counts, and neither does a run where *every* account (2 or more)
+  was unreadable (`_handle_unreadable`): that's a broken setup, not 32
+  personal accounts, so one bad hour can't pause everything. Paused, not
+  inactive: its posts still show (user's pick). A good run resets the
+  count; unticking "paused" resets it in `InstagramAccount.save()`;
+  approving a request resumes it. Dashboard notice:
+  `admin_dashboard.InstagramPausedPanel`. The subcode is Meta's
+  documented one, untested against a real answer; the message match is
+  what the real personal accounts returned.
+- No token → print and return 0, so dev/tests/CI never call Meta (tests
+  also force the settings empty).
+- Token expiry from `debug_token` goes in `InstagramSyncState`; within 7
+  days → stderr warning + superuser dashboard panel
+  (`admin_dashboard.InstagramTokenPanel`).
+- Timer: hourly 07–23 (server timezone; see the Peoply timer's note).
+
+## Feed
+
+- Started as design "E" (a fixed-height box you scroll inside). The user
+  then dropped the inner scroll (2026-11-14): the feed shows all 12 posts
+  as a plain grid, no max-height, mask or scroll-snap. Don't bring them
+  back without asking.
+- Layout "E with B's spacing" (user, 2026-11-14, from a mockup page; earlier:
+  fixed 30rem, fixed 16rem, then an auto-fill grid of up to 6 that felt
+  crowded): one row of posts, the rest behind a native `<details>` "Show
+  more"/"Show less" toggle (`.home-instagram-toggle`). B's spacing: card
+  padding 1.5rem, column gap 2rem, row gap 2.75rem, at most 4 per row.
+- The column count is explicit (container `instagram` on
+  `.home-instagram-card`: 1, 2 at 54rem, 3 at 96rem, 4 at 128rem. With 1–2
+  columns (laptop) posts are capped at 32rem and centered; with 3–4
+  (wide screens) they fill the row, ≥ ~30rem, ~43rem on the user's wide
+  screen, which they liked. User, 2026-11-15: 19rem too small on a laptop,
+  40rem too big there, 26rem "a bit bigger"; capping wide screens too
+  "ruined" them. Phones (<45rem) still get full-width posts from the
+  @media rule) because the collapsed state must know how many posts make one
+  row. Collapsed = `.instagram_container:not(:has(.home-instagram-toggle[open]))`
+  hides posts from nth-child 3 (2 on phones and at 2 columns), and the
+  wider queries show the 3rd/4th again. The details element is empty; it's
+  only the toggle, so all posts stay in one grid and none is lost at any
+  width (the mockup's version dropped the 4th at laptop width). The
+  template only adds the toggle with more than 2 posts.
+- Phones: below 45rem *viewport* (the site's phone breakpoint, where the
+  navbar and news headings switch) the feed is always one column with 2
+  posts collapsed, whatever the card width (user: at 718px the container
+  queries gave 2 columns). That `@media` block comes after the
+  `@container` ones so it wins.
+- No lines between rows (user, 2026-11-14: they didn't add much); rows are
+  separated by space only (now 2.75rem). Earlier versions drew a
+  rule in the row gap and clipped the first row's with `clip-path`; don't
+  bring it back without asking.
+- Pictures cap at 4:5 with `max-height: 125cqi` (the link is an
+  inline-size container, so cqi is the post's width).
+- Box: matches the news box and message board, not the side-column boxes
+  (user, 2026-11-14): heading outside the card with the news box's own
+  `newsbar-heading newsbar-heading--news` classes, then a borderless white
+  card (12px radius, the same shadow, 1rem padding). The column container
+  queries measure `.home-instagram-card`.
+- Post style (user, 2026-11-14: "follow Instagram's post style closely"):
+  no picture or avatar borders, post header "username • age" (no @), caption
+  clamped to 2 lines with the username in bold, and a "… more" `<button>`
+  when `InstagramPost.caption_is_long` (over 70 characters or a line
+  break; CSS can't detect a clamp, so it's an estimate). It's `hidden` in
+  the HTML; `static/js/home_instagram.js` unhides it and makes it expand
+  the caption in place (`.is-expanded`: no clamp, `white-space: pre-line`
+  so the caption's own line breaks show; keep the caption `<p>` on one
+  line in the template or its indentation shows too). "Show more" stays
+  the native `<details>` that opens all posts at once (user: not one row
+  or one post at a time).
+- Navigation (user): only the "See on Instagram →" link
+  (`.home-instagram-open`) leaves the site. The picture and the username
+  are deliberately not links, so a click on the post never navigates. Pictures are capped at 4:5 with
+  `object-fit: cover`, like Instagram's feed (real videos are 9:16).
+- Account types (user, 2026-11-17, from a mockup): `InstagramAccount.kind`
+  (labelled "type") is union, democracy, university, media or humour,
+  replacing official/meme. "meme" was renamed "humour" everywhere, values
+  and code included (user: consistent), except `0163`/`0164`, which stay
+  as they ran; `0166` converts them (`new_type()`: listed usernames by
+  hand, FUI is a union by the user's word, the rest union). Every post's
+  header shows the type's tag (`InstagramAccount.tag`, nb strings in
+  django.po); humour is yellow, the rest light grey (a `color-mix` of
+  slate, the palette has no light grey). No like/comment counts. A type
+  filter is in to_fix.md.
+- Union link (user, from mockups): `InstagramAccount.union_page` (FK to
+  the nb/default `UnionPage`) shows as a second line under the username,
+  "About Navet →" / "Om Navet →" (`post_header.html`, `.home-instagram-union`),
+  where Instagram puts the location. Not the tag (user: unclear what a
+  linked tag does; the tag is plain text) and not the username or picture,
+  so a click on the post itself still never navigates. The name is the
+  union page's title in the visitor's language. `InstagramAccount.union`
+  uses `Page.localized`, which queries on every call; views run
+  `with_union_links()` to look each page up once and set
+  `account.union_link` / `union_name`, which the template reads (missing =
+  no line).
+  `match_union_pages()` (start of every sync, works without a token)
+  links accounts that have no union page to the default-locale union page
+  whose `social_links` has an instagram URL ending in that username; it
+  never replaces a set one. Only Navet had a real Instagram link
+  (2026-11-17); the rest are set by admins in the account snippet.
+- Placement: in `#home-subcontent` after the news; under 72rem it's a grid
+  item with area `instagram` (`home_index_layout.css`).
+- `migrations/0164_instagram_accounts.py` holds the initial list (the
+  accounts @ificreatorsguild follows, minus a personal account the user
+  removed); `0166` sorts them into types.
+- The privacy page (`legal/data_processors.html`) got a paragraph: posts
+  are copied server-side, visitors' browsers don't contact Instagram.
+
+## Videos, albums and the viewer (user's choices, 2026-11-14)
+
+- Goal: let people see posts without an Instagram account. Every stored
+  synced post gets its video (`InstagramPost.video`) and the rest of an
+  album (`InstagramPostImage`) (user, 2026-11-15; before that only the 12
+  shown did, and the sync freed them when a post left the 12).
+  `_sync_media()` runs after all accounts, only for posts Meta returned in
+  this run, because the remote URLs live in memory (`self.remote`); a post
+  whose account failed waits for the next run. Each file is downloaded
+  once and only goes with its post (`post_delete`): older than
+  `POST_MAX_AGE` or out of the account's newest 12. Measured 2026-11-15:
+  212 posts, 16 of 23 videos with a file, 96 of 97 albums; 253 MB in
+  `media/instagram/` (videos 167, albums 58, covers 29).
+- `download_video()` streams to a temp file (100 MB cap), not memory.
+  Album downloads are all-or-nothing per post (partial ones are deleted).
+- Meta omits `media_url` for some videos (licensed music): `video` stays
+  empty and `media.html` shows the cover + "Watch on Instagram". Videos
+  inside albums are stored as their thumbnail.
+- Playback: native `<video controls preload="none" loop>`. Autoplay with
+  sound and looping (user, 2026-11-15; it was click to play): the
+  `viewerVideos` IntersectionObserver in `home_instagram.js` plays a video
+  once at least half is in view and pauses it below half (user: stop when
+  scrolled past). Opening the viewer is a click, so Chrome and Firefox
+  allow sound; when `play()` is refused (`NotAllowedError`, e.g. Safari) it
+  retries muted. `startMuted` follows the last `volumechange`, so muting
+  or unmuting carries over to the next video. Nothing downloads until a
+  video is in view; a video the visitor paused stays paused until it
+  leaves and comes back. Closing the viewer pauses all of them.
+- Viewer: design "A2" from a mockup. A native `<dialog>` with the posts as
+  cards in one vertical scroll; opening scrolls to the clicked post. Every screen uses it (user, 2026-11-15: phones too):
+  the feed shows covers as `<button disabled>` the script enables, so
+  without JS there are covers and "See on Instagram" only. On phones the
+  viewer posts are edge to edge, full height, with room under the close
+  button (which has a dark round background so it shows over a white
+  card). `html:has(dialog[open])` locks page scroll; closing pauses videos.
+- The viewer holds every visible post, not only the 12 (user, 2026-11-15,
+  "load when the viewer opens"). The homepage renders the 12 shown cards;
+  the rest come from `instagram_more_posts` (`api/instagram/posts/`,
+  `viewer_posts.html`), fetched by `home_instagram.js` the first time the
+  viewer opens (`data-more-url`, set only when there are more), so the
+  homepage stays small (200 cards were ~420 kB of HTML). It returns every
+  visible post, the first 12 too, and the script drops cards whose
+  `data-post` it already has: a sync between page load and opening the
+  viewer would otherwise shift the list and skip or repeat a post. A failed fetch
+  retries on the next open. Indexes must line up: thumbs' `data-index` and
+  the script's `posts()` are positions, so `shown_posts()` is
+  `visible_posts()[:SHOWN_POSTS]` and the ordering ends in `-pk` (a tie on
+  `posted_at` could otherwise order the two queries differently). The
+  counter "n / total" uses `instagram_total` (all visible posts) from the
+  start. Fetched cards are wired with `wire()` after they're in the page
+  (captions, album arrows, preload and pause observers).
+- "Show more" opens the viewer at the first hidden post instead of opening
+  the list on screens matching `SHOW_MORE_OPENS_VIEWER` in
+  `home_instagram.js`: "all" since 2026-11-15 (user; it was phones only
+  first). The native `<details>` still opens the list without JavaScript,
+  so the collapsed CSS stays.
+- Reels-style (user): each viewer post is the window's height
+  (`grid-auto-rows: 100dvh`), `scroll-snap-type: y mandatory` +
+  `scroll-snap-stop: always`, so a scroll moves exactly one post. Cards
+  leave `--top` (3.25rem) free above them for the hide-seen pill (user saw
+  it overlap a centered card): height `100dvh - --top - 1rem`, margin
+  `--top` above, snapped with `scroll-snap-align: start` +
+  `scroll-margin-top`, and the script scrolls with `block: "start"`. The
+  width formulas use the same height. The phone `@media` block for the
+  viewer must come after the base card rule: it used to come before, so
+  the base rule won and phones never got the edge-to-edge card
+  (found and fixed 2026-11-17). Media fills the space left (`minmax(0, 1fr)` row, `object-fit:
+  contain` on black). Captions start clamped with "… more" / "less" in the
+  viewer and the feed (same button, `data-more`/`data-less`); an opened
+  caption in the viewer scrolls inside `max-height: 30dvh`.
+- Layouts above 45rem (user, 2026-11-15). `fitCards()` in
+  `home_instagram.js` sets `data-layout` on each card when the viewer opens,
+  for fetched cards and on resize, because whether a post fits depends on
+  its `--ratio` and the window, which no media or container query can
+  compare. It reads sizes once and only writes in the loop (212 cards).
+  - `side`: the picture at full height plus the 24rem text column fit.
+    Instagram's desktop layout ("everything text", user's pick over "only
+    the caption"): media spans every row in column 1, post header, caption,
+    date and foot fill column 2, the whole caption shows and "… more" is
+    hidden. Every post with room gets it, short captions too (user: same
+    look while scrolling).
+  - `overlap`: doesn't fit, but the text column would cover at most 45% of
+    the picture (`MAX_COVER`, user: "a bit less than half"). Collapsed
+    until "… more", which opens the column over the picture's right edge
+    (white `::after` panel with a shadow; the picture keeps its size).
+    `--fit-cover` (px, from the script) moves the album's right arrow,
+    dots and "Watch on Instagram" out from under it. Videos never overlap,
+    the column would cover the native controls.
+  - `stack`: everything else, and phones: "… more" opens below, 30dvh.
+  - No JS → no `data-layout` → `stack`.
+  - Grid: columns `minmax(0, 1fr) 24rem`, media `grid-column: 1 / -1`,
+    `justify-self: start`, width `min(100%, full-height width)`, so in `side`
+    it fills column 1 exactly and in `overlap` it runs under the panel.
+    Card width = full-height width + 27.25rem (padding 2 + gap 1.25 + 24),
+    capped at 100%; `TEXT_COLUMN_REM` in the script must match. Rows `auto
+    minmax(0, max-content) auto minmax(0, 1fr) auto`: the caption grows to
+    its text and only scrolls when it doesn't fit (a plain 1fr caption row
+    would leave "less" far below a short caption). Every text item has an
+    explicit row (post header 1, caption 2, "less" 3, date 4, foot 5): the
+    media covers both columns, so auto-placement found no free cell in
+    column 2 and pushed the text into implicit rows under the media
+    (2026-11-15, the user's screenshot: date on top, squeezed video,
+    caption not scrolling). Explicit rows also keep date and foot at the
+    bottom without a caption.
+- Card width follows the picture (user: a fixed 34rem left black bars
+  around portrait pictures): the template sets `--ratio: w / h` from the
+  stored size (plain digits via `stringformat:'d'`, a localised thousands
+  separator would break the CSS), and the width is the height left after
+  `--chrome` (~13rem: account line, two caption lines, date, footer) times
+  that ratio, at least 22rem so captions stay readable. An opened caption
+  or an album picture of another shape can still show thin bars.
+- No scrolling inside a viewer post except a long caption (user,
+  2026-11-15). The album strip's `overflow-x: auto` turns its
+  `overflow-y` into `auto` too, so a picture a pixel taller than the box
+  scrolled vertically: in the viewer the strip has `overflow-y: hidden`
+  and one `minmax(0, 1fr)` row, the media box is `overflow: clip`, and the
+  feed is `overflow-x: hidden`.
+- Media markup is in `media.html`, used by the viewer only. Closed-dialog
+  copies don't load: images are `loading="lazy"` and
+  videos `preload="none"`. When an album comes into view, the script switches
+  all its pictures to `loading="eager"`, so the 3rd and later are ready
+  before they're swiped to (user saw empty slides). `InstagramPost.pictures` reads stored sizes so
+  no file is opened, and skips the album query for unsaved posts (tests).
+
+## Account requests (user's choices, 2026-11-17, from mockups)
+
+- Entry (user, from mockups "L4"): the box's last line, "Run an
+  IFI-related account? Suggest an account to show here →"
+  (`.home-instagram-suggest`). It was on the heading's line first; the
+  "Show more" button under the heading made the top too busy.
+- "Show more" under the heading (user, 2026-11-17; briefly an outlined
+  "View all N posts" button, mockup "V2"): `.home-instagram-view-all`,
+  `hidden` until the script runs, opens the viewer like the bottom "Show
+  more" (`open(0, true)`: the first post that isn't hidden). With the
+  script, the section gets `.has-viewer` and laptops (over 45rem, one row
+  of posts) hide the bottom `<details>` "Show more"; phones keep both,
+  since their posts are stacked. Without JS only the bottom `<details>`
+  shows, opening the list in place.
+- Own page, not a dialog, two steps in one view (`step` POST field: check /
+  request / back), plain form posts so it works without JS. The user's
+  rule: public + business/creator are required (Meta can't read anything
+  else), only IFI-relatedness may be an exception. Step 1's fields are
+  `required=False` and `clean()` raises one explanation, instead of two
+  "This field is required". "Next" is only dimmed by CSS (`:has(... not
+  (:checked))`), still clickable, so the server's explanation shows.
+- Look (user, from mockups): the site's own form style, a white card
+  with a plain 2px ink border (no pink top edge), a "Step 1 of 2" label,
+  the site's pink `.btn`, plain radio buttons for the type. A first
+  version with grey chips, a dark button and boxed radios "looked AI" and
+  didn't match the site.
+- The main button comes first in the HTML and `row-reverse` puts it on the
+  right: Enter in a text field submits the first submit button, which was
+  "← Back".
+- The form's `username` is 200 long so a pasted Instagram address fits;
+  `clean_username` shortens it with `instagram_username()` (shared with
+  `match_union_pages`) and checks it against `[a-z0-9._]{1,30}`.
+- Spam: a honeypot (`website`, off-screen, "succeeds" silently) and
+  `REQUESTS_PER_HOUR` for the whole site. Not per visitor: nginx passes no
+  client address (no X-Forwarded-For), so every visitor looks the same.
+- Approval lives in `InstagramAccountRequest.save()`: only the first change
+  away from pending counts (dated, account added or turned back on, email
+  in the requester's `language`). Later changes do nothing, so nothing is
+  added or removed by accident. The email goes after the transaction; an
+  SMTP error is logged, not raised, so the admin save still works.
+- Admin: the snippet's permission policy forbids "add" (rows come only
+  from the page). Dashboard panel for users who can change requests.
+- Privacy: requests, and their email, are deleted 180 days after the
+  decision (`delete_old_requests()`, start of every sync); the paragraph
+  is on `legal/data_processors.html`, since the answer goes through Resend.
+
+
+## Hide seen posts (user's choices, 2026-11-17)
+
+- Viewer only; the homepage feed is unchanged (user). Stored in this
+  browser only: `localStorage` keys `ifi-instagram-seen` (post pks as
+  strings, newest `SEEN_KEPT` = 500) and `ifi-instagram-hide-seen`
+  ("on"/"off", on by default). Every read and write is in `try`: blocked
+  storage just means nothing is hidden. A login-synced list is for later
+  (user), see `docs/claude_plans/instagram_more_posts.md`.
+- Seen = a viewer card (`data-post`) at least half on screen for
+  `SEEN_AFTER` (1 s), via the `seenCards` observer; closing the dialog
+  stops pending timers (ratio drops to 0).
+- Snapshot rule: `open()` reads the list into `seenAtOpen`; `applySeen()`
+  only hides what was seen before this open, so nothing vanishes while
+  scrolling. The clicked post (`keep`) is shown until the switch is
+  flipped; turning the switch on hides the current post too if it was
+  seen (user) and moves to the next shown one, or the end card. "Show more" (user) has no `keep`: it
+  opens at the first shown card from the first post the homepage hid, or
+  at the end card. Only the 12 newest are loaded when it opens, so if
+  they're all seen it would land on the end card although older unseen
+  posts are coming (user found it "annoying"): `open()` waits for
+  `loadRest()` (a promise) and then moves to the first unseen post. Until
+  the rest is loaded the end card says "Loading posts…" (`.is-loading`),
+  not "seen everything" (user saw it flash). The fetch also starts on
+  `pointerenter`/`focus` of the thumbs and both "Show more" buttons, so it's
+  usually done by the click.
+- UI (user, from mockups: first in each post's footer, then moved to
+  the top as "too hidden"): one pill fixed at the top center of the
+  dialog, `.home-instagram-viewer-status` ("1 / 211 new · 3 seen hidden"
+  and a switch, a checkbox styled as one: off = white outline and knob, on = turquoise with a black outline and dark knob, user's "W1" (a white or vanishing outline looked odd); its label says the state, "Hiding seen" / "Showing seen", from the label's `data-on` / `data-off`; on phones it sits left, clear of
+  the close button). The position follows scrolling (`showPosition()` on
+  the feed's scroll, via rAF): "n / total" from `data-index` and the
+  feed's `data-total` when nothing is hidden, otherwise the place among
+  shown posts plus "new". The switch only shows once something was seen.
+  Translated strings ride on the feed's `data-new` / `data-hidden-count`
+  ("{n}" replaced). Post footers keep only "See on Instagram". The end
+  card (`.home-instagram-viewer-end`, also a `.home-instagram-viewer-post`
+  so it snaps, but without `data-post`) is moved last after each fetch;
+  "Show them anyway" turns the switch off.
+- Seen posts that are shown (switch off, or the clicked one) get a "✓
+  Seen" badge on the picture (user's pick "S2" from mockups): a
+  `::after` on `.home-instagram-media[data-seen]`, the label from the
+  feed's `data-seen-label`.
+- `display: grid`/`flex` beat the UA's `[hidden]`, hence the explicit
+  `[hidden] { display: none }` rules. `fitCards()` measures the first
+  shown card, since a hidden one has no height. Arrow keys and scrolling
+  go through `shown()`, and the homepage opens a card by its `data-index`.

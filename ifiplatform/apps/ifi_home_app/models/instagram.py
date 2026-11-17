@@ -1,0 +1,447 @@
+"""The "Ifi Instagram" feed on the homepage: the curated accounts
+(InstagramAccount) and their posts (InstagramPost), either synced by
+sync_instagram_posts or added by hand in the admin. InstagramSyncState
+remembers when the access token expires, for the admin dashboard.
+
+Design rationale: docs/claude_context/home_instagram.md"""
+
+from datetime import timedelta
+
+from django.conf import settings
+from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+from django.utils import timezone
+from django.utils.translation import gettext as _
+from wagtail.admin.forms import WagtailAdminModelForm
+from wagtail.admin.panels import FieldPanel, FieldRowPanel
+from wagtail.models import Locale
+
+from .article.unions import UnionPage
+
+# Account types (user, 2026-11-17). Each shows as a tag on its posts.
+UNION, DEMOCRACY, UNIVERSITY, MEDIA, HUMOUR = (
+    "union",
+    "democracy",
+    "university",
+    "media",
+    "humour",
+)
+KIND_CHOICES = [
+    (UNION, "Union or association"),
+    (DEMOCRACY, "Student democracy"),
+    (UNIVERSITY, "University or department"),
+    (MEDIA, "Media"),
+    (HUMOUR, "Humour"),
+]
+SYNCED, MANUAL = "synced", "manual"
+IMAGE, VIDEO, ALBUM = "image", "video", "album"
+POSTS_KEPT_PER_ACCOUNT = 12
+# Synced posts older than this aren't kept, so quiet accounts don't keep
+# posts from years ago (user, 2026-11-15).
+POST_MAX_AGE = timedelta(days=365)
+# After this many runs in a row where Meta can't read an account (personal or
+# private), the sync pauses it (user, 2026-11-17).
+FAILED_RUNS_BEFORE_PAUSE = 3
+# The homepage feed (and the viewer before it loads the rest) shows this many.
+SHOWN_POSTS = 12
+
+
+class InstagramAccount(models.Model):
+    """An account whose posts may show in the feed."""
+
+    username = models.CharField(
+        max_length=30, unique=True, help_text="Without @, e.g. 'unioslo_ifi'."
+    )
+    display_name = models.CharField(max_length=100, blank=True)
+    kind = models.CharField(
+        "type",
+        max_length=12,
+        choices=KIND_CHOICES,
+        default=UNION,
+        help_text="Shown as a tag on the account's posts.",
+    )
+    union_page = models.ForeignKey(
+        UnionPage,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="The union's page on this site. Its tag on the posts links "
+        "there. The sync fills it in when a union page lists this account.",
+    )
+    sort_order = models.IntegerField(default=0)
+    is_active = models.BooleanField(
+        default=True, help_text="Uncheck to stop syncing and hide its posts."
+    )
+    profile_picture = models.ImageField(
+        upload_to="instagram/avatars/",
+        blank=True,
+        help_text="Filled in by the sync. Clear it to fetch a new one.",
+    )
+    sync_paused = models.BooleanField(
+        "paused",
+        default=False,
+        help_text="Set by the sync when Meta couldn't read the account "
+        f"{FAILED_RUNS_BEFORE_PAUSE} runs in a row (a personal or private "
+        "account). Its posts still show. Untick to try again.",
+    )
+    failed_runs = models.PositiveSmallIntegerField(
+        default=0, help_text="Runs in a row where Meta couldn't read it."
+    )
+    last_synced_at = models.DateTimeField(null=True, blank=True)
+    last_error = models.CharField(
+        max_length=300,
+        blank=True,
+        help_text="Why the last sync of this account failed, e.g. a personal account.",
+    )
+
+    panels = [
+        FieldRowPanel([FieldPanel("username"), FieldPanel("display_name")]),
+        FieldRowPanel(
+            [FieldPanel("kind"), FieldPanel("sort_order"), FieldPanel("is_active")]
+        ),
+        FieldPanel("union_page"),
+        FieldPanel("profile_picture"),
+        FieldPanel("sync_paused"),
+        FieldPanel("last_synced_at", read_only=True),
+        FieldPanel("last_error", read_only=True),
+    ]
+
+    class Meta:
+        ordering = ["sort_order", "username"]
+        verbose_name = "Instagram account"
+
+    def __str__(self):
+        return f"@{self.username}"
+
+    def save(self, *args, **kwargs):
+        if not self.sync_paused and self.failed_runs >= FAILED_RUNS_BEFORE_PAUSE:
+            self.failed_runs = 0  # an admin unticked "paused": try again
+        super().save(*args, **kwargs)
+
+    @property
+    def initials(self):
+        """Up to two letters for the avatar when there's no picture."""
+        words = (self.display_name or self.username).replace("_", " ").split()
+        words = [word for word in words if word[0].isalnum()]
+        return "".join(word[0] for word in words[:2]).upper()
+
+    @property
+    def url(self):
+        """The account's page on Instagram."""
+        return f"https://www.instagram.com/{self.username}/"
+
+    @property
+    def tag(self):
+        """The short type tag on its posts, in the active language."""
+        return {
+            UNION: _("union"),
+            DEMOCRACY: _("student democracy"),
+            UNIVERSITY: "UiO",
+            MEDIA: _("media"),
+            HUMOUR: _("humour"),
+        }.get(self.kind, "")
+
+    @property
+    def union(self):
+        """(url, name) of the union page in the visitor's language, or
+        ("", "") without a live one."""
+        page = self.union_page
+        if page is None or not page.live:
+            return ("", "")
+        page = page.localized
+        return (page.url or "", page.title)
+
+
+class InstagramPostForm(WagtailAdminModelForm):  # pylint: disable=too-many-ancestors
+    """Synced posts belong to the sync: only 'hidden' can be changed."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk and self.instance.source == SYNCED:
+            for name, form_field in self.fields.items():
+                if name != "hidden":
+                    form_field.disabled = True
+
+
+class InstagramPost(models.Model):
+    """One post in the feed."""
+
+    MEDIA_CHOICES = [(IMAGE, "Image"), (VIDEO, "Video"), (ALBUM, "Album")]
+    SOURCE_CHOICES = [(SYNCED, "Synced"), (MANUAL, "Added by hand")]
+
+    account = models.ForeignKey(
+        InstagramAccount, on_delete=models.CASCADE, related_name="posts"
+    )
+    instagram_id = models.CharField(max_length=64, blank=True, editable=False)
+    permalink = models.URLField(help_text="The post's address on Instagram.")
+    caption = models.TextField(blank=True)
+    posted_at = models.DateTimeField()
+    media_type = models.CharField(max_length=10, choices=MEDIA_CHOICES, default=IMAGE)
+    image = models.ImageField(
+        upload_to="instagram/posts/",
+        width_field="image_width",
+        height_field="image_height",
+    )
+    image_width = models.PositiveIntegerField(null=True, editable=False)
+    image_height = models.PositiveIntegerField(null=True, editable=False)
+    video = models.FileField(
+        upload_to="instagram/videos/",
+        blank=True,
+        help_text="Empty when Instagram gives no video file; the cover then links to Instagram.",
+    )
+    hidden = models.BooleanField(
+        default=False, help_text="Hide this post from the homepage."
+    )
+    source = models.CharField(
+        max_length=10, choices=SOURCE_CHOICES, default=MANUAL, editable=False
+    )
+
+    base_form_class = InstagramPostForm
+    panels = [
+        FieldPanel("hidden"),
+        FieldPanel("account"),
+        FieldPanel("permalink"),
+        FieldRowPanel([FieldPanel("posted_at"), FieldPanel("media_type")]),
+        FieldPanel("image"),
+        FieldPanel("video"),
+        FieldPanel("caption"),
+    ]
+
+    class Meta:
+        ordering = ["-posted_at", "-pk"]
+        verbose_name = "Instagram post"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["instagram_id"],
+                condition=~models.Q(instagram_id=""),
+                name="unique_instagram_post_id",
+            )
+        ]
+
+    def __str__(self):
+        return f"@{self.account.username} {self.posted_at:%Y-%m-%d}"
+
+    @property
+    def pictures(self):
+        """The cover, then the rest of an album, as {url, width, height}.
+        Uses the stored sizes, so no file is opened."""
+        extras = self.album_images.all() if self.pk else []
+        pictures = [self.image] + [extra.image for extra in extras]
+        return [
+            {
+                "url": p.url,
+                "width": p.instance.image_width,
+                "height": p.instance.image_height,
+            }
+            for p in pictures
+            if p
+        ]
+
+    @property
+    def caption_is_long(self):
+        """Whether the feed's two-line caption is cut off, roughly: the
+        template then adds "… more"."""
+        return len(self.caption) > 70 or "\n" in self.caption.strip()
+
+    def age(self, now=None):
+        """'45 min', '2 h', '3 d', '1 w', or the date for old posts."""
+        delta = (now or timezone.now()) - self.posted_at
+        if delta < timedelta(hours=1):
+            return _("%(n)s min") % {"n": max(1, int(delta.total_seconds() // 60))}
+        if delta < timedelta(days=1):
+            return _("%(n)s h") % {"n": int(delta.total_seconds() // 3600)}
+        if delta < timedelta(days=7):
+            return _("%(n)s d") % {"n": delta.days}
+        if delta < timedelta(weeks=9):
+            return _("%(n)s w") % {"n": delta.days // 7}
+        return timezone.localtime(self.posted_at).strftime("%d.%m.%Y")
+
+
+class InstagramPostImage(models.Model):
+    """The 2nd, 3rd ... picture of an album post."""
+
+    post = models.ForeignKey(
+        InstagramPost, on_delete=models.CASCADE, related_name="album_images"
+    )
+    image = models.ImageField(
+        upload_to="instagram/albums/",
+        width_field="image_width",
+        height_field="image_height",
+    )
+    image_width = models.PositiveIntegerField(null=True, editable=False)
+    image_height = models.PositiveIntegerField(null=True, editable=False)
+    sort_order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "pk"]
+
+
+def visible_posts():
+    """Every post the viewer may show, newest first."""
+    return (
+        InstagramPost.objects.filter(hidden=False, account__is_active=True)
+        .select_related("account__union_page")
+        .prefetch_related("album_images")
+    )
+
+
+def instagram_username(text):
+    """'https://www.instagram.com/IfiNavet/?hl=nb', '@IfiNavet' or
+    ' ifinavet ' -> 'ifinavet'."""
+    path = text.strip().split("?")[0].split("#")[0].rstrip("/")
+    return path.rsplit("/", 1)[-1].lstrip("@").lower()
+
+
+def match_union_pages():
+    """Links accounts without a union page to the union page whose social
+    links include that Instagram account. Never changes a link an admin set.
+    Returns how many accounts it linked."""
+    accounts = {
+        account.username.lower(): account
+        for account in InstagramAccount.objects.filter(union_page__isnull=True)
+    }
+    if not accounts:
+        return 0
+    linked = 0
+    for page in UnionPage.objects.filter(locale=Locale.get_default()):
+        for block in page.social_links:
+            if block.value.get("platform") != "instagram":
+                continue
+            account = accounts.pop(instagram_username(block.value.get("url", "")), None)
+            if account is not None:
+                account.union_page = page
+                account.save(update_fields=["union_page"])
+                linked += 1
+    return linked
+
+
+def with_union_links(posts):
+    """Sets account.union_link and union_name on each post's account,
+    looking each union page's translation up once (Page.localized queries
+    every time)."""
+    posts = list(posts)
+    unions = {}
+    for post in posts:
+        account = post.account
+        if account.union_page_id not in unions:
+            unions[account.union_page_id] = account.union
+        account.union_link, account.union_name = unions[account.union_page_id]
+    return posts
+
+
+def shown_posts():
+    """The posts the homepage feed shows: the first SHOWN_POSTS of
+    visible_posts(), so the viewer's later batch continues the same order."""
+    return visible_posts()[:SHOWN_POSTS]
+
+
+@receiver(post_delete, sender=InstagramPost)
+def _delete_post_files(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    if instance.image:
+        instance.image.delete(save=False)
+    if instance.video:
+        instance.video.delete(save=False)
+
+
+@receiver(post_delete, sender=InstagramAccount)
+def _delete_profile_picture(
+    sender, instance, **kwargs
+):  # pylint: disable=unused-argument
+    if instance.profile_picture:
+        instance.profile_picture.delete(save=False)
+
+
+def delete_old_posts():
+    """Deletes synced posts older than POST_MAX_AGE for every account,
+    paused and inactive ones too (the sync's own cleanup only reaches the
+    accounts it syncs). Returns how many."""
+    old = InstagramPost.objects.filter(
+        source=SYNCED, posted_at__lt=timezone.now() - POST_MAX_AGE
+    )
+    count = 0
+    for post in old:
+        post.delete()  # one by one, so post_delete removes the files
+        count += 1
+    return count
+
+
+@receiver(post_delete, sender=InstagramPostImage)
+def _delete_album_image(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    if instance.image:
+        instance.image.delete(save=False)
+
+
+# A sync that started longer ago than this is taken to have died (a crash or
+# a killed process), so a new one may start.
+RUN_STALE_AFTER = timedelta(minutes=30)
+
+
+class InstagramSyncState(models.Model):
+    """Singleton row (pk=1): what the last sync learnt about the token, and
+    whether a sync is running (so the timer and the "Sync Instagram now"
+    button never run two at once)."""
+
+    token_expires_at = models.DateTimeField(null=True, blank=True)
+    checked_at = models.DateTimeField(auto_now=True)
+    running_since = models.DateTimeField(null=True, blank=True)
+
+    @classmethod
+    def claim_run(cls):
+        """Marks a sync as running; False if another one already is."""
+        cls.objects.get_or_create(pk=1)
+        now = timezone.now()
+        free = models.Q(running_since__isnull=True) | models.Q(
+            running_since__lt=now - RUN_STALE_AFTER
+        )
+        return bool(cls.objects.filter(free, pk=1).update(running_since=now))
+
+    @classmethod
+    def finish_run(cls):
+        """Marks the running sync as done."""
+        cls.objects.filter(pk=1).update(running_since=None)
+
+    @classmethod
+    def is_running(cls):
+        """Whether a sync started less than RUN_STALE_AFTER ago is running."""
+        return cls.objects.filter(
+            pk=1, running_since__gte=timezone.now() - RUN_STALE_AFTER
+        ).exists()
+
+    @classmethod
+    def load(cls):
+        """The row, or None before the first sync."""
+        return cls.objects.filter(pk=1).first()
+
+    @classmethod
+    def record_token_expiry(cls, expires_at):
+        """Save when the token expires (None: never)."""
+        obj, _created = cls.objects.get_or_create(pk=1)
+        obj.token_expires_at = expires_at
+        obj.save()
+        return obj
+
+    def expires_soon(self, days=7):
+        """Whether the token expires within `days` days."""
+        return bool(
+            self.token_expires_at
+            and self.token_expires_at - timezone.now() < timedelta(days=days)
+        )
+
+
+class InstagramSyncLog(models.Model):
+    """One row per click of "Sync Instagram now" (instagram/sync_button.html,
+    instagram_views.force_sync_instagram): who started a sync by hand and
+    when, like PeoplySyncLog. Superuser-only in Django admin."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
+    )
+    triggered_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-triggered_at"]
+
+    def __str__(self):
+        return f"{self.user} at {self.triggered_at}"

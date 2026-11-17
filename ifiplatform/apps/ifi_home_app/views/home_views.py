@@ -14,6 +14,11 @@ from ..dummydata import (
 )
 from ..models.home_models import HomeBoardMessage, IfiTool, NewsItem, StudentUnion
 from ..models.magazine import MagazineIssue
+from ..models.instagram import (
+    shown_posts,
+    visible_posts,
+    with_union_links,
+)
 from ..models.opening_hours import opening_hours_now
 
 
@@ -68,10 +73,27 @@ def main_view(request):
         "upcoming_event_days": group_events_by_day(upcoming_events),
         "magazine_issues": list(MagazineIssue.objects.filter(hidden=False)),
         "opening_hours": opening_hours_now(),
+        "instagram_posts": with_union_links(shown_posts()),
+        "instagram_total": visible_posts().count(),
     }
 
     return render(
         request=request,
         template_name="home/home_index.html",
         context=context,
+    )
+
+
+def instagram_more_posts(request):
+    """Every visible post as Instagram viewer cards, an HTML fragment the
+    viewer appends the first time it opens."""
+    # All of them, not just after the first SHOWN_POSTS: a sync since the
+    # homepage loaded can shift the list, and the script drops the cards it
+    # already has, so nothing is skipped or shown twice.
+    posts = with_union_links(visible_posts())
+    numbered = list(enumerate(posts, start=1))
+    return render(
+        request,
+        "home/partials/instagram/viewer_posts.html",
+        {"numbered": numbered, "total": len(posts)},
     )

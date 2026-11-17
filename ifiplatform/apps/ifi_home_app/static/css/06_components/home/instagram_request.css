@@ -1,0 +1,211 @@
+.instagram-request {
+  display: grid;
+  justify-items: center;
+  padding: 2.5rem 1rem 4rem;
+}
+
+.instagram-request-card {
+  --line: var(--color-border);
+  width: min(100%, 30rem);
+  box-sizing: border-box;
+  display: grid;
+  gap: 1rem;
+  padding: 1.75rem 2rem;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-white);
+  box-shadow: 0 2px 8px var(--color-shadow);
+  line-height: 1.5;
+}
+
+.instagram-request-card h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  text-wrap: balance;
+}
+
+.instagram-request-card p {
+  margin: 0;
+}
+
+.instagram-request-card form {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.instagram-request-step {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.instagram-request-checks {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 12%, transparent);
+}
+
+.instagram-request-check {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem;
+  align-items: start;
+  cursor: pointer;
+}
+
+.instagram-request-check input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0.15rem 0 0;
+  accent-color: var(--color-text);
+}
+
+.instagram-request-check em {
+  margin-left: 0.25rem;
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-cta-border);
+}
+
+.instagram-request-check small,
+.instagram-request-field small {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.instagram-request-blocker {
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid var(--color-cta-border);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9rem;
+}
+
+.instagram-request-field {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.instagram-request-field > label,
+.instagram-request-field legend {
+  padding: 0;
+  font-weight: 700;
+}
+
+.instagram-request-field legend {
+  margin-bottom: 0.35rem;
+}
+
+.instagram-request-field input[type="text"],
+.instagram-request-field input[type="email"],
+.instagram-request-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--color-white);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.instagram-request-field textarea {
+  resize: vertical;
+}
+
+.instagram-request-at {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--color-white);
+}
+
+.instagram-request-at span {
+  padding-left: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.instagram-request-field .instagram-request-at input {
+  border: 0;
+  padding-left: 0.2rem;
+}
+
+.instagram-request-kinds {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.instagram-request-kinds label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.instagram-request-kinds input {
+  margin: 0;
+  accent-color: var(--color-text);
+}
+
+.instagram-request-error {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-error);
+}
+
+.instagram-request-actions {
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 12%, transparent);
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.instagram-request-next {
+  margin: 0;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.instagram-request-card form:has(.is-required input:not(:checked)) .instagram-request-next {
+  opacity: 0.4;
+}
+
+.instagram-request-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.instagram-request-honeypot {
+  position: absolute;
+  left: -100vw;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.instagram-request-card :is(input, textarea, button, a):focus-visible {
+  outline: 3px solid var(--color-cta-hover);
+  outline-offset: 2px;
+}

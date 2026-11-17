@@ -1,0 +1,29 @@
+{% comment %}A post's media at full size: video, album strip, cover with "Watch on Instagram", or one picture. Used by the viewer. Design rationale: docs/claude_context/home_instagram.md{% endcomment %}
+{% load i18n %}
+{% with pictures=post.pictures %}
+    <div class="home-instagram-media">
+        {% if post.media_type == "video" and post.video %}
+            <video class="home-instagram-video" controls preload="none" loop playsinline poster="{{ post.image.url }}"{% if post.image_width %} width="{{ post.image_width }}" height="{{ post.image_height }}"{% endif %}>
+                <source src="{{ post.video.url }}" type="video/mp4">
+            </video>
+        {% elif post.media_type == "video" %}
+            <div class="home-instagram-novideo">
+                <img src="{{ post.image.url }}" alt="{% blocktrans with handle=post.account.username %}Post by @{{ handle }}{% endblocktrans %}"{% if post.image_width %} width="{{ post.image_width }}" height="{{ post.image_height }}"{% endif %} loading="lazy">
+                <a class="home-instagram-watch" href="{{ post.permalink }}">{% trans "Watch on Instagram" %} &rarr;</a>
+            </div>
+        {% elif pictures|length > 1 %}
+            <div class="home-instagram-album" data-album>
+                <div class="home-instagram-album-strip">
+                    {% for picture in pictures %}
+                        <img src="{{ picture.url }}" alt="{% blocktrans with n=forloop.counter total=pictures|length %}Picture {{ n }} of {{ total }}{% endblocktrans %}"{% if picture.width %} width="{{ picture.width }}" height="{{ picture.height }}"{% endif %} loading="lazy">
+                    {% endfor %}
+                </div>
+                <button class="home-instagram-album-nav" type="button" data-step="-1" aria-label="{% trans 'Previous picture' %}" hidden>&lsaquo;</button>
+                <button class="home-instagram-album-nav" type="button" data-step="1" aria-label="{% trans 'Next picture' %}" hidden>&rsaquo;</button>
+                <div class="home-instagram-album-dots" aria-hidden="true">{% for picture in pictures %}<i></i>{% endfor %}</div>
+            </div>
+        {% else %}
+            <img src="{{ post.image.url }}" alt="{% blocktrans with handle=post.account.username %}Post by @{{ handle }}{% endblocktrans %}"{% if post.image_width %} width="{{ post.image_width }}" height="{{ post.image_height }}"{% endif %} loading="lazy">
+        {% endif %}
+    </div>
+{% endwith %}

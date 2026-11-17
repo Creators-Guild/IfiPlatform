@@ -7,8 +7,16 @@ from core_app.deploy_notice import deploy_notice_status_view
 from .views import home_views
 from .views import article_views
 from .views import event_views
+from .views import instagram_views
 
-ifi_home_urlpatterns = [path("", home_views.main_view, name="ifi_home")]
+ifi_home_urlpatterns = [
+    path("", home_views.main_view, name="ifi_home"),
+    path(
+        "instagram/request/",
+        instagram_views.instagram_request,
+        name="instagram_request",
+    ),
+]
 
 ifi_api_urlpatterns = [
     path(
@@ -57,6 +65,19 @@ ifi_api_urlpatterns = [
         "api/pages/<int:page_id>/banner-style/",
         article_views.save_banner_style,
         name="page_banner_style",
+    ),
+    # Every Instagram post as viewer cards, loaded when the viewer opens.
+    path(
+        "api/instagram/posts/",
+        home_views.instagram_more_posts,
+        name="instagram_more_posts",
+    ),
+    # Starts sync_instagram_posts in the background, see
+    # instagram_views.force_sync_instagram.
+    path(
+        "api/instagram/force-sync/",
+        instagram_views.force_sync_instagram,
+        name="force_sync_instagram",
     ),
     # Not page-scoped -- triggers the site-wide sync_peoply_events command,
     # see event_views.force_sync_peoply_events.

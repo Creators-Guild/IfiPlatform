@@ -1,9 +1,16 @@
-.peoply-sync-form {
+.peoply-sync-form,
+.instagram-sync-form {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
   margin: 0.5rem 0;
+}
+
+.instagram-sync-status {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-align: center;
 }
 
 .peoply-sync-warning {

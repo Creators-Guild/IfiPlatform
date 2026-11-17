@@ -13,6 +13,11 @@ __all__ = [
     "Location",
     "OpeningPeriod",
     "LocationClosure",
+    "InstagramAccount",
+    "InstagramPost",
+    "InstagramPostImage",
+    "InstagramSyncState",
+    "InstagramAccountRequest",
     "Menu",
     "MenuGroup",
     "MenuGroupLink",
@@ -31,6 +36,13 @@ from .event import peoply  # noqa: F401 -- imported so Django registers its mode
 from .glossary_models import GlossarySyncState
 from .magazine import MagazineIssue
 from .opening_hours import Location, LocationClosure, OpeningPeriod
+from .instagram import (
+    InstagramAccount,
+    InstagramPost,
+    InstagramPostImage,
+    InstagramSyncState,
+)
+from .instagram_request import InstagramAccountRequest
 from .menus import Menu, MenuGroup, MenuGroupLink, MenuSlot
 from .translation import (
     EnglishSlug,

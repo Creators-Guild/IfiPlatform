@@ -37,6 +37,7 @@ what does its log say?*
 | Browser warns about the certificate       | `sudo certbot certificates` and `sudo certbot renew --dry-run`                     |
 | Events from Peoply not updating           | `systemctl list-timers` and `journalctl -u sync-peoply-events -e`                  |
 | Magazine box missing new issues          | `systemctl list-timers` and `journalctl -u sync-output-magazine -e`                |
+| Instagram feed not updating              | `journalctl -u sync-instagram-posts -e`, then [instagram_setup.md](instagram_setup.md#keeping-it-working) |
 | Backups missing or old                    | `journalctl -u ifiplatform-backup -e`, see [backups_and_recovery.md](backups_and_recovery.md#checking-that-it-runs) |
 | Can't SSH in                              | Your IP may be banned by fail2ban (see [fail2ban](#fail2ban)), or the NREC security group changed |
 | Deploy failed                             | The failed run in GitHub → Actions → Deploy. Its log shows the server's output     |

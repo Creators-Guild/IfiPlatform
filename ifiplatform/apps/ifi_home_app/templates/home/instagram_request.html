@@ -1,0 +1,91 @@
+{% extends 'global_base.html' %}
+{% comment %}The "Suggest an account to show here" page for Ifi Instagram (instagram_views.instagram_request). Design rationale: docs/claude_context/home_instagram.md{% endcomment %}
+{% load i18n static %}
+
+{% block title %}{% trans "Suggest an account for Ifi Instagram" %}{% endblock %}
+
+{% block page_css %}
+    <link rel="stylesheet" href="{% static 'css/06_components/home/instagram_request.css' %}">
+{% endblock page_css %}
+
+{% block content %}
+    <div class="instagram-request">
+        <div class="instagram-request-card">
+            {% if step == "sent" %}
+                <h1>{% trans "Thanks!" %}</h1>
+                <p>{% blocktrans %}An admin will look at your request. If you left an email, the answer comes there. Approved accounts show up in Ifi Instagram within an hour.{% endblocktrans %}</p>
+                <p><a class="instagram-request-link" href="{% url 'ifi_home' %}">&larr; {% trans "Back to the home page" %}</a></p>
+            {% else %}
+                <p class="instagram-request-step">{% if step == "check" %}{% trans "Step 1 of 2 · Check" %}{% else %}{% trans "Step 2 of 2 · Suggest" %}{% endif %}</p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if step == "check" %}
+                        <h1>{% trans "Can the account be shown?" %}</h1>
+                        <p>{% trans "Ifi Instagram on the home page shows posts from IFI-related accounts. Suggest yours or another account, and an admin will look at it." %}</p>
+                        <div class="instagram-request-checks">
+                            <label class="instagram-request-check is-required">
+                                {{ form.is_public }}
+                                <span>{{ form.is_public.label }} <em>{% trans "required" %}</em></span>
+                            </label>
+                            <label class="instagram-request-check is-required">
+                                {{ form.is_professional }}
+                                <span>{{ form.is_professional.label }} <em>{% trans "required" %}</em>
+                                    <small>{% trans "Free to switch: in Instagram, Settings → Account type and tools." %}</small></span>
+                            </label>
+                            <label class="instagram-request-check">
+                                {{ form.ifi_related }}
+                                <span>{{ form.ifi_related.label }}
+                                    <small>{% trans "A union, a group, the university or a humour account about IFI. Not quite? You can ask for an exception in the next step." %}</small></span>
+                            </label>
+                        </div>
+                        {% for error in form.non_field_errors %}
+                            <p class="instagram-request-blocker" role="alert">{{ error }}</p>
+                        {% endfor %}
+                        <div class="instagram-request-actions">
+                            <button class="btn instagram-request-next" type="submit" name="step" value="check">{% trans "Next" %} &rarr;</button>
+                            <a class="instagram-request-link" href="{% url 'ifi_home' %}">{% trans "Cancel" %}</a>
+                        </div>
+                    {% else %}
+                        <h1>{% trans "Suggest an account for Ifi Instagram" %}</h1>
+                        {{ form.ifi_related }}
+                        <div class="instagram-request-honeypot" aria-hidden="true">
+                            <label for="{{ form.website.id_for_label }}">Website</label>
+                            <input type="text" name="website" id="{{ form.website.id_for_label }}" tabindex="-1" autocomplete="off">
+                        </div>
+                        {% for error in form.non_field_errors %}
+                            <p class="instagram-request-blocker" role="alert">{{ error }}</p>
+                        {% endfor %}
+                        <div class="instagram-request-field">
+                            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                            <div class="instagram-request-at"><span aria-hidden="true">@</span>{{ form.username }}</div>
+                            {% for error in form.username.errors %}<p class="instagram-request-error">{{ error }}</p>{% endfor %}
+                        </div>
+                        <fieldset class="instagram-request-field">
+                            <legend>{{ form.kind.label }}</legend>
+                            <div class="instagram-request-kinds">
+                                {% for choice in form.kind %}
+                                    <label>{{ choice.tag }} {{ choice.choice_label }}</label>
+                                {% endfor %}
+                            </div>
+                            {% for error in form.kind.errors %}<p class="instagram-request-error">{{ error }}</p>{% endfor %}
+                        </fieldset>
+                        <div class="instagram-request-field">
+                            <label for="{{ form.reason.id_for_label }}">{{ form.reason.label }}</label>
+                            {{ form.reason }}
+                            {% for error in form.reason.errors %}<p class="instagram-request-error">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div class="instagram-request-field">
+                            <label for="{{ form.contact_email.id_for_label }}">{{ form.contact_email.label }}</label>
+                            {{ form.contact_email }}
+                            {% for error in form.contact_email.errors %}<p class="instagram-request-error">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div class="instagram-request-actions">
+                            <button class="btn instagram-request-next" type="submit" name="step" value="request">{% trans "Send request" %}</button>
+                            <button class="instagram-request-link" type="submit" name="step" value="back" formnovalidate>&larr; {% trans "Back" %}</button>
+                        </div>
+                    {% endif %}
+                </form>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

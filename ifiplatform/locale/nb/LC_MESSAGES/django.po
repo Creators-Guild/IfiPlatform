@@ -870,6 +870,18 @@ msgstr "(sist synkronisert %(time)s)"
 msgid "Sync Peoply now"
 msgstr "Synkroniser Peoply nå"
 
+#: .\apps\ifi_home_app\templates\home\partials\instagram\sync_button.html
+msgid "Sync Instagram now"
+msgstr "Synkroniser Instagram nå"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\sync_button.html
+msgid "Instagram sync started. New posts show up in a minute or two."
+msgstr "Instagram-synkroniseringen har startet. Nye innlegg dukker opp om et minutt eller to."
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\sync_button.html
+msgid "An Instagram sync is already running."
+msgstr "En Instagram-synkronisering kjører allerede."
+
 #: .\apps\ifi_home_app\templates\events\partials\peoply_sync_button.html:7
 msgid "Don't spam!"
 msgstr "Ikke spam!"
@@ -2407,6 +2419,321 @@ msgstr "Alle dager"
 #, python-format
 msgid "Closed: %(reason)s"
 msgstr "Stengt: %(reason)s"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+#, python-format
+msgid "Post by @%(handle)s"
+msgstr "Innlegg fra @%(handle)s"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Video"
+msgstr "Video"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Several images"
+msgstr "Flere bilder"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "more"
+msgstr "mer"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "less"
+msgstr "mindre"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "See on Instagram"
+msgstr "Se på Instagram"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\media.html
+msgid "Watch on Instagram"
+msgstr "Se videoen på Instagram"
+
+#: Ifi Instagram account requests
+msgid "Suggest an account to show here"
+msgstr "Foreslå en konto som skal vises her"
+
+#: Ifi Instagram account requests
+msgid "Suggest an account for Ifi Instagram"
+msgstr "Foreslå en konto til Ifi Instagram"
+
+#: Ifi Instagram account requests
+msgid "Thanks!"
+msgstr "Takk!"
+
+#: Ifi Instagram account requests
+msgid "An admin will look at your request. If you left an email, the answer comes there. Approved accounts show up in Ifi Instagram within an hour."
+msgstr "En admin ser på forespørselen din. Hvis du la igjen en e-postadresse, kommer svaret dit. Godkjente kontoer dukker opp i Ifi Instagram innen en time."
+
+#: Ifi Instagram account requests
+msgid "Back to the home page"
+msgstr "Tilbake til forsiden"
+
+#: Ifi Instagram account requests
+msgid "Step 1 of 2 · Check"
+msgstr "Steg 1 av 2 · Sjekk"
+
+#: Ifi Instagram account requests
+msgid "Step 2 of 2 · Suggest"
+msgstr "Steg 2 av 2 · Foreslå"
+
+#: Ifi Instagram account requests
+msgid "Ifi Instagram on the home page shows posts from IFI-related accounts. Suggest yours or another account, and an admin will look at it."
+msgstr "Ifi Instagram på forsiden viser innlegg fra kontoer med tilknytning til IFI. Foreslå din egen eller en annen konto, så ser en admin på det."
+
+#: Ifi Instagram account requests
+msgid "Can the account be shown?"
+msgstr "Kan kontoen vises?"
+
+#: Ifi Instagram account requests
+msgid "required"
+msgstr "påkrevd"
+
+#: Ifi Instagram account requests
+msgid "Free to switch: in Instagram, Settings → Account type and tools."
+msgstr "Gratis å bytte: i Instagram, Innstillinger → Kontotype og verktøy."
+
+#: Ifi Instagram account requests
+msgid "A union, a group, the university or a humour account about IFI. Not quite? You can ask for an exception in the next step."
+msgstr "En forening, en gruppe, universitetet eller en humorkonto om IFI. Ikke helt? Du kan be om et unntak i neste steg."
+
+#: Ifi Instagram account requests
+#: Ifi Instagram account requests
+msgid "Send request"
+msgstr "Send forespørsel"
+
+#: Ifi Instagram account requests
+msgid "It's public"
+msgstr "Den er offentlig"
+
+#: Ifi Instagram account requests
+msgid "It's a business or creator account"
+msgstr "Den er en bedrifts- eller innholdsskaperkonto"
+
+#: Ifi Instagram account requests
+msgid "It's related to IFI"
+msgstr "Den har tilknytning til IFI"
+
+#: Ifi Instagram account requests
+msgid "Instagram only lets us show public business or creator accounts. Switching is free: in Instagram, go to Settings, then Account type and tools. Then come back here."
+msgstr "Instagram lar oss bare vise offentlige bedrifts- eller innholdsskaperkontoer. Det er gratis å bytte: i Instagram, gå til Innstillinger og så Kontotype og verktøy. Kom så tilbake hit."
+
+#: Ifi Instagram account requests
+msgid "Union or association"
+msgstr "Forening eller organisasjon"
+
+#: Ifi Instagram account requests
+msgid "Student democracy"
+msgstr "Studentdemokrati"
+
+#: Ifi Instagram account requests
+msgid "University or department"
+msgstr "Universitet eller institutt"
+
+#: Ifi Instagram account requests
+msgid "Media"
+msgstr "Medier"
+
+#: Ifi Instagram account requests
+msgid "Humour"
+msgstr "Humor"
+
+#: Ifi Instagram account requests
+msgid "Instagram username"
+msgstr "Instagram-brukernavn"
+
+#: Ifi Instagram account requests
+msgid "What kind of account is it?"
+msgstr "Hva slags konto er det?"
+
+#: Ifi Instagram account requests
+msgid "How is it related to IFI?"
+msgstr "Hvilken tilknytning har den til IFI?"
+
+#: Ifi Instagram account requests
+msgid "Email for the answer (optional)"
+msgstr "E-postadresse for svaret (valgfritt)"
+
+#: Ifi Instagram account requests
+msgid "Why should it be shown anyway?"
+msgstr "Hvorfor bør den vises likevel?"
+
+#: Ifi Instagram account requests
+msgid "Use the name from the account's Instagram address, e.g. ifinavet."
+msgstr "Bruk navnet fra kontoens Instagram-adresse, f.eks. ifinavet."
+
+#: Ifi Instagram account requests
+#, python-format
+msgid "@%(username)s is already in Ifi Instagram."
+msgstr "@%(username)s er allerede med i Ifi Instagram."
+
+#: Ifi Instagram account requests
+#, python-format
+msgid "@%(username)s has already been requested. An admin will look at it soon."
+msgstr "Noen har allerede bedt om @%(username)s. En admin ser på det snart."
+
+#: Ifi Instagram account requests
+msgid "We've had a lot of requests in the last hour. Please try again later."
+msgstr "Vi har fått mange forespørsler den siste timen. Prøv igjen senere."
+
+#: Ifi Instagram account requests
+msgid "Your Ifi Instagram request"
+msgstr "Forespørselen din til Ifi Instagram"
+
+#: Ifi Instagram account requests
+#, python-format
+msgid ""
+"Hi!\n"
+"\n"
+"@%(handle)s is now in Ifi Instagram on the home page of Ifi Platform. Its newest posts show up within an hour."
+msgstr ""
+"Hei!\n"
+"\n"
+"@%(handle)s er nå med i Ifi Instagram på forsiden av Ifi Plattform. De nyeste innleggene dukker opp innen en time."
+
+#: Ifi Instagram account requests
+#, python-format
+msgid ""
+"Hi!\n"
+"\n"
+"@%(handle)s won't be shown in Ifi Instagram on Ifi Platform."
+msgstr ""
+"Hei!\n"
+"\n"
+"@%(handle)s blir ikke vist i Ifi Instagram på Ifi Plattform."
+
+#: Ifi Instagram account requests
+msgid "Anyone can ask for an Instagram account to be added to the home page. We keep the request (the account name, what you wrote and, if you give one, your email address) until an admin has answered, and delete it six months after the answer. If you give an email address, the answer is sent to it through Resend."
+msgstr "Hvem som helst kan be om at en Instagram-konto legges til på forsiden. Vi tar vare på forespørselen (kontonavnet, det du skrev og e-postadressen din hvis du oppgir en) til en admin har svart, og sletter den seks måneder etter svaret. Hvis du oppgir en e-postadresse, sendes svaret dit gjennom Resend."
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "new"
+msgstr "nye"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "{n} seen hidden"
+msgstr "{n} sette skjult"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Run an IFI-related account?"
+msgstr "Driver du en konto med tilknytning til IFI?"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Loading posts…"
+msgstr "Laster inn innlegg …"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Seen"
+msgstr "Sett"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Hiding seen"
+msgstr "Skjuler sette"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Showing seen"
+msgstr "Viser sette"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "You've seen all the new posts."
+msgstr "Du har sett alle de nye innleggene."
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "New ones show up as the accounts post."
+msgstr "Nye dukker opp når kontoene legger ut noe."
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Show them anyway"
+msgstr "Vis dem likevel"
+
+#: .\apps\account_app\templates\legal\cookies_and_statistics.html
+msgid "Saved in your browser"
+msgstr "Lagret i nettleseren din"
+
+#: .\apps\account_app\templates\legal\cookies_and_statistics.html
+msgid "The Instagram viewer on the home page remembers which posts you have seen, so it can hide them next time. That list is saved only in your own browser (local storage) and is never sent to us. Clearing the site's data in your browser removes it."
+msgstr "Instagram-visningen på forsiden husker hvilke innlegg du har sett, så den kan skjule dem neste gang. Listen lagres bare i din egen nettleser (lokal lagring) og sendes aldri til oss. Hvis du sletter nettstedets data i nettleseren, forsvinner den."
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\post_header.html
+#, python-format
+msgid "About %(name)s"
+msgstr "Om %(name)s"
+
+#: .\apps\ifi_home_app\models\instagram.py
+msgid "union"
+msgstr "forening"
+
+#: .\apps\ifi_home_app\models\instagram.py
+msgid "student democracy"
+msgstr "studentdemokrati"
+
+#: .\apps\ifi_home_app\models\instagram.py
+msgid "media"
+msgstr "medier"
+
+#: .\apps\ifi_home_app\models\instagram.py
+msgid "humour"
+msgstr "humor"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\media.html
+#, python-format
+msgid "Picture %(n)s of %(total)s"
+msgstr "Bilde %(n)s av %(total)s"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\media.html
+msgid "Previous picture"
+msgstr "Forrige bilde"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\media.html
+msgid "Next picture"
+msgstr "Neste bilde"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+#, python-format
+msgid "Open post by @%(handle)s"
+msgstr "Åpne innlegg fra @%(handle)s"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+#, python-format
+msgid "Post %(n)s of %(total)s"
+msgstr "Innlegg %(n)s av %(total)s"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Show more"
+msgstr "Vis flere"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Show less"
+msgstr "Vis færre"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+#, python-format
+msgid "That's the %(n)s newest posts."
+msgstr "Det var de %(n)s nyeste innleggene."
+
+#: .\apps\ifi_home_app\models\instagram.py
+#, python-format
+msgid "%(n)s min"
+msgstr "%(n)s min"
+
+#: .\apps\ifi_home_app\models\instagram.py
+#, python-format
+msgid "%(n)s h"
+msgstr "%(n)s t"
+
+#: .\apps\ifi_home_app\models\instagram.py
+#, python-format
+msgid "%(n)s d"
+msgstr "%(n)s d"
+
+#: .\apps\ifi_home_app\models\instagram.py
+#, python-format
+msgid "%(n)s w"
+msgstr "%(n)s u"
+
+#: .\apps\account_app\templates\legal\data_processors.html
+msgid "The home page shows public posts from chosen Instagram accounts. Our server copies them through Meta's API, so your browser doesn't contact Instagram unless you open a post, and no data about you is sent to Meta. The posts come from public accounts we have chosen. If you appear in one and have concerns about it, contact us and we'll help, for example by hiding the post on our site or pointing you to the account that posted it."
+msgstr "Forsiden viser offentlige innlegg fra utvalgte Instagram-kontoer. Serveren vår henter dem gjennom Metas API, så nettleseren din kontakter ikke Instagram før du åpner et innlegg, og ingen data om deg sendes til Meta. Innleggene kommer fra offentlige kontoer vi har valgt. Hvis du er med i et innlegg og er bekymret for det, kontakt oss, så hjelper vi deg, for eksempel ved å skjule innlegget på nettstedet vårt eller vise deg til kontoen som la det ut."
 
 msgid "Visitor statistics"
 msgstr "Besøksstatistikk"

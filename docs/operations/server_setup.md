@@ -327,8 +327,8 @@ Run the routine checks from
 
 - Open https://www.ifiplattform.no. Check a few pages, some images, and
   log in to the Wagtail admin.
-- `systemctl list-timers`: `sync-peoply-events`, `sync-output-magazine`
-  and `ifiplatform-backup` are scheduled.
+- `systemctl list-timers`: `sync-peoply-events`, `sync-output-magazine`,
+  `sync-instagram-posts` and `ifiplatform-backup` are scheduled.
 - `ls -lt /mnt/backups/postgres/ | head -3`: the first deploy wrote a
   backup.
 - Run a deploy from GitHub Actions to check that the secrets work.
