@@ -447,7 +447,7 @@ class MorePostsViewTests(TestCase):
         with translation.override("en"):
             html = self.client.get(reverse("instagram_more_posts")).content.decode()
         self.assertEqual(html.count('class="home-instagram-viewer-post"'), 2)
-        self.assertIn("13 / 14", html)
+        self.assertIn('aria-label="Post 13 of 14"', html)
         self.assertIn('data-index="12"', html)
         self.assertIn("https://www.instagram.com/p/13/", html)
 
@@ -489,12 +489,33 @@ class ViewerTemplateTests(TestCase):
         html = self.render(self._post())
         self.assertIn('<dialog class="home-instagram-viewer"', html)
         self.assertIn('data-index="0"', html)
-        self.assertIn("1 / 1", html)
+        self.assertIn('data-total="1"', html)
         self.assertNotIn("data-more-url", html)
+
+    def test_viewer_cards_can_hide_seen_posts(self):
+        post = self._post()
+        post.pk = 41
+        html = self.render(post)
+        self.assertIn('data-post="41"', html)
+        self.assertIn('<p class="home-instagram-viewer-status" hidden>', html)
+        self.assertIn('data-hidden-count="{n} seen hidden"', html)
+        self.assertIn(
+            '<section class="home-instagram-viewer-post home-instagram-viewer-end" hidden>',
+            html,
+        )
+        self.assertIn("Show them anyway", html)
+        with translation.override("nb"):
+            html = render_to_string(
+                "home/partials/instagram/instagram.html", {"instagram_posts": [post]}
+            )
+        self.assertIn("Skjuler sette", html)
+        self.assertIn('data-off="Viser sette"', html)
+        self.assertIn('data-hidden-count="{n} sette skjult"', html)
 
     def test_viewer_counts_every_stored_post_and_loads_the_rest(self):
         html = self.render(self._post(), instagram_total=14)
-        self.assertIn("1 / 14", html)
+        self.assertIn('data-total="14"', html)
+        self.assertIn('aria-label="Post 1 of 14"', html)
         self.assertIn('data-more-url="/en/api/instagram/posts/"', html)
 
 

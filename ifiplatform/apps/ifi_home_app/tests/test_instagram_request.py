@@ -135,8 +135,12 @@ class RequestPageTests(TestCase):
                 "home/partials/instagram/instagram.html", {"instagram_posts": [post]}
             )
         self.assertIn(
-            '<a class="home-instagram-add" href="/en/instagram/request/">'
-            "Suggest an account to show here &rarr;</a>",
+            "Run an IFI-related account? "
+            '<a href="/en/instagram/request/">Suggest an account to show here &rarr;</a>',
+            html,
+        )
+        self.assertIn(
+            '<button class="home-instagram-view-all" type="button" hidden>Show more</button>',
             html,
         )
 

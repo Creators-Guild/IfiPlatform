@@ -2594,6 +2594,50 @@ msgstr ""
 msgid "Anyone can ask for an Instagram account to be added to the home page. We keep the request (the account name, what you wrote and, if you give one, your email address) until an admin has answered, and delete it six months after the answer. If you give an email address, the answer is sent to it through Resend."
 msgstr "Hvem som helst kan be om at en Instagram-konto legges til på forsiden. Vi tar vare på forespørselen (kontonavnet, det du skrev og e-postadressen din hvis du oppgir en) til en admin har svart, og sletter den seks måneder etter svaret. Hvis du oppgir en e-postadresse, sendes svaret dit gjennom Resend."
 
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "new"
+msgstr "nye"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "{n} seen hidden"
+msgstr "{n} sette skjult"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Run an IFI-related account?"
+msgstr "Driver du en konto med tilknytning til IFI?"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Seen"
+msgstr "Sett"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Hiding seen"
+msgstr "Skjuler sette"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Showing seen"
+msgstr "Viser sette"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "You've seen all the new posts."
+msgstr "Du har sett alle de nye innleggene."
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "New ones show up as the accounts post."
+msgstr "Nye dukker opp når kontoene legger ut noe."
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Show them anyway"
+msgstr "Vis dem likevel"
+
+#: .\apps\account_app\templates\legal\cookies_and_statistics.html
+msgid "Saved in your browser"
+msgstr "Lagret i nettleseren din"
+
+#: .\apps\account_app\templates\legal\cookies_and_statistics.html
+msgid "The Instagram viewer on the home page remembers which posts you have seen, so it can hide them next time. That list is saved only in your own browser (local storage) and is never sent to us. Clearing the site's data in your browser removes it."
+msgstr "Instagram-visningen på forsiden husker hvilke innlegg du har sett, så den kan skjule dem neste gang. Listen lagres bare i din egen nettleser (lokal lagring) og sendes aldri til oss. Hvis du sletter nettstedets data i nettleseren, forsvinner den."
+
 #: .\apps\ifi_home_app\templates\home\partials\instagram\post_header.html
 #, python-format
 msgid "About %(name)s"

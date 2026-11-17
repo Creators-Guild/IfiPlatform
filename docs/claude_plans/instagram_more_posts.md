@@ -75,6 +75,12 @@ Since 2026-11-15 synced posts older than a year aren't kept at all
 - Meta's platform terms have rules on how long content may be stored: read
   them before keeping months of posts.
 
+## Later: seen posts on the account
+
+The viewer hides posts this browser has seen (local storage, 2026-11-17).
+The user wants the same list saved on the account for logged-in users,
+so it follows them across devices, as a separate later plan.
+
 ## Open questions for the user
 
 - How far back: newest N per account, or last X weeks?

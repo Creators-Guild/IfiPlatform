@@ -1,11 +1,11 @@
 {% comment %}Design rationale: docs/claude_context/home_instagram.md{% endcomment %}
 {% load i18n static %}
-{% if instagram_posts %}
+{% if instagram_posts %}{% with shown=instagram_posts|length %}
     <section class="instagram_container" aria-labelledby="home-instagram-heading">
         <div class="home-instagram-card">
             <div class="home-instagram-head">
                 <h2 class="newsbar-heading newsbar-heading--news" id="home-instagram-heading">Ifi Instagram</h2>
-                <a class="home-instagram-add" href="{% url 'instagram_request' %}">{% trans "Suggest an account to show here" %} &rarr;</a>
+                <button class="home-instagram-view-all" type="button" hidden>{% trans "Show more" %}</button>
             </div>
             <div class="home-instagram-feed">
                 {% for post in instagram_posts %}
@@ -37,17 +37,26 @@
                     <summary><span class="home-instagram-toggle-more">{% trans "Show more" %}</span><span class="home-instagram-toggle-less">{% trans "Show less" %}</span></summary>
                 </details>
             {% endif %}
+            <p class="home-instagram-suggest">{% trans "Run an IFI-related account?" %} <a href="{% url 'instagram_request' %}">{% trans "Suggest an account to show here" %} &rarr;</a></p>
         </div>
-        {% with shown=instagram_posts|length %}
             <dialog class="home-instagram-viewer" aria-label="Ifi Instagram"{% if instagram_total > shown %} data-more-url="{% url 'instagram_more_posts' %}"{% endif %}>
                 <button class="home-instagram-viewer-close" type="button" aria-label="{% trans 'Close' %}">&times;</button>
-                <div class="home-instagram-viewer-feed">
+                <p class="home-instagram-viewer-status" hidden>
+                    <span class="home-instagram-viewer-position"></span>
+                    <span class="home-instagram-viewer-hidden"></span>
+                    <label class="home-instagram-seen-switch" hidden data-on="{% trans 'Hiding seen' %}" data-off="{% trans 'Showing seen' %}"><input type="checkbox" checked> <span>{% trans "Hiding seen" %}</span></label>
+                </p>
+                <div class="home-instagram-viewer-feed" data-total="{{ instagram_total|default:shown }}" data-new="{% trans 'new' %}" data-seen-label="{% trans 'Seen' %}" data-hidden-count="{% trans '{n} seen hidden' %}">
                     {% for post in instagram_posts %}
                         {% include "home/partials/instagram/viewer_post.html" with number=forloop.counter total=instagram_total|default:shown %}
                     {% endfor %}
+                    <section class="home-instagram-viewer-post home-instagram-viewer-end" hidden>
+                        <p><strong>{% trans "You've seen all the new posts." %}</strong></p>
+                        <p>{% trans "New ones show up as the accounts post." %}</p>
+                        <button class="btn home-instagram-show-seen" type="button">{% trans "Show them anyway" %}</button>
+                    </section>
                 </div>
             </dialog>
-        {% endwith %}
     </section>
     <script src="{% static 'js/home_instagram.js' %}" defer></script>
-{% endif %}
+{% endwith %}{% endif %}

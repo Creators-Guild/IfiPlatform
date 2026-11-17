@@ -112,8 +112,8 @@ permission error. Their posts can be added by hand in the meantime
 
 ## Handling account requests
 
-Visitors can ask for an account to be added (the "Suggest an account to show here →" link
-by the feed). The Wagtail dashboard shows how many requests wait. Open
+Visitors can ask for an account to be added (the "Suggest an account to
+show here →" link at the bottom of the feed). The Wagtail dashboard shows how many requests wait. Open
 Snippets → "Instagram account requests", check the account on Instagram,
 then set the status:
 

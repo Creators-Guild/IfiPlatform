@@ -203,9 +203,16 @@ accounts while the app was in Development mode.
   first). The native `<details>` still opens the list without JavaScript,
   so the collapsed CSS stays.
 - Reels-style (user): each viewer post is the window's height
-  (`grid-auto-rows: 100dvh`, card `calc(100dvh - 2rem)`), `scroll-snap-type:
-  y mandatory` + `scroll-snap-stop: always`, so a scroll moves exactly one
-  post. Media fills the space left (`minmax(0, 1fr)` row, `object-fit:
+  (`grid-auto-rows: 100dvh`), `scroll-snap-type: y mandatory` +
+  `scroll-snap-stop: always`, so a scroll moves exactly one post. Cards
+  leave `--top` (3.25rem) free above them for the hide-seen pill (user saw
+  it overlap a centered card): height `100dvh - --top - 1rem`, margin
+  `--top` above, snapped with `scroll-snap-align: start` +
+  `scroll-margin-top`, and the script scrolls with `block: "start"`. The
+  width formulas use the same height. The phone `@media` block for the
+  viewer must come after the base card rule: it used to come before, so
+  the base rule won and phones never got the edge-to-edge card
+  (found and fixed 2026-11-17). Media fills the space left (`minmax(0, 1fr)` row, `object-fit:
   contain` on black). Captions start clamped with "… more" / "less" in the
   viewer and the feed (same button, `data-more`/`data-less`); an opened
   caption in the viewer scrolls inside `max-height: 30dvh`.
@@ -265,9 +272,18 @@ accounts while the app was in Development mode.
 
 ## Account requests (user's choices, 2026-11-17, from mockups)
 
-- Entry: "Suggest an account to show here →" on the heading's line, right
-  (`.home-instagram-head`: grid `1fr auto 1fr` keeps the heading centered;
-  under 40rem card width the link drops under it).
+- Entry (user, from mockups "L4"): the box's last line, "Run an
+  IFI-related account? Suggest an account to show here →"
+  (`.home-instagram-suggest`). It was on the heading's line first; the
+  "Show more" button under the heading made the top too busy.
+- "Show more" under the heading (user, 2026-11-17; briefly an outlined
+  "View all N posts" button, mockup "V2"): `.home-instagram-view-all`,
+  `hidden` until the script runs, opens the viewer like the bottom "Show
+  more" (`open(0, true)`: the first post that isn't hidden). With the
+  script, the section gets `.has-viewer` and laptops (over 45rem, one row
+  of posts) hide the bottom `<details>` "Show more"; phones keep both,
+  since their posts are stacked. Without JS only the bottom `<details>`
+  shows, opening the list in place.
 - Own page, not a dialog, two steps in one view (`step` POST field: check /
   request / back), plain form posts so it works without JS. The user's
   rule: public + business/creator are required (Meta can't read anything
@@ -299,3 +315,47 @@ accounts while the app was in Development mode.
 - Privacy: requests, and their email, are deleted 180 days after the
   decision (`delete_old_requests()`, start of every sync); the paragraph
   is on `legal/data_processors.html`, since the answer goes through Resend.
+
+
+## Hide seen posts (user's choices, 2026-11-17)
+
+- Viewer only; the homepage feed is unchanged (user). Stored in this
+  browser only: `localStorage` keys `ifi-instagram-seen` (post pks as
+  strings, newest `SEEN_KEPT` = 500) and `ifi-instagram-hide-seen`
+  ("on"/"off", on by default). Every read and write is in `try`: blocked
+  storage just means nothing is hidden. A login-synced list is for later
+  (user), see `docs/claude_plans/instagram_more_posts.md`.
+- Seen = a viewer card (`data-post`) at least half on screen for
+  `SEEN_AFTER` (1 s), via the `seenCards` observer; closing the dialog
+  stops pending timers (ratio drops to 0).
+- Snapshot rule: `open()` reads the list into `seenAtOpen`; `applySeen()`
+  only hides what was seen before this open, so nothing vanishes while
+  scrolling. The clicked post (`keep`) is shown until the switch is
+  flipped; turning the switch on hides the current post too if it was
+  seen (user) and moves to the next shown one, or the end card. "Show more" (user) has no `keep`: it
+  opens at the first shown card from the first post the homepage hid, or
+  at the end card. Only the 12 newest are loaded when it opens, so if
+  they're all seen it would land on the end card although older unseen
+  posts are coming (user found it "annoying"): `open()` waits for
+  `loadRest()` (a promise) and then moves to the first unseen post.
+- UI (user, from mockups: first in each post's footer, then moved to
+  the top as "too hidden"): one pill fixed at the top center of the
+  dialog, `.home-instagram-viewer-status` ("1 / 211 new · 3 seen hidden"
+  and a switch, a checkbox styled as one: off = white outline and knob, on = turquoise with a black outline and dark knob, user's "W1" (a white or vanishing outline looked odd); its label says the state, "Hiding seen" / "Showing seen", from the label's `data-on` / `data-off`; on phones it sits left, clear of
+  the close button). The position follows scrolling (`showPosition()` on
+  the feed's scroll, via rAF): "n / total" from `data-index` and the
+  feed's `data-total` when nothing is hidden, otherwise the place among
+  shown posts plus "new". The switch only shows once something was seen.
+  Translated strings ride on the feed's `data-new` / `data-hidden-count`
+  ("{n}" replaced). Post footers keep only "See on Instagram". The end
+  card (`.home-instagram-viewer-end`, also a `.home-instagram-viewer-post`
+  so it snaps, but without `data-post`) is moved last after each fetch;
+  "Show them anyway" turns the switch off.
+- Seen posts that are shown (switch off, or the clicked one) get a "✓
+  Seen" badge on the picture (user's pick "S2" from mockups): a
+  `::after` on `.home-instagram-media[data-seen]`, the label from the
+  feed's `data-seen-label`.
+- `display: grid`/`flex` beat the UA's `[hidden]`, hence the explicit
+  `[hidden] { display: none }` rules. `fitCards()` measures the first
+  shown card, since a hidden one has no height. Arrow keys and scrolling
+  go through `shown()`, and the homepage opens a card by its `data-index`.

@@ -67,7 +67,9 @@ All in `models/instagram.py`:
   (arrows or swipe) and the video itself, which plays with sound and
   loops while it's in view. ↓ ↑
   jump between posts, Esc or a click outside closes it. "Show more"
-  opens the viewer too, at the first post that wasn't shown.
+  opens the viewer too, at the first post that isn't hidden. It sits
+  under the heading; phones also have one under the posts, since they
+  show the posts stacked.
 - **The viewer on bigger screens than a phone.** When there's room, a post
   shows like Instagram on a computer: the picture on the left, and the
   account, the whole caption, the date and the link in a column on the
@@ -75,6 +77,16 @@ All in `models/instagram.py`:
   opens the column over the right edge of the picture, if it would cover
   less than about half of it, or under the picture otherwise. Videos
   always open it under, so their controls stay visible.
+- **Hiding seen posts.** The viewer remembers which posts you've looked
+  at (at least half on screen for a second) and hides them the next time
+  it opens, so you only scroll through what's new. A pill at the top of
+  the viewer says where you are ("2 / 9 new"), how many are hidden ("3
+  seen hidden") and has a switch to show them again; an end card says
+  when you've seen everything. "Show more" opens at the first post that
+  isn't hidden. The list is saved in
+  your browser only (local storage, the newest 500), never on the server,
+  and the cookies page says so. The homepage feed itself always shows the
+  newest posts. The post you clicked on is always shown, seen or not.
 - A video Instagram gives us no file for (often reels with licensed music)
   shows its cover with "Watch on Instagram". A video inside an album shows
   as its cover picture.
@@ -87,8 +99,8 @@ All in `models/instagram.py`:
 
 ## Account requests
 
-Anyone can ask for an account to be added, through "Suggest an account to show here →"
-next to the feed's heading. The page (`instagram/request/`,
+Anyone can ask for an account to be added, through the box's last line,
+"Run an IFI-related account? Suggest an account to show here →". The page (`instagram/request/`,
 `views/instagram_views.py`, `forms.py`, template
 `home/instagram_request.html`) has two steps:
 
