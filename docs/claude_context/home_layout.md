@@ -1,6 +1,6 @@
 # home_layout.css — design rationale
 
-Last updated: 2026-11-13
+Last updated: 2026-11-17
 Covers: ifiplatform/apps/ifi_home_app/static/css/05_objects/home_layout.css, ifiplatform/apps/ifi_home_app/static/css/05_objects/home_index_layout.css, ifiplatform/apps/ifi_home_app/static/css/06_components/home/home_navbar_mobile.css
 
 Covers the homepage grid (`home/home_index.html`), which lives in
@@ -33,8 +33,9 @@ Instagram titles (both `.newsbar-heading`) sit *inside* their cards (user's
 choice): on the homepage the card style is on `.newsbar_container`
 (`home_newsbar.css`), not the article grid, and the Instagram `<h2>` is
 inside `.home-instagram-card`. `#home-subcontent .newsbar-heading` gives
-both the same margins inside the card (scoped so news headings on other
-pages keep theirs).
+both the same margins inside the card and an underline like the opening
+hours title (user, 2026-11-17), scoped so news headings on other pages
+keep theirs.
 
 `.home-sidecolumn` carries the placement the events box used to have
 (`grid-area`, `align-self: start`, `max-width: 23rem`, `margin`); the boxes
