@@ -15,6 +15,8 @@ systemd timer.
 Design rationale: docs/claude_context/home_instagram.md"""
 
 import io
+import signal
+import sys
 
 from django.core.files import File
 from django.core.files.base import ContentFile
@@ -56,6 +58,10 @@ def _jpeg(data, size):
     return ContentFile(out.getvalue())
 
 
+def _exit_on_sigterm(signum, frame):  # pylint: disable=unused-argument
+    sys.exit(128 + signum)
+
+
 class Command(BaseCommand):
     """See the module docstring."""
 
@@ -79,10 +85,15 @@ class Command(BaseCommand):
         if not InstagramSyncState.claim_run():
             self.stdout.write("Another Instagram sync is running: skipped.")
             return
+        # A restart (deploy.sh restarts gunicorn, which also stops a sync the
+        # button started) sends SIGTERM; exit through `finally` so the lock
+        # is released instead of blocking syncs for RUN_STALE_AFTER.
+        previous = signal.signal(signal.SIGTERM, _exit_on_sigterm)
         try:
             self._sync_all()
         finally:
             InstagramSyncState.finish_run()
+            signal.signal(signal.SIGTERM, previous)
 
     def _sync_all(self):
         self._check_token()

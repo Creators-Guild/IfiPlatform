@@ -370,8 +370,12 @@ function setUpViewer(section) {
       const i = visiblePosts.indexOf(card);
       const n = i === -1 ? visiblePosts.length : i + 1;
       position.textContent = `${n} / ${visiblePosts.length} ${feed.dataset.new}`;
-    } else if (card.dataset.index) {
-      position.textContent = `${Number(card.dataset.index) + 1} / ${feed.dataset.total}`;
+    } else if (card.dataset.post) {
+      // Count the cards actually here once all are loaded: a sync since the
+      // page loaded can change the stored total.
+      const cards = posts();
+      const total = loaded ? cards.length : feed.dataset.total;
+      position.textContent = `${cards.indexOf(card) + 1} / ${total}`;
     }
   };
   let reposition = 0;

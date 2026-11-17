@@ -59,7 +59,10 @@ accounts while the app was in Development mode.
   redirects with `?instagram_sync=started|running` for the status text.
   The command holds a run lock (`InstagramSyncState.claim_run`, an atomic
   UPDATE on `running_since`, stale after 30 min), so the timer and the
-  button never sync at once. The background run's output goes nowhere;
+  button never sync at once. The command turns SIGTERM into `sys.exit` so the lock's
+  `finally` runs: `deploy.sh` restarts gunicorn, and systemd stops a
+  button-started sync with it (review round 2); otherwise syncing would
+  be blocked for 30 minutes after every deploy. The background run's output goes nowhere;
   per-account errors are on the accounts. The form has its own class so
   `peoply_sync_button.js`'s cooldown doesn't attach; it shares only the
   Peoply button's CSS.
