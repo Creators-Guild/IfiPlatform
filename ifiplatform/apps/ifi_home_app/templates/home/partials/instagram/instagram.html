@@ -51,6 +51,7 @@
                         {% include "home/partials/instagram/viewer_post.html" with number=forloop.counter total=instagram_total|default:shown %}
                     {% endfor %}
                     <section class="home-instagram-viewer-post home-instagram-viewer-end" hidden>
+                        <p class="home-instagram-viewer-loading">{% trans "Loading posts…" %}</p>
                         <p><strong>{% trans "You've seen all the new posts." %}</strong></p>
                         <p>{% trans "New ones show up as the accounts post." %}</p>
                         <button class="btn home-instagram-show-seen" type="button">{% trans "Show them anyway" %}</button>

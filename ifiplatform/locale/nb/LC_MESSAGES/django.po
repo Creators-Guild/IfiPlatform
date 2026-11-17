@@ -2607,6 +2607,10 @@ msgid "Run an IFI-related account?"
 msgstr "Driver du en konto med tilknytning til IFI?"
 
 #: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
+msgid "Loading posts…"
+msgstr "Laster inn innlegg …"
+
+#: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
 msgid "Seen"
 msgstr "Sett"
 

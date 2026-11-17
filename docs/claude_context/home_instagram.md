@@ -337,7 +337,11 @@ accounts while the app was in Development mode.
   at the end card. Only the 12 newest are loaded when it opens, so if
   they're all seen it would land on the end card although older unseen
   posts are coming (user found it "annoying"): `open()` waits for
-  `loadRest()` (a promise) and then moves to the first unseen post.
+  `loadRest()` (a promise) and then moves to the first unseen post. Until
+  the rest is loaded the end card says "Loading posts…" (`.is-loading`),
+  not "seen everything" (user saw it flash). The fetch also starts on
+  `pointerenter`/`focus` of the thumbs and both "Show more" buttons, so it's
+  usually done by the click.
 - UI (user, from mockups: first in each post's footer, then moved to
   the top as "too hidden"): one pill fixed at the top center of the
   dialog, `.home-instagram-viewer-status` ("1 / 211 new · 3 seen hidden"

@@ -289,6 +289,8 @@ function setUpViewer(section) {
       : toggleLabel.dataset.off;
     status.hidden = false;
     end.hidden = !filtering;
+    // Older posts still on their way: say so, not "seen everything".
+    end.classList.toggle("is-loading", Boolean(viewer.dataset.moreUrl) && !loaded);
     feed.append(end);
   };
 
@@ -323,7 +325,9 @@ function setUpViewer(section) {
         fit(cards);
         showPosition();
       })
-      .catch(() => {})
+      .catch(() => {
+        end.classList.remove("is-loading");
+      })
       .finally(() => {
         loading = null;
       });
@@ -441,6 +445,15 @@ function setUpViewer(section) {
     const firstHidden = posts().find((card) => card.hidden);
     setHideSeen(false, firstHidden);
   });
+  // Start fetching the older posts as soon as someone points at or
+  // focuses a way into the viewer, so they're usually here by the click.
+  section
+    .querySelectorAll(".home-instagram-thumb, .home-instagram-view-all, .home-instagram-toggle summary")
+    .forEach((trigger) => {
+      ["pointerenter", "focus"].forEach((type) =>
+        trigger.addEventListener(type, () => loadRest(), { once: true }),
+      );
+    });
   section.querySelectorAll(".home-instagram-thumb").forEach((thumb) => {
     thumb.disabled = false;
     thumb.addEventListener("click", () => open(Number(thumb.dataset.index)));

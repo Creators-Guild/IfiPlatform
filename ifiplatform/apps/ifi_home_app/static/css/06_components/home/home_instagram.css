@@ -798,6 +798,11 @@ html:has(.home-instagram-viewer[open]) {
   margin: 0;
 }
 
+.home-instagram-viewer-end:not(.is-loading) .home-instagram-viewer-loading,
+.home-instagram-viewer-end.is-loading > :not(.home-instagram-viewer-loading) {
+  display: none;
+}
+
 .home-instagram-viewer-close:focus-visible,
 .home-instagram-seen-switch input:focus-visible,
 .home-instagram-album-nav:focus-visible,
