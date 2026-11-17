@@ -2622,6 +2622,10 @@ msgstr "Driver du en konto med tilknytning til IFI?"
 msgid "Loading posts…"
 msgstr "Laster inn innlegg …"
 
+#: .\apps\ifi_home_app\templates\home\partials\instagram\viewer_post.html
+msgid "Sound on or off"
+msgstr "Lyd på eller av"
+
 #: .\apps\ifi_home_app\templates\home\partials\instagram\instagram.html
 msgid "Seen"
 msgstr "Sett"

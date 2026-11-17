@@ -20,15 +20,19 @@ const SHOW_MORE_OPENS_VIEWER = "all";
 const hasObserver = "IntersectionObserver" in window;
 
 // Viewer videos play once at least half in view and pause when scrolled
-// past (user, 2026-11-15: autoplay with sound, looping). If the browser
-// blocks sound, the video plays muted; muting or unmuting carries over to
-// the next video.
-let startMuted = false;
+// past (user, 2026-11-15: autoplay with sound, looping). The visitor's own
+// mute/unmute carries over to the next video (wantSound). If the browser
+// refuses sound (phones often do without a tap on that video), the video
+// plays muted with data-auto-muted: that mute is the browser's, not the
+// visitor's, so it must not change wantSound (it used to, and then every
+// later video stayed muted). The first tap on such a video turns sound on.
+let wantSound = true;
 
 function autoplay(video) {
-  video.muted = startMuted;
+  video.muted = !wantSound;
   video.play().catch((error) => {
     if (error.name === "NotAllowedError" && !video.muted) {
+      video.dataset.autoMuted = "true";
       video.muted = true;
       video.play().catch(() => {});
     }
@@ -217,11 +221,67 @@ function wireAlbums(root) {
   });
 }
 
+// Phones (user, 2026-11-17, "P1"): the post fills the screen with its text
+// over the bottom, so the browser's control bar would sit under the text.
+// There the viewer gets .is-reels and videos lose `controls`: a tap pauses
+// or plays, a round button bottom right turns sound on/off, and a thin line
+// above the text shows progress. Laptops keep the browser's controls.
+function useReelsControls() {
+  document.querySelectorAll(".home-instagram-viewer").forEach((viewer) => {
+    viewer.classList.toggle("is-reels", phone.matches);
+  });
+  document.querySelectorAll(".home-instagram-viewer .home-instagram-video").forEach((video) => {
+    video.controls = !phone.matches;
+  });
+}
+phone.addEventListener("change", useReelsControls);
+
 function wireVideos(root) {
   root.querySelectorAll(".home-instagram-video").forEach((video) => {
+    const card = video.closest(".home-instagram-viewer-post");
+    const sound = card && card.querySelector(".home-instagram-sound");
+    const played = card && card.querySelector(".home-instagram-progress");
+    video.controls = !phone.matches;
     video.addEventListener("volumechange", () => {
-      startMuted = video.muted;
+      if (!video.muted) {
+        delete video.dataset.autoMuted;
+        wantSound = true;
+      } else if (!video.dataset.autoMuted) {
+        wantSound = false;
+      }
+      if (sound) {
+        sound.classList.toggle("is-muted", video.muted);
+      }
     });
+    if (card) {
+      video.addEventListener("click", () => {
+        if (!phone.matches) {
+          return;
+        }
+        if (video.dataset.autoMuted && wantSound) {
+          video.muted = false; // a tap counts, so the browser allows sound now
+          return;
+        }
+        if (video.paused) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      });
+      video.addEventListener("play", () => card.classList.remove("is-paused"));
+      video.addEventListener("pause", () => card.classList.add("is-paused"));
+      video.addEventListener("timeupdate", () => {
+        if (played && video.duration) {
+          played.style.setProperty("--played", `${(video.currentTime / video.duration) * 100}%`);
+        }
+      });
+    }
+    if (sound) {
+      sound.classList.toggle("is-muted", video.muted);
+      sound.addEventListener("click", () => {
+        video.muted = !video.muted;
+      });
+    }
     if (viewerVideos) {
       viewerVideos.observe(video);
     }
@@ -270,12 +330,18 @@ function setUpViewer(section) {
     cards.forEach((card) => {
       card.hidden = hideSeen && card !== keep && seenAtOpen.has(card.dataset.post);
       hiddenCount += card.hidden ? 1 : 0;
-      const media = card.querySelector(".home-instagram-media");
-      if (!card.hidden && seenAtOpen.has(card.dataset.post)) {
-        media.dataset.seen = feed.dataset.seenLabel;
-      } else {
-        delete media.dataset.seen;
-      }
+      // The badge: on the picture on laptops, in the account line on phones.
+      const marks = [
+        card.querySelector(".home-instagram-media"),
+        card.querySelector(".home-instagram-post-header"),
+      ];
+      marks.forEach((mark) => {
+        if (!card.hidden && seenAtOpen.has(card.dataset.post)) {
+          mark.dataset.seen = feed.dataset.seenLabel;
+        } else {
+          delete mark.dataset.seen;
+        }
+      });
     });
     visiblePosts = cards.filter((card) => !card.hidden);
     filtering = hideSeen && hiddenCount > 0;
@@ -370,8 +436,12 @@ function setUpViewer(section) {
       const i = visiblePosts.indexOf(card);
       const n = i === -1 ? visiblePosts.length : i + 1;
       position.textContent = `${n} / ${visiblePosts.length} ${feed.dataset.new}`;
-    } else if (card.dataset.index) {
-      position.textContent = `${Number(card.dataset.index) + 1} / ${feed.dataset.total}`;
+    } else if (card.dataset.post) {
+      // Count the cards actually here once all are loaded: a sync since the
+      // page loaded can change the stored total.
+      const cards = posts();
+      const total = loaded ? cards.length : feed.dataset.total;
+      position.textContent = `${cards.indexOf(card) + 1} / ${total}`;
     }
   };
   let reposition = 0;
@@ -441,6 +511,24 @@ function setUpViewer(section) {
     scrollToCard(target, false);
     showPosition();
   };
+  // Phones: an opened caption is a sheet over the dimmed picture; a tap
+  // outside the sheet closes it (and doesn't also pause the video).
+  feed.addEventListener(
+    "click",
+    (event) => {
+      if (!phone.matches || event.target.closest(".home-instagram-viewer-text")) {
+        return;
+      }
+      const card = event.target.closest(".home-instagram-viewer-post");
+      const less = card && card.querySelector(".home-instagram-caption.is-expanded + .home-instagram-more");
+      if (less) {
+        event.preventDefault();
+        event.stopPropagation();
+        less.click();
+      }
+    },
+    true,
+  );
   toggleInput.addEventListener("change", () => {
     const card = currentCard();
     setHideSeen(toggleInput.checked, card === end ? null : card);
@@ -506,6 +594,7 @@ function setUpViewer(section) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  useReelsControls();
   wire(document);
   document.querySelectorAll(".instagram_container").forEach(setUpViewer);
 });

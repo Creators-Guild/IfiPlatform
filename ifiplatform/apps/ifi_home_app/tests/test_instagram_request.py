@@ -1,5 +1,7 @@
 # pylint: disable=C0114,C0115,C0116
 import io
+import os
+import signal
 from datetime import timedelta
 from unittest.mock import patch
 
@@ -314,6 +316,21 @@ class ForceSyncTests(TestCase):
         ):
             call_command("sync_instagram_posts", stdout=out, stderr=io.StringIO())
         self.assertIn("Another Instagram sync is running", out.getvalue())
+
+    def test_sigterm_releases_the_lock(self):
+        def killed(_self):
+            os.kill(os.getpid(), signal.SIGTERM)
+
+        with override_settings(
+            INSTAGRAM_ACCESS_TOKEN="t", INSTAGRAM_BUSINESS_ACCOUNT_ID="1"
+        ):
+            with patch(
+                "ifi_home_app.management.commands.sync_instagram_posts.Command._sync_all",
+                killed,
+            ):
+                with self.assertRaises(SystemExit):
+                    call_command("sync_instagram_posts", stdout=io.StringIO())
+        self.assertFalse(InstagramSyncState.is_running())
 
     def test_button_only_for_staff_with_the_status(self):
         account = InstagramAccount.objects.get(username="ifinavet")

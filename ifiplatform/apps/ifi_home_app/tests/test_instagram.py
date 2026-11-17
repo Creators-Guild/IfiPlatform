@@ -588,11 +588,14 @@ class ViewerTemplateTests(TestCase):
             '<video class="home-instagram-video" controls preload="none"', html
         )
         self.assertNotIn("Watch on Instagram", html)
+        self.assertIn('<button class="home-instagram-sound" type="button"', html)
+        self.assertIn('<span class="home-instagram-progress"', html)
 
     def test_video_without_a_file_links_to_instagram(self):
         html = self.render(self._post(media_type="video"))
         self.assertNotIn("<video", html)
         self.assertIn("Watch on Instagram", html)
+        self.assertNotIn("home-instagram-sound", html)
 
     def test_viewer_dialog_has_every_post(self):
         html = self.render(self._post())
