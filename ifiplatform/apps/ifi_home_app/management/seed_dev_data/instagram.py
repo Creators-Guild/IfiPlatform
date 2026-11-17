@@ -1,10 +1,13 @@
 """InstagramPost seeding: a few example posts, added "by hand" with
 generated images, so the homepage's Instagram feed shows locally without a
-Meta token. The accounts themselves come from migration 0164."""
+Meta token. Skipped when INSTAGRAM_ACCESS_TOKEN is set: the sync then
+fills the feed with real posts. The accounts themselves come from
+migration 0164."""
 
 import io
 from datetime import timedelta
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils import timezone
 from PIL import Image, ImageDraw
@@ -95,6 +98,11 @@ class InstagramSeedMixin:  # pylint: disable=too-few-public-methods
     skipped_count = 0
 
     def _seed_instagram_posts(self):
+        if settings.INSTAGRAM_ACCESS_TOKEN:
+            self.stdout.write(
+                "  Instagram is connected: skipping example posts (run sync_instagram_posts)"
+            )
+            return
         now = timezone.now()
         for username, hours, caption, colour, text in EXAMPLE_POSTS:
             account = InstagramAccount.objects.filter(username=username).first()

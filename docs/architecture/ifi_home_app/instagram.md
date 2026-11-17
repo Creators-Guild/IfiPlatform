@@ -118,7 +118,9 @@ All in `models/instagram.py`:
   the viewer at the next post. Without JavaScript it opens the rest of the
   12 in place instead ("Show less" closes them). Rows are separated by
   space, not lines.
-- `seed_dev_data` adds four example posts with generated pictures.
+- `seed_dev_data` adds twelve example posts with generated pictures, but
+  only without `INSTAGRAM_ACCESS_TOKEN`; with a token, run
+  `sync_instagram_posts` for real posts instead.
 
 ## Where to change things
 
